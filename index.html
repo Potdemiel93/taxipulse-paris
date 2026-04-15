@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0D0D0D">
+<title>TaxiPulse Paris</title>
+<style>
+/* ── FONTS embarquées (pas de CDN externe qui peut crasher) ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0D0D0D;--bg2:#141414;--card:#1C1C1C;--card2:#242424;
+  --ink:#F0F0EB;--ink2:#9A9A94;--ink3:#555550;--line:#282828;
+  --accent:#FF4500;--adim:rgba(255,69,0,.14);
+  --green:#22C55E;--gdim:rgba(34,197,94,.12);
+  --gold:#F59E0B;--ydim:rgba(245,158,11,.12);
+  --red:#EF4444;--rdim:rgba(239,68,68,.12);
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono','Courier New',monospace;
+}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;}
+body{max-width:430px;margin:0 auto;min-height:100dvh;
+  padding-bottom:calc(80px + env(safe-area-inset-bottom));}
+
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:20;
+  background:var(--bg);border-bottom:1px solid var(--line);
+  padding:calc(14px + env(safe-area-inset-top)) 16px 0;
+}
+.hd-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.logo{font-size:22px;font-weight:900;letter-spacing:-1px;color:var(--ink)}
+.logo span{color:var(--accent)}
+.live-pill{
+  display:flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:100px;font-size:10px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;
+  background:var(--adim);border:1px solid rgba(255,69,0,.25);color:var(--accent);
+}
+.live-pill.off{background:rgba(85,85,80,.12);border-color:var(--line);color:var(--ink3)}
+.live-pill.warn{background:var(--ydim);border-color:rgba(245,158,11,.3);color:var(--gold)}
+.ldot{width:6px;height:6px;border-radius:50%;background:currentColor;
+  animation:blink 1.4s ease-in-out infinite;}
+.live-pill.off .ldot,.live-pill.warn .ldot{animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* NAV TABS */
+.nav-tabs{display:flex}
+.nav-tabs button{
+  flex:1;background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--ink3);font-family:var(--sans);font-size:12px;font-weight:600;
+  padding:10px 4px;cursor:pointer;letter-spacing:.2px;transition:all .15s;
+}
+.nav-tabs button.active{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* MAIN */
+main{padding:0 14px 20px}
+.tab{display:none}.tab.active{display:block}
+
+/* SECTION TITLE */
+.stitle{
+  font-size:9px;text-transform:uppercase;letter-spacing:2px;font-weight:800;
+  color:var(--ink3);margin:18px 0 10px;display:flex;align-items:center;gap:8px;
+}
+.stitle::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* REFRESH BAR */
+.refresh-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0 4px;
+}
+.rtime{font-family:var(--mono);font-size:10px;color:var(--ink3);line-height:1.4}
+.rbtn{
+  display:flex;align-items:center;gap:5px;background:var(--card);
+  border:1px solid var(--line);border-radius:100px;
+  padding:6px 12px;font-family:var(--sans);font-size:11px;
+  font-weight:600;color:var(--ink2);cursor:pointer;transition:all .12s;
+}
+.rbtn:active{border-color:var(--accent);color:var(--accent)}
+.rbtn.loading{opacity:.5;pointer-events:none}
+.spin{display:inline-block}
+.rbtn.loading .spin{animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ERROR BANNER */
+.err-banner{
+  background:var(--rdim);border:1px solid rgba(239,68,68,.2);
+  border-radius:12px;padding:12px 14px;margin:10px 0;
+  font-size:11px;line-height:1.5;display:none;
+}
+.err-banner.show{display:block}
+.err-banner b{display:block;font-size:12px;color:var(--ink);margin-bottom:3px}
+.err-banner.warn-b{background:var(--ydim);border-color:rgba(245,158,11,.25)}
+
+/* GARE LIST */
+.gare-list{display:flex;flex-direction:column;gap:8px}
+.gare-card{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:14px 16px;cursor:pointer;text-align:left;font-family:inherit;
+  color:inherit;transition:transform .12s,border-color .15s;
+  display:flex;align-items:center;gap:14px;width:100%;
+}
+.gare-card:active{transform:scale(.98)}
+.gare-card.peak{border-color:var(--accent)}
+.gare-card.err-card{border-color:rgba(239,68,68,.3);opacity:.7}
+.gc-ico{
+  width:46px;height:46px;border-radius:12px;background:var(--card2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.gc-left{flex:1;min-width:0}
+.gc-name{font-size:13px;font-weight:700;letter-spacing:-.3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.gc-sub{font-size:10px;color:var(--ink3);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+.gc-next{display:flex;align-items:center;gap:5px}
+.gc-dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.gc-dot.soon{background:var(--gold)}
+.gc-dot.now{background:var(--accent)}
+.gc-dot.none{background:var(--ink3)}
+.gc-next span{font-family:var(--mono);font-size:10px;color:var(--ink2);font-weight:500}
+.gc-right{text-align:right;flex-shrink:0}
+.gc-pax{font-size:26px;font-weight:900;letter-spacing:-1px;
+  color:var(--accent);line-height:1}
+.gc-pax.zero{color:var(--ink3)}
+.gc-plbl{font-size:9px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--ink3);font-weight:700;margin-top:2px}
+.peak-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--adim);border:1px solid rgba(255,69,0,.2);
+  border-radius:100px;padding:2px 7px;font-size:9px;
+  font-weight:800;color:var(--accent);letter-spacing:.5px;margin-top:5px;
+}
+.delay-tag{font-size:10px;color:var(--gold);font-weight:700;margin-top:4px}
+
+/* DIALOG */
+dialog{
+  padding:0;border:none;background:transparent;
+  max-width:430px;width:100%;max-height:93dvh;
+  margin:auto auto 0;position:fixed;inset:0;
+}
+dialog::backdrop{background:rgba(0,0,0,.7);backdrop-filter:blur(6px)}
+dialog .sheet{
+  background:var(--bg2);border-radius:22px 22px 0 0;
+  max-height:93dvh;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+}
+.dpill{width:34px;height:4px;background:var(--line);border-radius:100px;margin:10px auto 0}
+
+/* DIALOG HEADER */
+.dhdr{
+  padding:14px 16px;position:sticky;top:0;
+  background:var(--bg2);border-bottom:1px solid var(--line);z-index:5;
+}
+.dhdr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.dhdr-name{font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:2px}
+.dhdr-sub{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:var(--ink3)}
+.close-btn{
+  width:32px;height:32px;border-radius:50%;background:var(--card);
+  border:1px solid var(--line);color:var(--ink);font-size:14px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-family:inherit;
+}
+.close-btn:active{transform:scale(.9)}
+
+.dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.dstat{background:var(--card);border-radius:9px;padding:8px;text-align:center}
+.dstat .dk{font-size:8px;text-transform:uppercase;letter-spacing:.8px;
+  font-weight:700;color:var(--ink3);margin-bottom:3px}
+.dstat .dv{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--ink)}
+.dstat .dv.a{color:var(--accent)}.dstat .dv.g{color:var(--green)}
+.dstat .dv.y{color:var(--gold)}.dstat .dv.r{color:var(--red)}
+
+/* DIALOG BODY */
+.dbody{padding:10px 14px 80px}
+.grp-hdr{
+  font-size:8px;text-transform:uppercase;letter-spacing:1.8px;font-weight:800;
+  color:var(--ink3);padding:14px 2px 7px;
+  display:flex;align-items:center;gap:8px;
+}
+.grp-hdr:first-child{padding-top:2px}
+.grp-hdr.live{color:var(--accent)}
+.grp-line{flex:1;height:1px;background:var(--line)}
+.grp-ct{
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  background:var(--card2);border-radius:100px;padding:2px 7px;color:var(--ink2);
+}
+
+/* TRAIN CARD */
+.tc{
+  background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:12px;margin-bottom:7px;position:relative;overflow:hidden;
+}
+.tc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green)}
+.tc.warn::before{background:var(--gold)}
+.tc.crit::before{background:var(--red)}
+.tc.past{opacity:.32}.tc.past::before{background:var(--ink3)}
+.tc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:9px}
+.tc-info{flex:1;min-width:0}
+.tc-orig{
+  font-size:13px;font-weight:700;letter-spacing:-.2px;line-height:1.2;
+  margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tc-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.badge{
+  display:inline-block;padding:2px 6px;border-radius:4px;
+  font-size:9px;font-weight:800;letter-spacing:.5px;color:#fff;
+}
+.b-TGV,.b-INOUI{background:#1e40af}
+.b-OUIGO{background:#e4007c}
+.b-EURO,.b-EUROSTAR{background:#003399}
+.b-THAL,.b-THALYS{background:#7c2d12}
+.b-IC,.b-INTERCITES{background:#374151}
+.b-TER{background:#047857}
+.b-LYRIA{background:#dc2626}
+.b-ICE{background:#6b21a8}
+.b-NIGHT,.b-NIGHTJET{background:#1e1b4b}
+.b-DEF{background:#374151}
+.tc-num{font-family:var(--mono);font-size:10px;color:var(--ink3);font-weight:500}
+.tc-rt{font-size:9px;font-weight:700}
+.tc-rt.live{color:var(--green)}.tc-rt.base{color:var(--ink3)}
+.tc-cd{text-align:right;flex-shrink:0}
+.tc-h{font-family:var(--mono);font-size:16px;font-weight:800;
+  letter-spacing:-.5px;color:var(--ink);line-height:1.1}
+.tc-h-old{font-family:var(--mono);font-size:10px;color:var(--ink3);
+  text-decoration:line-through;line-height:1}
+.tc-when{font-family:var(--mono);font-size:10px;font-weight:700;
+  margin-top:2px;color:var(--green)}
+.tc-when.soon{color:var(--gold)}.tc-when.now{color:var(--accent)}.tc-when.past{color:var(--ink3)}
+.tc-bot{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.pax-chip{
+  display:flex;align-items:baseline;gap:4px;
+  background:var(--bg);border-radius:7px;padding:5px 9px;
+}
+.pax-n{font-size:17px;font-weight:900;letter-spacing:-.5px}
+.pax-l{font-size:9px;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--ink3);font-weight:700}
+.st-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:4px 9px;border-radius:100px;font-size:10px;font-weight:700;
+}
+.st-ok{background:var(--gdim);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.st-warn{background:var(--ydim);color:var(--gold);border:1px solid rgba(245,158,11,.25)}
+.st-crit{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.st-sup{background:rgba(85,85,80,.1);color:var(--ink3);border:1px solid var(--line)}
+
+/* EVENT CARDS */
+.ev-card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:15px;padding:15px;margin-bottom:8px;
+}
+.ev-top{display:flex;justify-content:space-between;align-items:flex-start;
+  gap:12px;margin-bottom:11px}
+.ev-name{font-size:19px;font-weight:800;letter-spacing:-.4px;margin-bottom:3px}
+.ev-lieu{font-size:10px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:700;color:var(--ink3)}
+.ev-time .t{font-family:var(--mono);font-size:17px;font-weight:700;
+  letter-spacing:-.5px;text-align:right}
+.ev-time .l{font-size:9px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--ink3);font-weight:700;text-align:right;margin-top:1px}
+.ev-info{background:var(--bg);border-radius:9px;padding:9px 11px;
+  display:flex;justify-content:space-between;gap:8px}
+.ev-info .ik{font-size:9px;text-transform:uppercase;letter-spacing:.6px;
+  font-weight:700;color:var(--ink3);margin-bottom:2px}
+.ev-info .iv{font-size:12px;font-weight:700}
+
+/* WEATHER */
+.wgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.wday{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:13px;padding:12px 3px;text-align:center;
+}
+.wday.today{border-color:var(--accent)}
+.wd{font-size:9px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:800;color:var(--ink3)}
+.wday.today .wd{color:var(--accent)}
+.wic{font-size:22px;margin:5px 0 3px}
+.wt{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.wp{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:5px;font-weight:600}
+
+/* SOURCE NOTE */
+.src-note{
+  display:flex;gap:9px;align-items:flex-start;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:11px;padding:11px 13px;margin:14px 0 6px;
+  font-size:11px;color:var(--ink2);line-height:1.5;
+}
+.src-note strong{color:var(--ink);display:block;font-size:12px;margin-bottom:2px}
+
+/* EMPTY */
+.empty{
+  text-align:center;padding:28px 14px;color:var(--ink3);font-size:13px;
+  background:var(--card);border:1px dashed var(--line);border-radius:13px;margin:6px 0;
+}
+.empty .ei{font-size:28px;margin-bottom:7px;display:block;opacity:.5}
+
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-top">
+    <div class="logo">Taxi<span>Pulse</span> <span style="font-size:13px;font-weight:600;color:var(--ink3);letter-spacing:0">Paris</span></div>
+    <div class="live-pill off" id="live-pill">
+      <div class="ldot"></div>
+      <span id="live-lbl">DÉMARRAGE</span>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="active" data-tab="tab-now">🚂 Gares</button>
+    <button data-tab="tab-tonight">🎭 Ce soir</button>
+    <button data-tab="tab-week">🌤 Météo</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ══ GARES ══ -->
+  <section class="tab active" id="tab-now">
+
+    <div class="refresh-bar">
+      <div class="rtime">
+        <div id="rtime-main">Connexion…</div>
+        <div id="rtime-next" style="font-size:9px"></div>
+      </div>
+      <button class="rbtn" id="rbtn" onclick="doRefresh(true)">
+        <span class="spin">↻</span> Actualiser
+      </button>
+    </div>
+
+    <div class="err-banner" id="err-banner">
+      <b id="err-title">Erreur</b>
+      <span id="err-body"></span>
+    </div>
+
+    <div class="stitle">6 Grandes Gares · Temps réel</div>
+    <div class="gare-list" id="gare-list">
+      <div class="empty"><span class="ei">⏳</span>Connexion aux données SNCF…</div>
+    </div>
+
+    <div class="src-note" id="src-note" style="display:none">
+      <span style="font-size:16px;flex-shrink:0">ℹ</span>
+      <div>
+        <strong>Source : API SNCF / Navitia — Temps réel</strong>
+        Retards et horaires mis à jour toutes les 3 min. Passagers = estimation par type de train.
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ══ CE SOIR ══ -->
+  <section class="tab" id="tab-tonight">
+    <div class="stitle">♫ Concerts ce soir</div>
+    <div id="concerts-list"></div>
+    <div class="stitle">♔ Théâtres &amp; Spectacles</div>
+    <div id="theatres-list"></div>
+    <div class="stitle">◇ Salons en cours</div>
+    <div id="salons-list"></div>
+  </section>
+
+  <!-- ══ MÉTÉO ══ -->
+  <section class="tab" id="tab-week">
+    <div class="stitle">Météo 5 jours · Paris</div>
+    <div id="weather-list"></div>
+  </section>
+
+</main>
+
+<!-- ══ DIALOG GARE ══ -->
+<dialog id="gare-dialog">
+  <div class="sheet">
+    <div class="dpill"></div>
+    <div class="dhdr">
+      <div class="dhdr-top">
+        <div>
+          <div class="dhdr-name" id="gd-nom">—</div>
+          <div class="dhdr-sub" id="gd-sub">—</div>
+        </div>
+        <button class="close-btn" id="gd-close">✕</button>
+      </div>
+      <div class="dstats">
+        <div class="dstat"><div class="dk">À venir</div><div class="dv a" id="gd-up">—</div></div>
+        <div class="dstat"><div class="dk">Pax 60min</div><div class="dv" id="gd-pax">—</div></div>
+        <div class="dstat"><div class="dk">Retards</div><div class="dv y" id="gd-del">—</div></div>
+        <div class="dstat"><div class="dk">Supprimés</div><div class="dv r" id="gd-can">—</div></div>
+      </div>
+    </div>
+    <div class="dbody" id="gd-body">—</div>
+  </div>
+</dialog>
+
+<script>
+/* ═══════════════════════════════════════════════
+   TOKEN SNCF — intégré
+═══════════════════════════════════════════════ */
+const TOKEN = 'e10f1175-be33-45fa-b1da-85d5885ebd37';
+
+/* ═══════════════════════════════════════════════
+   GARES — 6 gares parisiennes
+═══════════════════════════════════════════════ */
+const GARES = [
+  { id:'nord',         nom:'Gare du Nord',       sub:'Eurostar · Thalys · TGV',      ico:'🇬🇧', metro:'M4/5 · RER B/D/E', sid:'stop_area:OCE:SA:87271007' },
+  { id:'lyon',         nom:'Gare de Lyon',        sub:'TGV Sud-Est · Méditerranée',   ico:'🗼', metro:'M1/14 · RER A/D',  sid:'stop_area:OCE:SA:87686006' },
+  { id:'montparnasse', nom:'Montparnasse',         sub:'TGV Atlantique · Bretagne',    ico:'🌊', metro:'M4/6/12/13',       sid:'stop_area:OCE:SA:87391003' },
+  { id:'est',          nom:"Gare de l'Est",        sub:'TGV Est · Allemagne · ICE',    ico:'🍺', metro:'M4/5/7 · RER E',   sid:'stop_area:OCE:SA:87113001' },
+  { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités · Trains de nuit',  ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:OCE:SA:87313009' },
+  { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités · Grandes lignes',  ico:'🎪', metro:'M6/14',            sid:'stop_area:OCE:SA:87686022' },
+];
+
+/* ═══ CAPACITÉ PAX PAR TYPE ═══ */
+const PAX = {
+  TGV:700, INOUI:700, OUIGO:800, INTERCITES:550, IC:550,
+  EUROSTAR:900, EURO:900, THALYS:377, THAL:377,
+  LYRIA:428, ICE:400, NIGHTJET:250, NIGHT:250, TER:350,
+  TRANSILIEN:1800, DEF:450
+};
+
+/* ═══ DONNÉES STATIQUES SOIR / MÉTÉO ═══ */
+const STATIC = {
+  concerts:[
+    {n:'Genezio',              l:'Zénith La Villette',         fin:'22:30',cap:6300,  m:'M5 Porte de Pantin'},
+    {n:'TH',                   l:"L'Olympia",                  fin:'22:30',cap:1980,  m:'M3/7/8 Opéra'},
+    {n:'Lord of the Lost',     l:'Le Trianon',                 fin:'22:30',cap:1000,  m:'M2 Anvers'},
+    {n:'Ludovico Einaudi',     l:'Salle Pleyel',               fin:'22:30',cap:2100,  m:'M2 Ternes'},
+  ],
+  theatres:[
+    {n:'Le Roi Lion',          l:'Théâtre Mogador',            fin:'22:30',cap:1600,  m:'M12 Trinité'},
+    {n:'Amadeus',              l:'Théâtre Marigny',            fin:'22:45',cap:1024,  m:'M1/13 Champs-Élysées'},
+    {n:'Chicago',              l:'Casino de Paris',            fin:'22:45',cap:1500,  m:'M12 Trinité'},
+  ],
+  salons:[
+    {n:'Run Experience 2026',  l:'Porte de Versailles',        fin:'19:00',cap:33000, m:'M12 Porte de Versailles'},
+    {n:'Art Paris 2026',       l:'Grand Palais',               fin:'20:00',cap:18000, m:'M1/13 Champs-Élysées'},
+  ],
+  meteo:[
+    {j:'MER',ic:'⛅',t:17,p:15},
+    {j:'JEU',ic:'🌥',t:15,p:25},
+    {j:'VEN',ic:'🌧',t:13,p:70},
+    {j:'SAM',ic:'⛅',t:16,p:20},
+    {j:'DIM',ic:'☀️',t:19,p:5},
+  ]
+};
+
+/* ═══ STATE ═══ */
+let CACHE = {};       // { gareId: { trains, error, ts } }
+let loading = false;
+let autoTimer = null;
+let cdTimer   = null;
+let nextAt    = 0;
+
+/* ═══ UTILS ═══ */
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function dt(offsetMs=0){
+  const t = new Date(Date.now() + offsetMs);
+  return `${t.getFullYear()}${pad(t.getMonth()+1)}${pad(t.getDate())}T${pad(t.getHours())}${pad(t.getMinutes())}00`;
+}
+
+function minUntil(hhmm){
+  const [h,m] = hhmm.split(':').map(Number);
+  const now = new Date();
+  const tgt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
+  return Math.round((tgt - now) / 60000);
+}
+
+function fmtMin(min){
+  if(min <= 0) return 'passé';
+  if(min < 60) return `dans ${min} min`;
+  const h = Math.floor(min/60), m = min%60;
+  return `dans ${h}h${m>0?pad(m):''}`;
+}
+
+function fmtN(n){
+  if(n==null) return '—';
+  return Math.round(n).toLocaleString('fr-FR');
+}
+
+function esc(s){
+  const d = document.createElement('div');
+  d.textContent = String(s||'');
+  return d.innerHTML;
+}
+
+function navTime(s){
+  if(!s || s.length < 13) return null;
+  return s.slice(9,11) + ':' + s.slice(11,13);
+}
+
+function trainType(di){
+  const s = ((di.headsign||'') + ' ' + (di.physical_mode||'') + ' ' + (di.commercial_mode||'')).toUpperCase();
+  if(s.includes('OUIGO'))                    return 'OUIGO';
+  if(s.includes('EUROSTAR'))                 return 'EUROSTAR';
+  if(s.includes('THALYS'))                   return 'THALYS';
+  if(s.includes('LYRIA'))                    return 'LYRIA';
+  if(s.includes('ICE'))                      return 'ICE';
+  if(s.includes('NIGHTJET')||s.includes('NIGHT JET')) return 'NIGHTJET';
+  if(s.includes('INOUI')||s.includes('INOUÏ')) return 'INOUI';
+  if(s.includes('TGV'))                      return 'TGV';
+  if(s.includes('INTERCIT'))                 return 'INTERCITES';
+  if(s.includes('TER'))                      return 'TER';
+  if(s.includes('TRANSILIEN'))               return 'TRANSILIEN';
+  return 'DEF';
+}
+
+/* ═══════════════════════════════════════════════
+   API FETCH — 5 stratégies en cascade
+   Règle le problème CORS une bonne fois pour toutes.
+═══════════════════════════════════════════════ */
+const BASES = [
+  'https://api.navitia.io/v1/coverage/sncf',
+  'https://api.sncf.com/v1/coverage/sncf',
+];
+const PROXIES = [
+  u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
+  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+  u => `https://thingproxy.freeboard.io/fetch/${u}`,
+];
+
+let goodStrategy = null; // on mémorise ce qui marche
+
+async function timedFetch(url, opts={}, ms=9000){
+  const ac = new AbortController();
+  const t  = setTimeout(()=>ac.abort(), ms);
+  try {
+    const r = await fetch(url, { ...opts, signal: ac.signal });
+    clearTimeout(t);
+    return r;
+  } catch(e) {
+    clearTimeout(t);
+    throw e;
+  }
+}
+
+async function sncfFetch(path){
+  // Stratégies à tester — on commence par la dernière qui a fonctionné
+  const strategies = [];
+
+  // S1 & S2 : appel direct Basic Auth (TOKEN:@ dans l'URL, pas de preflight)
+  for(const base of BASES){
+    strategies.push({ tag:`direct:${base}`, fn: async ()=>{
+      const url = base.replace('https://','https://'+TOKEN+':@') + path;
+      return timedFetch(url, {}, 8000);
+    }});
+  }
+
+  // S3 : header Authorization (marche si CORS OK côté serveur)
+  for(const base of BASES){
+    strategies.push({ tag:`auth:${base}`, fn: async ()=>{
+      return timedFetch(base + path, { headers:{ Authorization: TOKEN }}, 7000);
+    }});
+  }
+
+  // S4-S6 : proxies CORS publics
+  for(const proxy of PROXIES){
+    for(const base of BASES){
+      strategies.push({ tag:`proxy:${proxy('').slice(0,30)}`, fn: async ()=>{
+        const target = proxy(base + path);
+        return timedFetch(target, { headers:{ Authorization: TOKEN }}, 10000);
+      }});
+    }
+  }
+
+  // Réorganise pour tester d'abord la stratégie qui a marché
+  if(goodStrategy !== null){
+    const idx = strategies.findIndex(s=>s.tag===goodStrategy);
+    if(idx>0){ strategies.unshift(strategies.splice(idx,1)[0]); }
+  }
+
+  for(const s of strategies){
+    try {
+      const r = await s.fn();
+      if(r && r.ok){
+        goodStrategy = s.tag; // mémorise le gagnant
+        return r;
+      }
+      // Erreurs définitives — on remonte directement
+      if(r && [401,403,429].includes(r.status)) return r;
+    } catch(_){ /* essaie le suivant */ }
+  }
+
+  throw new Error('NET_FAIL');
+}
+
+/* ═══ PARSE ARRIVÉE NAVITIA ═══ */
+function parseArrival(arr){
+  const di  = arr.display_informations || {};
+  const sdt = arr.stop_date_time || {};
+
+  const hBase = navTime(sdt.base_arrival_date_time);
+  const hRT   = navTime(sdt.arrival_date_time);
+  const hShow = hRT || hBase || '??:??';
+
+  let retard = 0;
+  if(sdt.base_arrival_date_time && sdt.arrival_date_time
+     && sdt.base_arrival_date_time !== sdt.arrival_date_time){
+    const mkD = s => new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8),
+                               +s.slice(9,11), +s.slice(11,13));
+    retard = Math.max(0, Math.round((mkD(sdt.arrival_date_time) - mkD(sdt.base_arrival_date_time)) / 60000));
+  }
+
+  const type = trainType(di);
+
+  return {
+    type,
+    origine:  di.direction || di.headsign || '—',
+    numero:   di.trip_short_name || di.label || '',
+    hBase:    hBase || '??:??',
+    hRT:      hRT   || hBase || '??:??',
+    hShow,
+    passagers: Math.round((PAX[type] || PAX.DEF) * 0.75),
+    retard,
+    supprime:  !sdt.arrival_date_time,
+    live:      sdt.data_freshness === 'realtime',
+    min:       minUntil(hShow),
+  };
+}
+
+/* ═══ FETCH UNE GARE ═══ */
+async function fetchGare(gare){
+  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-7200000)}&duration=25200&count=60&data_freshness=realtime`;
+
+  let resp;
+  try { resp = await sncfFetch(path); }
+  catch(e){
+    if(String(e.message).includes('NET_FAIL'))
+      throw new Error('Réseau inaccessible ou tous les proxies CORS ont échoué');
+    throw new Error('Erreur réseau : ' + e.message);
+  }
+
+  if(resp.status === 401) throw new Error('Token invalide ou expiré (401)');
+  if(resp.status === 403) throw new Error('Accès refusé (403)');
+  if(resp.status === 404) throw new Error('Gare non trouvée — ID inconnu (404)');
+  if(resp.status === 429) throw new Error('Quota journalier 5000 req atteint (429)');
+  if(!resp.ok)            throw new Error(`Erreur API HTTP ${resp.status}`);
+
+  let data;
+  try { data = await resp.json(); }
+  catch(_){ throw new Error('Réponse API illisible — réessaie'); }
+
+  return (data.arrivals || []).map(parseArrival);
+}
+
+/* ═══ REFRESH ENGINE ═══ */
+const INTERVAL  = 3 * 60 * 1000; // 3 min
+const CACHE_TTL = 90 * 1000;      // 90 sec
+
+async function doRefresh(force=true){
+  if(loading) return;
+  loading = true;
+
+  const btn = document.getElementById('rbtn');
+  btn.classList.add('loading');
+
+  const toFetch = GARES.filter(g=>{
+    if(force) return true;
+    const c = CACHE[g.id];
+    return !c || c.error || (Date.now()-c.ts) > CACHE_TTL;
+  });
+
+  if(toFetch.length === 0){
+    loading = false; btn.classList.remove('loading');
+    renderGares(); return;
+  }
+
+  const results = await Promise.allSettled(
+    toFetch.map(g =>
+      fetchGare(g)
+        .then(trains => ({ id:g.id, trains, error:null }))
+        .catch(e    => ({ id:g.id, trains:[], error:e.message }))
+    )
+  );
+
+  results.forEach(r => {
+    if(r.status==='fulfilled')
+      CACHE[r.value.id] = { trains:r.value.trains, error:r.value.error, ts:Date.now() };
+  });
+
+  loading = false;
+  btn.classList.remove('loading');
+
+  // Badge live
+  const errs  = Object.values(CACHE).filter(c=>c.error).map(c=>c.error);
+  const total = GARES.length;
+  const ok    = GARES.filter(g=>CACHE[g.id]&&!CACHE[g.id].error).length;
+
+  if(ok === 0)         setPill('off','ERREUR');
+  else if(ok < total)  setPill('warn', `${ok}/${total} LIVE`);
+  else                 setPill('live','LIVE');
+
+  // Heure refresh
+  const hms = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('rtime-main').textContent = `Actualisé à ${hms}`;
+  document.getElementById('src-note').style.display = 'flex';
+
+  // Bannière erreur
+  showErrBanner(errs);
+
+  // Reset countdown
+  startCD();
+  renderGares();
+}
+
+function startCD(){
+  if(cdTimer) clearInterval(cdTimer);
+  nextAt = Date.now() + INTERVAL;
+  cdTimer = setInterval(()=>{
+    const rem = Math.max(0, Math.round((nextAt - Date.now())/1000));
+    const el  = document.getElementById('rtime-next');
+    if(el){
+      const m=Math.floor(rem/60), s=rem%60;
+      el.textContent = `prochain dans ${m}:${pad(s)}`;
+    }
+  }, 1000);
+}
+
+function scheduleAuto(){
+  if(autoTimer) clearInterval(autoTimer);
+  autoTimer = setInterval(()=>{ if(!loading) doRefresh(false); }, INTERVAL);
+  startCD();
+}
+
+function setPill(state, txt){
+  const p = document.getElementById('live-pill');
+  p.className = 'live-pill ' + (state==='live'?'':state);
+  document.getElementById('live-lbl').textContent = txt;
+}
+
+/* ═══ BANNIÈRE ERREUR INTELLIGENTE ═══ */
+function showErrBanner(errs){
+  const b = document.getElementById('err-banner');
+  if(!errs.length){ b.className='err-banner'; return; }
+
+  const all = errs.join(' ');
+  let icon='⚠', title='Erreur de connexion', body='', warn=false;
+
+  if(all.includes('401')||all.includes('expiré')){
+    icon='🔑'; title='Token invalide ou expiré';
+    body='Régénère ton token sur <strong>numerique.sncf.com/startup/api</strong> et mets-le dans le fichier HTML.';
+  } else if(all.includes('429')||all.includes('Quota')){
+    icon='⏱'; title='Quota journalier atteint (5 000 req/jour)';
+    body='Les données reprendront automatiquement demain à minuit.'; warn=true;
+  } else if(all.includes('réseau')||all.includes('NET_FAIL')||all.includes('proxies')){
+    icon='🌐'; title='Connexion réseau impossible';
+    body='Vérifie ta connexion internet. Si tu ouvres le fichier en local (file://), essaie de l\'héberger sur un serveur web.';
+  } else if(all.includes('404')){
+    icon='🚉'; title='Gare non reconnue par l\'API';
+    body='L\'identifiant d\'une gare est peut-être obsolète. Contacte le développeur.';
+  } else {
+    body = errs.slice(0,2).join(' — ');
+  }
+
+  document.getElementById('err-title').innerHTML = icon + ' ' + title;
+  document.getElementById('err-body').innerHTML  = body;
+  b.className = 'err-banner show' + (warn?' warn-b':'');
+}
+
+/* ═══ RENDER GARES ═══ */
+function renderGares(){
+  const list = document.getElementById('gare-list');
+
+  if(!Object.keys(CACHE).length){
+    list.innerHTML = '<div class="empty"><span class="ei">⏳</span>Connexion SNCF en cours…</div>';
+    return;
+  }
+
+  list.innerHTML = GARES.map(gare => {
+    const c = CACHE[gare.id];
+    if(!c) return `<button class="gare-card" type="button" data-gid="${gare.id}">
+      <div class="gc-ico">${gare.ico}</div>
+      <div class="gc-left"><div class="gc-name">${esc(gare.nom)}</div>
+        <div class="gc-sub">Chargement…</div></div>
+      <div class="gc-right"><div class="gc-pax zero">—</div></div>
+    </button>`;
+
+    if(c.error){
+      const short = c.error.length > 55 ? c.error.slice(0,52)+'…' : c.error;
+      return `<button class="gare-card err-card" type="button" data-gid="${gare.id}">
+        <div class="gc-ico">${gare.ico}</div>
+        <div class="gc-left">
+          <div class="gc-name">${esc(gare.nom)}</div>
+          <div class="gc-sub" style="color:var(--red)">⚠ ${esc(short)}</div>
+        </div>
+        <div class="gc-right"><div class="gc-pax zero" style="font-size:20px">!</div></div>
+      </button>`;
+    }
+
+    const trains   = c.trains;
+    const upcoming = trains.filter(t => t.min > 0 && !t.supprime);
+    const next60   = upcoming.filter(t => t.min <= 60);
+    const pax60    = next60.reduce((s,t)=>s+t.passagers, 0);
+    const isPeak   = pax60 >= 1000;
+    const delays   = upcoming.filter(t=>t.retard>0).length;
+
+    const nxt = upcoming.sort((a,b)=>a.min-b.min)[0];
+    let dotClass='none', nextTxt='Aucun à venir';
+    if(nxt){
+      nextTxt = nxt.hShow + ' · ' + fmtMin(nxt.min);
+      dotClass = nxt.min<=5 ? 'now' : nxt.min<=15 ? 'soon' : '';
+    }
+
+    return `<button class="gare-card${isPeak?' peak':''}" type="button" data-gid="${gare.id}">
+      <div class="gc-ico">${gare.ico}</div>
+      <div class="gc-left">
+        <div class="gc-name">${esc(gare.nom)}</div>
+        <div class="gc-sub">${esc(gare.metro)}</div>
+        <div class="gc-next">
+          <div class="gc-dot ${dotClass}"></div>
+          <span>${esc(nextTxt)}</span>
+        </div>
+        ${delays>0 ? `<div class="delay-tag">⚠ ${delays} retard${delays>1?'s':''}</div>` : ''}
+        ${isPeak    ? '<div class="peak-tag">🔥 PEAK</div>' : ''}
+      </div>
+      <div class="gc-right">
+        <div class="gc-pax${pax60===0?' zero':''}">${fmtN(pax60)}</div>
+        <div class="gc-plbl">pax · 60 min</div>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+/* ═══ DIALOG GARE ═══ */
+function openDialog(gareId){
+  const gare = GARES.find(g=>g.id===gareId);
+  if(!gare) return;
+
+  document.getElementById('gd-nom').textContent = gare.nom;
+  document.getElementById('gd-sub').textContent = gare.sub;
+
+  const c = CACHE[gareId];
+  if(!c || c.error || !c.trains.length){
+    document.getElementById('gd-up').textContent  = '—';
+    document.getElementById('gd-pax').textContent = '—';
+    document.getElementById('gd-del').textContent = '—';
+    document.getElementById('gd-can').textContent = '—';
+    document.getElementById('gd-body').innerHTML  =
+      `<div class="empty" style="margin-top:12px"><span class="ei">⚠</span>${esc(c&&c.error?c.error:'Aucune donnée')}</div>`;
+  } else {
+    const trains   = [...c.trains].sort((a,b)=>a.hShow.localeCompare(b.hShow));
+    const upcoming = trains.filter(t=>t.min>0 && !t.supprime);
+    const past     = trains.filter(t=>t.min<=0 || t.supprime);
+    const pax60    = upcoming.filter(t=>t.min<=60).reduce((s,t)=>s+t.passagers,0);
+    const delays   = upcoming.filter(t=>t.retard>0).length;
+    const cancels  = trains.filter(t=>t.supprime).length;
+
+    document.getElementById('gd-up').textContent  = upcoming.length;
+    document.getElementById('gd-pax').textContent = fmtN(pax60);
+    document.getElementById('gd-del').textContent = delays;
+    document.getElementById('gd-can').textContent = cancels;
+
+    let body = '';
+    if(upcoming.length){
+      body += `<div class="grp-hdr live"><span>● À venir</span><div class="grp-line"></div><span class="grp-ct">${upcoming.length}</span></div>`;
+      body += upcoming.map(t=>renderTC(t,false)).join('');
+    } else {
+      body += '<div class="empty"><span class="ei">🌙</span>Plus aucun train à venir</div>';
+    }
+    if(past.length){
+      body += `<div class="grp-hdr"><span>○ Déjà passés</span><div class="grp-line"></div><span class="grp-ct">${past.length}</span></div>`;
+      body += past.map(t=>renderTC(t,true)).join('');
+    }
+    document.getElementById('gd-body').innerHTML = body;
+  }
+
+  const sheet = document.querySelector('#gare-dialog .sheet');
+  if(sheet) sheet.scrollTop = 0;
+
+  const dlg = document.getElementById('gare-dialog');
+  if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
+}
+
+function renderTC(t, isPast){
+  const isCrit = t.retard >= 10;
+  const isWarn = t.retard > 0 && t.retard < 10;
+
+  let cls = 'tc';
+  if(isPast||t.supprime) cls+=' past';
+  else if(isCrit) cls+=' crit';
+  else if(isWarn) cls+=' warn';
+
+  let wCls='tc-when', wTxt='';
+  if(isPast||t.supprime){ wCls+=' past'; wTxt=t.supprime?'supprimé':'passé'; }
+  else if(t.min<=5)      { wCls+=' now';  wTxt=fmtMin(t.min); }
+  else if(t.min<=15)     { wCls+=' soon'; wTxt=fmtMin(t.min); }
+  else                   { wTxt=fmtMin(t.min); }
+
+  const heureHtml = (t.retard>0 && t.hRT!==t.hBase)
+    ? `<div class="tc-h">${esc(t.hRT)}</div><div class="tc-h-old">${esc(t.hBase)}</div>`
+    : `<div class="tc-h">${esc(t.hShow)}</div>`;
+
+  let stHtml='';
+  if(t.supprime)      stHtml='<span class="st-chip st-sup">🚫 Supprimé</span>';
+  else if(isPast)     stHtml='';
+  else if(isCrit)     stHtml=`<span class="st-chip st-crit">⚠ +${t.retard} min</span>`;
+  else if(isWarn)     stHtml=`<span class="st-chip st-warn">⚠ +${t.retard} min</span>`;
+  else                stHtml='<span class="st-chip st-ok">✓ À l\'heure</span>';
+
+  const bCls = 'b-' + t.type;
+  return `<div class="${cls}">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">${esc(t.origine)}</div>
+        <div class="tc-meta">
+          <span class="badge ${bCls}">${esc(t.type)}</span>
+          ${t.numero ? `<span class="tc-num">#${esc(t.numero)}</span>` : ''}
+          <span class="tc-rt ${t.live?'live':'base'}">${t.live?'● LIVE':'~ théo'}</span>
+        </div>
+      </div>
+      <div class="tc-cd">${heureHtml}<div class="${wCls}">${esc(wTxt)}</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="pax-chip"><span class="pax-n">${fmtN(t.passagers)}</span><span class="pax-l">pax</span></div>
+      ${stHtml}
+    </div>
+  </div>`;
+}
+
+function closeDialog(){
+  const dlg = document.getElementById('gare-dialog');
+  if(dlg.close) dlg.close(); else dlg.removeAttribute('open');
+}
+
+/* ═══ RENDER SOIR / MÉTÉO ═══ */
+function renderEv(e){
+  return `<div class="ev-card">
+    <div class="ev-top">
+      <div><div class="ev-name">${esc(e.n)}</div><div class="ev-lieu">${esc(e.l)}</div></div>
+      <div class="ev-time"><div class="t">${esc(e.fin)}</div><div class="l">fin</div></div>
+    </div>
+    <div class="ev-info">
+      <div><div class="ik">Capacité</div><div class="iv">${fmtN(e.cap)} pax</div></div>
+      <div style="text-align:right"><div class="ik">Métro</div><div class="iv">${esc(e.m)}</div></div>
+    </div>
+  </div>`;
+}
+
+function renderSoir(){
+  document.getElementById('concerts-list').innerHTML  = STATIC.concerts.map(renderEv).join('');
+  document.getElementById('theatres-list').innerHTML  = STATIC.theatres.map(renderEv).join('');
+  document.getElementById('salons-list').innerHTML    = STATIC.salons.map(renderEv).join('');
+}
+
+function renderMeteo(){
+  document.getElementById('weather-list').innerHTML =
+    '<div class="wgrid">' +
+    STATIC.meteo.map((d,i)=>
+      `<div class="wday${i===0?' today':''}">
+        <div class="wd">${esc(d.j)}</div>
+        <div class="wic">${esc(d.ic)}</div>
+        <div class="wt">${d.t}°</div>
+        <div class="wp">${d.p}%💧</div>
+      </div>`
+    ).join('') +
+    '</div>';
+}
+
+/* ═══ NAVIGATION ═══ */
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.id===id));
+  document.querySelectorAll('.nav-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ═══ ÉVÉNEMENTS ═══ */
+document.addEventListener('click', e=>{
+  const nb = e.target.closest('.nav-tabs button');
+  if(nb && nb.dataset.tab){ switchTab(nb.dataset.tab); return; }
+
+  const gc = e.target.closest('.gare-card[data-gid]');
+  if(gc){ openDialog(gc.dataset.gid); return; }
+
+  if(e.target.id==='gd-close'){ closeDialog(); return; }
+});
+
+document.getElementById('gare-dialog').addEventListener('click', e=>{
+  if(e.target===document.getElementById('gare-dialog')) closeDialog();
+});
+
+// Pause si onglet caché (économise le quota)
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){
+    if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+    if(cdTimer)  { clearInterval(cdTimer);   cdTimer=null;   }
+  } else {
+    // Retour : refresh si les données ont plus de 90 sec
+    doRefresh(false).then(scheduleAuto);
+  }
+});
+
+/* ═══ BOOT ═══ */
+function boot(){
+  renderSoir();
+  renderMeteo();
+  setPill('off','CONNEXION…');
+  // Premier fetch immédiat, puis auto toutes les 3 min
+  doRefresh(true).then(scheduleAuto);
+}
+
+boot();
+</script>
+</body>
+</html>
