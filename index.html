@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0D0D0D">
 <title>TaxiPulse Paris</title>
 <style>
@@ -397,9 +398,10 @@ dialog .sheet{
 
 <script>
 /* ═══════════════════════════════════════════════
-   TOKEN SNCF — intégré
+   PROXY CLOUDFLARE — unique point d'entrée API
+   Le Worker ajoute lui-même le token Authorization
 ═══════════════════════════════════════════════ */
-const TOKEN = 'e10f1175-be33-45fa-b1da-85d5885ebd37';
+const PROXY = 'https://taxipulse-proxy.boughida-sofiane.workers.dev/?url=';
 
 /* ═══════════════════════════════════════════════
    GARES — 6 gares parisiennes
@@ -448,7 +450,7 @@ const STATIC = {
 };
 
 /* ═══ STATE ═══ */
-let CACHE = {};       // { gareId: { trains, error, ts } }
+let CACHE = {};
 let loading = false;
 let autoTimer = null;
 let cdTimer   = null;
@@ -509,26 +511,14 @@ function trainType(di){
 }
 
 /* ═══════════════════════════════════════════════
-   API FETCH — 5 stratégies en cascade
-   Règle le problème CORS une bonne fois pour toutes.
+   API FETCH — UNIQUEMENT via Worker Cloudflare
+   Le Worker gère le CORS + ajoute le token SNCF
 ═══════════════════════════════════════════════ */
-const BASES = [
-  'https://api.navitia.io/v1/coverage/sncf',
-  'https://api.sncf.com/v1/coverage/sncf',
-];
-const PROXIES = [
-  u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-  u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-  u => `https://thingproxy.freeboard.io/fetch/${u}`,
-];
-
-let goodStrategy = null; // on mémorise ce qui marche
-
-async function timedFetch(url, opts={}, ms=9000){
+async function timedFetch(url, ms=12000){
   const ac = new AbortController();
   const t  = setTimeout(()=>ac.abort(), ms);
   try {
-    const r = await fetch(url, { ...opts, signal: ac.signal });
+    const r = await fetch(url, { signal: ac.signal });
     clearTimeout(t);
     return r;
   } catch(e) {
@@ -538,53 +528,19 @@ async function timedFetch(url, opts={}, ms=9000){
 }
 
 async function sncfFetch(path){
-  // Stratégies à tester — on commence par la dernière qui a fonctionné
-  const strategies = [];
+  // URL cible Navitia — le Worker ajoute le token
+  const target  = 'https://api.navitia.io/v1/coverage/sncf' + path;
+  // On encode toute l'URL pour la passer en paramètre au Worker
+  const proxied = PROXY + encodeURIComponent(target);
 
-  // S1 & S2 : appel direct Basic Auth (TOKEN:@ dans l'URL, pas de preflight)
-  for(const base of BASES){
-    strategies.push({ tag:`direct:${base}`, fn: async ()=>{
-      const url = base.replace('https://','https://'+TOKEN+':@') + path;
-      return timedFetch(url, {}, 8000);
-    }});
+  let resp;
+  try {
+    resp = await timedFetch(proxied, 12000);
+  } catch(e){
+    if(e.name === 'AbortError') throw new Error('Timeout — le serveur met trop de temps à répondre');
+    throw new Error('Proxy injoignable : ' + e.message);
   }
-
-  // S3 : header Authorization (marche si CORS OK côté serveur)
-  for(const base of BASES){
-    strategies.push({ tag:`auth:${base}`, fn: async ()=>{
-      return timedFetch(base + path, { headers:{ Authorization: TOKEN }}, 7000);
-    }});
-  }
-
-  // S4-S6 : proxies CORS publics
-  for(const proxy of PROXIES){
-    for(const base of BASES){
-      strategies.push({ tag:`proxy:${proxy('').slice(0,30)}`, fn: async ()=>{
-        const target = proxy(base + path);
-        return timedFetch(target, { headers:{ Authorization: TOKEN }}, 10000);
-      }});
-    }
-  }
-
-  // Réorganise pour tester d'abord la stratégie qui a marché
-  if(goodStrategy !== null){
-    const idx = strategies.findIndex(s=>s.tag===goodStrategy);
-    if(idx>0){ strategies.unshift(strategies.splice(idx,1)[0]); }
-  }
-
-  for(const s of strategies){
-    try {
-      const r = await s.fn();
-      if(r && r.ok){
-        goodStrategy = s.tag; // mémorise le gagnant
-        return r;
-      }
-      // Erreurs définitives — on remonte directement
-      if(r && [401,403,429].includes(r.status)) return r;
-    } catch(_){ /* essaie le suivant */ }
-  }
-
-  throw new Error('NET_FAIL');
+  return resp;
 }
 
 /* ═══ PARSE ARRIVÉE NAVITIA ═══ */
@@ -625,30 +581,26 @@ function parseArrival(arr){
 async function fetchGare(gare){
   const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-7200000)}&duration=25200&count=60&data_freshness=realtime`;
 
-  let resp;
-  try { resp = await sncfFetch(path); }
-  catch(e){
-    if(String(e.message).includes('NET_FAIL'))
-      throw new Error('Réseau inaccessible ou tous les proxies CORS ont échoué');
-    throw new Error('Erreur réseau : ' + e.message);
-  }
+  const resp = await sncfFetch(path);
 
   if(resp.status === 401) throw new Error('Token invalide ou expiré (401)');
   if(resp.status === 403) throw new Error('Accès refusé (403)');
-  if(resp.status === 404) throw new Error('Gare non trouvée — ID inconnu (404)');
+  if(resp.status === 404) throw new Error('Gare non trouvée (404) — ID SNCF peut-être obsolète');
   if(resp.status === 429) throw new Error('Quota journalier 5000 req atteint (429)');
-  if(!resp.ok)            throw new Error(`Erreur API HTTP ${resp.status}`);
+  if(resp.status === 502 || resp.status === 503 || resp.status === 504)
+    throw new Error(`API SNCF indisponible (${resp.status})`);
+  if(!resp.ok) throw new Error(`Erreur HTTP ${resp.status}`);
 
   let data;
   try { data = await resp.json(); }
-  catch(_){ throw new Error('Réponse API illisible — réessaie'); }
+  catch(_){ throw new Error('Réponse illisible de l\'API'); }
 
   return (data.arrivals || []).map(parseArrival);
 }
 
 /* ═══ REFRESH ENGINE ═══ */
-const INTERVAL  = 3 * 60 * 1000; // 3 min
-const CACHE_TTL = 90 * 1000;      // 90 sec
+const INTERVAL  = 3 * 60 * 1000;
+const CACHE_TTL = 90 * 1000;
 
 async function doRefresh(force=true){
   if(loading) return;
@@ -684,7 +636,6 @@ async function doRefresh(force=true){
   loading = false;
   btn.classList.remove('loading');
 
-  // Badge live
   const errs  = Object.values(CACHE).filter(c=>c.error).map(c=>c.error);
   const total = GARES.length;
   const ok    = GARES.filter(g=>CACHE[g.id]&&!CACHE[g.id].error).length;
@@ -693,15 +644,12 @@ async function doRefresh(force=true){
   else if(ok < total)  setPill('warn', `${ok}/${total} LIVE`);
   else                 setPill('live','LIVE');
 
-  // Heure refresh
   const hms = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('rtime-main').textContent = `Actualisé à ${hms}`;
   document.getElementById('src-note').style.display = 'flex';
 
-  // Bannière erreur
   showErrBanner(errs);
 
-  // Reset countdown
   startCD();
   renderGares();
 }
@@ -740,17 +688,20 @@ function showErrBanner(errs){
   let icon='⚠', title='Erreur de connexion', body='', warn=false;
 
   if(all.includes('401')||all.includes('expiré')){
-    icon='🔑'; title='Token invalide ou expiré';
-    body='Régénère ton token sur <strong>numerique.sncf.com/startup/api</strong> et mets-le dans le fichier HTML.';
+    icon='🔑'; title='Token SNCF invalide ou expiré';
+    body='Régénère ton token sur <strong>navitia.io</strong>, mets-le à jour dans ton Worker Cloudflare et redéploie.';
   } else if(all.includes('429')||all.includes('Quota')){
     icon='⏱'; title='Quota journalier atteint (5 000 req/jour)';
     body='Les données reprendront automatiquement demain à minuit.'; warn=true;
-  } else if(all.includes('réseau')||all.includes('NET_FAIL')||all.includes('proxies')){
-    icon='🌐'; title='Connexion réseau impossible';
-    body='Vérifie ta connexion internet. Si tu ouvres le fichier en local (file://), essaie de l\'héberger sur un serveur web.';
   } else if(all.includes('404')){
     icon='🚉'; title='Gare non reconnue par l\'API';
-    body='L\'identifiant d\'une gare est peut-être obsolète. Contacte le développeur.';
+    body='Un identifiant SNCF est peut-être obsolète, ou l\'API Navitia est en panne.';
+  } else if(all.includes('502')||all.includes('503')||all.includes('504')||all.includes('indisponible')){
+    icon='🛠'; title='API SNCF temporairement indisponible';
+    body='Les serveurs Navitia sont en panne ou en maintenance. Ça reviendra tout seul.'; warn=true;
+  } else if(all.includes('Proxy')||all.includes('Timeout')){
+    icon='🌐'; title='Connexion au proxy impossible';
+    body='Vérifie ta connexion internet, ou que le Worker Cloudflare est bien en ligne.';
   } else {
     body = errs.slice(0,2).join(' — ');
   }
@@ -981,13 +932,11 @@ document.getElementById('gare-dialog').addEventListener('click', e=>{
   if(e.target===document.getElementById('gare-dialog')) closeDialog();
 });
 
-// Pause si onglet caché (économise le quota)
 document.addEventListener('visibilitychange', ()=>{
   if(document.hidden){
     if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
     if(cdTimer)  { clearInterval(cdTimer);   cdTimer=null;   }
   } else {
-    // Retour : refresh si les données ont plus de 90 sec
     doRefresh(false).then(scheduleAuto);
   }
 });
@@ -997,7 +946,6 @@ function boot(){
   renderSoir();
   renderMeteo();
   setPill('off','CONNEXION…');
-  // Premier fetch immédiat, puis auto toutes les 3 min
   doRefresh(true).then(scheduleAuto);
 }
 
