@@ -794,7 +794,7 @@ async function fetchGare(gare){
   try { data = await resp.json(); }
   catch(_){ throw new Error('Réponse illisible'); }
 
-  return (data.arrivals || []).map(parseArrival);
+  return (data.arrivals || []).map(parseArrival).filter(t => t.type !== 'TRANSILIEN');
 }
 
 /* ═══ REFRESH ENGINE ═══ */
