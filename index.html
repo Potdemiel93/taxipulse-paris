@@ -769,7 +769,7 @@ function parseArrival(arr, originsMap){
 
 /* ═══ FETCH UNE GARE ═══ */
 async function fetchGare(gare){
-  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(0)}&duration=5400&count=80`;
+  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-28800000)}&duration=39600&count=200`;
 
   const resp = await sncfFetch(path);
 
