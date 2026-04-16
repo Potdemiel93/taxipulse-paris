@@ -393,7 +393,7 @@ dialog .sheet{
       <span style="font-size:16px;flex-shrink:0">ℹ</span>
       <div>
         <strong>Source : API SNCF Temps réel</strong>
-        Horaires actualisés toutes les 3 min. L'affluence est une <strong style="display:inline;font-size:11px;margin:0">estimation</strong> basée sur les horaires SNCF, le type de train et l'heure. Données conservées en local pour une disponibilité permanente.
+        Horaires actualisés toutes les 3 min. La demande taxi est une <strong style="display:inline;font-size:11px;margin:0">estimation</strong> basée sur les horaires SNCF, le type de train (les TGV/Eurostar comptent plus que les RER) et l'heure.
       </div>
     </div>
 
@@ -431,7 +431,7 @@ dialog .sheet{
       </div>
       <div class="dstats">
         <div class="dstat"><div class="dk">Arrivées 20min</div><div class="dv a" id="gd-up">—</div></div>
-        <div class="dstat"><div class="dk">Affluence</div><div class="dv" id="gd-pax">—</div></div>
+        <div class="dstat"><div class="dk">Demande taxi</div><div class="dv" id="gd-pax">—</div></div>
         <div class="dstat"><div class="dk">Retards</div><div class="dv y" id="gd-del">—</div></div>
         <div class="dstat"><div class="dk">Supprimés</div><div class="dv r" id="gd-can">—</div></div>
       </div>
@@ -443,16 +443,17 @@ dialog .sheet{
 <!-- ══ INFO POPUP AFFLUENCE ══ -->
 <div class="info-popup" id="info-popup" onclick="if(event.target.id==='info-popup')closeInfo()">
   <div class="info-popup-box">
-    <h3>🔥 Comprendre l'affluence</h3>
-    <p>L'affluence indique le nombre de voyageurs attendus dans les <strong>20 prochaines minutes</strong> à la gare.</p>
+    <h3>🔥 Demande taxi estimée</h3>
+    <p>L'indicateur estime le nombre de <strong>clients taxi potentiels</strong> dans les <strong>20 prochaines minutes</strong> à chaque gare.</p>
+    <p style="font-size:11px;color:var(--ink2)">Les trains longue distance (TGV, Eurostar, Intercités) comptent beaucoup plus que les RER/Transilien, car leurs voyageurs ont des bagages et prennent davantage le taxi.</p>
     <div class="scale">
-      <div class="scale-row"><div class="scale-ico">🔥🔥🔥🔥</div><div class="scale-txt">Très forte — 1500+ voyageurs</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥🔥🔥</div><div class="scale-txt">Forte — 800 à 1500</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥🔥</div><div class="scale-txt">Moyenne — 300 à 800</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥</div><div class="scale-txt">Faible — moins de 300</div></div>
-      <div class="scale-row"><div class="scale-ico">💤</div><div class="scale-txt">Très faible ou aucun train</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥🔥🔥</div><div class="scale-txt">Rush — 150+ clients taxi</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥🔥</div><div class="scale-txt">Fort — 70 à 150 clients</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥</div><div class="scale-txt">Modéré — 25 à 70 clients</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥</div><div class="scale-txt">Calme — moins de 25</div></div>
+      <div class="scale-row"><div class="scale-ico">💤</div><div class="scale-txt">Très calme — aucun train prévu</div></div>
     </div>
-    <p style="font-size:10px;color:var(--ink3)">Estimation basée sur les horaires SNCF temps réel, la capacité du type de train et le coefficient de remplissage selon l'heure. Ne constitue pas une donnée officielle.</p>
+    <p style="font-size:10px;color:var(--ink3)">Estimation basée sur : horaires SNCF temps réel, capacité du train, taux de remplissage moyen par type, heure de la journée, et proportion de voyageurs prenant un taxi. Ne constitue pas une donnée officielle.</p>
     <button class="close-info" onclick="closeInfo()">J'ai compris</button>
   </div>
 </div>
@@ -511,7 +512,7 @@ const COEF_TYPE = {
   THALYS:     0.82,
   LYRIA:      0.75,
   ICE:        0.70,
-  INTERCITES: 0.70,
+  INTERCITES: 0.78,  // Brive, Limoges, Bourges — souvent complets
   NIGHTJET:   0.68,
   NIGHT:      0.68,
   TER:        0.55,
@@ -537,24 +538,48 @@ function coefHeure(h){
 }
 
 /* ═══════════════════════════════════════════════
-   CALCUL AFFLUENCE ESTIMÉE (nombre de voyageurs réaliste)
+   COEFFICIENT TAXI — % de voyageurs susceptibles
+   de prendre un taxi/VTC à l'arrivée
+   C'est LA donnée clé pour les chauffeurs
+═══════════════════════════════════════════════ */
+const COEF_TAXI = {
+  EUROSTAR:   0.25,  // Internationaux, bagages, ne connaissent pas Paris
+  THALYS:     0.22,  // Business Bruxelles-Amsterdam, premium
+  LYRIA:      0.20,  // Suisse, clientèle affaires
+  ICE:        0.20,  // Allemagne, business
+  INOUI:      0.15,  // Province → Paris, bagages
+  TGV:        0.15,
+  NIGHTJET:   0.18,  // Trains de nuit, fatigués, bagages
+  NIGHT:      0.18,
+  OUIGO:      0.08,  // Low-cost = budget = métro/bus
+  INTERCITES: 0.15,  // Brive, Limoges, Bourges = vrais clients taxi avec bagages
+  TER:        0.03,  // Courte distance, abonnés, pas de taxi
+  TRANSILIEN: 0.01,  // Pass Navigo, zéro taxi
+  DEF:        0.10
+};
+
+/* ═══════════════════════════════════════════════
+   CALCUL : CLIENTS TAXI POTENTIELS par train
+   Formule : capacité × remplissage × heure × coef_taxi
 ═══════════════════════════════════════════════ */
 function estimerPax(type, heureArrivee){
-  const cap  = CAPACITE[type] || CAPACITE.DEF;
-  const cTyp = COEF_TYPE[type] || COEF_TYPE.DEF;
-  const cHr  = coefHeure(heureArrivee);
-  return Math.round(cap * cTyp * cHr);
+  const cap   = CAPACITE[type]  || CAPACITE.DEF;
+  const cTyp  = COEF_TYPE[type] || COEF_TYPE.DEF;
+  const cHr   = coefHeure(heureArrivee);
+  const cTaxi = COEF_TAXI[type] || COEF_TAXI.DEF;
+  return Math.round(cap * cTyp * cHr * cTaxi);
 }
 
 /* ═══════════════════════════════════════════════
-   NIVEAU DE FLAMMES (affichage affluence)
+   NIVEAU DE FLAMMES (clients taxi potentiels en 20 min)
+   Seuils calibrés sur le nombre de CLIENTS TAXI, pas le total voyageurs
 ═══════════════════════════════════════════════ */
 function niveauFlammes(totalPax){
-  if(totalPax === 0)     return { lvl:0, ico:'💤',        txt:'très faible' };
-  if(totalPax < 300)     return { lvl:1, ico:'🔥',         txt:'faible'     };
-  if(totalPax < 800)     return { lvl:2, ico:'🔥🔥',       txt:'moyenne'    };
-  if(totalPax < 1500)    return { lvl:3, ico:'🔥🔥🔥',     txt:'forte'      };
-  return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'très forte' };
+  if(totalPax === 0)     return { lvl:0, ico:'💤',        txt:'très calme'  };
+  if(totalPax < 25)      return { lvl:1, ico:'🔥',         txt:'calme'      };
+  if(totalPax < 70)      return { lvl:2, ico:'🔥🔥',       txt:'modéré'     };
+  if(totalPax < 150)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'       };
+  return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'rush'       };
 }
 
 /* ═══════════════════════════════════════════════
@@ -994,7 +1019,7 @@ function renderGares(){
       <div class="gc-right">
         <div class="flames lvl${flames.lvl}">${flames.ico}</div>
         <div class="aff-label">
-          affluence estim.
+          demande taxi
           <button class="info-btn" onclick="event.stopPropagation();openInfo()">i</button>
         </div>
       </div>
