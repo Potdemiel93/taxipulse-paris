@@ -529,7 +529,7 @@ async function timedFetch(url, ms=12000){
 
 async function sncfFetch(path){
   // URL cible Navitia — le Worker ajoute le token
-  const target  = 'https://api.navitia.io/v1/coverage/sncf' + path;
+  const target  = 'https://api.sncf.com/v1/coverage/sncf' + path;
   // On encode toute l'URL pour la passer en paramètre au Worker
   const proxied = PROXY + encodeURIComponent(target);
 
