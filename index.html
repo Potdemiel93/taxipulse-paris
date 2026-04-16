@@ -769,7 +769,7 @@ function parseArrival(arr, originsMap){
 
 /* ═══ FETCH UNE GARE ═══ */
 async function fetchGare(gare){
-  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-28800000)}&duration=39600&count=200`;
+  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-28800000)}&duration=64800&count=200`;
 
   const resp = await sncfFetch(path);
 
@@ -1043,7 +1043,7 @@ function openDialog(gareId){
   } else {
     const trains   = [...(c.trains||[])].sort((a,b)=>a.hShow.localeCompare(b.hShow));
     const upcoming = trains.filter(t=>t.min>0 && !t.supprime);
-    const past     = trains.filter(t=>t.min<=0 || t.supprime);
+    // Trains passés non affichés
     const next20   = upcoming.filter(t=>t.min<=20);
     const totalPax = next20.reduce((s,t)=>s+t.passagers,0);
     const flames   = niveauFlammes(totalPax);
@@ -1060,12 +1060,9 @@ function openDialog(gareId){
       body += `<div class="grp-hdr live"><span>● Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${upcoming.length}</span></div>`;
       body += upcoming.map(t=>renderTC(t,false)).join('');
     } else {
-      body += '<div class="empty"><span class="ei">🌙</span>Plus aucun train à venir</div>';
+      body += '<div class="empty"><span class="ei">🌙</span>Plus de train ce soir — prochains trains demain matin</div>';
     }
-    if(past.length){
-      body += `<div class="grp-hdr"><span>○ Déjà passés</span><div class="grp-line"></div><span class="grp-ct">${past.length}</span></div>`;
-      body += past.map(t=>renderTC(t,true)).join('');
-    }
+    // Trains passés masqués — seuls les trains à venir intéressent les taxis
     document.getElementById('gd-body').innerHTML = body;
   }
 
