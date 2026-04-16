@@ -302,14 +302,7 @@ dialog .sheet{
 .wt{font-size:20px;font-weight:800;letter-spacing:-.5px}
 .wp{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:5px;font-weight:600}
 
-/* SOURCE NOTE */
-.src-note{
-  display:flex;gap:9px;align-items:flex-start;
-  background:var(--card);border:1px solid var(--line);
-  border-radius:11px;padding:11px 13px;margin:14px 0 6px;
-  font-size:11px;color:var(--ink2);line-height:1.5;
-}
-.src-note strong{color:var(--ink);display:block;font-size:12px;margin-bottom:2px}
+/* SOURCE NOTE — supprimé, remplacé par lien discret */
 
 /* INFO POPUP (tooltip affluence) */
 .info-popup{
@@ -849,7 +842,7 @@ async function doRefresh(force=true){
 
   const hms = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('rtime-main').textContent = `Actualisé à ${hms}`;
-  document.getElementById('src-note').style.display = 'flex';
+  document.getElementById('src-note').style.display = 'block';
 
   showErrBanner();
 
@@ -1215,7 +1208,7 @@ function boot(){
     setPill('cache','CACHE');
     updatePillState();
     renderGares();
-    document.getElementById('src-note').style.display = 'flex';
+    document.getElementById('src-note').style.display = 'block';
     const oldest = Math.min(...Object.values(CACHE).map(c=>c.ts||0));
     const ageMin = Math.floor((Date.now()-oldest)/60000);
     document.getElementById('rtime-main').textContent = `Dernières données : il y a ${ageMin} min`;
