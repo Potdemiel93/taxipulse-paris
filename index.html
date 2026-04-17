@@ -1413,16 +1413,20 @@ function openDialog(gareId){
   const dlg = document.getElementById('gare-dialog');
   if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
 
-  // Scroll direct au prochain train (instantané, positionné juste sous le header sticky)
+  // Scroll direct au prochain train À VENIR (instantané)
+  // On tient compte du header sticky ET du bloc "À quai" sticky qui sont en haut
   setTimeout(() => {
     const el = document.getElementById('next-train');
     if(el && sheet){
       const header = document.querySelector('#gare-dialog .dhdr');
+      const quai   = document.getElementById('gd-quai');
       const headerH = header ? header.offsetHeight : 140;
-      const targetY = el.offsetTop - headerH - 12;
+      const quaiH   = (quai && quai.style.display !== 'none') ? quai.offsetHeight : 0;
+      // Position du premier train à venir moins la hauteur totale des éléments sticky
+      const targetY = el.offsetTop - headerH - quaiH - 8;
       sheet.scrollTo({ top: Math.max(0, targetY), behavior: 'auto' });
     }
-  }, 80);
+  }, 100);
 }
 
 function renderTC(t, isPast){
