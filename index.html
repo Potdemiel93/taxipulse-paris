@@ -914,8 +914,41 @@ const TYPES_AUTORISES = {
   bercy:        ['INTERCITES','OUIGO','TER']
 };
 
-function trainType(di, gareId){
-  const s = ((di.headsign||'') + ' ' + (di.physical_mode||'') + ' ' + (di.commercial_mode||'') + ' ' + (di.network||'') + ' ' + (di.trip_short_name||'') + ' ' + (di.label||'') + ' ' + (di.direction||'')).toUpperCase();
+function trainType(di, gareId, origine){
+  // Construit une chaine complete avec TOUS les champs API + l'origine réelle
+  const s = ((di.headsign||'') + ' ' + (di.physical_mode||'') + ' ' + (di.commercial_mode||'') + ' ' + (di.network||'') + ' ' + (di.trip_short_name||'') + ' ' + (di.label||'') + ' ' + (di.direction||'') + ' ' + (origine||'')).toUpperCase();
+
+  // ⚡ PRIORITÉ ABSOLUE : À Gare du Nord, tout train venant de Londres/Bruxelles/Amsterdam
+  // est FORCÉMENT un Eurostar, peu importe ce que dit l'API
+  if(gareId === 'nord'){
+    if(s.includes('LONDON')||s.includes('LONDRES')||s.includes('PANCRAS')||s.includes('ST PANCRAS')||
+       s.includes('BRUXELLES')||s.includes('BRUSSELS')||s.includes('BRUSSEL')||
+       s.includes('AMSTERDAM')||s.includes('ROTTERDAM')||s.includes('ANVERS')||s.includes('ANTWERP')){
+      return 'EUROSTAR';
+    }
+  }
+
+  // ⚡ PRIORITÉ ABSOLUE : À Gare de l'Est, destinations allemandes = ICE, Berlin/Vienne = Nightjet
+  if(gareId === 'est'){
+    if(s.includes('BERLIN')||s.includes('VIENNE')||s.includes('WIEN')||s.includes('NIGHTJET')){
+      return 'NIGHTJET';
+    }
+    if(s.includes('FRANCFORT')||s.includes('FRANKFURT')||s.includes('STUTTGART')||
+       s.includes('MUNICH')||s.includes('MÜNCHEN')||s.includes('KARLSRUHE')||
+       s.includes('MANNHEIM')||s.includes('SAARBRUCK')||s.includes('SARREBRUCK')||
+       s.includes('SAARBRÜCKEN')||s.includes('DB ')){
+      return 'ICE';
+    }
+  }
+
+  // ⚡ PRIORITÉ ABSOLUE : À Gare de Lyon, Suisse = Lyria
+  if(gareId === 'lyon'){
+    if(s.includes('GENÈVE')||s.includes('GENEVA')||s.includes('CORNAVIN')||
+       s.includes('LAUSANNE')||s.includes('ZÜRICH')||s.includes('ZURICH')||
+       s.includes('BÂLE')||s.includes('BASEL')||s.includes('BERNE')||s.includes('BERN')){
+      return 'LYRIA';
+    }
+  }
 
   let detecte = 'DEF';
 
@@ -1038,15 +1071,15 @@ function parseArrival(arr, originsMap, gareId){
     retard = Math.max(0, Math.round((rtDate - baseDate) / 60000));
   }
 
-  const type = trainType(di, gareId);
-  const hArr = navHour(sdt.arrival_date_time || sdt.base_arrival_date_time);
-
-  // Détermine l'origine AVANT le calcul pax (utilisé pour ajuster la demande taxi)
+  // Détermine l'origine EN PREMIER (utilisée pour détecter Eurostar/Lyria/ICE par destination)
   const origine = (function(){
     const oLink = (sdt.links||[]).find(l=>l.rel==='origins');
     if(oLink && originsMap && originsMap[oLink.id]) return originsMap[oLink.id];
     return di.direction || di.headsign || '—';
   })();
+
+  const type = trainType(di, gareId, origine);
+  const hArr = navHour(sdt.arrival_date_time || sdt.base_arrival_date_time);
 
   const pax = estimerPax(type, hArr, origine, gareId, new Date());
 
@@ -1449,25 +1482,37 @@ function openDialog(gareId){
   }
 
   const sheet = document.querySelector('#gare-dialog .sheet');
-  if(sheet) sheet.scrollTop = 0;
 
   const dlg = document.getElementById('gare-dialog');
   if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
 
-  // Scroll direct au prochain train À VENIR (instantané)
-  // On tient compte du header sticky ET du bloc "À quai" sticky qui sont en haut
-  setTimeout(() => {
+  // ═══ SCROLL DIRECT AU PROCHAIN TRAIN — ultra-fiable ═══
+  // Priorité absolue : le chauffeur doit voir directement les trains à venir
+  const scrollToNext = () => {
     const el = document.getElementById('next-train');
-    if(el && sheet){
-      const header = document.querySelector('#gare-dialog .dhdr');
-      const quai   = document.getElementById('gd-quai');
-      const headerH = header ? header.offsetHeight : 140;
-      const quaiH   = (quai && quai.style.display !== 'none') ? quai.offsetHeight : 0;
-      // Position du premier train à venir moins la hauteur totale des éléments sticky
-      const targetY = el.offsetTop - headerH - quaiH - 8;
-      sheet.scrollTo({ top: Math.max(0, targetY), behavior: 'auto' });
+    if(!el || !sheet) {
+      if(sheet) sheet.scrollTop = 0;  // fallback : pas de train à venir → haut
+      return false;
     }
-  }, 100);
+    const header = document.querySelector('#gare-dialog .dhdr');
+    const quai   = document.getElementById('gd-quai');
+    const headerH = header ? header.offsetHeight : 140;
+    const quaiH   = (quai && quai.style.display !== 'none') ? quai.offsetHeight : 0;
+    const targetY = Math.max(0, el.offsetTop - headerH - quaiH - 4);
+    sheet.scrollTop = targetY;  // Assignation directe = plus fiable
+    return true;
+  };
+
+  // Triple appel : DOM parfois pas prêt, on garantit l'exécution
+  requestAnimationFrame(() => {
+    scrollToNext();
+    requestAnimationFrame(() => {
+      scrollToNext();
+      setTimeout(scrollToNext, 50);
+      setTimeout(scrollToNext, 150);
+      setTimeout(scrollToNext, 300);
+    });
+  });
 }
 
 function renderTC(t, isPast){
