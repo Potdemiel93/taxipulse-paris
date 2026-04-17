@@ -433,15 +433,15 @@ dialog .sheet{
   <div class="info-popup-box">
     <h3>🔥 Demande taxi estimée</h3>
     <p>L'indicateur estime le nombre de <strong>clients taxi potentiels</strong> dans les <strong>20 prochaines minutes</strong> à chaque gare.</p>
-    <p style="font-size:11px;color:var(--ink2)">Les trains longue distance (TGV, Eurostar, Intercités) comptent beaucoup plus que les RER/Transilien, car leurs voyageurs ont des bagages et prennent davantage le taxi.</p>
+    <p style="font-size:11px;color:var(--ink2)">Eurostar (Londres), Thalys (Bruxelles/Amsterdam) et TGV longue distance (Marseille, Bordeaux…) génèrent beaucoup plus de demande taxi que les trains courts (Lille, Rouen) où la clientèle a Pass Navigo et peu de bagages.</p>
     <div class="scale">
-      <div class="scale-row"><div class="scale-ico">🔥🔥🔥🔥</div><div class="scale-txt">Rush — 150+ clients taxi</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥🔥🔥</div><div class="scale-txt">Fort — 70 à 150 clients</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥🔥</div><div class="scale-txt">Modéré — 25 à 70 clients</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥</div><div class="scale-txt">Calme — moins de 25</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥🔥🔥</div><div class="scale-txt">Rush — 120+ clients taxi</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥🔥</div><div class="scale-txt">Fort — 55 à 120 clients</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥</div><div class="scale-txt">Modéré — 20 à 55 clients</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥</div><div class="scale-txt">Calme — moins de 20</div></div>
       <div class="scale-row"><div class="scale-ico">💤</div><div class="scale-txt">Très calme — aucun train prévu</div></div>
     </div>
-    <p style="font-size:10px;color:var(--ink3)">Estimation basée sur : horaires SNCF temps réel, capacité du train, taux de remplissage moyen par type, heure de la journée, et proportion de voyageurs prenant un taxi. Ne constitue pas une donnée officielle.</p>
+    <p style="font-size:10px;color:var(--ink3)">Estimation basée sur 5 facteurs : type de train, capacité & remplissage, heure, origine (distance/international), gare d'arrivée, et jour (vendredi/dimanche = rush weekend). Ne constitue pas une donnée officielle.</p>
     <button class="close-info" onclick="closeInfo()">J'ai compris</button>
   </div>
 </div>
@@ -493,81 +493,162 @@ const CAPACITE = {
    Basé sur études SNCF publiques (taux moyen 2023-2024)
 ═══════════════════════════════════════════════ */
 const COEF_TYPE = {
-  TGV:        0.78,  // Réservation obligatoire, taux élevé
+  TGV:        0.78,
   INOUI:      0.80,
-  OUIGO:      0.82,  // Low-cost souvent plein
-  EUROSTAR:   0.85,  // Très rempli
-  THALYS:     0.82,
-  LYRIA:      0.75,
-  ICE:        0.70,
-  INTERCITES: 0.78,  // Brive, Limoges, Bourges — souvent complets
+  OUIGO:      0.82,
+  EUROSTAR:   0.88,  // Eurostar quasi toujours complet
+  THALYS:     0.85,
+  LYRIA:      0.78,
+  ICE:        0.72,
+  INTERCITES: 0.78,
   NIGHTJET:   0.68,
   NIGHT:      0.68,
   TER:        0.55,
-  TRANSILIEN: 0.55,  // Très variable, prudent
+  TRANSILIEN: 0.55,
   DEF:        0.65
 };
 
 /* ═══════════════════════════════════════════════
    COEFFICIENT HORAIRE (arrivées à Paris)
-   Un train qui arrive à 8h est plus rempli qu'un train à 14h
 ═══════════════════════════════════════════════ */
 function coefHeure(h){
-  // h = heure (0-23)
-  if(h >= 0  && h < 5)  return 0.25;  // Nuit profonde
-  if(h >= 5  && h < 7)  return 0.55;  // Premier trains
-  if(h >= 7  && h < 10) return 1.00;  // POINTE MATIN (rush)
+  if(h >= 0  && h < 5)  return 0.25;
+  if(h >= 5  && h < 7)  return 0.55;
+  if(h >= 7  && h < 10) return 1.00;  // POINTE MATIN
   if(h >= 10 && h < 12) return 0.70;
-  if(h >= 12 && h < 14) return 0.80;  // Lunch TGV affaires
+  if(h >= 12 && h < 14) return 0.80;
   if(h >= 14 && h < 17) return 0.75;
-  if(h >= 17 && h < 20) return 0.95;  // POINTE SOIR (rush)
+  if(h >= 17 && h < 20) return 0.95;  // POINTE SOIR
   if(h >= 20 && h < 23) return 0.65;
-  return 0.40;                         // Tard soirée
+  return 0.40;
 }
 
 /* ═══════════════════════════════════════════════
-   COEFFICIENT TAXI — % de voyageurs susceptibles
-   de prendre un taxi/VTC à l'arrivée
-   C'est LA donnée clé pour les chauffeurs
+   COEFFICIENT TAXI — % voyageurs → taxi/VTC
+   Valeurs recalibrées à partir d'études réelles
 ═══════════════════════════════════════════════ */
 const COEF_TAXI = {
-  EUROSTAR:   0.25,  // Internationaux, bagages, ne connaissent pas Paris
-  THALYS:     0.22,  // Business Bruxelles-Amsterdam, premium
-  LYRIA:      0.20,  // Suisse, clientèle affaires
-  ICE:        0.20,  // Allemagne, business
-  INOUI:      0.15,  // Province → Paris, bagages
-  TGV:        0.15,
-  NIGHTJET:   0.18,  // Trains de nuit, fatigués, bagages
-  NIGHT:      0.18,
-  OUIGO:      0.08,  // Low-cost = budget = métro/bus
-  INTERCITES: 0.15,  // Brive, Limoges, Bourges = vrais clients taxi avec bagages
-  TER:        0.03,  // Courte distance, abonnés, pas de taxi
-  TRANSILIEN: 0.01,  // Pass Navigo, zéro taxi
+  EUROSTAR:   0.35,  // Londres/Amsterdam — valises, touristes, zéro Pass Navigo
+  THALYS:     0.32,  // Bruxelles/Amsterdam premium business
+  LYRIA:      0.28,  // Suisse — clientèle aisée affaires
+  ICE:        0.25,  // Allemagne — business/tourisme premium
+  NIGHTJET:   0.24,  // Nuit → fatigués + grosses valises
+  NIGHT:      0.24,
+  INOUI:      0.17,  // TGV Inoui (ajusté ensuite par origine)
+  TGV:        0.17,
+  INTERCITES: 0.18,  // Brive/Limoges/Bourges — clientèle taxi typique
+  OUIGO:      0.06,  // Low-cost → budget serré, métro/bus
+  TER:        0.03,
+  TRANSILIEN: 0.01,
   DEF:        0.10
 };
 
 /* ═══════════════════════════════════════════════
-   CALCUL : CLIENTS TAXI POTENTIELS par train
-   Formule : capacité × remplissage × heure × coef_taxi
+   COEFFICIENT ORIGINE — influence distance/type voyage
+   Plus c'est loin/étranger, plus y a de bagages = plus de taxi
 ═══════════════════════════════════════════════ */
-function estimerPax(type, heureArrivee){
-  const cap   = CAPACITE[type]  || CAPACITE.DEF;
-  const cTyp  = COEF_TYPE[type] || COEF_TYPE.DEF;
-  const cHr   = coefHeure(heureArrivee);
-  const cTaxi = COEF_TAXI[type] || COEF_TAXI.DEF;
-  return Math.round(cap * cTyp * cHr * cTaxi);
+function coefOrigine(origine){
+  const o = (origine || '').toUpperCase();
+
+  // INTERNATIONAL = forte demande taxi (+35%)
+  if(o.includes('LONDON') || o.includes('LONDRES') || o.includes('PANCRAS') ||
+     o.includes('BRUXELLES') || o.includes('BRUSSELS') || o.includes('AMSTERDAM') ||
+     o.includes('ROTTERDAM') || o.includes('ANVERS') || o.includes('ANTWERP') ||
+     o.includes('COLOGNE') || o.includes('KÖLN') || o.includes('FRANCFORT') || o.includes('FRANKFURT') ||
+     o.includes('GENÈVE') || o.includes('GENEVA') || o.includes('LAUSANNE') ||
+     o.includes('ZURICH') || o.includes('BÂLE') || o.includes('BASEL') || o.includes('BERN') ||
+     o.includes('MILAN') || o.includes('TURIN') || o.includes('BARCELONE') || o.includes('MADRID') ||
+     o.includes('LUXEMBOURG')) return 1.35;
+
+  // LONGUE DISTANCE FRANCE = +25% (grosses valises, vacances)
+  if(o.includes('MARSEILLE') || o.includes('NICE') || o.includes('CANNES') ||
+     o.includes('MONTPELLIER') || o.includes('PERPIGNAN') || o.includes('TOULON') ||
+     o.includes('TOULOUSE') || o.includes('BORDEAUX') || o.includes('BIARRITZ') ||
+     o.includes('BAYONNE') || o.includes('HENDAYE') || o.includes('PAU') ||
+     o.includes('BREST') || o.includes('QUIMPER') || o.includes('LORIENT') ||
+     o.includes('AIX') || o.includes('AVIGNON') || o.includes('NIMES') || o.includes('NÎMES') ||
+     o.includes('CLERMONT') || o.includes('BRIVE') || o.includes('LIMOGES') ||
+     o.includes('LOURDES') || o.includes('TARBES')) return 1.25;
+
+  // MOYENNE DISTANCE = neutre
+  if(o.includes('RENNES') || o.includes('STRASBOURG') || o.includes('LYON') ||
+     o.includes('DIJON') || o.includes('NANTES') || o.includes('ANGERS') ||
+     o.includes('LE MANS') || o.includes('POITIERS') || o.includes('LA ROCHELLE') ||
+     o.includes('SAINT-ÉTIENNE') || o.includes('METZ') || o.includes('MULHOUSE') ||
+     o.includes('BESANÇON')) return 1.0;
+
+  // COURTE DISTANCE = -25% (business, abonnés, peu de bagages)
+  if(o.includes('LILLE') || o.includes('ARRAS') || o.includes('AMIENS') ||
+     o.includes('DUNKERQUE') || o.includes('CALAIS') || o.includes('VALENCIENNES') ||
+     o.includes('ROUEN') || o.includes('LE HAVRE') || o.includes('CAEN') ||
+     o.includes('REIMS') || o.includes('NANCY') ||
+     o.includes('ORLÉANS') || o.includes('TOURS') || o.includes('BOURGES') ||
+     o.includes('CHARTRES') || o.includes('DREUX') || o.includes('EVREUX') ||
+     o.includes('COMPIEGNE') || o.includes('CREIL') || o.includes('BEAUVAIS')) return 0.75;
+
+  return 1.0;  // Origine inconnue → neutre
 }
 
 /* ═══════════════════════════════════════════════
-   NIVEAU DE FLAMMES (clients taxi potentiels en 20 min)
-   Seuils calibrés sur le nombre de CLIENTS TAXI, pas le total voyageurs
+   COEFFICIENT GARE — contexte local de la gare
+   Basé sur la densité transport, typologie voyageurs
+═══════════════════════════════════════════════ */
+const COEF_GARE = {
+  nord:         1.20,  // International, Eurostar, quartier moyennement desservi
+  lyon:         1.15,  // Centre, touristes, grandes lignes Sud
+  montparnasse: 1.10,  // Bretagne/Atlantique, beaucoup de bagages
+  est:          1.00,  // Alsace/Allemagne, mais quartier bien desservi
+  austerlitz:   1.20,  // Peu de métro direct vers 8e/16e
+  bercy:        1.25   // Quartier isolé, métro limité pour centre
+};
+
+/* ═══════════════════════════════════════════════
+   COEFFICIENT JOUR DE SEMAINE
+   Vendredi/dimanche soir = rush retour weekend
+═══════════════════════════════════════════════ */
+function coefJour(date, heure){
+  const jour = date.getDay(); // 0=dim, 1=lun, ..., 6=sam
+  // Vendredi 17-21h = départ weekend/tourisme
+  if(jour === 5 && heure >= 17 && heure <= 21) return 1.25;
+  // Dimanche 17-22h = retour weekend massif
+  if(jour === 0 && heure >= 17 && heure <= 22) return 1.30;
+  // Lundi matin 6-10h = rush business
+  if(jour === 1 && heure >= 6  && heure <= 10) return 1.15;
+  // Samedi après-midi = loisir, moins de taxi
+  if(jour === 6 && heure >= 13 && heure <= 17) return 0.90;
+  return 1.0;
+}
+
+/* ═══════════════════════════════════════════════
+   CALCUL PRINCIPAL : CLIENTS TAXI POTENTIELS
+   Formule : voyageurs × taux_taxi (avec safety cap)
+═══════════════════════════════════════════════ */
+function estimerPax(type, heureArrivee, origine, gareId, date){
+  const cap        = CAPACITE[type]  || CAPACITE.DEF;
+  // Remplissage réel (capé à 95% — un train n'est jamais 100% plein)
+  const remplissage = Math.min(0.95, (COEF_TYPE[type] || COEF_TYPE.DEF) * coefHeure(heureArrivee));
+  const voyageurs  = cap * remplissage;
+
+  // Taux taxi : base × ajustements (capé à 42% — jamais plus de 42% d'un train ne prend un taxi)
+  const cTaxi = COEF_TAXI[type] || COEF_TAXI.DEF;
+  const cOrig = coefOrigine(origine);
+  const cGare = COEF_GARE[gareId] || 1.0;
+  const cJour = coefJour(date || new Date(), heureArrivee);
+  const tauxTaxi = Math.min(0.42, cTaxi * cOrig * cGare * cJour);
+
+  return Math.round(voyageurs * tauxTaxi);
+}
+
+/* ═══════════════════════════════════════════════
+   NIVEAU DE FLAMMES (clients taxi potentiels)
+   Seuils recalibrés — mieux étalés pour différencier
 ═══════════════════════════════════════════════ */
 function niveauFlammes(totalPax){
-  if(totalPax === 0)     return { lvl:0, ico:'💤',        txt:'très calme'  };
-  if(totalPax < 25)      return { lvl:1, ico:'🔥',         txt:'calme'      };
-  if(totalPax < 70)      return { lvl:2, ico:'🔥🔥',       txt:'modéré'     };
-  if(totalPax < 150)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'       };
-  return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'rush'       };
+  if(totalPax === 0)     return { lvl:0, ico:'💤',        txt:'très calme' };
+  if(totalPax < 20)      return { lvl:1, ico:'🔥',         txt:'calme'     };
+  if(totalPax < 55)      return { lvl:2, ico:'🔥🔥',       txt:'modéré'    };
+  if(totalPax < 120)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'      };
+  return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'rush'      };
 }
 
 /* ═══════════════════════════════════════════════
@@ -738,7 +819,7 @@ async function sncfFetch(path){
 }
 
 /* ═══ PARSE ARRIVÉE ═══ */
-function parseArrival(arr, originsMap){
+function parseArrival(arr, originsMap, gareId){
   const di  = arr.display_informations || {};
   const sdt = arr.stop_date_time || {};
 
@@ -756,22 +837,25 @@ function parseArrival(arr, originsMap){
 
   const type = trainType(di);
   const hArr = navHour(sdt.arrival_date_time || sdt.base_arrival_date_time);
-  const pax  = estimerPax(type, hArr);
+
+  // Détermine l'origine AVANT le calcul pax (utilisé pour ajuster la demande taxi)
+  const origine = (function(){
+    const oLink = (sdt.links||[]).find(l=>l.rel==='origins');
+    if(oLink && originsMap && originsMap[oLink.id]) return originsMap[oLink.id];
+    return di.direction || di.headsign || '—';
+  })();
+
+  const pax = estimerPax(type, hArr, origine, gareId, new Date());
 
   return {
     type,
-    origine: (function(){
-      const oLink = (sdt.links||[]).find(l=>l.rel==='origins');
-      if(oLink && originsMap && originsMap[oLink.id]) return originsMap[oLink.id];
-      return di.direction || di.headsign || '—';
-    })(),
+    origine,
     numero:   di.trip_short_name || di.label || '',
     hBase:    hBase || '??:??',
     hRT:      hRT   || hBase || '??:??',
     hShow,
     passagers: pax,
     retard,
-    // Un train est supprimé seulement si explicitement indiqué ET pas de temps RT
     supprime:  sdt.departure_occupancy === 'canceled' || (!sdt.arrival_date_time && !sdt.base_arrival_date_time),
     live:      sdt.data_freshness === 'realtime',
     min:       minUntil(hShow),
@@ -798,7 +882,7 @@ async function fetchGare(gare){
 
   const originsMap = {};
   (data.origins || []).forEach(o => { originsMap[o.id] = o.name; });
-  return (data.arrivals || []).map(a => parseArrival(a, originsMap)).filter(t => t.type !== 'TRANSILIEN');
+  return (data.arrivals || []).map(a => parseArrival(a, originsMap, gare.id)).filter(t => t.type !== 'TRANSILIEN');
 }
 
 /* ═══ REFRESH ENGINE ═══ */
