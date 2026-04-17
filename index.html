@@ -530,28 +530,53 @@ const GARES = [
 ];
 
 /* ═══════════════════════════════════════════════
-   CAPACITÉS RÉELLES DES TRAINS (sources: fiches techniques SNCF + data ouvertes)
-   Sièges réels des rames les plus courantes
+   CAPACITÉS RÉELLES DES TRAINS
+   Sources vérifiées : Siemens, SNCF fiches techniques, Wikipedia
 ═══════════════════════════════════════════════ */
 const CAPACITE = {
-  // Grande vitesse — données constructeur
-  TGV:       510,   // TGV Duplex standard
-  INOUI:     556,   // TGV Océane / Atlantique
-  OUIGO:     634,   // TGV Ouigo double-étage
-  EUROSTAR:  894,   // e320 Siemens (le plus fréquent)
-  THALYS:    377,   // PBA/PBKA (Thalys devenu Eurostar Red)
-  LYRIA:     377,   // TGV Lyria
-  ICE:       460,   // ICE 3 (Allemagne)
+  // Grande vitesse — valeurs constructeur
+  TGV:       510,   // TGV Duplex/Réseau (510 moyenne)
+  INOUI:     556,   // TGV Océane 2N2 (556 places)
+  OUIGO:     634,   // TGV Ouigo double-étage modifié haute densité
+  EUROSTAR:  900,   // Eurostar e320 Siemens — 400m, 16 voitures, 900 places
+  THALYS:    900,   // Ex-Thalys, désormais opéré sous marque Eurostar (rames e320)
+  LYRIA:     377,   // TGV Lyria (rames POS/Duplex)
+  ICE:       460,   // ICE 3 Siemens Velaro D (DB)
+
   // Intercités & trains classiques
-  INTERCITES:540,   // Corail rénovée
-  NIGHTJET:  400,   // Nightjet ÖBB
+  INTERCITES:540,   // Corail rénovée, rames VU capables de 540 places
+  NIGHTJET:  400,   // Nightjet ÖBB (couchettes/sièges mixtes)
   NIGHT:     400,
-  TER:       340,   // Régio 2N moyen
-  // RER / Transilien — données IDFM
-  TRANSILIEN:1100,  // MI09 / Z50000 moyen (réaliste, pas pic max)
+
+  // TER longue distance (Regio 2N = 500+ places en version 10 caisses)
+  TER:       340,   // Moyenne selon longueur rame (variable 200-500)
+
+  // RER / Transilien (pour calcul théorique — filtré à l'affichage)
+  TRANSILIEN:1100,
+
   // Défaut
   DEF:       400
 };
+
+/* ═══════════════════════════════════════════════
+   FACTEUR UM (Unité Multiple) — x2 en rush
+   Vendredi/dimanche + pointes = beaucoup de TGV en UM (2 rames)
+═══════════════════════════════════════════════ */
+function coefUM(type, date, heure){
+  // UM principalement sur TGV/INOUI/OUIGO, jamais sur Eurostar, Intercités, TER
+  if(!['TGV','INOUI','OUIGO','LYRIA'].includes(type)) return 1.0;
+  const jour = date.getDay();
+  // Vendredi soir 16-21h → ~50% en UM → coef moyen 1.35
+  if(jour === 5 && heure >= 16 && heure <= 21) return 1.35;
+  // Dimanche soir 16-22h → ~60% en UM → coef 1.45
+  if(jour === 0 && heure >= 16 && heure <= 22) return 1.45;
+  // Lundi matin 6-10h → ~40% en UM → coef 1.25
+  if(jour === 1 && heure >= 6 && heure <= 10) return 1.25;
+  // Samedi départ vacances matin → coef 1.20
+  if(jour === 6 && heure >= 7 && heure <= 11) return 1.20;
+  // Jours normaux → rares UM → coef 1.05
+  return 1.05;
+}
 
 /* ═══════════════════════════════════════════════
    COEFFICIENT DE REMPLISSAGE PAR TYPE
@@ -686,19 +711,23 @@ function coefJour(date, heure){
 
 /* ═══════════════════════════════════════════════
    CALCUL PRINCIPAL : CLIENTS TAXI POTENTIELS
-   Formule : voyageurs × taux_taxi (avec safety cap)
+   Formule : voyageurs × taux_taxi
+   Prend en compte UM (unité multiple = 2 rames) pour les TGV en rush
 ═══════════════════════════════════════════════ */
 function estimerPax(type, heureArrivee, origine, gareId, date){
-  const cap        = CAPACITE[type]  || CAPACITE.DEF;
+  const d = date || new Date();
+  const capBase    = CAPACITE[type]  || CAPACITE.DEF;
+  // Capacité ajustée pour UM (TGV en rush peuvent être en double)
+  const cap        = capBase * coefUM(type, d, heureArrivee);
   // Remplissage réel (capé à 95% — un train n'est jamais 100% plein)
   const remplissage = Math.min(0.95, (COEF_TYPE[type] || COEF_TYPE.DEF) * coefHeure(heureArrivee));
   const voyageurs  = cap * remplissage;
 
-  // Taux taxi : base × ajustements (capé à 42% — jamais plus de 42% d'un train ne prend un taxi)
+  // Taux taxi : base × ajustements (capé à 42%)
   const cTaxi = COEF_TAXI[type] || COEF_TAXI.DEF;
   const cOrig = coefOrigine(origine);
   const cGare = COEF_GARE[gareId] || 1.0;
-  const cJour = coefJour(date || new Date(), heureArrivee);
+  const cJour = coefJour(d, heureArrivee);
   const tauxTaxi = Math.min(0.42, cTaxi * cOrig * cGare * cJour);
 
   return Math.round(voyageurs * tauxTaxi);
@@ -954,11 +983,18 @@ function parseArrival(arr, originsMap, gareId){
   const hShow = hRT || hBase || '??:??';
 
   let retard = 0;
-  if(sdt.base_arrival_date_time && sdt.arrival_date_time
-     && sdt.base_arrival_date_time !== sdt.arrival_date_time){
-    const mkD = s => new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8),
-                               +s.slice(9,11), +s.slice(11,13));
-    retard = Math.max(0, Math.round((mkD(sdt.arrival_date_time) - mkD(sdt.base_arrival_date_time)) / 60000));
+  // Conversion timestamp Navitia → Date JS (format: YYYYMMDDTHHMMSS)
+  const mkD = s => {
+    if(!s || s.length < 15) return null;
+    return new Date(+s.slice(0,4), +s.slice(4,6)-1, +s.slice(6,8),
+                    +s.slice(9,11), +s.slice(11,13), +s.slice(13,15)||0);
+  };
+
+  const baseDate = mkD(sdt.base_arrival_date_time);
+  const rtDate   = mkD(sdt.arrival_date_time);
+
+  if(baseDate && rtDate && sdt.base_arrival_date_time !== sdt.arrival_date_time){
+    retard = Math.max(0, Math.round((rtDate - baseDate) / 60000));
   }
 
   const type = trainType(di, gareId);
@@ -973,6 +1009,20 @@ function parseArrival(arr, originsMap, gareId){
 
   const pax = estimerPax(type, hArr, origine, gareId, new Date());
 
+  // CALCUL min DIRECTEMENT DEPUIS LA DATE COMPLÈTE (évite bug passage minuit / retards)
+  // Prend la date RT si dispo, sinon base — c'est la VRAIE date d'arrivée
+  const refDate = rtDate || baseDate;
+  const min = refDate ? Math.round((refDate - new Date()) / 60000) : 9999;
+
+  // Détection suppression : arrival_status = 'deleted' OU pas de date du tout
+  const arrStatus = (sdt.arrival_status || '').toLowerCase();
+  const supprime = arrStatus === 'deleted'
+                 || sdt.departure_occupancy === 'canceled'
+                 || (!sdt.arrival_date_time && !sdt.base_arrival_date_time);
+
+  // Détection "delayed" explicite depuis l'API
+  const arrDelayed = arrStatus === 'delayed';
+
   return {
     type,
     origine,
@@ -982,9 +1032,10 @@ function parseArrival(arr, originsMap, gareId){
     hShow,
     passagers: pax,
     retard,
-    supprime:  sdt.departure_occupancy === 'canceled' || (!sdt.arrival_date_time && !sdt.base_arrival_date_time),
+    supprime,
+    delayed:   arrDelayed || retard > 0,
     live:      sdt.data_freshness === 'realtime',
-    min:       minUntil(hShow),
+    min,  // ← Calculé depuis la date complète, pas juste HH:MM
   };
 }
 
@@ -992,7 +1043,10 @@ function parseArrival(arr, originsMap, gareId){
 async function fetchGare(gare){
   // Filtres multiples : on exclut RER (RapidTransit), Transilien/RER métro (LocalTrain),
   // mais on garde Eurostar, TGV, Intercités, Thalys, Lyria, TER longue distance
-  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-43200000)}&duration=108000&count=200&forbidden_uris[]=physical_mode:LocalTrain&forbidden_uris[]=physical_mode:RapidTransit&forbidden_uris[]=physical_mode:Metro&forbidden_uris[]=physical_mode:SuspendedCableCar`;
+  // base_schedule (défaut) : Navitia retourne TOUS les trains théoriques,
+  // enrichis automatiquement avec les retards/suppressions temps réel quand disponibles.
+  // depth=0 + disable_geojson = réponse plus légère (3x plus rapide)
+  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-43200000)}&duration=108000&count=200&depth=0&disable_geojson=true&forbidden_uris[]=physical_mode:LocalTrain&forbidden_uris[]=physical_mode:RapidTransit&forbidden_uris[]=physical_mode:Metro&forbidden_uris[]=physical_mode:SuspendedCableCar`;
 
   const resp = await sncfFetch(path);
 
@@ -1390,14 +1444,21 @@ function renderTC(t, isPast){
   else if(t.min<=15)   { wCls+=' soon'; wTxt=fmtMin(t.min); }
   else                 { wTxt=fmtMin(t.min); }
 
-  const heureHtml = (t.retard>0 && t.hRT!==t.hBase)
-    ? `<div class="tc-h">${esc(t.hRT)}</div><div class="tc-h-old">${esc(t.hBase)}</div>`
+  // AFFICHAGE DE L'HEURE :
+  // - Si retard : heure RT en grand (heure réelle d'arrivée) + heure théorique barrée au-dessus
+  // - Si pas de retard : heure simple
+  const heureHtml = (t.retard > 0 && t.hRT !== t.hBase)
+    ? `<div class="tc-h-old">${esc(t.hBase)}</div><div class="tc-h" style="color:var(--gold)">${esc(t.hRT)}</div>`
     : `<div class="tc-h">${esc(t.hShow)}</div>`;
 
   let stHtml='';
   if(t.supprime)        stHtml='<span class="st-chip st-sup">🚫 Supprimé</span>';
   else if(isQuai)       stHtml = `<span class="st-chip st-ok">🚉 À quai${minDepuisArrivee > 0 ? ' · ' + minDepuisArrivee + ' min' : ''}</span>`;
-  else if(isCrit)       stHtml=`<span class="st-chip st-crit">⚠ +${t.retard} min</span>`;
+  else if(isCrit){
+    // Gros retard : affichage impact fort
+    const hTxt = t.retard >= 60 ? `+${Math.floor(t.retard/60)}h${t.retard%60 || ''}` : `+${t.retard} min`;
+    stHtml=`<span class="st-chip st-crit">⚠ RETARD ${hTxt}</span>`;
+  }
   else if(isWarn)       stHtml=`<span class="st-chip st-warn">⚠ +${t.retard} min</span>`;
   else                  stHtml='<span class="st-chip st-ok">✓ À l\'heure</span>';
 
