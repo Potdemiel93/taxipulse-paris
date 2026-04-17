@@ -716,15 +716,20 @@ async function timedFetch(url, ms=12000){
 async function sncfFetch(path){
   const target  = 'https://api.sncf.com/v1/coverage/sncf' + path;
   const proxied = PROXY + encodeURIComponent(target);
-
-  let resp;
-  try {
-    resp = await timedFetch(proxied, 12000);
-  } catch(e){
-    if(e.name === 'AbortError') throw new Error('Timeout — serveur SNCF lent');
-    throw new Error('Connexion impossible : ' + e.message);
+  let lastErr;
+  for(let attempt=1; attempt<=3; attempt++){
+    try {
+      const resp = await timedFetch(proxied, 15000);
+      if(resp.ok || resp.status===404) return resp;
+      if(attempt<3){ await new Promise(r=>setTimeout(r,1000*attempt)); continue; }
+      return resp;
+    } catch(e){
+      lastErr = e;
+      if(attempt<3) await new Promise(r=>setTimeout(r,1000*attempt));
+    }
   }
-  return resp;
+  if(lastErr && lastErr.name==='AbortError') throw new Error('Timeout apres 3 tentatives');
+  throw new Error('Connexion impossible apres 3 tentatives');
 }
 
 /* ═══ PARSE ARRIVÉE ═══ */
@@ -974,7 +979,7 @@ function renderGares(){
     }
 
     const trains   = c.trains || [];
-    const upcoming = trains.filter(t => t.min > 0 && !t.supprime);
+    const upcoming = trains.filter(t => t.min > 0 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
     const next20   = upcoming.filter(t => t.min <= 20);
     const totalPax = next20.reduce((s,t)=>s+t.passagers, 0);
     const flames   = niveauFlammes(totalPax);
@@ -1042,7 +1047,7 @@ function openDialog(gareId){
       `<div class="empty" style="margin-top:12px"><span class="ei">⚠</span>${esc(c&&c.error?c.error:'Aucune donnée')}</div>`;
   } else {
     const trains   = [...(c.trains||[])].sort((a,b)=>a.hShow.localeCompare(b.hShow));
-    const upcoming = trains.filter(t=>t.min>0 && !t.supprime);
+    const upcoming = trains.filter(t=>t.min>0 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
     // Trains passés non affichés
     const next20   = upcoming.filter(t=>t.min<=20);
     const totalPax = next20.reduce((s,t)=>s+t.passagers,0);
