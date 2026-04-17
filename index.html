@@ -521,12 +521,12 @@ const PROXY = 'https://taxipulse-proxy.boughida-sofiane.workers.dev/?url=';
    GARES
 ═══════════════════════════════════════════════ */
 const GARES = [
-  { id:'nord',         nom:'Gare du Nord',       sub:'Eurostar · Thalys · TGV',      ico:'🇬🇧', metro:'M4/5 · RER B/D/E', sid:'stop_area:SNCF:87271007' },
-  { id:'lyon',         nom:'Gare de Lyon',        sub:'TGV Sud-Est · Méditerranée',   ico:'🗼', metro:'M1/14 · RER A/D',  sid:'stop_area:SNCF:87686006' },
-  { id:'montparnasse', nom:'Montparnasse',         sub:'TGV Atlantique · Bretagne',    ico:'🌊', metro:'M4/6/12/13',       sid:'stop_area:SNCF:87391003' },
-  { id:'est',          nom:"Gare de l'Est",        sub:'TGV Est · Allemagne · ICE',    ico:'🍺', metro:'M4/5/7 · RER E',   sid:'stop_area:SNCF:87113001' },
-  { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités · Trains de nuit',  ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:SNCF:87547000' },
-  { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités · Grandes lignes',  ico:'🎪', metro:'M6/14',            sid:'stop_area:SNCF:87686667' },
+  { id:'nord',         nom:'Gare du Nord',       sub:'Eurostar · TGV INOUI · TER HDF',      ico:'🇬🇧', metro:'M4/5 · RER B/D/E', sid:'stop_area:SNCF:87271007' },
+  { id:'lyon',         nom:'Gare de Lyon',        sub:'TGV Sud-Est · Lyria · TER',   ico:'🗼', metro:'M1/14 · RER A/D',  sid:'stop_area:SNCF:87686006' },
+  { id:'montparnasse', nom:'Montparnasse',         sub:'TGV Atlantique · Bretagne · TER',    ico:'🌊', metro:'M4/6/12/13',       sid:'stop_area:SNCF:87391003' },
+  { id:'est',          nom:"Gare de l'Est",        sub:'TGV Est · ICE Allemagne · Nightjet',    ico:'🍺', metro:'M4/5/7 · RER E',   sid:'stop_area:SNCF:87113001' },
+  { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités Limoges/Toulouse · Nightjet',  ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:SNCF:87547000' },
+  { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités Clermont-Fd · OUIGO',  ico:'🎪', metro:'M6/14',            sid:'stop_area:SNCF:87686667' },
 ];
 
 /* ═══════════════════════════════════════════════
@@ -832,24 +832,81 @@ function navHour(s){
   return parseInt(s.slice(9,11), 10);
 }
 
-function trainType(di){
-  const s = ((di.headsign||'') + ' ' + (di.physical_mode||'') + ' ' + (di.commercial_mode||'') + ' ' + (di.network||'') + ' ' + (di.trip_short_name||'') + ' ' + (di.label||'')).toUpperCase();
+/* ═══════════════════════════════════════════════
+   VÉRITÉ TERRAIN : quels trains circulent dans chaque gare
+   Source : SNCF Gares & Connexions + Wikipedia + sites officiels
+═══════════════════════════════════════════════ */
+const TYPES_AUTORISES = {
+  // Gare du Nord : Eurostar, TGV INOUI, OUIGO, TER HDF — JAMAIS d'Intercités
+  nord:         ['EUROSTAR','INOUI','TGV','OUIGO','TER'],
+  // Gare de Lyon : TGV Sud-Est, OUIGO, Lyria (Suisse), TER — PAS d'Intercités
+  lyon:         ['INOUI','TGV','OUIGO','LYRIA','TER'],
+  // Montparnasse : TGV Atlantique, OUIGO, TER — PAS d'Intercités
+  montparnasse: ['INOUI','TGV','OUIGO','TER'],
+  // Gare de l'Est : TGV Est, OUIGO, ICE/DB (Allemagne), Nightjet (Berlin/Vienne), TER — PAS d'Intercités
+  est:          ['INOUI','TGV','OUIGO','ICE','NIGHTJET','NIGHT','TER'],
+  // Austerlitz : Intercités Limoges/Toulouse, OUIGO classique, Nightjet France, TER
+  austerlitz:   ['INTERCITES','OUIGO','NIGHTJET','NIGHT','TER'],
+  // Bercy : Intercités Clermont, OUIGO classique, TER Bourgogne
+  bercy:        ['INTERCITES','OUIGO','TER']
+};
 
-  // Eurostar en premier (priorité absolue — ex-Thalys inclus dedans maintenant)
-  if(s.includes('EUROSTAR'))                 return 'EUROSTAR';
-  if(s.includes('THALYS'))                   return 'THALYS';
-  if(s.includes('OUIGO'))                    return 'OUIGO';
-  if(s.includes('LYRIA'))                    return 'LYRIA';
-  if(s.includes('ICE')||s.includes('RAILJET')||s.includes('NIGHTJET'))
-    return s.includes('NIGHTJET')?'NIGHTJET':'ICE';
-  if(s.includes('INOUI')||s.includes('INOUÏ')) return 'INOUI';
-  if(s.includes('TGV'))                      return 'TGV';
-  if(s.includes('INTERCIT'))                 return 'INTERCITES';
-  // TER Hauts-de-France, Normandie, Centre = TER (pas Intercités)
-  if(s.includes('TER'))                      return 'TER';
-  if(s.includes('NIGHT'))                    return 'NIGHT';
-  if(s.includes('TRANSILIEN')||s.includes('RER')||s.includes('RAPID'))  return 'TRANSILIEN';
-  return 'DEF';
+function trainType(di, gareId){
+  const s = ((di.headsign||'') + ' ' + (di.physical_mode||'') + ' ' + (di.commercial_mode||'') + ' ' + (di.network||'') + ' ' + (di.trip_short_name||'') + ' ' + (di.label||'') + ' ' + (di.direction||'')).toUpperCase();
+
+  let detecte = 'DEF';
+
+  // Détection explicite par nom de marque
+  if(s.includes('EUROSTAR'))                 detecte = 'EUROSTAR';
+  else if(s.includes('THALYS'))              detecte = 'EUROSTAR'; // Thalys devenu Eurostar en 2024
+  else if(s.includes('LYRIA'))               detecte = 'LYRIA';
+  else if(s.includes('NIGHTJET')||s.includes('NIGHT JET')) detecte = 'NIGHTJET';
+  else if(s.includes('DB SNCF')||s.includes('ICE')||s.includes('RAILJET')) detecte = 'ICE';
+  else if(s.includes('OUIGO'))               detecte = 'OUIGO';
+  else if(s.includes('INOUI')||s.includes('INOUÏ')) detecte = 'INOUI';
+  else if(s.includes('INTERCIT'))            detecte = 'INTERCITES';
+  else if(s.includes('TER'))                 detecte = 'TER';
+  else if(s.includes('TGV'))                 detecte = 'TGV';
+  else if(s.includes('NIGHT'))               detecte = 'NIGHT';
+  else if(s.includes('TRANSILIEN')||s.includes('RER')||s.includes('RAPID'))  detecte = 'TRANSILIEN';
+
+  // FALLBACK par destination : si la detection a raté, on regarde d'où vient le train
+  if(detecte === 'DEF' || (gareId === 'nord' && detecte === 'TGV')){
+    // Eurostar : Londres, Bruxelles, Amsterdam, Rotterdam, Cologne
+    if(s.includes('LONDON')||s.includes('LONDRES')||s.includes('PANCRAS')||
+       s.includes('BRUXELLES')||s.includes('BRUSSELS')||s.includes('MIDI')&&gareId==='nord'||
+       s.includes('AMSTERDAM')||s.includes('ROTTERDAM')||s.includes('ANVERS')||s.includes('ANTWERP')){
+      detecte = 'EUROSTAR';
+    }
+    // ICE/DB : Francfort, Cologne, Munich, Stuttgart (via Gare de l'Est)
+    else if(gareId === 'est' && (s.includes('FRANCFORT')||s.includes('FRANKFURT')||
+            s.includes('STUTTGART')||s.includes('MUNICH')||s.includes('KARLSRUHE')||
+            s.includes('MANNHEIM')||s.includes('SAARBRUCK')||s.includes('SARREBRUCK'))){
+      detecte = 'ICE';
+    }
+    // Nightjet Berlin/Vienne depuis Gare de l'Est
+    else if(gareId === 'est' && (s.includes('BERLIN')||s.includes('VIENNE')||s.includes('WIEN'))){
+      detecte = 'NIGHTJET';
+    }
+  }
+
+  // CORRECTION : si le type détecté n'est pas autorisé dans cette gare, on corrige
+  if(gareId && TYPES_AUTORISES[gareId]){
+    const autorises = TYPES_AUTORISES[gareId];
+    if(!autorises.includes(detecte)){
+      // INTERCITES détecté dans Nord/Lyon/Est/Montparnasse → en fait TER ou TGV
+      if(detecte === 'INTERCITES'){
+        if(gareId === 'nord' && (s.includes('LILLE')||s.includes('DUNKERQUE')||s.includes('VALENCIENNES'))) {
+          detecte = 'INOUI';
+        } else {
+          detecte = 'TER';
+        }
+      }
+      else if(detecte === 'DEF') detecte = 'TER';
+    }
+  }
+
+  return detecte;
 }
 
 /* ═══════════════════════════════════════════════
@@ -904,7 +961,7 @@ function parseArrival(arr, originsMap, gareId){
     retard = Math.max(0, Math.round((mkD(sdt.arrival_date_time) - mkD(sdt.base_arrival_date_time)) / 60000));
   }
 
-  const type = trainType(di);
+  const type = trainType(di, gareId);
   const hArr = navHour(sdt.arrival_date_time || sdt.base_arrival_date_time);
 
   // Détermine l'origine AVANT le calcul pax (utilisé pour ajuster la demande taxi)
