@@ -308,6 +308,7 @@ dialog .sheet{
 .tc-num{font-family:var(--mono);font-size:10px;color:var(--ink3);font-weight:500}
 .tc-rt{font-size:9px;font-weight:700}
 .tc-rt.live{color:var(--green)}.tc-rt.base{color:var(--ink3)}
+.tc-rt.est{color:#facc15;font-weight:800}
 .tc-cd{text-align:right;flex-shrink:0}
 .tc-h{font-family:var(--mono);font-size:16px;font-weight:800;
   letter-spacing:-.5px;color:var(--ink);line-height:1.1}
@@ -1113,6 +1114,192 @@ function parseArrival(arr, originsMap, gareId){
   };
 }
 
+/* ═══════════════════════════════════════════════
+   SCRAPING EUROSTAR EN TEMPS RÉEL
+   Récupère les statuts (retardé, annulé) depuis eurostar.com
+   via le proxy Cloudflare — mis à jour à chaque refresh
+═══════════════════════════════════════════════ */
+// Map des statuts Eurostar (rempli à chaque scrape)
+// Clé = numéro de train (ex "ES9302"), Valeur = { status:'delayed'|'cancelled'|'ok', newTime?, origine }
+let EUROSTAR_STATUS = {};
+
+async function scrapeEurostarStatus(){
+  const urls = [
+    { src: 'Londres St Pancras',  url: 'https://www.eurostar.com/fr-fr/voyage/horaires/7015400/8727100/londres-st-pancras-intl/paris-gare-du-nord' },
+    { src: 'Bruxelles-Midi',      url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8814001/8727100/bruxelles-midi/paris-gare-du-nord' },
+    { src: 'Amsterdam Centraal',  url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8400058/8727100/amsterdam-centraal/paris-gare-du-nord' }
+  ];
+
+  const newStatus = {};
+
+  for(const { src, url } of urls){
+    try {
+      const proxied = PROXY + encodeURIComponent(url);
+      const resp = await timedFetch(proxied, 10000);
+      if(!resp.ok) continue;
+      const html = await resp.text();
+
+      // Extraction regex : chaque bloc contient "ES 9302" ou "ER 9404" + optionnellement "Retardé" / "Train annulé"
+      // Pattern : "Numéro du train: ES 9302" suivi parfois de " - Retardé" ou " - Train annulé"
+      // Puis plus bas l'heure d'arrivée ajustée "Env. HH:MM"
+      const regex = /Numéro du train:\s*(ES|ER)\s*(\d{4})(\s*-\s*(Retardé|Train annulé))?/gi;
+      let match;
+      while((match = regex.exec(html)) !== null){
+        const prefix = match[1].toUpperCase();
+        const num = prefix + match[2];
+        const statusTxt = (match[4] || '').toLowerCase();
+
+        let status = 'ok';
+        if(statusTxt.includes('annulé') || statusTxt.includes('annule')) status = 'cancelled';
+        else if(statusTxt.includes('retard')) status = 'delayed';
+
+        // Chercher "Env. HH:MM" dans les 500 caractères qui suivent pour extraire heure réelle
+        let newTime = null;
+        if(status === 'delayed'){
+          const afterMatch = html.substring(match.index, match.index + 800);
+          // Prend la DERNIÈRE occurrence de "Env. HH:MM" (celle qui correspond à Paris)
+          const envMatches = [...afterMatch.matchAll(/Env\.\s*(\d{2}):(\d{2})/g)];
+          if(envMatches.length > 0){
+            const last = envMatches[envMatches.length - 1];
+            newTime = last[1] + ':' + last[2];
+          }
+        }
+
+        newStatus[num] = { status, newTime, origine: src };
+      }
+    } catch(e){
+      // Erreur silencieuse — on garde les anciens statuts
+    }
+  }
+
+  // Ne remplace que si on a récupéré des données
+  if(Object.keys(newStatus).length > 0){
+    EUROSTAR_STATUS = newStatus;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   HORAIRES EUROSTAR OFFICIELS — Gare du Nord
+   Source : eurostar.com horaires officiels (avril 2026)
+   Les Eurostar ne sont PAS dans l'API Navitia SNCF,
+   on injecte leurs horaires réguliers manuellement.
+═══════════════════════════════════════════════ */
+const EUROSTAR_SCHEDULE = {
+  // St Pancras (Londres) → Paris Gare du Nord
+  london: [
+    { h:'09:34', num:'ES9080' }, { h:'10:27', num:'ES9004' }, { h:'11:00', num:'ES9006' },
+    { h:'11:34', num:'ES9008' }, { h:'12:55', num:'ES9014' }, { h:'13:56', num:'ES9018' },
+    { h:'14:53', num:'ES9022' }, { h:'15:34', num:'ES9060' }, { h:'16:01', num:'ES9024' },
+    { h:'16:56', num:'ES9028' }, { h:'17:57', num:'ES9032' }, { h:'19:02', num:'ES9036' },
+    { h:'19:30', num:'ES9038' }, { h:'20:00', num:'ES9040' }, { h:'21:00', num:'ES9044' },
+    { h:'21:24', num:'ES9046' }, { h:'22:26', num:'ES9050' }, { h:'23:24', num:'ES9054' }
+  ],
+  // Bruxelles-Midi → Paris Gare du Nord
+  bruxelles: [
+    { h:'08:13', num:'ES9302' }, { h:'08:36', num:'ER9404' }, { h:'08:36', num:'ES9304' },
+    { h:'09:45', num:'ES9410' }, { h:'09:45', num:'ES9310' }, { h:'10:12', num:'ER9414' },
+    { h:'11:09', num:'ES9320' }, { h:'11:09', num:'ES9420' }, { h:'11:43', num:'ER9322' },
+    { h:'12:10', num:'ES9326' }, { h:'12:10', num:'ER9426' }, { h:'12:40', num:'ES9328' },
+    { h:'14:10', num:'ES9338' }, { h:'14:10', num:'ER9438' }, { h:'14:43', num:'ES9340' },
+    { h:'16:10', num:'ER9450' }, { h:'16:10', num:'ES9350' }, { h:'16:48', num:'ES9352' },
+    { h:'16:48', num:'ES9452' }, { h:'17:10', num:'ES9356' }, { h:'18:12', num:'ES9362' },
+    { h:'18:12', num:'ES9462' }, { h:'18:46', num:'ES9364' }, { h:'18:46', num:'ES9464' },
+    { h:'19:13', num:'ES9368' }, { h:'19:45', num:'ES9470' }, { h:'19:45', num:'ES9370' },
+    { h:'20:12', num:'ER9474' }, { h:'20:12', num:'ES9374' }, { h:'20:45', num:'ES9376' },
+    { h:'20:45', num:'ES9476' }, { h:'21:14', num:'ES9380' }, { h:'21:44', num:'ES9382' },
+    { h:'22:15', num:'ER9486' }, { h:'22:42', num:'ES9388' }
+  ],
+  // Amsterdam-Centraal → Paris Gare du Nord (via Bruxelles-Midi)
+  amsterdam: [
+    { h:'09:45', num:'ES9310' }, { h:'10:38', num:'ES9316' }, { h:'11:43', num:'ER9322' },
+    { h:'12:40', num:'ES9428' }, { h:'12:40', num:'ES9328' }, { h:'14:43', num:'ES9340' },
+    { h:'16:48', num:'ES9352' }, { h:'16:48', num:'ES9452' }, { h:'18:46', num:'ES9364' },
+    { h:'19:45', num:'ES9370' }, { h:'20:45', num:'ES9376' }, { h:'21:44', num:'ES9382' },
+    { h:'22:42', num:'ES9388' }
+  ]
+};
+
+/* Génère les trains Eurostar "virtuels" au format parseArrival */
+function buildEurostarTrains(){
+  const trains = [];
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const addTrains = (schedule, origine) => {
+    for(const entry of schedule){
+      const [h, m] = entry.h.split(':').map(Number);
+      let arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
+
+      // ═══ Applique le statut live si disponible ═══
+      const live = EUROSTAR_STATUS[entry.num];
+      let retard = 0;
+      let supprime = false;
+      let hRT = entry.h;
+      let hShow = entry.h;
+      let isDelayed = false;
+      let isLive = false;
+
+      if(live){
+        isLive = true;
+        if(live.status === 'cancelled'){
+          supprime = true;
+        } else if(live.status === 'delayed'){
+          isDelayed = true;
+          if(live.newTime){
+            // Nouvelle heure précise trouvée → recalcul retard
+            const [nh, nm] = live.newTime.split(':').map(Number);
+            const newArrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), nh, nm, 0);
+            retard = Math.max(0, Math.round((newArrDate - arrDate) / 60000));
+            arrDate = newArrDate;
+            hRT = live.newTime;
+            hShow = live.newTime;
+          } else {
+            // Marqué retardé mais sans heure précise → on estime +15 min
+            retard = 15;
+            const newArr = new Date(arrDate.getTime() + 15*60*1000);
+            arrDate = newArr;
+            hRT = pad(newArr.getHours()) + ':' + pad(newArr.getMinutes());
+            hShow = hRT;
+          }
+        }
+      }
+
+      const minDiff = Math.round((arrDate - now) / 60000);
+      // Trains dans la fenêtre [-15 min ; +24h]
+      if(minDiff < -15 || minDiff > 24*60) continue;
+
+      // Ne double pas les doublons
+      const dup = trains.find(t => t.hBase === entry.h && t.origine === origine && t.numero === entry.num);
+      if(dup) continue;
+
+      const hArr = arrDate.getHours();
+      const pax = estimerPax('EUROSTAR', hArr, origine, 'nord', now);
+
+      trains.push({
+        type: 'EUROSTAR',
+        origine,
+        numero: entry.num,
+        hBase: entry.h,
+        hRT,
+        hShow,
+        passagers: pax,
+        retard,
+        supprime,
+        delayed: isDelayed || retard > 0,
+        live: isLive,  // ● LIVE si on a récupéré le statut depuis eurostar.com
+        min: minDiff,
+        isEurostar: true
+      });
+    }
+  };
+
+  addTrains(EUROSTAR_SCHEDULE.london,    'Londres St Pancras');
+  addTrains(EUROSTAR_SCHEDULE.bruxelles, 'Bruxelles-Midi');
+  addTrains(EUROSTAR_SCHEDULE.amsterdam, 'Amsterdam Centraal');
+
+  return trains;
+}
+
 /* ═══ FETCH UNE GARE ═══ */
 async function fetchGare(gare){
   // Filtres multiples : on exclut RER (RapidTransit), Transilien/RER métro (LocalTrain),
@@ -1138,7 +1325,25 @@ async function fetchGare(gare){
 
   const originsMap = {};
   (data.origins || []).forEach(o => { originsMap[o.id] = o.name; });
-  return (data.arrivals || []).map(a => parseArrival(a, originsMap, gare.id)).filter(t => t.type !== 'TRANSILIEN');
+  let trains = (data.arrivals || []).map(a => parseArrival(a, originsMap, gare.id)).filter(t => t.type !== 'TRANSILIEN');
+
+  // ⚡ GARE DU NORD : on complète avec les horaires Eurostar officiels
+  // car l'API Navitia SNCF ne retourne PAS les Eurostar (opérateur international distinct)
+  if(gare.id === 'nord'){
+    const eurostarTrains = buildEurostarTrains();
+    // Supprime les éventuels doublons Eurostar déjà dans l'API
+    const apiEurostarKeys = new Set(
+      trains.filter(t => t.type === 'EUROSTAR').map(t => t.hShow + '|' + t.origine)
+    );
+    // Ajoute uniquement les Eurostar manquants
+    for(const est of eurostarTrains){
+      if(!apiEurostarKeys.has(est.hShow + '|' + est.origine)){
+        trains.push(est);
+      }
+    }
+  }
+
+  return trains;
 }
 
 /* ═══ REFRESH ENGINE ═══ */
@@ -1163,13 +1368,37 @@ async function doRefresh(force=true){
     renderGares(); return;
   }
 
-  const results = await Promise.allSettled(
-    toFetch.map(g =>
+  // ═══ Scrape Eurostar EN PARALLÈLE avec SNCF ═══
+  // Important : le scrape met à jour EUROSTAR_STATUS, utilisé par fetchGare('nord')
+  // On lance en parallèle MAIS on attend la fin avant fetchGare pour Nord.
+  const eurostarPromise = scrapeEurostarStatus().catch(() => {});
+
+  // Fetch SNCF des gares non-Nord en parallèle du scrape Eurostar
+  const nonNordGares = toFetch.filter(g => g.id !== 'nord');
+  const nordGares    = toFetch.filter(g => g.id === 'nord');
+
+  const nonNordResults = Promise.allSettled(
+    nonNordGares.map(g =>
       fetchGare(g)
         .then(trains => ({ id:g.id, trains, error:null }))
         .catch(e    => ({ id:g.id, trains:null, error:e.message }))
     )
   );
+
+  // Pour Gare du Nord : on attend le scrape Eurostar AVANT de fetcher
+  // (pour avoir les statuts live quand on construit les trains Eurostar)
+  const nordResults = eurostarPromise.then(() =>
+    Promise.allSettled(
+      nordGares.map(g =>
+        fetchGare(g)
+          .then(trains => ({ id:g.id, trains, error:null }))
+          .catch(e    => ({ id:g.id, trains:null, error:e.message }))
+      )
+    )
+  );
+
+  const [non, nord] = await Promise.all([nonNordResults, nordResults]);
+  const results = [...non, ...nord];
 
   results.forEach(r => {
     if(r.status==='fulfilled'){
@@ -1561,7 +1790,7 @@ function renderTC(t, isPast){
         <div class="tc-meta">
           <span class="badge ${bCls}">${esc(t.type)}</span>
           ${t.numero ? `<span class="tc-num">#${esc(t.numero)}</span>` : ''}
-          <span class="tc-rt ${t.live?'live':'base'}">${t.live?'● LIVE':'~ théo'}</span>
+          <span class="tc-rt ${t.live?'live':(t.isEurostar?'est':'base')}">${t.live?'● LIVE':(t.isEurostar?'📅 planning':'~ théo')}</span>
         </div>
       </div>
       <div class="tc-cd">${heureHtml}<div class="${wCls}">${esc(wTxt)}</div></div>
