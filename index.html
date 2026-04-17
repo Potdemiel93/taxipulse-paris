@@ -521,12 +521,12 @@ const PROXY = 'https://taxipulse-proxy.boughida-sofiane.workers.dev/?url=';
    GARES
 ═══════════════════════════════════════════════ */
 const GARES = [
-  { id:'nord',         nom:'Gare du Nord',       sub:'Eurostar · TGV INOUI · TER HDF',      ico:'🇬🇧', metro:'M4/5 · RER B/D/E', sid:'stop_area:SNCF:87271007' },
-  { id:'lyon',         nom:'Gare de Lyon',        sub:'TGV Sud-Est · Lyria · TER',   ico:'🗼', metro:'M1/14 · RER A/D',  sid:'stop_area:SNCF:87686006' },
-  { id:'montparnasse', nom:'Montparnasse',         sub:'TGV Atlantique · Bretagne · TER',    ico:'🌊', metro:'M4/6/12/13',       sid:'stop_area:SNCF:87391003' },
-  { id:'est',          nom:"Gare de l'Est",        sub:'TGV Est · ICE Allemagne · Nightjet',    ico:'🍺', metro:'M4/5/7 · RER E',   sid:'stop_area:SNCF:87113001' },
-  { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités Limoges/Toulouse · Nightjet',  ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:SNCF:87547000' },
-  { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités Clermont-Fd · OUIGO',  ico:'🎪', metro:'M6/14',            sid:'stop_area:SNCF:87686667' },
+  { id:'nord',         nom:'Gare du Nord',       sub:'Eurostar · TGV Nord · TER HDF',            ico:'🇬🇧', metro:'M4/5 · RER B/D/E', sid:'stop_area:SNCF:87271007' },
+  { id:'lyon',         nom:'Gare de Lyon',        sub:'TGV Sud-Est · Lyria Suisse · Italie',      ico:'🗼', metro:'M1/14 · RER A/D',  sid:'stop_area:SNCF:87686006' },
+  { id:'montparnasse', nom:'Montparnasse',         sub:'TGV Atlantique · Bretagne · Sud-Ouest',    ico:'🌊', metro:'M4/6/12/13',       sid:'stop_area:SNCF:87391003' },
+  { id:'est',          nom:"Gare de l'Est",        sub:'TGV Est · ICE Allemagne · Nightjet',       ico:'🍺', metro:'M4/5/7 · RER E',   sid:'stop_area:SNCF:87113001' },
+  { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités Sud-Ouest · Trains de nuit',    ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:SNCF:87547000' },
+  { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités Clermont-Fd · OUIGO classique', ico:'🎪', metro:'M6/14',            sid:'stop_area:SNCF:87686667' },
 ];
 
 /* ═══════════════════════════════════════════════
@@ -645,36 +645,55 @@ function coefOrigine(origine){
      o.includes('BRUXELLES') || o.includes('BRUSSELS') || o.includes('AMSTERDAM') ||
      o.includes('ROTTERDAM') || o.includes('ANVERS') || o.includes('ANTWERP') ||
      o.includes('COLOGNE') || o.includes('KÖLN') || o.includes('FRANCFORT') || o.includes('FRANKFURT') ||
-     o.includes('GENÈVE') || o.includes('GENEVA') || o.includes('LAUSANNE') ||
-     o.includes('ZURICH') || o.includes('BÂLE') || o.includes('BASEL') || o.includes('BERN') ||
-     o.includes('MILAN') || o.includes('TURIN') || o.includes('BARCELONE') || o.includes('MADRID') ||
-     o.includes('LUXEMBOURG')) return 1.35;
+     o.includes('GENÈVE') || o.includes('GENEVA') || o.includes('CORNAVIN') ||
+     o.includes('LAUSANNE') || o.includes('ZURICH') || o.includes('ZÜRICH') ||
+     o.includes('BÂLE') || o.includes('BASEL') || o.includes('BERN') || o.includes('BERNE') ||
+     o.includes('MILAN') || o.includes('MILANO') || o.includes('TURIN') || o.includes('TORINO') ||
+     o.includes('BARCELONE') || o.includes('BARCELONA') || o.includes('MADRID') || o.includes('FIGUERAS') ||
+     o.includes('LUXEMBOURG') ||
+     o.includes('MUNICH') || o.includes('MÜNCHEN') || o.includes('STUTTGART') ||
+     o.includes('BERLIN') || o.includes('VIENNE') || o.includes('WIEN') ||
+     o.includes('KARLSRUHE') || o.includes('MANNHEIM') ||
+     o.includes('SARREBRUCK') || o.includes('SAARBRUCKEN') || o.includes('SAARBRÜCKEN')) return 1.35;
 
-  // LONGUE DISTANCE FRANCE = +25% (grosses valises, vacances)
-  if(o.includes('MARSEILLE') || o.includes('NICE') || o.includes('CANNES') ||
+  // LONGUE DISTANCE FRANCE = +25% (grosses valises, vacances, pro)
+  if(o.includes('MARSEILLE') || o.includes('NICE') || o.includes('CANNES') || o.includes('ANTIBES') ||
      o.includes('MONTPELLIER') || o.includes('PERPIGNAN') || o.includes('TOULON') ||
      o.includes('TOULOUSE') || o.includes('BORDEAUX') || o.includes('BIARRITZ') ||
-     o.includes('BAYONNE') || o.includes('HENDAYE') || o.includes('PAU') ||
-     o.includes('BREST') || o.includes('QUIMPER') || o.includes('LORIENT') ||
-     o.includes('AIX') || o.includes('AVIGNON') || o.includes('NIMES') || o.includes('NÎMES') ||
-     o.includes('CLERMONT') || o.includes('BRIVE') || o.includes('LIMOGES') ||
-     o.includes('LOURDES') || o.includes('TARBES')) return 1.25;
+     o.includes('BAYONNE') || o.includes('HENDAYE') || o.includes('IRUN') || o.includes('PAU') ||
+     o.includes('BREST') || o.includes('QUIMPER') || o.includes('LORIENT') || o.includes('SAINT-MALO') ||
+     o.includes('AIX') || o.includes('AVIGNON') || o.includes('NIMES') || o.includes('NÎMES') || o.includes('ARLES') ||
+     o.includes('CLERMONT') || o.includes('BRIVE') || o.includes('LIMOGES') || o.includes('CAHORS') ||
+     o.includes('MONTAUBAN') || o.includes('AGEN') || o.includes('NARBONNE') || o.includes('BÉZIERS') ||
+     o.includes('LOURDES') || o.includes('TARBES') || o.includes('CARCASSONNE') ||
+     o.includes('GRENOBLE') || o.includes('CHAMBÉRY') || o.includes('CHAMBERY') ||
+     o.includes('ANNECY') || o.includes('BRIANÇON') || o.includes('GAP') ||
+     o.includes('HYÈRES') || o.includes('HYERES')) return 1.25;
 
   // MOYENNE DISTANCE = neutre
   if(o.includes('RENNES') || o.includes('STRASBOURG') || o.includes('LYON') ||
      o.includes('DIJON') || o.includes('NANTES') || o.includes('ANGERS') ||
      o.includes('LE MANS') || o.includes('POITIERS') || o.includes('LA ROCHELLE') ||
-     o.includes('SAINT-ÉTIENNE') || o.includes('METZ') || o.includes('MULHOUSE') ||
-     o.includes('BESANÇON')) return 1.0;
+     o.includes('SAINT-ÉTIENNE') || o.includes('SAINT-ETIENNE') || o.includes('CHÂTEAUCREUX') ||
+     o.includes('METZ') || o.includes('MULHOUSE') || o.includes('BESANÇON') || o.includes('BESANCON') ||
+     o.includes('NEVERS') || o.includes('VICHY') || o.includes('MOULINS') ||
+     o.includes('COLMAR') || o.includes('BELFORT') || o.includes('CHALON') || o.includes('MÂCON') ||
+     o.includes('MACON') || o.includes('CHÂTEAUROUX') || o.includes('CHATEAUROUX') ||
+     o.includes('LE CROISIC')) return 1.0;
 
   // COURTE DISTANCE = -25% (business, abonnés, peu de bagages)
   if(o.includes('LILLE') || o.includes('ARRAS') || o.includes('AMIENS') ||
      o.includes('DUNKERQUE') || o.includes('CALAIS') || o.includes('VALENCIENNES') ||
-     o.includes('ROUEN') || o.includes('LE HAVRE') || o.includes('CAEN') ||
-     o.includes('REIMS') || o.includes('NANCY') ||
-     o.includes('ORLÉANS') || o.includes('TOURS') || o.includes('BOURGES') ||
-     o.includes('CHARTRES') || o.includes('DREUX') || o.includes('EVREUX') ||
-     o.includes('COMPIEGNE') || o.includes('CREIL') || o.includes('BEAUVAIS')) return 0.75;
+     o.includes('BOULOGNE') || o.includes('ROUEN') || o.includes('LE HAVRE') || o.includes('CAEN') ||
+     o.includes('REIMS') || o.includes('NANCY') || o.includes('CHÂLONS') ||
+     o.includes('ORLÉANS') || o.includes('ORLEANS') || o.includes('AUBRAIS') ||
+     o.includes('TOURS') || o.includes('BOURGES') ||
+     o.includes('CHARTRES') || o.includes('DREUX') || o.includes('ÉVREUX') || o.includes('EVREUX') ||
+     o.includes('COMPIÈGNE') || o.includes('COMPIEGNE') || o.includes('CREIL') ||
+     o.includes('BEAUVAIS') || o.includes('LAON') || o.includes('CAMBRAI') ||
+     o.includes('SAINT-QUENTIN') || o.includes('MAUBEUGE') || o.includes('TERGNIER') ||
+     o.includes('VIERZON') || o.includes('ISSOUDUN') || o.includes('SOUILLAC') ||
+     o.includes('TROYES') || o.includes('SENS')) return 0.75;
 
   return 1.0;  // Origine inconnue → neutre
 }
@@ -863,20 +882,35 @@ function navHour(s){
 
 /* ═══════════════════════════════════════════════
    VÉRITÉ TERRAIN : quels trains circulent dans chaque gare
-   Source : SNCF Gares & Connexions + Wikipedia + sites officiels
+   Sources vérifiées : SNCF Connect, Wikipedia, SNCF TER, Lyria
 ═══════════════════════════════════════════════ */
 const TYPES_AUTORISES = {
-  // Gare du Nord : Eurostar, TGV INOUI, OUIGO, TER HDF — JAMAIS d'Intercités
+  // Gare du Nord : Eurostar (Londres/Bruxelles/Amsterdam), TGV INOUI (Lille/Dunkerque/Calais),
+  // OUIGO (rare), TER HDF (Amiens/Beauvais/Laon/Cambrai/Compiègne/Saint-Quentin)
+  // — JAMAIS d'Intercités
   nord:         ['EUROSTAR','INOUI','TGV','OUIGO','TER'],
-  // Gare de Lyon : TGV Sud-Est, OUIGO, Lyria (Suisse), TER — PAS d'Intercités
+  // Gare de Lyon : TGV Sud-Est (Lyon/Marseille/Nice/Montpellier/Perpignan),
+  // Lyria (Genève/Lausanne/Zurich/Bâle), TGV INOUI Italie (Milan/Turin) + Espagne (Barcelone),
+  // OUIGO, TER Bourgogne/Centre (Laroche-Migennes, Montargis)
+  // — PAS d'Intercités (partent de Bercy)
   lyon:         ['INOUI','TGV','OUIGO','LYRIA','TER'],
-  // Montparnasse : TGV Atlantique, OUIGO, TER — PAS d'Intercités
+  // Montparnasse : TGV Atlantique (Rennes/Brest/Bordeaux/Toulouse/Nantes),
+  // OUIGO, TER Normandie/Centre (Le Mans, Chartres, Granville)
+  // — PAS d'Intercités
   montparnasse: ['INOUI','TGV','OUIGO','TER'],
-  // Gare de l'Est : TGV Est, OUIGO, ICE/DB (Allemagne), Nightjet (Berlin/Vienne), TER — PAS d'Intercités
+  // Gare de l'Est : TGV Est (Strasbourg/Metz/Nancy/Reims/Mulhouse),
+  // ICE/DB SNCF coopération (Francfort/Stuttgart/Munich/Karlsruhe/Mannheim),
+  // Nightjet ÖBB (Berlin/Vienne), OUIGO, TER Grand Est
+  // — PAS d'Intercités
   est:          ['INOUI','TGV','OUIGO','ICE','NIGHTJET','NIGHT','TER'],
-  // Austerlitz : Intercités Limoges/Toulouse, OUIGO classique, Nightjet France, TER
+  // Austerlitz : Intercités (Limoges/Brive/Toulouse/Cahors),
+  // Intercités de nuit (Nice/Cerbère/Foix/Briançon),
+  // OUIGO Train Classique (Nantes/Angers/Lyon classique),
+  // TER Centre-Val de Loire (Orléans/Tours/Bourges)
   austerlitz:   ['INTERCITES','OUIGO','NIGHTJET','NIGHT','TER'],
-  // Bercy : Intercités Clermont, OUIGO classique, TER Bourgogne
+  // Bercy : Intercités (Clermont-Ferrand via Nevers/Moulins/Vichy),
+  // OUIGO Train Classique (Lyon via Dijon),
+  // TER Bourgogne (Dijon, Laroche) et Centre (Nevers via Montargis)
   bercy:        ['INTERCITES','OUIGO','TER']
 };
 
@@ -909,13 +943,20 @@ function trainType(di, gareId){
     }
     // ICE/DB : Francfort, Cologne, Munich, Stuttgart (via Gare de l'Est)
     else if(gareId === 'est' && (s.includes('FRANCFORT')||s.includes('FRANKFURT')||
-            s.includes('STUTTGART')||s.includes('MUNICH')||s.includes('KARLSRUHE')||
-            s.includes('MANNHEIM')||s.includes('SAARBRUCK')||s.includes('SARREBRUCK'))){
+            s.includes('STUTTGART')||s.includes('MUNICH')||s.includes('MÜNCHEN')||
+            s.includes('KARLSRUHE')||s.includes('MANNHEIM')||
+            s.includes('SAARBRUCK')||s.includes('SARREBRUCK'))){
       detecte = 'ICE';
     }
     // Nightjet Berlin/Vienne depuis Gare de l'Est
     else if(gareId === 'est' && (s.includes('BERLIN')||s.includes('VIENNE')||s.includes('WIEN'))){
       detecte = 'NIGHTJET';
+    }
+    // Lyria : Genève, Lausanne, Zurich, Bâle depuis Gare de Lyon
+    else if(gareId === 'lyon' && (s.includes('GENÈVE')||s.includes('GENEVA')||s.includes('CORNAVIN')||
+            s.includes('LAUSANNE')||s.includes('ZÜRICH')||s.includes('ZURICH')||
+            s.includes('BÂLE')||s.includes('BASEL')||s.includes('BERNE')||s.includes('BERN'))){
+      detecte = 'LYRIA';
     }
   }
 
