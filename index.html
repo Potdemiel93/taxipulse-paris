@@ -219,6 +219,7 @@ dialog .sheet{
 .tc.warn::before{background:var(--gold)}
 .tc.crit::before{background:var(--red)}
 .tc.past{opacity:.32}.tc.past::before{background:var(--ink3)}
+.tc.quai{opacity:.72}.tc.quai::before{background:var(--ink2)}
 .tc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:9px}
 .tc-info{flex:1;min-width:0}
 .tc-orig{color:var(--ink);
@@ -643,17 +644,21 @@ function dt(offsetMs=0){
 }
 
 function minUntil(hhmm){
+  if(!hhmm || hhmm==='??:??') return 9999;
   const [h,m] = hhmm.split(':').map(Number);
   const now = new Date();
   const tgt = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0);
   let diff = Math.round((tgt - now) / 60000);
-  // Si le train est "demain" (ex: passé 23h, train à 00h30)
-  if(diff < -180) diff += 24*60;
+  // Ajustement minuit : si diff trop négatif → train de demain matin
+  if(diff < -720) diff += 24*60;
+  // Si diff trop positif (train hier soir affiché comme demain) → on corrige
+  if(diff > 23*60) diff -= 24*60;
   return diff;
 }
 
 function fmtMin(min){
-  if(min <= 0) return 'passé';
+  if(min < 0)  return 'à quai';
+  if(min === 0)return 'maintenant';
   if(min < 60) return `dans ${min} min`;
   const h = Math.floor(min/60), m = min%60;
   return `dans ${h}h${m>0?pad(m):''}`;
@@ -766,7 +771,8 @@ function parseArrival(arr, originsMap){
     hShow,
     passagers: pax,
     retard,
-    supprime:  !sdt.arrival_date_time,
+    // Un train est supprimé seulement si explicitement indiqué ET pas de temps RT
+    supprime:  sdt.departure_occupancy === 'canceled' || (!sdt.arrival_date_time && !sdt.base_arrival_date_time),
     live:      sdt.data_freshness === 'realtime',
     min:       minUntil(hShow),
   };
@@ -979,18 +985,24 @@ function renderGares(){
     }
 
     const trains   = c.trains || [];
-    const upcoming = trains.filter(t => t.min > 0 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
-    const next20   = upcoming.filter(t => t.min <= 20);
+    const upcoming = trains.filter(t => t.min > -15 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
+    const next20   = upcoming.filter(t => t.min <= 20 && t.min >= 0);
     const totalPax = next20.reduce((s,t)=>s+t.passagers, 0);
     const flames   = niveauFlammes(totalPax);
     const isPeak   = flames.lvl >= 3;
     const delays   = upcoming.filter(t=>t.retard>0).length;
 
-    const nxt = upcoming.sort((a,b)=>a.min-b.min)[0];
+    const nxt = upcoming.filter(t=>t.min>=0).sort((a,b)=>a.min-b.min)[0]
+             || upcoming.filter(t=>t.min<0).sort((a,b)=>b.min-a.min)[0];
     let dotClass='none', nextTxt='Aucun à venir';
     if(nxt){
-      nextTxt = nxt.hShow + ' · ' + fmtMin(nxt.min);
-      dotClass = nxt.min<=5 ? 'now' : nxt.min<=15 ? 'soon' : '';
+      if(nxt.min < 0){
+        nextTxt = nxt.hShow + ' · à quai';
+        dotClass = 'now';
+      } else {
+        nextTxt = nxt.hShow + ' · ' + fmtMin(nxt.min);
+        dotClass = nxt.min<=5 ? 'now' : nxt.min<=15 ? 'soon' : '';
+      }
     }
 
     // Badge fraîcheur
@@ -1046,14 +1058,19 @@ function openDialog(gareId){
     document.getElementById('gd-body').innerHTML  =
       `<div class="empty" style="margin-top:12px"><span class="ei">⚠</span>${esc(c&&c.error?c.error:'Aucune donnée')}</div>`;
   } else {
-    const trains   = [...(c.trains||[])].sort((a,b)=>a.hShow.localeCompare(b.hShow));
-    const upcoming = trains.filter(t=>t.min>0 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
-    // Trains passés non affichés
-    const next20   = upcoming.filter(t=>t.min<=20);
-    const totalPax = next20.reduce((s,t)=>s+t.passagers,0);
-    const flames   = niveauFlammes(totalPax);
-    const delays   = upcoming.filter(t=>t.retard>0).length;
-    const cancels  = trains.filter(t=>t.supprime).length;
+    const trains      = [...(c.trains||[])].sort((a,b)=>a.hShow.localeCompare(b.hShow));
+    // Trains arrivés dans les 15 dernières minutes (encore à quai / passagers en sortie)
+    const justArrived = trains.filter(t => t.min < 0 && t.min >= -15 && !t.supprime)
+                              .sort((a,b) => b.min - a.min); // du plus récent au plus ancien
+    // Trains à venir (non encore arrivés)
+    const future      = trains.filter(t => t.min >= 0 && !t.supprime)
+                              .sort((a,b) => a.hRT.localeCompare(b.hRT));
+    // Stats : seulement les trains dans les 20 prochaines minutes
+    const next20      = future.filter(t => t.min <= 20);
+    const totalPax    = next20.reduce((s,t) => s + t.passagers, 0);
+    const flames      = niveauFlammes(totalPax);
+    const delays      = future.filter(t => t.retard > 0).length;
+    const cancels     = trains.filter(t => t.supprime).length;
 
     document.getElementById('gd-up').textContent  = next20.length;
     document.getElementById('gd-pax').innerHTML   = `<span style="font-size:18px">${flames.ico}</span>`;
@@ -1061,16 +1078,26 @@ function openDialog(gareId){
     document.getElementById('gd-can').textContent = cancels;
 
     let body = '';
-    if(upcoming.length){
-      body += `<div class="grp-hdr live"><span>● Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${upcoming.length}</span></div>`;
-      body += upcoming.map((t,i)=>{
-        const card = renderTC(t,false);
+
+    // Section trains à quai (arrivés il y a moins de 15 min)
+    if(justArrived.length){
+      body += `<div class="grp-hdr" style="color:var(--ink2)"><span>🚉 À quai · vient d'arriver</span><div class="grp-line"></div><span class="grp-ct">${justArrived.length}</span></div>`;
+      body += justArrived.map(t => renderTC(t, false)).join('');
+    }
+
+    // Section prochaines arrivées
+    if(future.length){
+      body += `<div class="grp-hdr live"><span>● Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${future.length}</span></div>`;
+      body += future.map((t,i) => {
+        const card = renderTC(t, false);
         return i===0 ? card.replace('<div class="tc', '<div id="next-train" class="tc') : card;
       }).join('');
-    } else {
+    }
+
+    if(!justArrived.length && !future.length){
       body += '<div class="empty"><span class="ei">🌙</span>Plus de train ce soir — prochains trains demain matin</div>';
     }
-    // Trains passés masqués — seuls les trains à venir intéressent les taxis
+
     document.getElementById('gd-body').innerHTML = body;
   }
 
@@ -1088,28 +1115,31 @@ function openDialog(gareId){
 function renderTC(t, isPast){
   const isCrit = t.retard >= 10;
   const isWarn = t.retard > 0 && t.retard < 10;
+  const isQuai = !t.supprime && t.min < 0; // vient d'arriver (< 15 min)
 
   let cls = 'tc';
-  if(isPast||t.supprime) cls+=' past';
-  else if(isCrit) cls+=' crit';
-  else if(isWarn) cls+=' warn';
+  if(t.supprime)      cls += ' past';
+  else if(isQuai)     cls += ' quai';
+  else if(isCrit)     cls += ' crit';
+  else if(isWarn)     cls += ' warn';
 
   let wCls='tc-when', wTxt='';
-  if(isPast||t.supprime){ wCls+=' past'; wTxt=t.supprime?'supprimé':'passé'; }
-  else if(t.min<=5)      { wCls+=' now';  wTxt=fmtMin(t.min); }
-  else if(t.min<=15)     { wCls+=' soon'; wTxt=fmtMin(t.min); }
-  else                   { wTxt=fmtMin(t.min); }
+  if(t.supprime)       { wCls+=' past'; wTxt='supprimé'; }
+  else if(isQuai)      { wCls+=' now';  wTxt='à quai'; }
+  else if(t.min<=5)    { wCls+=' now';  wTxt=fmtMin(t.min); }
+  else if(t.min<=15)   { wCls+=' soon'; wTxt=fmtMin(t.min); }
+  else                 { wTxt=fmtMin(t.min); }
 
   const heureHtml = (t.retard>0 && t.hRT!==t.hBase)
     ? `<div class="tc-h">${esc(t.hRT)}</div><div class="tc-h-old">${esc(t.hBase)}</div>`
     : `<div class="tc-h">${esc(t.hShow)}</div>`;
 
   let stHtml='';
-  if(t.supprime)      stHtml='<span class="st-chip st-sup">🚫 Supprimé</span>';
-  else if(isPast)     stHtml='';
-  else if(isCrit)     stHtml=`<span class="st-chip st-crit">⚠ +${t.retard} min</span>`;
-  else if(isWarn)     stHtml=`<span class="st-chip st-warn">⚠ +${t.retard} min</span>`;
-  else                stHtml='<span class="st-chip st-ok">✓ À l\'heure</span>';
+  if(t.supprime)        stHtml='<span class="st-chip st-sup">🚫 Supprimé</span>';
+  else if(isQuai)       stHtml='<span class="st-chip st-ok">🚉 À quai</span>';
+  else if(isCrit)       stHtml=`<span class="st-chip st-crit">⚠ +${t.retard} min</span>`;
+  else if(isWarn)       stHtml=`<span class="st-chip st-warn">⚠ +${t.retard} min</span>`;
+  else                  stHtml='<span class="st-chip st-ok">✓ À l\'heure</span>';
 
   const tFlame = niveauFlammes(t.passagers);
   const bCls = 'b-' + t.type;
