@@ -197,6 +197,57 @@ dialog .sheet{
 
 /* DIALOG BODY */
 .dbody{padding:10px 14px 80px;color:var(--ink)}
+
+/* STICKY À QUAI — reste visible en scrollant */
+.sticky-quai{
+  position:sticky; top:0; z-index:10;
+  background:var(--bg2);
+  border-bottom:1px solid var(--line);
+  padding:10px 14px 8px;
+  box-shadow:0 4px 12px rgba(0,0,0,.4);
+}
+.sq-hdr{
+  font-size:9px; text-transform:uppercase; letter-spacing:1.2px;
+  font-weight:800; color:var(--ink2); margin-bottom:7px;
+  display:flex; align-items:center; gap:6px;
+}
+.sq-hdr .sq-dot{
+  width:7px; height:7px; border-radius:50%;
+  background:var(--accent);
+  animation:blink 1.4s ease-in-out infinite;
+}
+.sq-hdr .sq-ct{
+  font-family:var(--mono); font-size:9px;
+  background:var(--card2); border-radius:100px;
+  padding:2px 7px; color:var(--ink); font-weight:700;
+  margin-left:auto;
+}
+.sq-list{display:flex;flex-direction:column;gap:6px}
+.sq-train{
+  background:var(--card); border-left:3px solid var(--ink2);
+  border-radius:9px; padding:8px 11px;
+  display:flex; align-items:center; gap:10px;
+}
+.sq-train .sq-orig{
+  flex:1; min-width:0;
+  font-size:12px; font-weight:700;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.sq-train .sq-badge{
+  display:inline-block; padding:1px 5px; border-radius:3px;
+  font-size:8px; font-weight:800; color:#fff; letter-spacing:.4px;
+  margin-right:5px; vertical-align:middle;
+}
+.sq-train .sq-time{
+  font-family:var(--mono); font-size:10px;
+  color:var(--ink3); font-weight:700; white-space:nowrap;
+}
+.sq-train .sq-since{
+  font-size:9px; font-weight:700; color:var(--green);
+  text-transform:uppercase; letter-spacing:.5px;
+  background:var(--gdim); padding:2px 6px; border-radius:100px;
+  white-space:nowrap;
+}
 .grp-hdr{
   font-size:8px;text-transform:uppercase;letter-spacing:1.8px;font-weight:800;
   color:var(--ink3);padding:14px 2px 7px;
@@ -220,6 +271,18 @@ dialog .sheet{
 .tc.crit::before{background:var(--red)}
 .tc.past{opacity:.32}.tc.past::before{background:var(--ink3)}
 .tc.quai{opacity:.72}.tc.quai::before{background:var(--ink2)}
+
+/* DAY SEPARATOR — passage au lendemain */
+.day-sep{
+  display:flex;align-items:center;gap:10px;
+  margin:18px 2px 10px;padding:8px 12px;
+  background:linear-gradient(90deg, rgba(255,69,0,.05), transparent);
+  border-left:2px solid var(--accent);border-radius:4px;
+}
+.day-sep span{
+  font-size:10px;text-transform:uppercase;letter-spacing:1.2px;
+  font-weight:800;color:var(--accent);
+}
 .tc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:9px}
 .tc-info{flex:1;min-width:0}
 .tc-orig{color:var(--ink);
@@ -424,6 +487,8 @@ dialog .sheet{
         <div class="dstat"><div class="dk">Supprimés</div><div class="dv r" id="gd-can">—</div></div>
       </div>
     </div>
+    <!-- Bloc À quai sticky — reste visible en scrollant -->
+    <div class="sticky-quai" id="gd-quai" style="display:none"></div>
     <div class="dbody" id="gd-body">—</div>
   </div>
 </dialog>
@@ -435,11 +500,11 @@ dialog .sheet{
     <p>L'indicateur estime le nombre de <strong>clients taxi potentiels</strong> dans les <strong>20 prochaines minutes</strong> à chaque gare.</p>
     <p style="font-size:11px;color:var(--ink2)">Eurostar (Londres), Thalys (Bruxelles/Amsterdam) et TGV longue distance (Marseille, Bordeaux…) génèrent beaucoup plus de demande taxi que les trains courts (Lille, Rouen) où la clientèle a Pass Navigo et peu de bagages.</p>
     <div class="scale">
-      <div class="scale-row"><div class="scale-ico">🔥🔥🔥🔥</div><div class="scale-txt">Rush — 120+ clients taxi</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥🔥🔥</div><div class="scale-txt">Fort — 55 à 120 clients</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥🔥</div><div class="scale-txt">Modéré — 20 à 55 clients</div></div>
-      <div class="scale-row"><div class="scale-ico">🔥</div><div class="scale-txt">Calme — moins de 20</div></div>
-      <div class="scale-row"><div class="scale-ico">💤</div><div class="scale-txt">Très calme — aucun train prévu</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥🔥🔥</div><div class="scale-txt">Rush — 180+ clients taxi</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥🔥</div><div class="scale-txt">Fort — 90 à 180 clients</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥🔥</div><div class="scale-txt">Modéré — 35 à 90 clients</div></div>
+      <div class="scale-row"><div class="scale-ico">🔥</div><div class="scale-txt">Calme — 5 à 35 clients</div></div>
+      <div class="scale-row"><div class="scale-ico">💤</div><div class="scale-txt">Très calme — moins de 5</div></div>
     </div>
     <p style="font-size:10px;color:var(--ink3)">Estimation basée sur 5 facteurs : type de train, capacité & remplissage, heure, origine (distance/international), gare d'arrivée, et jour (vendredi/dimanche = rush weekend). Ne constitue pas une donnée officielle.</p>
     <button class="close-info" onclick="closeInfo()">J'ai compris</button>
@@ -525,22 +590,22 @@ function coefHeure(h){
 
 /* ═══════════════════════════════════════════════
    COEFFICIENT TAXI — % voyageurs → taxi/VTC
-   Valeurs recalibrées à partir d'études réelles
+   Recalibré — écart net entre international et régional
 ═══════════════════════════════════════════════ */
 const COEF_TAXI = {
-  EUROSTAR:   0.35,  // Londres/Amsterdam — valises, touristes, zéro Pass Navigo
-  THALYS:     0.32,  // Bruxelles/Amsterdam premium business
-  LYRIA:      0.28,  // Suisse — clientèle aisée affaires
-  ICE:        0.25,  // Allemagne — business/tourisme premium
-  NIGHTJET:   0.24,  // Nuit → fatigués + grosses valises
-  NIGHT:      0.24,
-  INOUI:      0.17,  // TGV Inoui (ajusté ensuite par origine)
-  TGV:        0.17,
-  INTERCITES: 0.18,  // Brive/Limoges/Bourges — clientèle taxi typique
-  OUIGO:      0.06,  // Low-cost → budget serré, métro/bus
-  TER:        0.03,
-  TRANSILIEN: 0.01,
-  DEF:        0.10
+  EUROSTAR:   0.40,  // Londres/Amsterdam — TOP demande taxi
+  THALYS:     0.35,  // Bruxelles premium business
+  LYRIA:      0.30,  // Suisse — aisés affaires
+  ICE:        0.26,  // Allemagne premium
+  NIGHTJET:   0.25,
+  NIGHT:      0.25,
+  INOUI:      0.14,  // TGV classique (ajusté par origine)
+  TGV:        0.14,
+  INTERCITES: 0.15,  // Brive/Limoges — taxi typique
+  OUIGO:      0.05,  // Low-cost strict
+  TER:        0.015, // TER Amiens/Beauvais/Rouen — quasi zéro
+  TRANSILIEN: 0.005,
+  DEF:        0.08
 };
 
 /* ═══════════════════════════════════════════════
@@ -641,13 +706,13 @@ function estimerPax(type, heureArrivee, origine, gareId, date){
 
 /* ═══════════════════════════════════════════════
    NIVEAU DE FLAMMES (clients taxi potentiels)
-   Seuils recalibrés — mieux étalés pour différencier
+   Seuils stricts — 1 flamme reste l'exception, pas la règle
 ═══════════════════════════════════════════════ */
 function niveauFlammes(totalPax){
-  if(totalPax === 0)     return { lvl:0, ico:'💤',        txt:'très calme' };
-  if(totalPax < 20)      return { lvl:1, ico:'🔥',         txt:'calme'     };
-  if(totalPax < 55)      return { lvl:2, ico:'🔥🔥',       txt:'modéré'    };
-  if(totalPax < 120)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'      };
+  if(totalPax < 5)       return { lvl:0, ico:'💤',        txt:'très calme' };
+  if(totalPax < 35)      return { lvl:1, ico:'🔥',         txt:'calme'     };
+  if(totalPax < 90)      return { lvl:2, ico:'🔥🔥',       txt:'modéré'    };
+  if(totalPax < 180)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'      };
   return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'rush'      };
 }
 
@@ -768,17 +833,21 @@ function navHour(s){
 }
 
 function trainType(di){
-  const s = ((di.headsign||'') + ' ' + (di.physical_mode||'') + ' ' + (di.commercial_mode||'') + ' ' + (di.network||'')).toUpperCase();
-  if(s.includes('OUIGO'))                    return 'OUIGO';
+  const s = ((di.headsign||'') + ' ' + (di.physical_mode||'') + ' ' + (di.commercial_mode||'') + ' ' + (di.network||'') + ' ' + (di.trip_short_name||'') + ' ' + (di.label||'')).toUpperCase();
+
+  // Eurostar en premier (priorité absolue — ex-Thalys inclus dedans maintenant)
   if(s.includes('EUROSTAR'))                 return 'EUROSTAR';
   if(s.includes('THALYS'))                   return 'THALYS';
+  if(s.includes('OUIGO'))                    return 'OUIGO';
   if(s.includes('LYRIA'))                    return 'LYRIA';
-  if(s.includes('ICE'))                      return 'ICE';
-  if(s.includes('NIGHTJET')||s.includes('NIGHT JET')) return 'NIGHTJET';
+  if(s.includes('ICE')||s.includes('RAILJET')||s.includes('NIGHTJET'))
+    return s.includes('NIGHTJET')?'NIGHTJET':'ICE';
   if(s.includes('INOUI')||s.includes('INOUÏ')) return 'INOUI';
   if(s.includes('TGV'))                      return 'TGV';
   if(s.includes('INTERCIT'))                 return 'INTERCITES';
+  // TER Hauts-de-France, Normandie, Centre = TER (pas Intercités)
   if(s.includes('TER'))                      return 'TER';
+  if(s.includes('NIGHT'))                    return 'NIGHT';
   if(s.includes('TRANSILIEN')||s.includes('RER')||s.includes('RAPID'))  return 'TRANSILIEN';
   return 'DEF';
 }
@@ -864,7 +933,9 @@ function parseArrival(arr, originsMap, gareId){
 
 /* ═══ FETCH UNE GARE ═══ */
 async function fetchGare(gare){
-  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-43200000)}&duration=108000&count=200&forbidden_uris[]=physical_mode:RapidTransit`;
+  // Filtres multiples : on exclut RER (RapidTransit), Transilien/RER métro (LocalTrain),
+  // mais on garde Eurostar, TGV, Intercités, Thalys, Lyria, TER longue distance
+  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-43200000)}&duration=108000&count=200&forbidden_uris[]=physical_mode:LocalTrain&forbidden_uris[]=physical_mode:RapidTransit&forbidden_uris[]=physical_mode:Metro&forbidden_uris[]=physical_mode:SuspendedCableCar`;
 
   const resp = await sncfFetch(path);
 
@@ -1081,7 +1152,8 @@ function renderGares(){
     let dotClass='none', nextTxt='Aucun à venir';
     if(nxt){
       if(nxt.min < 0){
-        nextTxt = nxt.hShow + ' · à quai';
+        const depuis = Math.abs(nxt.min);
+        nextTxt = nxt.hShow + (depuis === 0 ? ' · à l\'instant' : ` · à quai ${depuis} min`);
         dotClass = 'now';
       } else {
         nextTxt = nxt.hShow + ' · ' + fmtMin(nxt.min);
@@ -1134,6 +1206,10 @@ function openDialog(gareId){
   document.getElementById('gd-sub').textContent = gare.sub;
 
   const c = CACHE[gareId];
+  // Reset bloc sticky
+  const gq = document.getElementById('gd-quai');
+  if(gq){ gq.style.display = 'none'; gq.innerHTML = ''; }
+
   if(!c || (c.error && (!c.trains||!c.trains.length))){
     document.getElementById('gd-up').textContent  = '—';
     document.getElementById('gd-pax').textContent = '—';
@@ -1161,20 +1237,55 @@ function openDialog(gareId){
     document.getElementById('gd-del').textContent = delays;
     document.getElementById('gd-can').textContent = cancels;
 
-    let body = '';
-
-    // Section trains à quai (arrivés il y a moins de 15 min)
+    // === BLOC STICKY "À QUAI" — toujours visible en haut ===
+    const quaiBlock = document.getElementById('gd-quai');
     if(justArrived.length){
-      body += `<div class="grp-hdr" style="color:var(--ink2)"><span>🚉 À quai · vient d'arriver</span><div class="grp-line"></div><span class="grp-ct">${justArrived.length}</span></div>`;
-      body += justArrived.map(t => renderTC(t, false)).join('');
+      let quaiHtml = `<div class="sq-hdr"><span class="sq-dot"></span><span>🚉 À quai · vient d'arriver</span><span class="sq-ct">${justArrived.length}</span></div>`;
+      quaiHtml += '<div class="sq-list">';
+      quaiHtml += justArrived.map(t => {
+        const depuis = Math.abs(t.min);
+        const sinceTxt = depuis === 0 ? 'à l\'instant' : depuis + ' min';
+        return `<div class="sq-train">
+          <div class="sq-orig">
+            <span class="sq-badge b-${t.type}">${esc(t.type)}</span>${esc(t.origine)}
+          </div>
+          <div class="sq-time">${esc(t.hShow)}</div>
+          <div class="sq-since">${sinceTxt}</div>
+        </div>`;
+      }).join('');
+      quaiHtml += '</div>';
+      quaiBlock.innerHTML = quaiHtml;
+      quaiBlock.style.display = 'block';
+    } else {
+      quaiBlock.style.display = 'none';
+      quaiBlock.innerHTML = '';
     }
+
+    let body = '';
 
     // Section prochaines arrivées
     if(future.length){
       body += `<div class="grp-hdr live"><span>● Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${future.length}</span></div>`;
+
+      // Détecte si trains demain : min > (minutes restantes dans la journée d'aujourd'hui)
+      const now = new Date();
+      const minutesUntilMidnight = (24*60) - (now.getHours()*60 + now.getMinutes());
+      let tomorrowSeparatorInserted = false;
+
       body += future.map((t,i) => {
+        let separator = '';
+        // Insère le séparateur AVANT le premier train de demain
+        if(!tomorrowSeparatorInserted && t.min > minutesUntilMidnight){
+          tomorrowSeparatorInserted = true;
+          const demain = new Date(now.getTime() + 24*60*60*1000);
+          const joursFR = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+          const moisFR = ['jan.','fév.','mars','avril','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
+          const label = `${joursFR[demain.getDay()]} ${demain.getDate()} ${moisFR[demain.getMonth()]}`;
+          separator = `<div class="day-sep"><span>🌙 Demain · ${label}</span></div>`;
+        }
         const card = renderTC(t, false);
-        return i===0 ? card.replace('<div class="tc', '<div id="next-train" class="tc') : card;
+        const cardWithId = i===0 ? card.replace('<div class="tc', '<div id="next-train" class="tc') : card;
+        return separator + cardWithId;
       }).join('');
     }
 
@@ -1190,16 +1301,24 @@ function openDialog(gareId){
 
   const dlg = document.getElementById('gare-dialog');
   if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
-  setTimeout(()=>{
+
+  // Scroll direct au prochain train (instantané, positionné juste sous le header sticky)
+  setTimeout(() => {
     const el = document.getElementById('next-train');
-    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
-  }, 200);
+    if(el && sheet){
+      const header = document.querySelector('#gare-dialog .dhdr');
+      const headerH = header ? header.offsetHeight : 140;
+      const targetY = el.offsetTop - headerH - 12;
+      sheet.scrollTo({ top: Math.max(0, targetY), behavior: 'auto' });
+    }
+  }, 80);
 }
 
 function renderTC(t, isPast){
   const isCrit = t.retard >= 10;
   const isWarn = t.retard > 0 && t.retard < 10;
   const isQuai = !t.supprime && t.min < 0; // vient d'arriver (< 15 min)
+  const minDepuisArrivee = isQuai ? Math.abs(t.min) : 0;
 
   let cls = 'tc';
   if(t.supprime)      cls += ' past';
@@ -1209,7 +1328,7 @@ function renderTC(t, isPast){
 
   let wCls='tc-when', wTxt='';
   if(t.supprime)       { wCls+=' past'; wTxt='supprimé'; }
-  else if(isQuai)      { wCls+=' now';  wTxt='à quai'; }
+  else if(isQuai)      { wCls+=' now';  wTxt = minDepuisArrivee === 0 ? 'à l\'instant' : `il y a ${minDepuisArrivee} min`; }
   else if(t.min<=5)    { wCls+=' now';  wTxt=fmtMin(t.min); }
   else if(t.min<=15)   { wCls+=' soon'; wTxt=fmtMin(t.min); }
   else                 { wTxt=fmtMin(t.min); }
@@ -1220,7 +1339,7 @@ function renderTC(t, isPast){
 
   let stHtml='';
   if(t.supprime)        stHtml='<span class="st-chip st-sup">🚫 Supprimé</span>';
-  else if(isQuai)       stHtml='<span class="st-chip st-ok">🚉 À quai</span>';
+  else if(isQuai)       stHtml = `<span class="st-chip st-ok">🚉 À quai${minDepuisArrivee > 0 ? ' · ' + minDepuisArrivee + ' min' : ''}</span>`;
   else if(isCrit)       stHtml=`<span class="st-chip st-crit">⚠ +${t.retard} min</span>`;
   else if(isWarn)       stHtml=`<span class="st-chip st-warn">⚠ +${t.retard} min</span>`;
   else                  stHtml='<span class="st-chip st-ok">✓ À l\'heure</span>';
