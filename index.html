@@ -693,7 +693,7 @@ function trainType(di){
   if(s.includes('TGV'))                      return 'TGV';
   if(s.includes('INTERCIT'))                 return 'INTERCITES';
   if(s.includes('TER'))                      return 'TER';
-  if(s.includes('TRANSILIEN')||s.includes('RER'))  return 'TRANSILIEN';
+  if(s.includes('TRANSILIEN')||s.includes('RER')||s.includes('RAPID'))  return 'TRANSILIEN';
   return 'DEF';
 }
 
@@ -774,7 +774,7 @@ function parseArrival(arr, originsMap){
 
 /* ═══ FETCH UNE GARE ═══ */
 async function fetchGare(gare){
-  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-43200000)}&duration=108000&count=200&forbidden_uris[]=physical_mode:RapidTransit`;
+  const path = `/stop_areas/${gare.sid}/arrivals?from_datetime=${dt(-43200000)}&duration=108000&count=200`;
 
   const resp = await sncfFetch(path);
 
@@ -1063,7 +1063,10 @@ function openDialog(gareId){
     let body = '';
     if(upcoming.length){
       body += `<div class="grp-hdr live"><span>● Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${upcoming.length}</span></div>`;
-      body += upcoming.map(t=>renderTC(t,false)).join('');
+      body += upcoming.map((t,i)=>{
+        const card = renderTC(t,false);
+        return i===0 ? card.replace('<div class="tc', '<div id="next-train" class="tc') : card;
+      }).join('');
     } else {
       body += '<div class="empty"><span class="ei">🌙</span>Plus de train ce soir — prochains trains demain matin</div>';
     }
@@ -1076,6 +1079,10 @@ function openDialog(gareId){
 
   const dlg = document.getElementById('gare-dialog');
   if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
+  setTimeout(()=>{
+    const el = document.getElementById('next-train');
+    if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  }, 200);
 }
 
 function renderTC(t, isPast){
