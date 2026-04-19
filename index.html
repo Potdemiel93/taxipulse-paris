@@ -2,11 +2,17 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TaxiPulse">
 <meta name="theme-color" content="#0D0D0D">
+<meta name="description" content="TaxiPulse Paris — Arrivées SNCF temps réel + estimateur demande taxi pour chauffeurs de taxi parisiens">
 <title>TaxiPulse Paris</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF4500'/%3E%3Ctext x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial Black'%3E🚕%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23FF4500'/%3E%3Ctext x='90' y='130' font-size='110' text-anchor='middle'%3E🚕%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22TaxiPulse+Paris%22,%22short_name%22:%22TaxiPulse%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230D0D0D%22,%22theme_color%22:%22%23FF4500%22,%22orientation%22:%22portrait%22}">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
@@ -108,15 +114,15 @@ main{padding:0 14px 20px}
   display:flex;align-items:center;gap:14px;width:100%;
 }
 .gare-card:active{transform:scale(.98)}
-.gare-card.peak{border-color:var(--accent)}
+.gare-card.peak{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,69,0,.2),0 4px 16px rgba(255,69,0,.1)}
 .gare-card.err-card{border-color:rgba(239,68,68,.3);opacity:.7}
 .gc-ico{
-  width:46px;height:46px;border-radius:12px;background:var(--card2);
+  width:52px;height:52px;border-radius:13px;background:var(--card2);
   display:flex;align-items:center;justify-content:center;
-  font-size:20px;flex-shrink:0;
+  font-size:22px;flex-shrink:0;
 }
 .gc-left{flex:1;min-width:0}
-.gc-name{font-size:14px;font-weight:800;letter-spacing:-.3px;
+.gc-name{font-size:15px;font-weight:800;letter-spacing:-.3px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .gc-sub{font-size:10px;color:var(--ink3);font-weight:600;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
@@ -135,6 +141,13 @@ main{padding:0 14px 20px}
 }
 .flames.lvl0{filter:none;opacity:.5}
 .flames.lvl1{filter:none}
+
+/* Compteur clients/heure — info clé pour chauffeur */
+.gc-pax60{font-family:var(--mono);font-size:16px;font-weight:900;color:var(--ink);
+  letter-spacing:-.5px;margin-top:2px}
+.gc-pax60-unit{font-size:9px;color:var(--ink3);font-weight:700}
+.gare-card.peak .gc-pax60{color:var(--accent)}
+
 .aff-label{
   font-size:9px;text-transform:uppercase;letter-spacing:.7px;
   color:var(--ink3);font-weight:700;display:flex;align-items:center;gap:3px;
@@ -198,21 +211,21 @@ dialog .sheet{
 /* DIALOG BODY */
 .dbody{padding:10px 14px 80px;color:var(--ink)}
 
-/* STICKY À QUAI — reste visible en scrollant */
+/* STICKY À QUAI — reste visible en scrollant, ultra-compact */
 .sticky-quai{
   position:sticky; top:0; z-index:10;
   background:var(--bg2);
   border-bottom:1px solid var(--line);
-  padding:10px 14px 8px;
+  padding:8px 14px 6px;
   box-shadow:0 4px 12px rgba(0,0,0,.4);
 }
 .sq-hdr{
   font-size:9px; text-transform:uppercase; letter-spacing:1.2px;
-  font-weight:800; color:var(--ink2); margin-bottom:7px;
+  font-weight:800; color:var(--ink2); margin-bottom:5px;
   display:flex; align-items:center; gap:6px;
 }
 .sq-hdr .sq-dot{
-  width:7px; height:7px; border-radius:50%;
+  width:6px; height:6px; border-radius:50%;
   background:var(--accent);
   animation:blink 1.4s ease-in-out infinite;
 }
@@ -222,11 +235,11 @@ dialog .sheet{
   padding:2px 7px; color:var(--ink); font-weight:700;
   margin-left:auto;
 }
-.sq-list{display:flex;flex-direction:column;gap:6px}
+.sq-list{display:flex;flex-direction:column;gap:4px}
 .sq-train{
   background:var(--card); border-left:3px solid var(--ink2);
-  border-radius:9px; padding:8px 11px;
-  display:flex; align-items:center; gap:10px;
+  border-radius:8px; padding:6px 10px;
+  display:flex; align-items:center; gap:8px;
 }
 .sq-train .sq-orig{
   flex:1; min-width:0;
@@ -333,40 +346,6 @@ dialog .sheet{
 .st-crit{background:var(--rdim);color:var(--red);border:1px solid rgba(239,68,68,.25)}
 .st-sup{background:rgba(85,85,80,.1);color:var(--ink3);border:1px solid var(--line)}
 
-/* EVENT CARDS */
-.ev-card{
-  background:var(--card);border:1px solid var(--line);
-  border-radius:15px;padding:15px;margin-bottom:8px;
-}
-.ev-top{display:flex;justify-content:space-between;align-items:flex-start;
-  gap:12px;margin-bottom:11px}
-.ev-name{font-size:19px;font-weight:800;letter-spacing:-.4px;margin-bottom:3px}
-.ev-lieu{font-size:10px;text-transform:uppercase;letter-spacing:1px;
-  font-weight:700;color:var(--ink3)}
-.ev-time .t{font-family:var(--mono);font-size:17px;font-weight:700;
-  letter-spacing:-.5px;text-align:right}
-.ev-time .l{font-size:9px;text-transform:uppercase;letter-spacing:.8px;
-  color:var(--ink3);font-weight:700;text-align:right;margin-top:1px}
-.ev-info{background:var(--bg);border-radius:9px;padding:9px 11px;
-  display:flex;justify-content:space-between;gap:8px}
-.ev-info .ik{font-size:9px;text-transform:uppercase;letter-spacing:.6px;
-  font-weight:700;color:var(--ink3);margin-bottom:2px}
-.ev-info .iv{font-size:12px;font-weight:700}
-
-/* WEATHER */
-.wgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
-.wday{
-  background:var(--card);border:1px solid var(--line);
-  border-radius:13px;padding:12px 3px;text-align:center;
-}
-.wday.today{border-color:var(--accent)}
-.wd{font-size:9px;text-transform:uppercase;letter-spacing:1px;
-  font-weight:800;color:var(--ink3)}
-.wday.today .wd{color:var(--accent)}
-.wic{font-size:22px;margin:5px 0 3px}
-.wt{font-size:20px;font-weight:800;letter-spacing:-.5px}
-.wp{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:5px;font-weight:600}
-
 /* SOURCE NOTE — supprimé, remplacé par lien discret */
 
 /* INFO POPUP (tooltip affluence) */
@@ -402,6 +381,94 @@ dialog .sheet{
 }
 .empty .ei{font-size:28px;margin-bottom:7px;display:block;opacity:.5}
 
+/* ═══ RUSH (onglet Stats) ═══ */
+.rush-card{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px;margin-bottom:10px;
+}
+.rush-card.top{
+  background:linear-gradient(135deg,rgba(255,69,0,.08),rgba(255,69,0,.02));
+  border-color:rgba(255,69,0,.3);
+}
+.rush-now-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:800;color:var(--ink2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.rush-now-big{font-size:26px;font-weight:900;letter-spacing:-1px;color:var(--accent);
+  margin-bottom:4px;font-family:var(--mono)}
+.rush-now-sub{font-size:12px;color:var(--ink2);margin-bottom:10px}
+.rush-next{display:flex;align-items:center;gap:10px;padding:10px;
+  background:var(--card2);border-radius:10px;margin-top:8px}
+.rush-next .rn-ico{font-size:24px}
+.rush-next .rn-main{flex:1}
+.rush-next .rn-gare{font-size:13px;font-weight:800}
+.rush-next .rn-train{font-size:10px;color:var(--ink2);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.rush-next .rn-time{font-family:var(--mono);font-size:14px;font-weight:800;color:var(--accent)}
+
+.hour-bar{display:flex;align-items:flex-end;gap:5px;height:100px;
+  padding:10px 8px;background:var(--card);border-radius:12px;margin-bottom:8px}
+.hour-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.hour-col .hb{width:100%;max-width:24px;background:var(--line);border-radius:3px 3px 0 0;
+  min-height:3px;transition:background .2s}
+.hour-col .hb.hot{background:var(--accent)}
+.hour-col .hb.warm{background:var(--gold)}
+.hour-col .hb.cur{outline:2px solid var(--ink);outline-offset:1px}
+.hour-col .hh{font-size:9px;color:var(--ink3);font-family:var(--mono);font-weight:700}
+
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 12px;
+  background:var(--card);border-radius:10px;margin-bottom:6px;border:1px solid var(--line)}
+.rank-row .rk-pos{font-size:16px;font-weight:900;color:var(--accent);min-width:22px}
+.rank-row .rk-pos.p1{color:#FFD700}
+.rank-row .rk-pos.p2{color:#C0C0C0}
+.rank-row .rk-pos.p3{color:#CD7F32}
+.rank-row .rk-ico{font-size:20px}
+.rank-row .rk-name{flex:1;font-size:13px;font-weight:700}
+.rank-row .rk-pax{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--accent)}
+.rank-row .rk-flames{font-size:14px}
+
+/* ═══ TRAJET (onglet Prix course) ═══ */
+.trajet-box{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:16px;margin-bottom:14px;
+}
+.tr-field{margin-bottom:14px}
+.tr-field:last-of-type{margin-bottom:18px}
+.tr-field label{display:block;font-size:10px;text-transform:uppercase;
+  letter-spacing:1px;font-weight:800;color:var(--ink3);margin-bottom:6px}
+.tr-field select{
+  width:100%;background:var(--card2);border:1px solid var(--line);
+  border-radius:10px;color:var(--ink);padding:11px 12px;font-size:14px;
+  font-family:inherit;font-weight:600;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23F0F0EB' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+}
+.tr-segment{display:flex;gap:6px}
+.tr-segment button{
+  flex:1;background:var(--card2);border:1px solid var(--line);color:var(--ink2);
+  border-radius:10px;padding:10px 6px;font-size:12px;font-weight:700;
+  font-family:inherit;cursor:pointer;
+}
+.tr-segment button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tr-calc-btn{
+  width:100%;background:var(--accent);color:#fff;border:none;
+  border-radius:12px;padding:14px;font-size:14px;font-weight:800;
+  text-transform:uppercase;letter-spacing:1px;font-family:inherit;cursor:pointer;
+}
+.tr-calc-btn:active{transform:scale(.98)}
+
+.tr-result{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:18px;margin-bottom:14px;
+}
+.tr-price{font-size:36px;font-weight:900;color:var(--accent);
+  font-family:var(--mono);letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.tr-range{font-size:12px;color:var(--ink2);margin-bottom:14px}
+.tr-info-row{display:flex;justify-content:space-between;padding:8px 0;
+  border-top:1px solid var(--line);font-size:13px}
+.tr-info-row:first-of-type{border-top:0}
+.tr-info-row .k{color:var(--ink3);font-weight:600}
+.tr-info-row .v{color:var(--ink);font-weight:800;font-family:var(--mono)}
+.tr-disclaimer{font-size:10px;color:var(--ink3);margin-top:10px;line-height:1.5;font-style:italic}
+
 ::-webkit-scrollbar{width:0}
 </style>
 </head>
@@ -417,8 +484,8 @@ dialog .sheet{
   </div>
   <div class="nav-tabs">
     <button class="active" data-tab="tab-now">🚂 Gares</button>
-    <button data-tab="tab-tonight">🎭 Ce soir</button>
-    <button data-tab="tab-week">🌤 Météo</button>
+    <button data-tab="tab-stats">📊 Rush</button>
+    <button data-tab="tab-trajet">💶 Trajet</button>
   </div>
 </header>
 
@@ -451,20 +518,85 @@ dialog .sheet{
 
   </section>
 
-  <!-- ══ CE SOIR ══ -->
-  <section class="tab" id="tab-tonight">
-    <div class="stitle">♫ Concerts ce soir</div>
-    <div id="concerts-list"></div>
-    <div class="stitle">♔ Théâtres &amp; Spectacles</div>
-    <div id="theatres-list"></div>
-    <div class="stitle">◇ Salons en cours</div>
-    <div id="salons-list"></div>
+  <!-- ══ RUSH — Analyse ══ -->
+  <section class="tab" id="tab-stats">
+    <div class="stitle">🔥 Rush maintenant</div>
+    <div id="rush-now"></div>
+
+    <div class="stitle">📈 Meilleures heures aujourd'hui</div>
+    <div id="rush-hours"></div>
+
+    <div class="stitle">🏆 Classement gares (prochaine heure)</div>
+    <div id="rush-ranking"></div>
   </section>
 
-  <!-- ══ MÉTÉO ══ -->
-  <section class="tab" id="tab-week">
-    <div class="stitle">Météo 5 jours · Paris</div>
-    <div id="weather-list"></div>
+  <!-- ══ TRAJET — Estimateur course ══ -->
+  <section class="tab" id="tab-trajet">
+    <div class="stitle">💶 Estimateur de course taxi</div>
+
+    <div class="trajet-box">
+      <div class="tr-field">
+        <label>Départ (gare)</label>
+        <select id="tr-depart">
+          <option value="nord">Gare du Nord</option>
+          <option value="lyon">Gare de Lyon</option>
+          <option value="montparnasse">Montparnasse</option>
+          <option value="est">Gare de l'Est</option>
+          <option value="austerlitz">Gare d'Austerlitz</option>
+          <option value="bercy">Gare de Bercy</option>
+        </select>
+      </div>
+      <div class="tr-field">
+        <label>Arrivée</label>
+        <select id="tr-arrivee">
+          <optgroup label="Aéroports">
+            <option value="cdg">Aéroport Charles-de-Gaulle (CDG)</option>
+            <option value="orly">Aéroport Orly</option>
+            <option value="beauvais">Aéroport Beauvais</option>
+          </optgroup>
+          <optgroup label="Quartiers Paris">
+            <option value="opera">Opéra · Louvre · Châtelet</option>
+            <option value="champs">Champs-Élysées · Étoile</option>
+            <option value="eiffel">Tour Eiffel · Invalides · 7e</option>
+            <option value="marais">Le Marais · Bastille · 4e</option>
+            <option value="mont">Montmartre · Sacré-Cœur · 18e</option>
+            <option value="latin">Quartier Latin · 5e · 6e</option>
+            <option value="defense">La Défense</option>
+            <option value="bercy-q">Bercy · 12e est</option>
+          </optgroup>
+          <optgroup label="Banlieues affaires">
+            <option value="neuilly">Neuilly-sur-Seine</option>
+            <option value="boulogne">Boulogne-Billancourt</option>
+            <option value="levallois">Levallois-Perret</option>
+            <option value="issy">Issy-les-Moulineaux</option>
+          </optgroup>
+          <optgroup label="Autres grandes gares">
+            <option value="g-nord">Gare du Nord</option>
+            <option value="g-lyon">Gare de Lyon</option>
+            <option value="g-mont">Gare Montparnasse</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="tr-field">
+        <label>Bagages (nombre)</label>
+        <div class="tr-segment" id="tr-bagages">
+          <button data-v="0" class="active">0</button>
+          <button data-v="1">1</button>
+          <button data-v="2">2</button>
+          <button data-v="3">3+</button>
+        </div>
+      </div>
+      <div class="tr-field">
+        <label>Moment</label>
+        <div class="tr-segment" id="tr-moment">
+          <button data-v="jour" class="active">Jour (7h-19h)</button>
+          <button data-v="nuit">Nuit / WE</button>
+        </div>
+      </div>
+      <button class="tr-calc-btn" onclick="calcTrajet()">Calculer le prix</button>
+    </div>
+
+    <div id="tr-resultat" style="display:none"></div>
   </section>
 
 </main>
@@ -764,34 +896,6 @@ function niveauFlammes(totalPax){
   if(totalPax < 180)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'      };
   return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'rush'      };
 }
-
-/* ═══════════════════════════════════════════════
-   DONNÉES STATIQUES
-═══════════════════════════════════════════════ */
-const STATIC = {
-  concerts:[
-    {n:'Genezio',              l:'Zénith La Villette',         fin:'22:30',cap:6300,  m:'M5 Porte de Pantin'},
-    {n:'TH',                   l:"L'Olympia",                  fin:'22:30',cap:1980,  m:'M3/7/8 Opéra'},
-    {n:'Lord of the Lost',     l:'Le Trianon',                 fin:'22:30',cap:1000,  m:'M2 Anvers'},
-    {n:'Ludovico Einaudi',     l:'Salle Pleyel',               fin:'22:30',cap:2100,  m:'M2 Ternes'},
-  ],
-  theatres:[
-    {n:'Le Roi Lion',          l:'Théâtre Mogador',            fin:'22:30',cap:1600,  m:'M12 Trinité'},
-    {n:'Amadeus',              l:'Théâtre Marigny',            fin:'22:45',cap:1024,  m:'M1/13 Champs-Élysées'},
-    {n:'Chicago',              l:'Casino de Paris',            fin:'22:45',cap:1500,  m:'M12 Trinité'},
-  ],
-  salons:[
-    {n:'Run Experience 2026',  l:'Porte de Versailles',        fin:'19:00',cap:33000, m:'M12 Porte de Versailles'},
-    {n:'Art Paris 2026',       l:'Grand Palais',               fin:'20:00',cap:18000, m:'M1/13 Champs-Élysées'},
-  ],
-  meteo:[
-    {j:'MER',ic:'⛅',t:17,p:15},
-    {j:'JEU',ic:'🌥',t:15,p:25},
-    {j:'VEN',ic:'🌧',t:13,p:70},
-    {j:'SAM',ic:'⛅',t:16,p:20},
-    {j:'DIM',ic:'☀️',t:19,p:5},
-  ]
-};
 
 /* ═══ STATE ═══ */
 let CACHE = {};
@@ -1115,66 +1219,28 @@ function parseArrival(arr, originsMap, gareId){
 }
 
 /* ═══════════════════════════════════════════════
-   SCRAPING EUROSTAR EN TEMPS RÉEL
-   Récupère les statuts (retardé, annulé) depuis eurostar.com
-   via le proxy Cloudflare — mis à jour à chaque refresh
+   RÉCUPÈRE LES STATUTS EUROSTAR DEPUIS LE WORKER
+   Le Worker Cloudflare scrape eurostar.com côté serveur
+   avec User-Agent navigateur et cache 2 min.
+   Endpoint : /eurostar → JSON { trains: { ES9302: { status, newTime, origine } } }
 ═══════════════════════════════════════════════ */
-// Map des statuts Eurostar (rempli à chaque scrape)
-// Clé = numéro de train (ex "ES9302"), Valeur = { status:'delayed'|'cancelled'|'ok', newTime?, origine }
+// Map des statuts Eurostar (rempli à chaque refresh)
 let EUROSTAR_STATUS = {};
+let EUROSTAR_STATUS_TS = 0;
 
 async function scrapeEurostarStatus(){
-  const urls = [
-    { src: 'Londres St Pancras',  url: 'https://www.eurostar.com/fr-fr/voyage/horaires/7015400/8727100/londres-st-pancras-intl/paris-gare-du-nord' },
-    { src: 'Bruxelles-Midi',      url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8814001/8727100/bruxelles-midi/paris-gare-du-nord' },
-    { src: 'Amsterdam Centraal',  url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8400058/8727100/amsterdam-centraal/paris-gare-du-nord' }
-  ];
-
-  const newStatus = {};
-
-  for(const { src, url } of urls){
-    try {
-      const proxied = PROXY + encodeURIComponent(url);
-      const resp = await timedFetch(proxied, 10000);
-      if(!resp.ok) continue;
-      const html = await resp.text();
-
-      // Extraction regex : chaque bloc contient "ES 9302" ou "ER 9404" + optionnellement "Retardé" / "Train annulé"
-      // Pattern : "Numéro du train: ES 9302" suivi parfois de " - Retardé" ou " - Train annulé"
-      // Puis plus bas l'heure d'arrivée ajustée "Env. HH:MM"
-      const regex = /Numéro du train:\s*(ES|ER)\s*(\d{4})(\s*-\s*(Retardé|Train annulé))?/gi;
-      let match;
-      while((match = regex.exec(html)) !== null){
-        const prefix = match[1].toUpperCase();
-        const num = prefix + match[2];
-        const statusTxt = (match[4] || '').toLowerCase();
-
-        let status = 'ok';
-        if(statusTxt.includes('annulé') || statusTxt.includes('annule')) status = 'cancelled';
-        else if(statusTxt.includes('retard')) status = 'delayed';
-
-        // Chercher "Env. HH:MM" dans les 500 caractères qui suivent pour extraire heure réelle
-        let newTime = null;
-        if(status === 'delayed'){
-          const afterMatch = html.substring(match.index, match.index + 800);
-          // Prend la DERNIÈRE occurrence de "Env. HH:MM" (celle qui correspond à Paris)
-          const envMatches = [...afterMatch.matchAll(/Env\.\s*(\d{2}):(\d{2})/g)];
-          if(envMatches.length > 0){
-            const last = envMatches[envMatches.length - 1];
-            newTime = last[1] + ':' + last[2];
-          }
-        }
-
-        newStatus[num] = { status, newTime, origine: src };
-      }
-    } catch(e){
-      // Erreur silencieuse — on garde les anciens statuts
+  try {
+    // Appelle le Worker qui scrape côté serveur (plus fiable que scraping client)
+    const workerBase = PROXY.replace(/\?url=$/, '');
+    const resp = await timedFetch(workerBase + '/eurostar', 12000);
+    if(!resp.ok) return;
+    const data = await resp.json();
+    if(data && data.trains && typeof data.trains === 'object'){
+      EUROSTAR_STATUS = data.trains;
+      EUROSTAR_STATUS_TS = Date.now();
     }
-  }
-
-  // Ne remplace que si on a récupéré des données
-  if(Object.keys(newStatus).length > 0){
-    EUROSTAR_STATUS = newStatus;
+  } catch(e){
+    // Erreur silencieuse — on garde les anciens statuts
   }
 }
 
@@ -1219,56 +1285,76 @@ const EUROSTAR_SCHEDULE = {
   ]
 };
 
-/* Génère les trains Eurostar "virtuels" au format parseArrival */
+/* Génère les trains Eurostar depuis les DONNÉES LIVE du Worker
+   (horaire + statut + retards tous synchronisés avec eurostar.com) */
 function buildEurostarTrains(){
   const trains = [];
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  const addTrains = (schedule, origine) => {
-    for(const entry of schedule){
-      const [h, m] = entry.h.split(':').map(Number);
+  // Si on a des données live depuis le Worker, les utiliser en priorité
+  if(Object.keys(EUROSTAR_STATUS).length > 0){
+    for(const num in EUROSTAR_STATUS){
+      const info = EUROSTAR_STATUS[num];
+      if(!info.arriveeParis) continue; // Ignore si pas d'heure
+
+      const [h, m] = info.arriveeParis.split(':').map(Number);
       let arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
 
-      // ═══ Applique le statut live si disponible ═══
-      const live = EUROSTAR_STATUS[entry.num];
       let retard = 0;
-      let supprime = false;
-      let hRT = entry.h;
-      let hShow = entry.h;
-      let isDelayed = false;
-      let isLive = false;
+      let supprime = info.status === 'cancelled';
+      let hRT = info.arriveeParis;
+      let hShow = info.arriveeParis;
+      let isDelayed = info.status === 'delayed';
 
-      if(live){
-        isLive = true;
-        if(live.status === 'cancelled'){
-          supprime = true;
-        } else if(live.status === 'delayed'){
-          isDelayed = true;
-          if(live.newTime){
-            // Nouvelle heure précise trouvée → recalcul retard
-            const [nh, nm] = live.newTime.split(':').map(Number);
-            const newArrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), nh, nm, 0);
-            retard = Math.max(0, Math.round((newArrDate - arrDate) / 60000));
-            arrDate = newArrDate;
-            hRT = live.newTime;
-            hShow = live.newTime;
-          } else {
-            // Marqué retardé mais sans heure précise → on estime +15 min
-            retard = 15;
-            const newArr = new Date(arrDate.getTime() + 15*60*1000);
-            arrDate = newArr;
-            hRT = pad(newArr.getHours()) + ':' + pad(newArr.getMinutes());
-            hShow = hRT;
-          }
-        }
+      if(info.status === 'delayed' && info.newTime){
+        const [nh, nm] = info.newTime.split(':').map(Number);
+        const newArrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), nh, nm, 0);
+        retard = Math.max(0, Math.round((newArrDate - arrDate) / 60000));
+        arrDate = newArrDate;
+        hRT = info.newTime;
+        hShow = info.newTime;
+      } else if(info.status === 'delayed'){
+        // Marqué retardé mais sans heure précise → estime +10 min
+        retard = 10;
+        arrDate = new Date(arrDate.getTime() + 10*60*1000);
+        hRT = pad(arrDate.getHours()) + ':' + pad(arrDate.getMinutes());
+        hShow = hRT;
       }
 
       const minDiff = Math.round((arrDate - now) / 60000);
-      // Trains dans la fenêtre [-15 min ; +24h]
       if(minDiff < -15 || minDiff > 24*60) continue;
 
-      // Ne double pas les doublons
+      const hArr = arrDate.getHours();
+      const pax = estimerPax('EUROSTAR', hArr, info.origine, 'nord', now);
+
+      trains.push({
+        type: 'EUROSTAR',
+        origine: info.origine,
+        numero: num,
+        hBase: info.arriveeParis,
+        hRT,
+        hShow,
+        passagers: pax,
+        retard,
+        supprime,
+        delayed: isDelayed || retard > 0,
+        live: true,  // données live temps réel
+        min: minDiff,
+        isEurostar: true
+      });
+    }
+    return trains;
+  }
+
+  // Fallback : si le Worker n'a pas répondu, utiliser le planning hardcodé
+  const addTrains = (schedule, origine) => {
+    for(const entry of schedule){
+      const [h, m] = entry.h.split(':').map(Number);
+      const arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
+      const minDiff = Math.round((arrDate - now) / 60000);
+      if(minDiff < -15 || minDiff > 24*60) continue;
+
       const dup = trains.find(t => t.hBase === entry.h && t.origine === origine && t.numero === entry.num);
       if(dup) continue;
 
@@ -1280,13 +1366,13 @@ function buildEurostarTrains(){
         origine,
         numero: entry.num,
         hBase: entry.h,
-        hRT,
-        hShow,
+        hRT: entry.h,
+        hShow: entry.h,
         passagers: pax,
-        retard,
-        supprime,
-        delayed: isDelayed || retard > 0,
-        live: isLive,  // ● LIVE si on a récupéré le statut depuis eurostar.com
+        retard: 0,
+        supprime: false,
+        delayed: false,
+        live: false,
         min: minDiff,
         isEurostar: true
       });
@@ -1422,7 +1508,7 @@ async function doRefresh(force=true){
 
   const hms = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   document.getElementById('rtime-main').textContent = `Actualisé à ${hms}`;
-  document.getElementById('src-note').style.display = 'block';
+  
 
   showErrBanner();
 
@@ -1556,7 +1642,9 @@ function renderGares(){
     const trains   = c.trains || [];
     const upcoming = trains.filter(t => t.min > -15 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
     const next20   = upcoming.filter(t => t.min <= 20 && t.min >= 0);
+    const next60   = upcoming.filter(t => t.min <= 60 && t.min >= 0);
     const totalPax = next20.reduce((s,t)=>s+t.passagers, 0);
+    const totalPax60 = next60.reduce((s,t)=>s+t.passagers, 0);
     const flames   = niveauFlammes(totalPax);
     const isPeak   = flames.lvl >= 3;
     const delays   = upcoming.filter(t=>t.retard>0).length;
@@ -1598,6 +1686,7 @@ function renderGares(){
       </div>
       <div class="gc-right">
         <div class="flames lvl${flames.lvl}">${flames.ico}</div>
+        <div class="gc-pax60">${totalPax60} <span class="gc-pax60-unit">/1h</span></div>
         <div class="aff-label">
           demande taxi
           <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
@@ -1611,10 +1700,280 @@ function renderGares(){
 function openInfo(){ document.getElementById('info-popup').classList.add('show'); }
 function closeInfo(){ document.getElementById('info-popup').classList.remove('show'); }
 
+/* ═══════════════════════════════════════════════
+   RUSH / STATS — Analyse pour chauffeur
+═══════════════════════════════════════════════ */
+function renderStats(){
+  // ─── 1. Rush maintenant : total prochaine heure toutes gares ───
+  let totalPax = 0;
+  let nextBig = null;
+  const next60 = []; // trains dans les 60 min
+
+  for(const gare of GARES){
+    const c = CACHE[gare.id];
+    if(!c || !c.trains) continue;
+    for(const t of c.trains){
+      if(t.min >= 0 && t.min <= 60 && !t.supprime){
+        totalPax += t.passagers || 0;
+        next60.push({...t, gareId: gare.id, gareNom: gare.nom, gareIco: gare.ico});
+        if(!nextBig || t.passagers > nextBig.passagers){
+          nextBig = {...t, gareNom: gare.nom, gareIco: gare.ico};
+        }
+      }
+    }
+  }
+
+  const rushNow = document.getElementById('rush-now');
+  if(!rushNow) return;
+
+  if(totalPax === 0){
+    rushNow.innerHTML = '<div class="empty"><span class="ei">😴</span>Pas de rush dans la prochaine heure</div>';
+  } else {
+    const level = totalPax >= 600 ? '🔥🔥🔥🔥 RUSH MAXIMUM'
+               : totalPax >= 300 ? '🔥🔥🔥 Forte demande'
+               : totalPax >= 100 ? '🔥🔥 Demande modérée'
+               : '🔥 Calme';
+    const topClass = totalPax >= 300 ? 'top' : '';
+
+    let nextHTML = '';
+    if(nextBig){
+      nextHTML = `<div class="rush-next">
+        <div class="rn-ico">${nextBig.gareIco}</div>
+        <div class="rn-main">
+          <div class="rn-gare">${esc(nextBig.gareNom)}</div>
+          <div class="rn-train">${esc(nextBig.type)} · ${esc(nextBig.origine)}</div>
+        </div>
+        <div class="rn-time">dans ${nextBig.min}min</div>
+      </div>`;
+    }
+
+    rushNow.innerHTML = `<div class="rush-card ${topClass}">
+      <div class="rush-now-title">🔥 Prochaine heure toutes gares</div>
+      <div class="rush-now-big">${totalPax} clients potentiels</div>
+      <div class="rush-now-sub">${level} · ${next60.length} trains à venir</div>
+      ${nextHTML ? '<div class="rush-now-title" style="margin-top:14px">🎯 Prochain gros arrivant</div>' + nextHTML : ''}
+    </div>`;
+  }
+
+  // ─── 2. Courbe des heures aujourd'hui ───
+  // Somme pax par heure pour la journée à venir
+  const byHour = {};
+  const nowH = new Date().getHours();
+  for(let i = 0; i < 12; i++){
+    const h = (nowH + i) % 24;
+    byHour[h] = 0;
+  }
+  for(const gare of GARES){
+    const c = CACHE[gare.id];
+    if(!c || !c.trains) continue;
+    for(const t of c.trains){
+      if(t.min < 0 || t.supprime) continue;
+      // Calcule l'heure d'arrivée
+      const [h] = (t.hShow || '00:00').split(':').map(Number);
+      if(byHour[h] !== undefined){
+        byHour[h] += t.passagers || 0;
+      }
+    }
+  }
+
+  const hours = Object.keys(byHour).map(Number);
+  const maxVal = Math.max(1, ...Object.values(byHour));
+
+  const hoursHTML = hours.map(h => {
+    const v = byHour[h] || 0;
+    const pct = Math.round((v / maxVal) * 100);
+    const cls = v >= maxVal * 0.66 ? 'hot' : v >= maxVal * 0.33 ? 'warm' : '';
+    const curCls = h === nowH ? ' cur' : '';
+    return `<div class="hour-col">
+      <div class="hb ${cls}${curCls}" style="height:${Math.max(3, pct)}%"></div>
+      <div class="hh">${pad(h)}h</div>
+    </div>`;
+  }).join('');
+
+  const rushHours = document.getElementById('rush-hours');
+  if(rushHours){
+    rushHours.innerHTML = `<div class="hour-bar">${hoursHTML}</div>
+      <div style="font-size:10px;color:var(--ink3);text-align:center;padding:0 10px">
+        Nombre de clients taxi estimés par heure · <span style="color:var(--accent)">■</span> rush · <span style="color:var(--gold)">■</span> actif
+      </div>`;
+  }
+
+  // ─── 3. Classement gares (prochaine heure) ───
+  const ranking = GARES.map(gare => {
+    const c = CACHE[gare.id];
+    if(!c || !c.trains) return { ...gare, pax: 0, count: 0 };
+    let pax = 0, count = 0;
+    for(const t of c.trains){
+      if(t.min >= 0 && t.min <= 60 && !t.supprime){
+        pax += t.passagers || 0;
+        count++;
+      }
+    }
+    return { ...gare, pax, count };
+  }).sort((a, b) => b.pax - a.pax);
+
+  const rankHTML = ranking.map((g, i) => {
+    const flames = g.pax >= 180 ? '🔥🔥🔥🔥' : g.pax >= 90 ? '🔥🔥🔥'
+                 : g.pax >= 35 ? '🔥🔥' : g.pax >= 5 ? '🔥' : '💤';
+    const posCls = i === 0 ? 'p1' : i === 1 ? 'p2' : i === 2 ? 'p3' : '';
+    return `<div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=>openDialog('${g.id}'),300)">
+      <div class="rk-pos ${posCls}">${i+1}</div>
+      <div class="rk-ico">${g.ico}</div>
+      <div class="rk-name">${esc(g.nom)}</div>
+      <div class="rk-flames">${flames}</div>
+      <div class="rk-pax">${g.pax}</div>
+    </div>`;
+  }).join('');
+
+  const rushRanking = document.getElementById('rush-ranking');
+  if(rushRanking){
+    rushRanking.innerHTML = rankHTML || '<div class="empty"><span class="ei">📊</span>Données en chargement…</div>';
+  }
+}
+
+function switchTab(id){
+  document.querySelectorAll('.nav-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+  document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('active', s.id===id));
+  if(id === 'tab-stats') renderStats();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ═══════════════════════════════════════════════
+   TRAJET — Estimateur course taxi Paris
+   Basé sur tarifs officiels Préfecture de Police 2025 :
+   - Prise en charge : 4,48€ (max)
+   - Tarif A (Paris jour 7h-19h lun-sam) : 1,22€/km
+   - Tarif B (Paris nuit 19h-7h ou dim/férié) : 1,61€/km
+   - Tarif C (banlieue nuit ou dim/férié) : 1,96€/km
+   - Tarif D (banlieue jour) : 1,61€/km
+   - Minimum course : 8€
+   - Supplément bagages : +2€ à partir du 2e bagage
+   - Forfaits aéroport officiels CDG/Orly
+   Source : arrêté du 20 janvier 2025 (JO 1 février 2025)
+═══════════════════════════════════════════════ */
+
+// Distances km depuis chaque gare vers destinations (approx Google Maps)
+const TRAJETS_KM = {
+  nord: { cdg:25, orly:25, beauvais:85, opera:3, champs:4, eiffel:6, marais:3.5, mont:4, latin:4, defense:9, 'bercy-q':5, neuilly:7, boulogne:10, levallois:7, issy:10, 'g-nord':0, 'g-lyon':4, 'g-mont':7 },
+  lyon: { cdg:30, orly:20, beauvais:90, opera:4, champs:6, eiffel:7, marais:3, mont:8, latin:4, defense:13, 'bercy-q':1, neuilly:11, boulogne:10, levallois:11, issy:9, 'g-nord':4, 'g-lyon':0, 'g-mont':5 },
+  montparnasse: { cdg:35, orly:15, beauvais:95, opera:4, champs:3, eiffel:4, marais:5, mont:7, latin:3, defense:9, 'bercy-q':7, neuilly:7, boulogne:6, levallois:8, issy:5, 'g-nord':7, 'g-lyon':5, 'g-mont':0 },
+  est: { cdg:22, orly:22, beauvais:82, opera:4, champs:5, eiffel:7, marais:3.5, mont:4, latin:4.5, defense:10, 'bercy-q':5, neuilly:8, boulogne:10, levallois:8, issy:11, 'g-nord':1, 'g-lyon':4, 'g-mont':7 },
+  austerlitz: { cdg:28, orly:17, beauvais:85, opera:4, champs:6, eiffel:6, marais:3, mont:8, latin:2, defense:11, 'bercy-q':2, neuilly:9, boulogne:8, levallois:10, issy:8, 'g-nord':5, 'g-lyon':1, 'g-mont':4 },
+  bercy: { cdg:28, orly:18, beauvais:90, opera:5, champs:7, eiffel:8, marais:4, mont:9, latin:4, defense:12, 'bercy-q':1, neuilly:11, boulogne:10, levallois:11, issy:9, 'g-nord':5, 'g-lyon':1, 'g-mont':6 }
+};
+
+// Temps trajet moyen (minutes) - ajusté pour trafic Paris
+const TRAJETS_MIN = {
+  nord: { cdg:45, orly:45, beauvais:80, opera:15, champs:20, eiffel:25, marais:15, mont:20, latin:20, defense:30, 'bercy-q':20, neuilly:25, boulogne:30, levallois:25, issy:35, 'g-nord':0, 'g-lyon':20, 'g-mont':25 },
+  lyon: { cdg:55, orly:40, beauvais:90, opera:20, champs:25, eiffel:25, marais:15, mont:30, latin:15, defense:40, 'bercy-q':7, neuilly:35, boulogne:30, levallois:35, issy:30, 'g-nord':20, 'g-lyon':0, 'g-mont':20 },
+  montparnasse: { cdg:60, orly:30, beauvais:95, opera:20, champs:15, eiffel:15, marais:20, mont:25, latin:12, defense:30, 'bercy-q':25, neuilly:25, boulogne:20, levallois:30, issy:20, 'g-nord':25, 'g-lyon':20, 'g-mont':0 },
+  est: { cdg:40, orly:45, beauvais:80, opera:18, champs:22, eiffel:27, marais:15, mont:18, latin:18, defense:32, 'bercy-q':20, neuilly:28, boulogne:32, levallois:28, issy:35, 'g-nord':5, 'g-lyon':20, 'g-mont':27 },
+  austerlitz: { cdg:50, orly:35, beauvais:85, opera:20, champs:25, eiffel:22, marais:12, mont:30, latin:8, defense:35, 'bercy-q':10, neuilly:30, boulogne:25, levallois:33, issy:25, 'g-nord':20, 'g-lyon':5, 'g-mont':15 },
+  bercy: { cdg:50, orly:35, beauvais:90, opera:22, champs:27, eiffel:30, marais:18, mont:32, latin:15, defense:38, 'bercy-q':5, neuilly:35, boulogne:30, levallois:35, issy:30, 'g-nord':22, 'g-lyon':7, 'g-mont':22 }
+};
+
+const DEST_NOMS = {
+  cdg:'Aéroport CDG', orly:'Aéroport Orly', beauvais:'Aéroport Beauvais',
+  opera:'Opéra / Louvre / Châtelet', champs:'Champs-Élysées / Étoile',
+  eiffel:'Tour Eiffel / Invalides', marais:'Le Marais / Bastille',
+  mont:'Montmartre / Sacré-Cœur', latin:'Quartier Latin',
+  defense:'La Défense', 'bercy-q':'Bercy',
+  neuilly:'Neuilly-sur-Seine', boulogne:'Boulogne-Billancourt',
+  levallois:'Levallois-Perret', issy:'Issy-les-Moulineaux',
+  'g-nord':'Gare du Nord', 'g-lyon':'Gare de Lyon', 'g-mont':'Gare Montparnasse'
+};
+
+// Init segments interactifs
+function initTrajetSegments(){
+  document.querySelectorAll('#tr-bagages button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#tr-bagages button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    };
+  });
+  document.querySelectorAll('#tr-moment button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#tr-moment button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+    };
+  });
+}
+
+function calcTrajet(){
+  const depart = document.getElementById('tr-depart').value;
+  const arrivee = document.getElementById('tr-arrivee').value;
+  const bagages = parseInt(document.querySelector('#tr-bagages button.active').dataset.v);
+  const moment  = document.querySelector('#tr-moment button.active').dataset.v;
+
+  const km = TRAJETS_KM[depart] && TRAJETS_KM[depart][arrivee];
+  const min = TRAJETS_MIN[depart] && TRAJETS_MIN[depart][arrivee];
+
+  if(!km){
+    document.getElementById('tr-resultat').style.display = 'block';
+    document.getElementById('tr-resultat').innerHTML =
+      '<div class="empty"><span class="ei">❓</span>Trajet non disponible. Essaie une autre destination.</div>';
+    return;
+  }
+
+  // Tarifs Paris 2025-2026 (arrêté du 20 janvier 2025)
+  const PRISE = 4.48;
+  // Tarifs kilométriques plafonds (Préfecture de Police de Paris)
+  //   Tarif A : Paris intra-muros en journée (7h-19h) lun-sam
+  //   Tarif B : Paris nuit (19h-7h) ou dim/férié
+  //   Tarif C : Banlieue nuit ou dim/férié
+  //   Tarif D : Banlieue jour
+  const estBanlieue = ['cdg','orly','beauvais','defense','neuilly','boulogne','levallois','issy'].includes(arrivee);
+  const tarifKm = moment === 'nuit'
+    ? (estBanlieue ? 1.96 : 1.61)  // Banlieue nuit / Paris nuit
+    : (estBanlieue ? 1.61 : 1.22); // Banlieue jour / Paris jour
+
+  let prix = PRISE + km * tarifKm;
+  // Supplément bagages (1er bagage gratuit, +2€ par bagage suppl au-delà)
+  if(bagages >= 2) prix += 2 * (bagages - 1);
+  // Minimum course réglementaire 2025 : 8€
+  if(prix < 8) prix = 8;
+
+  // Fourchette ± 15% (trafic)
+  const low  = Math.round(prix * 0.90);
+  const high = Math.round(prix * 1.15);
+
+  // Tarifs forfaitaires aéroports Paris (officiels)
+  let forfaitHtml = '';
+  if(arrivee === 'cdg' || arrivee === 'orly'){
+    // Forfait Paris ↔ CDG = 56€ rive droite, 65€ rive gauche
+    // Forfait Paris ↔ Orly = 36€ rive gauche, 44€ rive droite
+    const forfait = arrivee === 'cdg'
+      ? (['nord','est'].includes(depart) ? 56 : 65)
+      : (['montparnasse','austerlitz'].includes(depart) ? 36 : 44);
+    forfaitHtml = `<div class="tr-info-row" style="background:var(--adim);margin:8px -18px 0;padding:10px 18px;border-radius:0">
+      <span class="k">✓ Forfait aéroport officiel</span>
+      <span class="v" style="color:var(--accent);font-size:16px">${forfait}€</span>
+    </div>`;
+    prix = forfait;
+  }
+
+  const res = document.getElementById('tr-resultat');
+  res.style.display = 'block';
+  res.innerHTML = `<div class="tr-result">
+    <div class="tr-price">${Math.round(prix)}€</div>
+    <div class="tr-range">Fourchette estimée : ${low}€ — ${high}€</div>
+    ${forfaitHtml}
+    <div class="tr-info-row"><span class="k">🛣 Distance</span><span class="v">${km} km</span></div>
+    <div class="tr-info-row"><span class="k">⏱ Durée estimée</span><span class="v">${min} min</span></div>
+    <div class="tr-info-row"><span class="k">💶 Tarif au km</span><span class="v">${tarifKm.toFixed(2)}€</span></div>
+    <div class="tr-info-row"><span class="k">📍 Prise en charge</span><span class="v">${PRISE.toFixed(2)}€</span></div>
+    ${bagages >= 2 ? `<div class="tr-info-row"><span class="k">🧳 Supplément bagages</span><span class="v">+${2*(bagages-1)}€</span></div>` : ''}
+    <div class="tr-disclaimer">Estimation indicative basée sur les tarifs officiels Préfecture de Police de Paris (arrêté du 20 janvier 2025). Prix réel variable selon trafic, itinéraire et suppléments (4e passager, animaux, attente). Forfaits officiels CDG/Orly ↔ Paris intra-muros.</div>
+  </div>`;
+}
+
 /* ═══ DIALOG GARE ═══ */
 function openDialog(gareId){
   const gare = GARES.find(g=>g.id===gareId);
   if(!gare) return;
+
+  // Vibration haptique sur smartphone (feedback tactile)
+  if(navigator.vibrate) navigator.vibrate(15);
 
   document.getElementById('gd-nom').textContent = gare.nom;
   document.getElementById('gd-sub').textContent = gare.sub;
@@ -1807,47 +2166,6 @@ function closeDialog(){
   if(dlg.close) dlg.close(); else dlg.removeAttribute('open');
 }
 
-/* ═══ RENDER SOIR / MÉTÉO ═══ */
-function renderEv(e){
-  return `<div class="ev-card">
-    <div class="ev-top">
-      <div><div class="ev-name">${esc(e.n)}</div><div class="ev-lieu">${esc(e.l)}</div></div>
-      <div class="ev-time"><div class="t">${esc(e.fin)}</div><div class="l">fin</div></div>
-    </div>
-    <div class="ev-info">
-      <div><div class="ik">Capacité</div><div class="iv">${fmtN(e.cap)} pax</div></div>
-      <div style="text-align:right"><div class="ik">Métro</div><div class="iv">${esc(e.m)}</div></div>
-    </div>
-  </div>`;
-}
-
-function renderSoir(){
-  document.getElementById('concerts-list').innerHTML  = STATIC.concerts.map(renderEv).join('');
-  document.getElementById('theatres-list').innerHTML  = STATIC.theatres.map(renderEv).join('');
-  document.getElementById('salons-list').innerHTML    = STATIC.salons.map(renderEv).join('');
-}
-
-function renderMeteo(){
-  document.getElementById('weather-list').innerHTML =
-    '<div class="wgrid">' +
-    STATIC.meteo.map((d,i)=>
-      `<div class="wday${i===0?' today':''}">
-        <div class="wd">${esc(d.j)}</div>
-        <div class="wic">${esc(d.ic)}</div>
-        <div class="wt">${d.t}°</div>
-        <div class="wp">${d.p}%💧</div>
-      </div>`
-    ).join('') +
-    '</div>';
-}
-
-/* ═══ NAVIGATION ═══ */
-function switchTab(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.id===id));
-  document.querySelectorAll('.nav-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
 /* ═══ ÉVÉNEMENTS ═══ */
 document.addEventListener('click', e=>{
   const nb = e.target.closest('.nav-tabs button');
@@ -1876,8 +2194,7 @@ document.addEventListener('visibilitychange', ()=>{
 
 /* ═══ BOOT ═══ */
 function boot(){
-  renderSoir();
-  renderMeteo();
+  initTrajetSegments();
 
   // Charge immédiatement le cache persistant pour avoir des données à l'ouverture
   CACHE = loadCache();
@@ -1887,7 +2204,7 @@ function boot(){
     setPill('cache','CACHE');
     updatePillState();
     renderGares();
-    document.getElementById('src-note').style.display = 'block';
+    
     const oldest = Math.min(...Object.values(CACHE).map(c=>c.ts||0));
     const ageMin = Math.floor((Date.now()-oldest)/60000);
     document.getElementById('rtime-main').textContent = `Dernières données : il y a ${ageMin} min`;
