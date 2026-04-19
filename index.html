@@ -425,6 +425,31 @@ dialog .sheet{
 .rank-row .rk-pax{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--accent)}
 .rank-row .rk-flames{font-size:14px}
 
+/* ═══ ÉVÉNEMENTS (onglet Rush) ═══ */
+.ev-card{
+  background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:12px 14px;margin-bottom:8px;
+}
+.ev-top{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.ev-ico{
+  width:40px;height:40px;border-radius:10px;background:var(--card2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.ev-main{flex:1;min-width:0}
+.ev-titre{font-size:13px;font-weight:800;letter-spacing:-.2px;color:var(--ink);
+  margin-bottom:3px;line-height:1.3}
+.ev-lieu{font-size:10px;color:var(--ink3);font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px}
+.ev-fin{text-align:right;flex-shrink:0}
+.ev-fin-h{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--accent)}
+.ev-fin-l{font-size:8px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--ink3);font-weight:700;margin-top:1px}
+.ev-bot{display:flex;justify-content:space-between;align-items:center;
+  padding-top:8px;border-top:1px solid var(--line);font-size:11px}
+.ev-cap{color:var(--ink2);font-weight:600;font-family:var(--mono)}
+.ev-impact{color:var(--accent);font-weight:700}
+
 /* ═══ TRAJET (onglet Prix course) ═══ */
 .trajet-box{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
@@ -448,6 +473,11 @@ dialog .sheet{
   font-family:inherit;cursor:pointer;
 }
 .tr-segment button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tr-help{
+  font-size:10px;color:var(--ink3);margin-top:8px;line-height:1.6;
+  padding:8px 10px;background:var(--bg);border-radius:8px;
+}
+.tr-help strong{color:var(--accent)}
 .tr-calc-btn{
   width:100%;background:var(--accent);color:#fff;border:none;
   border-radius:12px;padding:14px;font-size:14px;font-weight:800;
@@ -520,19 +550,22 @@ dialog .sheet{
 
   <!-- ══ RUSH — Analyse ══ -->
   <section class="tab" id="tab-stats">
-    <div class="stitle">🔥 Rush maintenant</div>
+    <div class="stitle">🔥 Rush prochaines 25 min</div>
     <div id="rush-now"></div>
 
     <div class="stitle">📈 Meilleures heures aujourd'hui</div>
     <div id="rush-hours"></div>
 
-    <div class="stitle">🏆 Classement gares (prochaine heure)</div>
+    <div class="stitle">🏆 Classement gares (25 min à venir)</div>
     <div id="rush-ranking"></div>
+
+    <div class="stitle">🎤 Événements aujourd'hui · fin de soirée</div>
+    <div id="events-today"></div>
   </section>
 
   <!-- ══ TRAJET — Estimateur course ══ -->
   <section class="tab" id="tab-trajet">
-    <div class="stitle">💶 Estimateur de course taxi</div>
+    <div class="stitle">💶 Estimateur course taxi parisien</div>
 
     <div class="trajet-box">
       <div class="tr-field">
@@ -549,28 +582,43 @@ dialog .sheet{
       <div class="tr-field">
         <label>Arrivée</label>
         <select id="tr-arrivee">
-          <optgroup label="Aéroports">
+          <optgroup label="✈ Aéroports (forfait officiel)">
             <option value="cdg">Aéroport Charles-de-Gaulle (CDG)</option>
             <option value="orly">Aéroport Orly</option>
             <option value="beauvais">Aéroport Beauvais</option>
           </optgroup>
-          <optgroup label="Quartiers Paris">
+          <optgroup label="🏙 Paris intra-muros">
             <option value="opera">Opéra · Louvre · Châtelet</option>
             <option value="champs">Champs-Élysées · Étoile</option>
             <option value="eiffel">Tour Eiffel · Invalides · 7e</option>
             <option value="marais">Le Marais · Bastille · 4e</option>
             <option value="mont">Montmartre · Sacré-Cœur · 18e</option>
             <option value="latin">Quartier Latin · 5e · 6e</option>
-            <option value="defense">La Défense</option>
             <option value="bercy-q">Bercy · 12e est</option>
           </optgroup>
-          <optgroup label="Banlieues affaires">
+          <optgroup label="🏢 Banlieue affaires (zone suburbaine)">
+            <option value="defense">La Défense</option>
             <option value="neuilly">Neuilly-sur-Seine</option>
             <option value="boulogne">Boulogne-Billancourt</option>
             <option value="levallois">Levallois-Perret</option>
             <option value="issy">Issy-les-Moulineaux</option>
           </optgroup>
-          <optgroup label="Autres grandes gares">
+          <optgroup label="🎤 Grandes salles">
+            <option value="bercy_arena">Accor Arena (Bercy)</option>
+            <option value="zenith">Zénith La Villette</option>
+            <option value="olympia">L'Olympia</option>
+            <option value="pleyel">Salle Pleyel</option>
+            <option value="porte_versailles">Paris Expo Porte de Versailles</option>
+            <option value="seine_musicale">La Seine Musicale (Boulogne)</option>
+            <option value="defense_arena">Paris La Défense Arena (Nanterre)</option>
+            <option value="villepinte">Parc Expo Villepinte</option>
+            <option value="bourget">Parc Expo Le Bourget</option>
+            <option value="stade_france">Stade de France (St-Denis)</option>
+          </optgroup>
+          <optgroup label="🎭 Théâtres Paris" id="og-theatres">
+            <!-- Rempli dynamiquement par JS -->
+          </optgroup>
+          <optgroup label="🚂 Autres gares">
             <option value="g-nord">Gare du Nord</option>
             <option value="g-lyon">Gare de Lyon</option>
             <option value="g-mont">Gare Montparnasse</option>
@@ -578,19 +626,17 @@ dialog .sheet{
         </select>
       </div>
       <div class="tr-field">
-        <label>Bagages (nombre)</label>
-        <div class="tr-segment" id="tr-bagages">
-          <button data-v="0" class="active">0</button>
-          <button data-v="1">1</button>
-          <button data-v="2">2</button>
-          <button data-v="3">3+</button>
-        </div>
-      </div>
-      <div class="tr-field">
-        <label>Moment</label>
+        <label>Tarif applicable</label>
         <div class="tr-segment" id="tr-moment">
-          <button data-v="jour" class="active">Jour (7h-19h)</button>
-          <button data-v="nuit">Nuit / WE</button>
+          <button data-v="auto" class="active">🤖 Auto</button>
+          <button data-v="A">A</button>
+          <button data-v="B">B</button>
+          <button data-v="C">C</button>
+        </div>
+        <div class="tr-help">
+          <strong>A</strong> Paris jour sem 10-17h · 1,25€/km &nbsp;·&nbsp;
+          <strong>B</strong> Paris nuit/dim · Banlieue jour · 1,64€/km &nbsp;·&nbsp;
+          <strong>C</strong> Paris dim nuit · Banlieue nuit/dim · 1,79€/km
         </div>
       </div>
       <button class="tr-calc-btn" onclick="calcTrajet()">Calculer le prix</button>
@@ -614,7 +660,7 @@ dialog .sheet{
         <button class="close-btn" id="gd-close">✕</button>
       </div>
       <div class="dstats">
-        <div class="dstat"><div class="dk">Arrivées 20min</div><div class="dv a" id="gd-up">—</div></div>
+        <div class="dstat"><div class="dk">Arrivées 25min</div><div class="dv a" id="gd-up">—</div></div>
         <div class="dstat"><div class="dk">Demande taxi</div><div class="dv" id="gd-pax">—</div></div>
         <div class="dstat"><div class="dk">Retards</div><div class="dv y" id="gd-del">—</div></div>
         <div class="dstat"><div class="dk">Supprimés</div><div class="dv r" id="gd-can">—</div></div>
@@ -630,7 +676,7 @@ dialog .sheet{
 <div class="info-popup" id="info-popup" onclick="if(event.target.id==='info-popup')closeInfo()">
   <div class="info-popup-box">
     <h3>🔥 Demande taxi estimée</h3>
-    <p>L'indicateur estime le nombre de <strong>clients taxi potentiels</strong> dans les <strong>20 prochaines minutes</strong> à chaque gare.</p>
+    <p>L'indicateur estime le nombre de <strong>clients taxi potentiels</strong> dans les <strong>25 prochaines minutes</strong> à chaque gare.</p>
     <p style="font-size:11px;color:var(--ink2)">Eurostar (Londres), Thalys (Bruxelles/Amsterdam) et TGV longue distance (Marseille, Bordeaux…) génèrent beaucoup plus de demande taxi que les trains courts (Lille, Rouen) où la clientèle a Pass Navigo et peu de bagages.</p>
     <div class="scale">
       <div class="scale-row"><div class="scale-ico">🔥🔥🔥🔥</div><div class="scale-txt">Rush — 180+ clients taxi</div></div>
@@ -1641,10 +1687,9 @@ function renderGares(){
 
     const trains   = c.trains || [];
     const upcoming = trains.filter(t => t.min > -15 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
-    const next20   = upcoming.filter(t => t.min <= 20 && t.min >= 0);
-    const next60   = upcoming.filter(t => t.min <= 60 && t.min >= 0);
-    const totalPax = next20.reduce((s,t)=>s+t.passagers, 0);
-    const totalPax60 = next60.reduce((s,t)=>s+t.passagers, 0);
+    const next25   = upcoming.filter(t => t.min <= 25 && t.min >= 0);
+    const totalPax = next25.reduce((s,t)=>s+t.passagers, 0);
+    const totalPax25 = totalPax;
     const flames   = niveauFlammes(totalPax);
     const isPeak   = flames.lvl >= 3;
     const delays   = upcoming.filter(t=>t.retard>0).length;
@@ -1686,7 +1731,7 @@ function renderGares(){
       </div>
       <div class="gc-right">
         <div class="flames lvl${flames.lvl}">${flames.ico}</div>
-        <div class="gc-pax60">${totalPax60} <span class="gc-pax60-unit">/1h</span></div>
+        <div class="gc-pax60">${totalPax25} <span class="gc-pax60-unit">/25min</span></div>
         <div class="aff-label">
           demande taxi
           <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
@@ -1701,21 +1746,21 @@ function openInfo(){ document.getElementById('info-popup').classList.add('show')
 function closeInfo(){ document.getElementById('info-popup').classList.remove('show'); }
 
 /* ═══════════════════════════════════════════════
-   RUSH / STATS — Analyse pour chauffeur
+   RUSH / STATS — Analyse pour chauffeur (fenêtre 25 min)
 ═══════════════════════════════════════════════ */
 function renderStats(){
-  // ─── 1. Rush maintenant : total prochaine heure toutes gares ───
+  // ─── 1. Rush maintenant : total prochaines 25 min toutes gares ───
   let totalPax = 0;
   let nextBig = null;
-  const next60 = []; // trains dans les 60 min
+  const next25 = []; // trains dans les 25 min
 
   for(const gare of GARES){
     const c = CACHE[gare.id];
     if(!c || !c.trains) continue;
     for(const t of c.trains){
-      if(t.min >= 0 && t.min <= 60 && !t.supprime){
+      if(t.min >= 0 && t.min <= 25 && !t.supprime){
         totalPax += t.passagers || 0;
-        next60.push({...t, gareId: gare.id, gareNom: gare.nom, gareIco: gare.ico});
+        next25.push({...t, gareId: gare.id, gareNom: gare.nom, gareIco: gare.ico});
         if(!nextBig || t.passagers > nextBig.passagers){
           nextBig = {...t, gareNom: gare.nom, gareIco: gare.ico};
         }
@@ -1727,13 +1772,14 @@ function renderStats(){
   if(!rushNow) return;
 
   if(totalPax === 0){
-    rushNow.innerHTML = '<div class="empty"><span class="ei">😴</span>Pas de rush dans la prochaine heure</div>';
+    rushNow.innerHTML = '<div class="empty"><span class="ei">😴</span>Pas de rush dans les 25 prochaines minutes</div>';
   } else {
-    const level = totalPax >= 600 ? '🔥🔥🔥🔥 RUSH MAXIMUM'
-               : totalPax >= 300 ? '🔥🔥🔥 Forte demande'
-               : totalPax >= 100 ? '🔥🔥 Demande modérée'
+    // Seuils ajustés pour fenêtre 25 min (plus courte que 60 min)
+    const level = totalPax >= 300 ? '🔥🔥🔥🔥 RUSH MAXIMUM'
+               : totalPax >= 150 ? '🔥🔥🔥 Forte demande'
+               : totalPax >= 50  ? '🔥🔥 Demande modérée'
                : '🔥 Calme';
-    const topClass = totalPax >= 300 ? 'top' : '';
+    const topClass = totalPax >= 150 ? 'top' : '';
 
     let nextHTML = '';
     if(nextBig){
@@ -1748,9 +1794,9 @@ function renderStats(){
     }
 
     rushNow.innerHTML = `<div class="rush-card ${topClass}">
-      <div class="rush-now-title">🔥 Prochaine heure toutes gares</div>
+      <div class="rush-now-title">🔥 Prochaines 25 minutes toutes gares</div>
       <div class="rush-now-big">${totalPax} clients potentiels</div>
-      <div class="rush-now-sub">${level} · ${next60.length} trains à venir</div>
+      <div class="rush-now-sub">${level} · ${next25.length} trains à venir</div>
       ${nextHTML ? '<div class="rush-now-title" style="margin-top:14px">🎯 Prochain gros arrivant</div>' + nextHTML : ''}
     </div>`;
   }
@@ -1798,13 +1844,13 @@ function renderStats(){
       </div>`;
   }
 
-  // ─── 3. Classement gares (prochaine heure) ───
+  // ─── 3. Classement gares (prochaines 25 min) ───
   const ranking = GARES.map(gare => {
     const c = CACHE[gare.id];
     if(!c || !c.trains) return { ...gare, pax: 0, count: 0 };
     let pax = 0, count = 0;
     for(const t of c.trains){
-      if(t.min >= 0 && t.min <= 60 && !t.supprime){
+      if(t.min >= 0 && t.min <= 25 && !t.supprime){
         pax += t.passagers || 0;
         count++;
       }
@@ -1831,45 +1877,274 @@ function renderStats(){
   }
 }
 
+/* ═══════════════════════════════════════════════
+   ÉVÉNEMENTS Paris & Grand Paris — base de données
+   Sources : Accor Arena, Seine Musicale, Paris Expo, Villepinte, Le Bourget
+   Format : date YYYY-MM-DD, heure fin, capacité, lieu + icon + coords
+═══════════════════════════════════════════════ */
+const VENUES = {
+  bercy_arena:      { nom:'Accor Arena',               adr:'Bercy · 12e',              cap:20000, ico:'🎤' },
+  zenith:           { nom:'Zénith La Villette',        adr:'Porte de Pantin · 19e',    cap:6300,  ico:'🎸' },
+  olympia:          { nom:"L'Olympia",                 adr:'Opéra · 9e',               cap:1980,  ico:'🎭' },
+  pleyel:           { nom:'Salle Pleyel',              adr:'Étoile · 8e',              cap:1913,  ico:'🎻' },
+  seine_musicale:   { nom:'La Seine Musicale',         adr:'Boulogne-Billancourt',     cap:6000,  ico:'🎼' },
+  defense_arena:    { nom:'Paris La Défense Arena',    adr:'Nanterre',                 cap:40000, ico:'🏟' },
+  porte_versailles: { nom:'Paris Expo Porte Versailles',adr:'Porte de Versailles · 15e',cap:30000, ico:'🎪' },
+  villepinte:       { nom:'Paris Nord Villepinte',     adr:'Villepinte (93)',          cap:40000, ico:'🏛' },
+  bourget:          { nom:'Parc Expo Le Bourget',      adr:'Le Bourget (93)',          cap:35000, ico:'✈' },
+  stade_france:     { nom:'Stade de France',           adr:'Saint-Denis (93)',         cap:80000, ico:'⚽' }
+};
+
+/* Events avril-mai 2026 (sources : sortiraparis, agendaculturel, infoconcert, expo.paris)
+   Format : { d:"YYYY-MM-DD", fin:"HH:MM", venue:'key', titre:"..." }
+   Ajoute ici les nouveaux événements au fur et à mesure.
+*/
+const EVENTS = [
+  // Accor Arena (Bercy) - avril 2026
+  { d:'2026-04-18', fin:'22:30', venue:'bercy_arena', titre:'Julien Doré - Tournée' },
+  { d:'2026-04-20', fin:'22:30', venue:'bercy_arena', titre:'Sting - My Songs Tour' },
+  { d:'2026-04-21', fin:'22:30', venue:'bercy_arena', titre:'5 Seconds of Summer' },
+  { d:'2026-04-29', fin:'22:30', venue:'bercy_arena', titre:'Naza - Tournée' },
+  { d:'2026-04-30', fin:'22:30', venue:'bercy_arena', titre:'Charlotte Cardin' },
+
+  // Accor Arena - mai 2026
+  { d:'2026-05-02', fin:'22:30', venue:'bercy_arena', titre:'Worakls Orchestra' },
+  { d:'2026-05-03', fin:'22:30', venue:'bercy_arena', titre:'Tame Impala' },
+  { d:'2026-05-10', fin:'17:00', venue:'bercy_arena', titre:'France vs Canada · Hockey' },
+  { d:'2026-05-12', fin:'22:30', venue:'bercy_arena', titre:'Ne-Yo & Akon' },
+  { d:'2026-05-16', fin:'22:30', venue:'bercy_arena', titre:'Twice - K-Pop World Tour' },
+  { d:'2026-05-17', fin:'22:30', venue:'bercy_arena', titre:'Twice - K-Pop World Tour (J2)' },
+  { d:'2026-05-20', fin:'22:30', venue:'bercy_arena', titre:'Star Academy Tour' },
+  { d:'2026-05-23', fin:'22:00', venue:'bercy_arena', titre:'Finales Coupe de France Handball' },
+  { d:'2026-05-24', fin:'19:00', venue:'bercy_arena', titre:'Finales Coupe de France Handball (J2)' },
+
+  // Zénith Paris - avril 2026
+  { d:'2026-04-16', fin:'22:30', venue:'zenith', titre:'Ben Mazué - Famille' },
+  { d:'2026-04-17', fin:'22:30', venue:'zenith', titre:'Ben Mazué - Famille (J2)' },
+  { d:'2026-04-18', fin:'22:30', venue:'zenith', titre:'Ben Mazué - Famille (J3)' },
+
+  // L'Olympia - avril 2026
+  { d:'2026-04-22', fin:'22:30', venue:'olympia', titre:'Cassius (Boombass)' },
+
+  // Seine Musicale (Boulogne) - avril-mai 2026
+  { d:'2026-04-10', fin:'22:30', venue:'seine_musicale', titre:'Festival Chorus (J1)' },
+  { d:'2026-04-11', fin:'22:30', venue:'seine_musicale', titre:'Festival Chorus (J2)' },
+  { d:'2026-04-12', fin:'22:30', venue:'seine_musicale', titre:'Festival Chorus (J3)' },
+  { d:'2026-04-14', fin:'22:00', venue:'seine_musicale', titre:'Ciné-concert' },
+  { d:'2026-04-23', fin:'23:00', venue:'seine_musicale', titre:'Les Flammes Awards 2026 (rap/R&B)' },
+  { d:'2026-04-25', fin:'22:30', venue:'seine_musicale', titre:'Joe Bonamassa (blues rock)' },
+  { d:'2026-05-06', fin:'22:30', venue:'seine_musicale', titre:'Ballet Preljocaj' },
+  { d:'2026-05-15', fin:'22:30', venue:'seine_musicale', titre:'Tayc' },
+  { d:'2026-05-16', fin:'22:30', venue:'seine_musicale', titre:'Tayc (J2)' },
+  { d:'2026-05-28', fin:'22:00', venue:'seine_musicale', titre:'Clair Obscur · Expedition 33' },
+
+  // Paris Expo Porte de Versailles
+  { d:'2026-04-18', fin:'19:00', venue:'porte_versailles', titre:'Gala TCG · Pokémon/Magic (J1)' },
+  { d:'2026-04-19', fin:'19:00', venue:'porte_versailles', titre:'Gala TCG · Pokémon/Magic (J2)' },
+  // Foire de Paris 30 avril - 11 mai (12 jours)
+  { d:'2026-04-30', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris · Ouverture' },
+  { d:'2026-05-01', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-02', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-03', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-04', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-05', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-06', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-07', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-08', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-09', fin:'22:00', venue:'porte_versailles', titre:'Foire de Paris · Nocturne (22h)' },
+  { d:'2026-05-10', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
+  { d:'2026-05-11', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris · Clôture' },
+  { d:'2026-05-29', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J1)' },
+  { d:'2026-05-30', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J2)' },
+  { d:'2026-05-31', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J3)' },
+
+  // Paris Nord Villepinte (salons)
+  { d:'2026-06-15', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J1)' },
+  { d:'2026-06-16', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J2)' },
+  { d:'2026-06-17', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J3)' },
+  { d:'2026-06-18', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J4)' },
+  { d:'2026-06-19', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J5)' },
+
+  // Paris La Défense Arena (Nanterre)
+  { d:'2026-05-30', fin:'22:30', venue:'defense_arena', titre:'Metallica (M72 Tour)' },
+  { d:'2026-05-31', fin:'22:30', venue:'defense_arena', titre:'Metallica (J2)' }
+];
+
+function todayYMD(){
+  const d = new Date();
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+}
+
 function switchTab(id){
   document.querySelectorAll('.nav-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
   document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('active', s.id===id));
-  if(id === 'tab-stats') renderStats();
+  if(id === 'tab-stats'){
+    renderStats();
+    renderEvents();
+  }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+function renderEvents(){
+  const today = todayYMD();
+  const todayEvents = EVENTS.filter(e => e.d === today)
+                            .sort((a,b) => a.fin.localeCompare(b.fin));
+
+  const el = document.getElementById('events-today');
+  if(!el) return;
+
+  if(todayEvents.length === 0){
+    el.innerHTML = '<div class="empty"><span class="ei">📅</span>Aucun événement majeur aujourd\'hui</div>';
+    return;
+  }
+
+  el.innerHTML = todayEvents.map(e => {
+    const v = VENUES[e.venue] || { nom:e.venue, adr:'', cap:0, ico:'🎫' };
+    const impact = v.cap >= 20000 ? '🔥🔥🔥🔥'
+                 : v.cap >= 5000  ? '🔥🔥🔥'
+                 : v.cap >= 2000  ? '🔥🔥' : '🔥';
+    return `<div class="ev-card">
+      <div class="ev-top">
+        <div class="ev-ico">${v.ico}</div>
+        <div class="ev-main">
+          <div class="ev-titre">${esc(e.titre)}</div>
+          <div class="ev-lieu">${esc(v.nom)} · ${esc(v.adr)}</div>
+        </div>
+        <div class="ev-fin">
+          <div class="ev-fin-h">${esc(e.fin)}</div>
+          <div class="ev-fin-l">fin</div>
+        </div>
+      </div>
+      <div class="ev-bot">
+        <span class="ev-cap">👥 ${v.cap.toLocaleString('fr-FR')} pax</span>
+        <span class="ev-impact">${impact} rush sortie</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 /* ═══════════════════════════════════════════════
-   TRAJET — Estimateur course taxi Paris
-   Basé sur tarifs officiels Préfecture de Police 2025 :
-   - Prise en charge : 4,48€ (max)
-   - Tarif A (Paris jour 7h-19h lun-sam) : 1,22€/km
-   - Tarif B (Paris nuit 19h-7h ou dim/férié) : 1,61€/km
-   - Tarif C (banlieue nuit ou dim/férié) : 1,96€/km
-   - Tarif D (banlieue jour) : 1,61€/km
-   - Minimum course : 8€
-   - Supplément bagages : +2€ à partir du 2e bagage
-   - Forfaits aéroport officiels CDG/Orly
-   Source : arrêté du 20 janvier 2025 (JO 1 février 2025)
+   TRAJET — Estimateur course TAXI PARISIEN uniquement
+   Source : arrêté préfectoral Paris (tarifs 2025 en vigueur)
+   Zone : Paris intra-muros (périph inclus) + zone suburbaine (banlieue rattachée)
+
+   GRILLE OFFICIELLE TAXIS PARISIENS :
+   • Prise en charge : 3,00 € (montant réel préfectoral Paris)
+   • Minimum course : 8,00 €
+   • Tarif A : Paris intra-muros JOUR (lun-sam 10h-17h)          → 1,25 €/km
+   • Tarif B : Paris nuit (17h-10h) / dim 7h-24h / fériés
+              OU zone suburbaine JOUR (7h-19h lun-sam)            → 1,64 €/km
+   • Tarif C : Paris nuit profonde dim (0h-7h)
+              OU zone suburbaine nuit (19h-7h) / dim / fériés     → 1,79 €/km
+   • Supplément 5e passager : 5,50 €
+   • Forfaits aéroport directs CDG/Orly ↔ Paris (tous horaires)
 ═══════════════════════════════════════════════ */
 
-// Distances km depuis chaque gare vers destinations (approx Google Maps)
-const TRAJETS_KM = {
-  nord: { cdg:25, orly:25, beauvais:85, opera:3, champs:4, eiffel:6, marais:3.5, mont:4, latin:4, defense:9, 'bercy-q':5, neuilly:7, boulogne:10, levallois:7, issy:10, 'g-nord':0, 'g-lyon':4, 'g-mont':7 },
-  lyon: { cdg:30, orly:20, beauvais:90, opera:4, champs:6, eiffel:7, marais:3, mont:8, latin:4, defense:13, 'bercy-q':1, neuilly:11, boulogne:10, levallois:11, issy:9, 'g-nord':4, 'g-lyon':0, 'g-mont':5 },
-  montparnasse: { cdg:35, orly:15, beauvais:95, opera:4, champs:3, eiffel:4, marais:5, mont:7, latin:3, defense:9, 'bercy-q':7, neuilly:7, boulogne:6, levallois:8, issy:5, 'g-nord':7, 'g-lyon':5, 'g-mont':0 },
-  est: { cdg:22, orly:22, beauvais:82, opera:4, champs:5, eiffel:7, marais:3.5, mont:4, latin:4.5, defense:10, 'bercy-q':5, neuilly:8, boulogne:10, levallois:8, issy:11, 'g-nord':1, 'g-lyon':4, 'g-mont':7 },
-  austerlitz: { cdg:28, orly:17, beauvais:85, opera:4, champs:6, eiffel:6, marais:3, mont:8, latin:2, defense:11, 'bercy-q':2, neuilly:9, boulogne:8, levallois:10, issy:8, 'g-nord':5, 'g-lyon':1, 'g-mont':4 },
-  bercy: { cdg:28, orly:18, beauvais:90, opera:5, champs:7, eiffel:8, marais:4, mont:9, latin:4, defense:12, 'bercy-q':1, neuilly:11, boulogne:10, levallois:11, issy:9, 'g-nord':5, 'g-lyon':1, 'g-mont':6 }
+// Quartier/destination → "paris" (intra-muros) ou "banlieue" (suburbaine)
+const ZONES = {
+  // Paris intra-muros
+  opera:'paris', champs:'paris', eiffel:'paris', marais:'paris',
+  mont:'paris', latin:'paris', 'bercy-q':'paris',
+  'g-nord':'paris', 'g-lyon':'paris', 'g-mont':'paris',
+  // Banlieue suburbaine
+  cdg:'banlieue', orly:'banlieue', beauvais:'banlieue',
+  defense:'banlieue', neuilly:'banlieue', boulogne:'banlieue',
+  levallois:'banlieue', issy:'banlieue',
+  // Sites événements (grandes salles)
+  bercy_arena:'paris', zenith:'paris', olympia:'paris', pleyel:'paris',
+  porte_versailles:'paris',
+  seine_musicale:'banlieue', defense_arena:'banlieue',
+  villepinte:'banlieue', bourget:'banlieue',
+  stade_france:'banlieue',
+  // Tous les théâtres parisiens (intra-muros)
+  th_marigny:'paris', th_mogador:'paris', th_chatelet:'paris', th_ville:'paris',
+  th_comedie_francaise:'paris', th_odeon:'paris', th_opera_garnier:'paris',
+  th_opera_bastille:'paris', th_opera_comique:'paris', th_champs_elysees:'paris',
+  th_casino:'paris', th_folies_bergere:'paris', th_edouard7:'paris',
+  th_michodiere:'paris', th_bouffes_parisiens:'paris', th_bouffes_nord:'paris',
+  th_pepiniere:'paris', th_varietes:'paris', th_gymnase:'paris',
+  th_nouveautes:'paris', th_stgeorges:'paris', th_antoine:'paris',
+  th_renaissance:'paris', th_ambigu:'paris', th_rive_gauche:'paris',
+  th_splendid:'paris', th_atelier:'paris', th_madeleine:'paris',
+  th_palais_royal:'paris', th_gaite:'paris', th_bobino:'paris',
+  th_grandpv:'paris', th_lucernaire:'paris',
+  // Café-théâtres / petites salles
+  th_cafegare:'paris', th_contrescarpe:'paris', th_comedie_bastille:'paris',
+  th_comedie_paris:'paris', th_comedie_odeon:'paris', th_daunou:'paris',
+  th_10h:'paris', th_2anes:'paris', th_edgar:'paris', th_tristan:'paris',
+  th_stmartin:'paris', th_potiniere:'paris', th_comedia:'paris',
+  th_funambules:'paris',
+  // Comedy clubs
+  th_sarfati:'paris', th_jamel:'paris', th_pv:'paris', th_blancs:'paris',
+  // Salles concerts complémentaires
+  th_bataclan:'paris', th_cigale:'paris', th_cirque_hiver:'paris',
+  th_trianon:'paris', th_elysee_mmtre:'paris', th_cafe_danse:'paris',
+  th_new_morning:'paris', th_petit_bain:'paris', th_maroquinerie:'paris',
+  th_fleche_or:'paris', th_boule_noire:'paris', th_machine_mr:'paris',
+  th_rex:'paris', th_cabaret_sauvage:'paris', th_gaite_lyrique:'paris',
+  th_philharmonie:'paris', th_cite_musique:'paris', th_gaveau:'paris',
+  th_radio_france:'paris', th_rond_point:'paris',
+  th_13:'paris', th_14:'paris', th_71:'banlieue'
 };
 
-// Temps trajet moyen (minutes) - ajusté pour trafic Paris
+/**
+ * Détermine le tarif kilométrique réglementaire selon heure, jour, zone
+ * @param {string} arrivee - code destination
+ * @param {string} moment - 'A' | 'B' | 'C' (forcé par l'utilisateur)
+ */
+function tarifKmParisien(zone, moment){
+  // Moment 'A' = Paris jour semaine 10-17h
+  // Moment 'B' = Paris soir/nuit ou banlieue jour
+  // Moment 'C' = Paris nuit dimanche ou banlieue nuit/dimanche
+  if(moment === 'A') return { tarif:'A', km:1.25, libelle:'Tarif A · Paris jour semaine' };
+  if(moment === 'B') return { tarif:'B', km:1.64, libelle:'Tarif B · Paris nuit/dim ou banlieue jour' };
+  if(moment === 'C') return { tarif:'C', km:1.79, libelle:'Tarif C · Nuit banlieue ou dim profond' };
+  return { tarif:'A', km:1.25, libelle:'Tarif A' };
+}
+
+/**
+ * Calcule automatiquement quel tarif A/B/C s'applique selon la date/heure actuelle
+ * et la zone de destination (intra-muros vs banlieue)
+ */
+function tarifAutoNow(zone){
+  const now = new Date();
+  const j = now.getDay(); // 0=dim, 6=sam
+  const h = now.getHours();
+  const ferie = false; // simplifié ; possible à étendre
+
+  if(zone === 'paris'){
+    // Paris nuit profonde DIMANCHE 0h-7h = C
+    if((j === 0 || ferie) && h < 7) return 'C';
+    // Paris nuit 17h-10h OU dimanche 7h-24h = B
+    if(h >= 17 || h < 10 || j === 0 || ferie) return 'B';
+    // Paris jour lun-sam 10h-17h = A
+    return 'A';
+  } else {
+    // Banlieue nuit 19h-7h OU dim/ferié = C
+    if(h >= 19 || h < 7 || j === 0 || ferie) return 'C';
+    // Banlieue jour lun-sam 7h-19h = B
+    return 'B';
+  }
+}
+
+// Distances km taxi depuis chaque gare vers destinations
+const TRAJETS_KM = {
+  nord:         { cdg:25, orly:25, beauvais:85, opera:3.5, champs:4, eiffel:6, marais:3.5, mont:4, latin:4, defense:9, 'bercy-q':5, neuilly:7, boulogne:10, levallois:7, issy:10, 'g-nord':0, 'g-lyon':4, 'g-mont':7, bercy_arena:5, zenith:5, olympia:3, pleyel:5, porte_versailles:8, seine_musicale:12, defense_arena:10, villepinte:22, bourget:16, stade_france:7 },
+  lyon:         { cdg:30, orly:20, beauvais:90, opera:4, champs:6, eiffel:7, marais:3, mont:8, latin:4, defense:13, 'bercy-q':1, neuilly:11, boulogne:10, levallois:11, issy:9, 'g-nord':4, 'g-lyon':0, 'g-mont':5, bercy_arena:1, zenith:6, olympia:4, pleyel:7, porte_versailles:6, seine_musicale:12, defense_arena:14, villepinte:28, bourget:20, stade_france:10 },
+  montparnasse: { cdg:35, orly:15, beauvais:95, opera:4, champs:3, eiffel:4, marais:5, mont:7, latin:3, defense:9, 'bercy-q':7, neuilly:7, boulogne:6, levallois:8, issy:5, 'g-nord':7, 'g-lyon':5, 'g-mont':0, bercy_arena:6, zenith:10, olympia:4, pleyel:5, porte_versailles:3, seine_musicale:8, defense_arena:10, villepinte:32, bourget:22, stade_france:12 },
+  est:          { cdg:22, orly:22, beauvais:82, opera:4, champs:5, eiffel:7, marais:3.5, mont:4, latin:4.5, defense:10, 'bercy-q':5, neuilly:8, boulogne:10, levallois:8, issy:11, 'g-nord':1, 'g-lyon':4, 'g-mont':7, bercy_arena:5, zenith:5, olympia:3, pleyel:5, porte_versailles:9, seine_musicale:13, defense_arena:11, villepinte:20, bourget:14, stade_france:7 },
+  austerlitz:   { cdg:28, orly:17, beauvais:85, opera:4, champs:6, eiffel:6, marais:3, mont:8, latin:2, defense:11, 'bercy-q':2, neuilly:9, boulogne:8, levallois:10, issy:8, 'g-nord':5, 'g-lyon':1, 'g-mont':4, bercy_arena:2, zenith:6, olympia:5, pleyel:7, porte_versailles:6, seine_musicale:10, defense_arena:13, villepinte:28, bourget:20, stade_france:10 },
+  bercy:        { cdg:28, orly:18, beauvais:90, opera:5, champs:7, eiffel:8, marais:4, mont:9, latin:4, defense:12, 'bercy-q':1, neuilly:11, boulogne:10, levallois:11, issy:9, 'g-nord':5, 'g-lyon':1, 'g-mont':6, bercy_arena:1, zenith:6, olympia:5, pleyel:8, porte_versailles:7, seine_musicale:12, defense_arena:14, villepinte:28, bourget:20, stade_france:11 }
+};
+
+// Temps trajet moyen (min) - ajusté trafic Paris
 const TRAJETS_MIN = {
-  nord: { cdg:45, orly:45, beauvais:80, opera:15, champs:20, eiffel:25, marais:15, mont:20, latin:20, defense:30, 'bercy-q':20, neuilly:25, boulogne:30, levallois:25, issy:35, 'g-nord':0, 'g-lyon':20, 'g-mont':25 },
-  lyon: { cdg:55, orly:40, beauvais:90, opera:20, champs:25, eiffel:25, marais:15, mont:30, latin:15, defense:40, 'bercy-q':7, neuilly:35, boulogne:30, levallois:35, issy:30, 'g-nord':20, 'g-lyon':0, 'g-mont':20 },
-  montparnasse: { cdg:60, orly:30, beauvais:95, opera:20, champs:15, eiffel:15, marais:20, mont:25, latin:12, defense:30, 'bercy-q':25, neuilly:25, boulogne:20, levallois:30, issy:20, 'g-nord':25, 'g-lyon':20, 'g-mont':0 },
-  est: { cdg:40, orly:45, beauvais:80, opera:18, champs:22, eiffel:27, marais:15, mont:18, latin:18, defense:32, 'bercy-q':20, neuilly:28, boulogne:32, levallois:28, issy:35, 'g-nord':5, 'g-lyon':20, 'g-mont':27 },
-  austerlitz: { cdg:50, orly:35, beauvais:85, opera:20, champs:25, eiffel:22, marais:12, mont:30, latin:8, defense:35, 'bercy-q':10, neuilly:30, boulogne:25, levallois:33, issy:25, 'g-nord':20, 'g-lyon':5, 'g-mont':15 },
-  bercy: { cdg:50, orly:35, beauvais:90, opera:22, champs:27, eiffel:30, marais:18, mont:32, latin:15, defense:38, 'bercy-q':5, neuilly:35, boulogne:30, levallois:35, issy:30, 'g-nord':22, 'g-lyon':7, 'g-mont':22 }
+  nord:         { cdg:45, orly:45, beauvais:80, opera:15, champs:20, eiffel:25, marais:15, mont:20, latin:20, defense:30, 'bercy-q':20, neuilly:25, boulogne:30, levallois:25, issy:35, 'g-nord':0, 'g-lyon':20, 'g-mont':25, bercy_arena:20, zenith:20, olympia:15, pleyel:20, porte_versailles:30, seine_musicale:35, defense_arena:30, villepinte:40, bourget:30, stade_france:22 },
+  lyon:         { cdg:55, orly:40, beauvais:90, opera:20, champs:25, eiffel:25, marais:15, mont:30, latin:15, defense:40, 'bercy-q':7, neuilly:35, boulogne:30, levallois:35, issy:30, 'g-nord':20, 'g-lyon':0, 'g-mont':20, bercy_arena:7, zenith:25, olympia:20, pleyel:30, porte_versailles:25, seine_musicale:35, defense_arena:40, villepinte:50, bourget:38, stade_france:28 },
+  montparnasse: { cdg:60, orly:30, beauvais:95, opera:20, champs:15, eiffel:15, marais:20, mont:25, latin:12, defense:30, 'bercy-q':25, neuilly:25, boulogne:20, levallois:30, issy:20, 'g-nord':25, 'g-lyon':20, 'g-mont':0, bercy_arena:25, zenith:30, olympia:20, pleyel:25, porte_versailles:12, seine_musicale:25, defense_arena:30, villepinte:55, bourget:42, stade_france:30 },
+  est:          { cdg:40, orly:45, beauvais:80, opera:18, champs:22, eiffel:27, marais:15, mont:18, latin:18, defense:32, 'bercy-q':20, neuilly:28, boulogne:32, levallois:28, issy:35, 'g-nord':5, 'g-lyon':20, 'g-mont':27, bercy_arena:20, zenith:20, olympia:18, pleyel:25, porte_versailles:30, seine_musicale:40, defense_arena:32, villepinte:35, bourget:28, stade_france:20 },
+  austerlitz:   { cdg:50, orly:35, beauvais:85, opera:20, champs:25, eiffel:22, marais:12, mont:30, latin:8, defense:35, 'bercy-q':10, neuilly:30, boulogne:25, levallois:33, issy:25, 'g-nord':20, 'g-lyon':5, 'g-mont':15, bercy_arena:10, zenith:22, olympia:20, pleyel:30, porte_versailles:25, seine_musicale:30, defense_arena:35, villepinte:50, bourget:38, stade_france:28 },
+  bercy:        { cdg:50, orly:35, beauvais:90, opera:22, champs:27, eiffel:30, marais:18, mont:32, latin:15, defense:38, 'bercy-q':5, neuilly:35, boulogne:30, levallois:35, issy:30, 'g-nord':22, 'g-lyon':7, 'g-mont':22, bercy_arena:5, zenith:25, olympia:22, pleyel:30, porte_versailles:28, seine_musicale:35, defense_arena:38, villepinte:50, bourget:38, stade_france:30 }
 };
 
 const DEST_NOMS = {
@@ -1877,33 +2152,155 @@ const DEST_NOMS = {
   opera:'Opéra / Louvre / Châtelet', champs:'Champs-Élysées / Étoile',
   eiffel:'Tour Eiffel / Invalides', marais:'Le Marais / Bastille',
   mont:'Montmartre / Sacré-Cœur', latin:'Quartier Latin',
-  defense:'La Défense', 'bercy-q':'Bercy',
+  defense:'La Défense (affaires)', 'bercy-q':'Bercy / 12e',
   neuilly:'Neuilly-sur-Seine', boulogne:'Boulogne-Billancourt',
   levallois:'Levallois-Perret', issy:'Issy-les-Moulineaux',
-  'g-nord':'Gare du Nord', 'g-lyon':'Gare de Lyon', 'g-mont':'Gare Montparnasse'
+  'g-nord':'Gare du Nord', 'g-lyon':'Gare de Lyon', 'g-mont':'Gare Montparnasse',
+  bercy_arena:'Accor Arena (Bercy)', zenith:'Zénith La Villette',
+  olympia:'L\'Olympia', pleyel:'Salle Pleyel', porte_versailles:'Paris Expo Porte de Versailles',
+  seine_musicale:'La Seine Musicale', defense_arena:'Paris La Défense Arena',
+  villepinte:'Parc Expo Villepinte', bourget:'Parc Expo Le Bourget',
+  stade_france:'Stade de France'
 };
+
+/* ═══ THÉÂTRES PARISIENS ═══
+   Chaque théâtre est rattaché à un quartier "proxy" existant (opera, champs, marais, etc.)
+   → les distances/temps sont héritées automatiquement.
+   On fait juste des petits ajustements quand le théâtre est loin du proxy.
+*/
+const THEATRES = {
+  // Grands théâtres "Opéra/Madeleine/2e"
+  th_mogador:          { nom:'Théâtre Mogador',           adr:'9e · M12 Trinité',           proxy:'opera' },
+  th_opera_garnier:    { nom:'Opéra Garnier',             adr:'9e · M3/7/8 Opéra',          proxy:'opera' },
+  th_opera_comique:    { nom:'Opéra Comique',             adr:'2e · M3/7/8 Opéra',          proxy:'opera' },
+  th_bouffes_parisiens:{ nom:'Bouffes-Parisiens',         adr:'2e · M3/7/8 Opéra',          proxy:'opera' },
+  th_varietes:         { nom:'Théâtre des Variétés',      adr:'2e · M8/9 Grands Boulevards',proxy:'opera' },
+  th_gymnase:          { nom:'Théâtre du Gymnase',        adr:'10e · M8/9 Bonne Nouvelle',  proxy:'opera' },
+  th_nouveautes:       { nom:'Théâtre des Nouveautés',    adr:'9e · M8/9 Grands Boulevards',proxy:'opera' },
+  th_michodiere:       { nom:'Théâtre de la Michodière',  adr:'2e · M3 Quatre-Septembre',   proxy:'opera' },
+  th_daunou:           { nom:'Théâtre Daunou',            adr:'2e · M3/7/8 Opéra',          proxy:'opera' },
+  th_madeleine:        { nom:'Théâtre de la Madeleine',   adr:'8e · M8/12/14 Madeleine',    proxy:'opera' },
+  th_palais_royal:     { nom:'Théâtre du Palais-Royal',   adr:'1er · M1/7 Palais-Royal',    proxy:'opera' },
+  th_comedie_francaise:{ nom:'Comédie-Française',         adr:'1er · M1/7 Palais-Royal',    proxy:'opera' },
+  th_chatelet:         { nom:'Théâtre du Châtelet',       adr:'1er · M1/4/7/11/14 Châtelet',proxy:'opera' },
+  th_ville:            { nom:'Théâtre de la Ville',       adr:'4e · M1/4/7/11/14 Châtelet', proxy:'opera' },
+  th_potiniere:        { nom:'Théâtre de la Potinière',   adr:'1er · M1/7 Palais-Royal',    proxy:'opera' },
+
+  // Champs-Élysées / 8e / Étoile
+  th_marigny:          { nom:'Théâtre Marigny',           adr:'8e · M1/13 Champs-Élysées',  proxy:'champs' },
+  th_champs_elysees:   { nom:'Théâtre des Champs-Élysées',adr:'8e · M9 Alma-Marceau',       proxy:'champs' },
+  th_edouard7:         { nom:'Théâtre Édouard VII',       adr:'9e · M3/7/8 Opéra',          proxy:'opera' },
+  th_pepiniere:        { nom:'Théâtre de la Pépinière',   adr:'2e · M3 Quatre-Septembre',   proxy:'opera' },
+  th_casino:           { nom:'Casino de Paris',           adr:'9e · M12 Trinité',           proxy:'opera' },
+  th_folies_bergere:   { nom:'Folies Bergère',            adr:'9e · M7 Cadet',              proxy:'opera' },
+  th_gaveau:           { nom:'Salle Gaveau',              adr:'8e · M9/13 Miromesnil',      proxy:'champs' },
+  th_rond_point:       { nom:'Théâtre du Rond-Point',     adr:'8e · M1/13 Champs-Élysées',  proxy:'champs' },
+
+  // Marais / Bastille
+  th_antoine:          { nom:'Théâtre Antoine',           adr:'10e · M8/9 Strasbourg-St-Denis', proxy:'opera' },
+  th_renaissance:      { nom:'Théâtre de la Renaissance', adr:'10e · M4/8/9 Strasbourg-St-Denis', proxy:'opera' },
+  th_ambigu:           { nom:"Théâtre de l'Ambigu",       adr:'10e · M4 Strasbourg-St-Denis', proxy:'opera' },
+  th_stmartin:         { nom:'Théâtre de la Porte Saint-Martin', adr:'10e · M4/8/9 Strasbourg', proxy:'opera' },
+  th_comedie_bastille: { nom:'Comédie Bastille',          adr:'11e · M1/5/8 Bastille',      proxy:'marais' },
+  th_cafegare:         { nom:'Café de la Gare',           adr:'4e · M11 Rambuteau',         proxy:'marais' },
+  th_bataclan:         { nom:'Le Bataclan',               adr:'11e · M5/9 Oberkampf',       proxy:'marais' },
+  th_cirque_hiver:     { nom:"Cirque d'Hiver Bouglione",  adr:'11e · M5/8/9 République',    proxy:'marais' },
+  th_cafe_danse:       { nom:'Café de la Danse',          adr:'11e · M1/5/8 Bastille',      proxy:'marais' },
+
+  // Montmartre / 18e
+  th_atelier:          { nom:"Théâtre de l'Atelier",      adr:'18e · M2 Anvers',            proxy:'mont' },
+  th_stgeorges:        { nom:'Théâtre Saint-Georges',     adr:'9e · M12 Saint-Georges',     proxy:'mont' },
+  th_trianon:          { nom:'Le Trianon',                adr:'18e · M2 Anvers',            proxy:'mont' },
+  th_elysee_mmtre:     { nom:'Élysée Montmartre',         adr:'18e · M2 Anvers',            proxy:'mont' },
+  th_cigale:           { nom:'La Cigale',                 adr:'18e · M2 Pigalle',           proxy:'mont' },
+  th_boule_noire:      { nom:'La Boule Noire',            adr:'18e · M2 Pigalle',           proxy:'mont' },
+  th_machine_mr:       { nom:'La Machine du Moulin Rouge',adr:'18e · M2 Blanche',           proxy:'mont' },
+  th_2anes:            { nom:'Théâtre des Deux Ânes',     adr:'18e · M2 Blanche',           proxy:'mont' },
+  th_funambules:       { nom:'Les Funambules',            adr:'18e · M2 Anvers',            proxy:'mont' },
+  th_comedia:          { nom:'Théâtre Comedia',           adr:'10e · M7 Château-Landon',    proxy:'opera' },
+
+  // Quartier Latin / 5e-6e
+  th_odeon:            { nom:"Théâtre de l'Odéon",        adr:'6e · M4/10 Odéon',           proxy:'latin' },
+  th_contrescarpe:     { nom:'Théâtre de la Contrescarpe',adr:'5e · M7 Place Monge',        proxy:'latin' },
+  th_lucernaire:       { nom:'Le Lucernaire',             adr:'6e · M4 Saint-Placide',      proxy:'latin' },
+  th_comedie_odeon:    { nom:'Comédie Odéon',             adr:'6e · M4/10 Odéon',           proxy:'latin' },
+  th_10h:              { nom:'Théâtre des Dix Heures',    adr:'18e · M2/12 Pigalle',        proxy:'mont' },
+  th_jamel:            { nom:'Jamel Comedy Club',         adr:'10e · M7/9 Faubourg-Poissonnière', proxy:'opera' },
+  th_pv:               { nom:'Le Point Virgule',          adr:'4e · M11 Rambuteau',         proxy:'marais' },
+  th_grandpv:          { nom:'Le Grand Point-Virgule',    adr:'15e · M12 Vaugirard',        proxy:'eiffel' },
+  th_blancs:           { nom:'Café-Théâtre des Blancs Manteaux', adr:'4e · M11 Rambuteau',   proxy:'marais' },
+  th_sarfati:          { nom:'Madame Sarfati Comedy Club',adr:'1er · M4 Les Halles',        proxy:'opera' },
+
+  // Montparnasse / 14e
+  th_gaite:            { nom:'Théâtre Gaîté Montparnasse',adr:'14e · M4/6/12/13 Montparnasse', proxy:'g-mont' },
+  th_bobino:           { nom:'Bobino',                    adr:'14e · M4 Vavin',             proxy:'g-mont' },
+  th_splendid:         { nom:'Le Splendid',               adr:'10e · M7 Château-Landon',    proxy:'opera' },
+  th_rive_gauche:      { nom:'Théâtre Rive Gauche',       adr:'14e · M4/6/12/13 Montparnasse', proxy:'g-mont' },
+  th_tristan:          { nom:'Théâtre Tristan Bernard',   adr:'8e · M2 Villiers',           proxy:'champs' },
+  th_14:               { nom:'Théâtre 14',                adr:'14e · M13 Porte de Vanves',  proxy:'g-mont' },
+  th_13:               { nom:'Théâtre 13',                adr:'13e · M7 Porte d\'Italie',   proxy:'latin' },
+
+  // Opéra Bastille
+  th_opera_bastille:   { nom:'Opéra Bastille',            adr:'12e · M1/5/8 Bastille',      proxy:'marais' },
+
+  // Concerts / petites salles
+  th_new_morning:      { nom:'New Morning',               adr:'10e · M4/8/9 Château d\'Eau',proxy:'opera' },
+  th_maroquinerie:     { nom:'La Maroquinerie',           adr:'20e · M3 Gambetta',          proxy:'marais' },
+  th_fleche_or:        { nom:"La Flèche d'Or",            adr:'20e · M3 Gambetta',          proxy:'marais' },
+  th_rex:              { nom:'Le Rex Club / Grand Rex',   adr:'2e · M8/9 Bonne Nouvelle',   proxy:'opera' },
+  th_cabaret_sauvage:  { nom:'Cabaret Sauvage',           adr:'19e · M7 Porte de la Villette', proxy:'mont' },
+  th_gaite_lyrique:    { nom:'Gaîté Lyrique',             adr:'3e · M3/4/8/9/11 Réaumur',   proxy:'opera' },
+  th_philharmonie:     { nom:'Philharmonie de Paris',     adr:'19e · M5 Porte de Pantin',   proxy:'mont' },
+  th_cite_musique:     { nom:'Cité de la Musique',        adr:'19e · M5 Porte de Pantin',   proxy:'mont' },
+  th_radio_france:     { nom:'Auditorium Radio France',   adr:'16e · M6 Passy',             proxy:'eiffel' },
+  th_petit_bain:       { nom:'Petit Bain',                adr:'13e · M6 Quai de la Gare',   proxy:'latin' },
+
+  // Banlieue
+  th_71:               { nom:'Théâtre 71',                adr:'Malakoff',                   proxy:'issy' }
+};
+
+// Génération automatique des TRAJETS_KM/MIN pour tous les théâtres (via leur proxy)
+function buildTheatreTrajets(){
+  Object.keys(THEATRES).forEach(thId => {
+    const proxy = THEATRES[thId].proxy;
+    DEST_NOMS[thId] = THEATRES[thId].nom;
+    // Pour chaque gare départ, on réutilise la distance du quartier proxy
+    Object.keys(TRAJETS_KM).forEach(gareId => {
+      if(TRAJETS_KM[gareId][proxy] != null){
+        TRAJETS_KM[gareId][thId] = TRAJETS_KM[gareId][proxy];
+      }
+      if(TRAJETS_MIN[gareId][proxy] != null){
+        TRAJETS_MIN[gareId][thId] = TRAJETS_MIN[gareId][proxy];
+      }
+    });
+  });
+}
+buildTheatreTrajets();
 
 // Init segments interactifs
 function initTrajetSegments(){
-  document.querySelectorAll('#tr-bagages button').forEach(b => {
-    b.onclick = () => {
-      document.querySelectorAll('#tr-bagages button').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-    };
-  });
   document.querySelectorAll('#tr-moment button').forEach(b => {
     b.onclick = () => {
       document.querySelectorAll('#tr-moment button').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
     };
   });
+
+  // Remplissage dynamique de l'optgroup théâtres (trié alphabétiquement)
+  const og = document.getElementById('og-theatres');
+  if(og && !og.children.length){
+    const entries = Object.entries(THEATRES)
+      .sort((a,b) => a[1].nom.localeCompare(b[1].nom, 'fr'));
+    og.innerHTML = entries.map(([id, t]) =>
+      `<option value="${id}">${esc(t.nom)} · ${esc(t.adr.split(' · ')[0])}</option>`
+    ).join('');
+  }
 }
 
 function calcTrajet(){
   const depart = document.getElementById('tr-depart').value;
   const arrivee = document.getElementById('tr-arrivee').value;
-  const bagages = parseInt(document.querySelector('#tr-bagages button.active').dataset.v);
-  const moment  = document.querySelector('#tr-moment button.active').dataset.v;
+  const momentChoix = document.querySelector('#tr-moment button.active').dataset.v; // 'auto' | 'A' | 'B' | 'C'
 
   const km = TRAJETS_KM[depart] && TRAJETS_KM[depart][arrivee];
   const min = TRAJETS_MIN[depart] && TRAJETS_MIN[depart][arrivee];
@@ -1915,42 +2312,47 @@ function calcTrajet(){
     return;
   }
 
-  // Tarifs Paris 2025-2026 (arrêté du 20 janvier 2025)
-  const PRISE = 4.48;
-  // Tarifs kilométriques plafonds (Préfecture de Police de Paris)
-  //   Tarif A : Paris intra-muros en journée (7h-19h) lun-sam
-  //   Tarif B : Paris nuit (19h-7h) ou dim/férié
-  //   Tarif C : Banlieue nuit ou dim/férié
-  //   Tarif D : Banlieue jour
-  const estBanlieue = ['cdg','orly','beauvais','defense','neuilly','boulogne','levallois','issy'].includes(arrivee);
-  const tarifKm = moment === 'nuit'
-    ? (estBanlieue ? 1.96 : 1.61)  // Banlieue nuit / Paris nuit
-    : (estBanlieue ? 1.61 : 1.22); // Banlieue jour / Paris jour
+  // === TARIFS OFFICIELS TAXIS PARISIENS 2025 ===
+  const PRISE = 3.00;
+  const MIN_COURSE = 8.00;
 
-  let prix = PRISE + km * tarifKm;
-  // Supplément bagages (1er bagage gratuit, +2€ par bagage suppl au-delà)
-  if(bagages >= 2) prix += 2 * (bagages - 1);
-  // Minimum course réglementaire 2025 : 8€
-  if(prix < 8) prix = 8;
+  // Détermine la zone (intra-muros vs banlieue suburbaine)
+  const zone = ZONES[arrivee] || 'paris';
+  const tarifLettre = momentChoix === 'auto' ? tarifAutoNow(zone) : momentChoix;
+  const t = tarifKmParisien(zone, tarifLettre);
 
-  // Fourchette ± 15% (trafic)
-  const low  = Math.round(prix * 0.90);
-  const high = Math.round(prix * 1.15);
+  let prix = PRISE + km * t.km;
+  // Supplément 5e passager : ici on ne modélise pas le nb passagers ; ignoré pour simplicité
+  // Minimum course
+  if(prix < MIN_COURSE) prix = MIN_COURSE;
 
-  // Tarifs forfaitaires aéroports Paris (officiels)
+  // === FORFAITS OFFICIELS AÉROPORTS (obligatoires si intra-muros ↔ CDG/Orly) ===
+  // Paris ↔ CDG  : 56€ Rive Droite / 65€ Rive Gauche
+  // Paris ↔ Orly : 44€ Rive Droite / 36€ Rive Gauche
   let forfaitHtml = '';
+  let usedForfait = false;
   if(arrivee === 'cdg' || arrivee === 'orly'){
-    // Forfait Paris ↔ CDG = 56€ rive droite, 65€ rive gauche
-    // Forfait Paris ↔ Orly = 36€ rive gauche, 44€ rive droite
+    // Rive Droite / Rive Gauche (gares)
+    //   Rive Droite (Nord) : Gare du Nord, Gare de l'Est
+    //   Rive Gauche (Sud)  : Montparnasse, Austerlitz, Bercy (Bercy limite floue mais RG historique)
+    //   Lyon est sur Rive Droite
+    const riveDroite = ['nord', 'est', 'lyon'].includes(depart);
     const forfait = arrivee === 'cdg'
-      ? (['nord','est'].includes(depart) ? 56 : 65)
-      : (['montparnasse','austerlitz'].includes(depart) ? 36 : 44);
+      ? (riveDroite ? 56 : 65)
+      : (riveDroite ? 44 : 36);
+    const riveLbl = riveDroite ? 'Rive Droite' : 'Rive Gauche';
+    const aeroLbl = arrivee === 'cdg' ? 'Roissy-CDG' : 'Orly';
     forfaitHtml = `<div class="tr-info-row" style="background:var(--adim);margin:8px -18px 0;padding:10px 18px;border-radius:0">
-      <span class="k">✓ Forfait aéroport officiel</span>
-      <span class="v" style="color:var(--accent);font-size:16px">${forfait}€</span>
+      <span class="k">✓ Forfait officiel ${aeroLbl} · ${riveLbl}</span>
+      <span class="v" style="color:var(--accent);font-size:17px">${forfait}€</span>
     </div>`;
     prix = forfait;
+    usedForfait = true;
   }
+
+  // Fourchette ± 12% (trafic)
+  const low  = Math.round(prix * 0.88);
+  const high = Math.round(prix * 1.15);
 
   const res = document.getElementById('tr-resultat');
   res.style.display = 'block';
@@ -1960,11 +2362,14 @@ function calcTrajet(){
     ${forfaitHtml}
     <div class="tr-info-row"><span class="k">🛣 Distance</span><span class="v">${km} km</span></div>
     <div class="tr-info-row"><span class="k">⏱ Durée estimée</span><span class="v">${min} min</span></div>
-    <div class="tr-info-row"><span class="k">💶 Tarif au km</span><span class="v">${tarifKm.toFixed(2)}€</span></div>
-    <div class="tr-info-row"><span class="k">📍 Prise en charge</span><span class="v">${PRISE.toFixed(2)}€</span></div>
-    ${bagages >= 2 ? `<div class="tr-info-row"><span class="k">🧳 Supplément bagages</span><span class="v">+${2*(bagages-1)}€</span></div>` : ''}
-    <div class="tr-disclaimer">Estimation indicative basée sur les tarifs officiels Préfecture de Police de Paris (arrêté du 20 janvier 2025). Prix réel variable selon trafic, itinéraire et suppléments (4e passager, animaux, attente). Forfaits officiels CDG/Orly ↔ Paris intra-muros.</div>
+    ${!usedForfait ? `<div class="tr-info-row"><span class="k">⚡ Tarif appliqué</span><span class="v">${t.tarif} · ${t.km.toFixed(2)}€/km</span></div>` : ''}
+    ${!usedForfait ? `<div class="tr-info-row"><span class="k">📍 Prise en charge</span><span class="v">${PRISE.toFixed(2)}€</span></div>` : ''}
+    ${!usedForfait ? `<div class="tr-info-row" style="font-size:11px;color:var(--ink3)"><span class="k">Zone</span><span class="v" style="color:var(--ink3)">${zone === 'paris' ? 'Paris intra-muros' : 'Suburbaine'}</span></div>` : ''}
+    <div class="tr-disclaimer">Grille officielle taxis parisiens (arrêté préfectoral Paris). Prise en charge 3,00€ · Tarif A 1,25€/km · B 1,64€/km · C 1,79€/km · Minimum course 8€ · Forfaits CDG/Orly ↔ Paris en vigueur. Supplément 5e passager : +5,50€. Prix indicatif, le taximètre fait foi.</div>
   </div>`;
+
+  // Vibration haptique sur smartphone
+  if(navigator.vibrate) navigator.vibrate(10);
 }
 
 /* ═══ DIALOG GARE ═══ */
@@ -1998,14 +2403,14 @@ function openDialog(gareId){
     // Trains à venir (non encore arrivés)
     const future      = trains.filter(t => t.min >= 0 && !t.supprime)
                               .sort((a,b) => a.hRT.localeCompare(b.hRT));
-    // Stats : seulement les trains dans les 20 prochaines minutes
-    const next20      = future.filter(t => t.min <= 20);
-    const totalPax    = next20.reduce((s,t) => s + t.passagers, 0);
+    // Stats : seulement les trains dans les 25 prochaines minutes
+    const next25      = future.filter(t => t.min <= 25);
+    const totalPax    = next25.reduce((s,t) => s + t.passagers, 0);
     const flames      = niveauFlammes(totalPax);
     const delays      = future.filter(t => t.retard > 0).length;
     const cancels     = trains.filter(t => t.supprime).length;
 
-    document.getElementById('gd-up').textContent  = next20.length;
+    document.getElementById('gd-up').textContent  = next25.length;
     document.getElementById('gd-pax').innerHTML   = `<span style="font-size:18px">${flames.ico}</span>`;
     document.getElementById('gd-del').textContent = delays;
     document.getElementById('gd-can').textContent = cancels;
