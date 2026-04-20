@@ -708,8 +708,10 @@ dialog .sheet{
 .em-titre{font-size:22px;font-weight:900;letter-spacing:-.5px;
   color:var(--ink);line-height:1.2;margin-bottom:10px}
 .em-lieu{font-size:13px;color:var(--ink2);font-weight:700;
-  margin-bottom:16px;display:flex;align-items:center;gap:6px}
+  margin-bottom:4px;display:flex;align-items:center;gap:6px}
 .em-lieu-ico{font-size:16px}
+.em-adr{font-size:11px;color:var(--ink3);font-weight:600;
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:16px}
 
 .em-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .em-stat{background:var(--card);border:1px solid var(--line);
@@ -2280,13 +2282,13 @@ const VENUES = {
   cirque_hiver:     { nom:"Cirque d'Hiver Bouglione",     adr:'110 rue Amelot · 11e',             cap:1650,  ico:'🎪', cat:'concert', gare:'Gare de Lyon' },
 
   // Salons / Expo
-  porte_versailles: { nom:'Paris Expo Porte de Versailles',adr:'1 pl. Porte de Versailles · 15e', cap:30000, ico:'🎪', cat:'salon',   gare:'Montparnasse (M12)' },
-  villepinte:       { nom:'Paris Nord Villepinte',        adr:'ZAC Paris Nord 2 · 93',            cap:40000, ico:'🏛', cat:'salon',   gare:'Gare du Nord / Est (RER B)' },
-  bourget:          { nom:'Parc Expo Le Bourget',         adr:'93 Le Bourget',                     cap:35000, ico:'✈', cat:'salon',   gare:'Gare du Nord / Est' },
+  porte_versailles: { nom:'Paris Expo Porte de Versailles',adr:'1 pl. Porte de Versailles · 15e', cap:30000, ico:'🏢', cat:'salon',   gare:'Montparnasse (M12)' },
+  villepinte:       { nom:'Paris Nord Villepinte',        adr:'ZAC Paris Nord 2 · 93',            cap:40000, ico:'🏢', cat:'salon',   gare:'Gare du Nord / Est (RER B)' },
+  bourget:          { nom:'Parc Expo Le Bourget',         adr:'93 Le Bourget',                     cap:35000, ico:'🏢', cat:'salon',   gare:'Gare du Nord / Est' },
   grand_palais:     { nom:'Grand Palais',                 adr:'3 av. Général-Eisenhower · 8e',    cap:15000, ico:'🏛', cat:'salon',   gare:'Gare du Nord / Saint-Lazare' },
-  carreau_temple:   { nom:'Le Carreau du Temple',         adr:'4 rue E. Spuller · 3e',            cap:1500,  ico:'🎪', cat:'salon',   gare:'Gare de l\'Est' },
+  carreau_temple:   { nom:'Le Carreau du Temple',         adr:'4 rue E. Spuller · 3e',            cap:1500,  ico:'🏢', cat:'salon',   gare:'Gare de l\'Est' },
   palais_brongniart:{ nom:'Palais Brongniart',            adr:'28 pl. Bourse · 2e',               cap:2000,  ico:'🏛', cat:'salon',   gare:'Gare du Nord' },
-  parc_floral:      { nom:'Parc Floral de Paris',         adr:'Rte Pyramide · 12e',               cap:20000, ico:'🌸', cat:'salon',   gare:'Gare de Lyon' },
+  parc_floral:      { nom:'Parc Floral de Paris',         adr:'Rte Pyramide · 12e',               cap:20000, ico:'🌳', cat:'salon',   gare:'Gare de Lyon' },
 
   // Théâtres majeurs
   mogador:          { nom:'Théâtre Mogador',              adr:'25 rue Mogador · 9e',              cap:1600,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare' },
@@ -2600,8 +2602,8 @@ function renderTheatres(){
                  : `Se termine à ${critical.fin} (dans ${diffMin} min)`;
     rushEl.innerHTML = `
       <div class="ra-top"><span class="ra-dot"></span><span>CIBLE PREMIUM</span></div>
-      <div class="ra-title">${esc(critical.titre)}</div>
-      <div class="ra-sub">${esc(critical.v.nom)} · ${(critical.v.cap || 0).toLocaleString('fr-FR')} spectateurs · ${statusTxt}</div>
+      <div class="ra-title">${esc(critical.v.nom)}</div>
+      <div class="ra-sub">${esc(critical.titre)} · ${(critical.v.cap || 0).toLocaleString('fr-FR')} pax · ${statusTxt}</div>
       <div class="ra-cta">⚡ Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</div>
     `;
     rushEl.style.display = 'block';
@@ -2664,8 +2666,8 @@ function renderTheatres(){
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">🎭</div>
         <div class="tl-main">
-          <div class="tl-titre">${esc(e.titre)} <span class="tl-tier-chip">${tierLbl}</span></div>
-          <div class="tl-lieu">${esc(e.v.nom || e.venue)}</div>
+          <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-tier-chip">${tierLbl}</span></div>
+          <div class="tl-lieu">${esc(e.titre)}</div>
         </div>
         <div class="tl-right">
           <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
@@ -2729,8 +2731,8 @@ function renderEventsTab(){
                    : `Fin à ${critical.fin} (dans ${diffMin} min)`;
     rushEl.innerHTML = `
       <div class="ra-top"><span class="ra-dot"></span><span>RUSH MAJEUR</span></div>
-      <div class="ra-title">${esc(critical.titre)}</div>
-      <div class="ra-sub">${esc(critical.v.nom)} · ${(critical.v.cap||0).toLocaleString('fr-FR')} spectateurs · ${statusTxt}</div>
+      <div class="ra-title">${esc(critical.v.nom)}</div>
+      <div class="ra-sub">${esc(critical.titre)} · ${(critical.v.cap||0).toLocaleString('fr-FR')} pax · ${statusTxt}</div>
       <div class="ra-cta">⚡ Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</div>
     `;
     rushEl.style.display = 'block';
@@ -2778,8 +2780,8 @@ function renderEventsTab(){
         </div>
         <div class="te-body">
           <div>
-            <div class="te-titre">${CAT_ICO[e.cat] || '🎫'} ${esc(e.titre)}</div>
-            <div class="te-venue">${esc(e.v.nom || e.venue)}</div>
+            <div class="te-titre">${CAT_ICO[e.cat] || '🎫'} ${esc(e.v.nom || e.venue)}</div>
+            <div class="te-venue">${esc(e.titre)}</div>
           </div>
           <div class="te-meta">
             <span class="te-fin">fin ${esc(e.fin)}</span>
@@ -2840,8 +2842,8 @@ function renderEventsTab(){
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">${CAT_ICO[e.cat] || '🎫'}</div>
         <div class="tl-main">
-          <div class="tl-titre">${esc(e.titre)}</div>
-          <div class="tl-lieu">${esc(e.v.nom || e.venue)}</div>
+          <div class="tl-titre">${esc(e.v.nom || e.venue)}</div>
+          <div class="tl-lieu">${esc(e.titre)}</div>
         </div>
         <div class="tl-right">
           <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
@@ -2908,11 +2910,12 @@ function openEvModal(ev){
   const content = document.getElementById('ev-modal-content');
   content.innerHTML = `
     <span class="em-cat-badge ${ev.cat}">${catLbl}</span>
-    <div class="em-titre">${esc(ev.titre)}</div>
+    <div class="em-titre">${esc(v.nom || ev.venue)}</div>
     <div class="em-lieu">
       <span class="em-lieu-ico">${v.ico || '🏛'}</span>
-      <span>${esc(v.nom || ev.venue)}${v.adr ? ' · ' + esc(v.adr) : ''}</span>
+      <span>${esc(ev.titre)}</span>
     </div>
+    ${v.adr ? `<div class="em-adr">${esc(v.adr)}</div>` : ''}
 
     <div class="em-grid">
       <div class="em-stat">
@@ -2967,7 +2970,7 @@ document.addEventListener('keydown', (e) => {
 const MOIS_FR = ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
 const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const JOURS_LONG = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-const CAT_ICO = { concert:'🎤', sport:'⚽', salon:'🎪', theatre:'🎭', arena:'🏟' };
+const CAT_ICO = { concert:'🎤', sport:'⚽', salon:'🏢', theatre:'🎭', arena:'🏟' };
 
 function parseEventDate(ymd){
   const [y,m,d] = ymd.split('-').map(Number);
