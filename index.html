@@ -479,16 +479,25 @@ dialog .sheet{
 
 /* HERO — simple, info-dense */
 .venues-hero{
-  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:16px;
   padding:16px 18px;margin-bottom:14px;
   display:flex;align-items:center;justify-content:space-between;gap:14px;
+  position:relative;
+  overflow:hidden;
 }
-.vh-left{flex:1;min-width:0}
+.venues-hero::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg, rgba(255,69,0,.04) 0%, transparent 40%);
+  pointer-events:none;
+}
+.vh-left{flex:1;min-width:0;position:relative}
 .vh-date{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;
   font-weight:700;color:var(--ink3);margin-bottom:3px}
 .vh-main{font-size:17px;font-weight:900;letter-spacing:-.3px;color:var(--ink);
   line-height:1.25}
-.vh-right{text-align:right;flex-shrink:0;border-left:1px solid var(--line);padding-left:14px}
+.vh-right{text-align:right;flex-shrink:0;border-left:1px solid var(--line);padding-left:14px;position:relative}
 .vh-kpi{font-family:var(--mono);font-size:26px;font-weight:900;
   letter-spacing:-1px;color:var(--accent);line-height:1}
 .vh-kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.8px;
@@ -643,38 +652,157 @@ dialog .sheet{
 }
 .gd-waze:active{transform:scale(.92);background:rgba(5,199,242,.3)}
 
-/* ═══ Tier badges (théâtres prioritaires) ═══ */
+/* ═══ Tier system — FLAMMES (cohérent avec l'app) ═══ */
 .tier-info{
-  background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:11px 13px;margin-bottom:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:12px 14px;margin-bottom:14px;
   font-size:11px;
 }
 .tier-row{
-  display:flex;align-items:center;gap:8px;padding:4px 0;
+  display:flex;align-items:center;gap:10px;padding:5px 0;
   color:var(--ink2);font-weight:600;
 }
-.tier-row+.tier-row{border-top:1px solid var(--line);padding-top:7px;margin-top:3px}
-.tier-badge{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-width:26px;height:22px;border-radius:6px;
-  font-size:10px;font-weight:900;letter-spacing:.3px;flex-shrink:0;
+.tier-row+.tier-row{border-top:1px solid var(--line);padding-top:8px;margin-top:3px}
+.tier-flames{
+  display:inline-flex;align-items:center;flex-shrink:0;
+  font-size:13px;letter-spacing:-1px;
+  min-width:48px;
 }
-.tier-badge.t3{background:var(--accent);color:#fff}
-.tier-badge.t2{background:var(--gold);color:#0D0D0D}
-.tier-badge.t1{background:var(--card2);color:var(--ink2)}
-.tier-desc{color:var(--ink3);font-weight:600;font-size:10px;margin-left:auto}
+.tier-flames.t3{filter:drop-shadow(0 0 4px rgba(255,69,0,.5))}
+.tier-desc{color:var(--ink3);font-weight:600;font-size:10px;margin-left:auto;text-align:right}
 
-/* Timeline row enrichi pour théâtres avec tier */
-.tl-row.tier3{border-left-width:4px;border-left-color:var(--accent)}
+/* Timeline row enrichi avec tier + glow subtil */
+.tl-row.tier3{
+  border-left-width:4px;border-left-color:var(--accent);
+  background:linear-gradient(90deg, rgba(255,69,0,.06) 0%, var(--card) 40%);
+}
+.tl-row.tier3:hover{
+  box-shadow:0 0 0 1px rgba(255,69,0,.3), 0 4px 20px rgba(255,69,0,.12);
+}
 .tl-row.tier2{border-left-width:4px;border-left-color:var(--gold)}
 .tl-row.tier1{border-left-width:3px}
-.tl-row .tl-tier-chip{
-  display:inline-block;background:var(--card2);border-radius:4px;
-  padding:1px 5px;font-size:8px;font-weight:900;letter-spacing:.3px;
-  color:var(--ink3);margin-left:4px;
+
+/* Flammes inline dans les titres (remplace les anciens chips S+/A/B) */
+.tl-flames-inline{
+  display:inline-block;margin-left:5px;font-size:11px;letter-spacing:-1px;
+  vertical-align:middle;
 }
-.tl-row.tier3 .tl-tier-chip{background:var(--accent);color:#fff}
-.tl-row.tier2 .tl-tier-chip{background:var(--gold);color:#0D0D0D}
+.tl-row.tier3 .tl-flames-inline{
+  animation:flamesPulse 2.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 3px rgba(255,69,0,.6));
+}
+@keyframes flamesPulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.85;transform:scale(1.08)}
+}
+
+/* ═══ ANIMATIONS GLOBALES — dynamisme et polish ═══ */
+
+/* Tous les taps ont un feedback visuel doux */
+.tl-row, .top-ev, .gare-card, .vv-card, .vchip, .vf, .tier-row,
+.rush-alert, .em-waze-btn, .tl-waze, .gd-waze {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s ease-out, box-shadow .15s ease-out, border-color .15s ease-out;
+}
+
+/* Fade-in progressif pour le contenu des onglets */
+.tab.active {
+  animation: tabFadeIn .35s ease-out;
+}
+@keyframes tabFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Les lignes timeline entrent en cascade */
+.tl-group .tl-row{
+  animation: rowSlideIn .4s cubic-bezier(.25,.8,.25,1) backwards;
+}
+.tl-group .tl-row:nth-child(2){animation-delay:.04s}
+.tl-group .tl-row:nth-child(3){animation-delay:.08s}
+.tl-group .tl-row:nth-child(4){animation-delay:.12s}
+.tl-group .tl-row:nth-child(5){animation-delay:.16s}
+.tl-group .tl-row:nth-child(6){animation-delay:.20s}
+.tl-group .tl-row:nth-child(7){animation-delay:.24s}
+.tl-group .tl-row:nth-child(n+8){animation-delay:.28s}
+
+@keyframes rowSlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* TOP events entrent avec un effet pop */
+#ev-top .top-ev, #top-events .top-ev{
+  animation: popIn .5s cubic-bezier(.175,.885,.32,1.275) backwards;
+}
+#ev-top .top-ev:nth-child(2), #top-events .top-ev:nth-child(2){animation-delay:.08s}
+#ev-top .top-ev:nth-child(3), #top-events .top-ev:nth-child(3){animation-delay:.16s}
+@keyframes popIn {
+  0%  { opacity: 0; transform: scale(.92) translateY(10px); }
+  100%{ opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Rush alert : apparition depuis le haut */
+.rush-alert{
+  animation: rushSlide .5s cubic-bezier(.175,.885,.32,1.275),
+             pulse-rush 2s ease-in-out infinite .5s;
+}
+@keyframes rushSlide {
+  from { opacity: 0; transform: translateY(-20px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Hero pulse subtil au load */
+.venues-hero{
+  animation: heroFade .45s ease-out;
+}
+@keyframes heroFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI grosse valeur qui compte (petit bounce) */
+.vh-kpi{
+  animation: kpiBounce .6s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes kpiBounce {
+  0%  { transform: scale(.5); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100%{ transform: scale(1); opacity: 1; }
+}
+
+/* Hover states desktop (sans affecter mobile) */
+@media (hover: hover) {
+  .tl-row:hover{ transform: translateX(2px); border-color: var(--ink3); }
+  .top-ev:hover{ transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+  .vv-card:hover{ border-color: var(--ink3); }
+  .vchip:hover{ border-color: var(--accent); color: var(--ink); }
+}
+
+/* Micro-interaction sur les chips filtres */
+.vchip.active{
+  animation: chipActivate .25s ease-out;
+}
+@keyframes chipActivate {
+  0%  { transform: scale(.95); }
+  50% { transform: scale(1.08); }
+  100%{ transform: scale(1); }
+}
+
+/* Rush alert plus discret en animation (moins agressif) */
+@keyframes pulse-rush {
+  0%,100% { box-shadow: 0 6px 24px rgba(255,69,0,.25); }
+  50%     { box-shadow: 0 6px 32px rgba(255,69,0,.45); }
+}
+
+/* Modal opening animation améliorée */
+.ev-modal.show .ev-modal-box{
+  animation: modalPop .35s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes modalPop {
+  0%  { opacity:0; transform: translateY(30px) scale(.94); }
+  100%{ opacity:1; transform: translateY(0) scale(1); }
+}
 
 /* ═══ MODAL Event Details ═══ */
 .ev-modal{
@@ -692,9 +820,7 @@ dialog .sheet{
   border-radius:18px;padding:20px 18px 18px;max-width:480px;width:100%;
   max-height:85vh;overflow-y:auto;
   box-shadow:0 20px 60px rgba(0,0,0,.5);
-  animation:slideUp .25s ease;
 }
-@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
 .ev-modal-close{
   position:absolute;top:12px;right:12px;
   width:30px;height:30px;border-radius:8px;
@@ -905,9 +1031,21 @@ dialog .sheet{
     </div>
 
     <div class="tier-info">
-      <div class="tier-row"><span class="tier-badge t3">S+</span> Garnier · Bastille <span class="tier-desc">clientèle premium, gros pourboires</span></div>
-      <div class="tier-row"><span class="tier-badge t2">A</span> Champs-Élysées · Marigny <span class="tier-desc">quartier huppé</span></div>
-      <div class="tier-row"><span class="tier-badge t1">B</span> Autres théâtres <span class="tier-desc">intérêt moyen</span></div>
+      <div class="tier-row">
+        <span class="tier-flames t3">🔥🔥🔥</span>
+        <span>Opéra Garnier · Bastille</span>
+        <span class="tier-desc">clientèle premium · gros pourboires</span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-flames t2">🔥🔥</span>
+        <span>Champs-Élysées · Marigny · Châtelet · Mogador</span>
+        <span class="tier-desc">quartier huppé</span>
+      </div>
+      <div class="tier-row">
+        <span class="tier-flames t1">🔥</span>
+        <span>Autres théâtres</span>
+        <span class="tier-desc">intérêt moyen</span>
+      </div>
     </div>
 
     <div class="v-toolbar">
@@ -2698,7 +2836,7 @@ function renderTheatres(){
       const isNow = diffMin >= -15 && diffMin <= 45;
       const isPast = diffMin < -15;
       const tier = THEATRE_TIERS[e.venue] || 1;
-      const tierLbl = tier === 3 ? 'S+' : tier === 2 ? 'A' : 'B';
+      const tierFlames = tier === 3 ? '🔥🔥🔥' : tier === 2 ? '🔥🔥' : '🔥';
       let cls = `tier${tier}`;
       if(isNow) cls += ' now-row';
       if(isPast) cls += ' past';
@@ -2707,7 +2845,7 @@ function renderTheatres(){
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">🎭</div>
         <div class="tl-main">
-          <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-tier-chip">${tierLbl}</span></div>
+          <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${tierFlames}</span></div>
           <div class="tl-lieu">${esc(e.titre)}</div>
         </div>
         <div class="tl-right">
@@ -2875,16 +3013,20 @@ function renderEventsTab(){
       const isNow = diffMin >= -15 && diffMin <= 45;
       const isSoon = diffMin > 45 && diffMin <= 120;
       const isPast = diffMin < -15;
-      let cls = '';
-      if(isPast) cls = 'past';
-      else if(isNow) cls = 'now-row';
-      else if(isSoon) cls = 'soon-row';
+      // Tier basé sur capacité pour events (similaire aux flammes gares)
+      const evTier = (e.v.cap || 0) >= 20000 ? 3
+                   : (e.v.cap || 0) >= 5000  ? 2 : 1;
+      const evFlames = evTier === 3 ? '🔥🔥🔥' : evTier === 2 ? '🔥🔥' : '🔥';
+      let cls = `tier${evTier}`;
+      if(isPast) cls += ' past';
+      else if(isNow) cls += ' now-row';
+      else if(isSoon) cls += ' soon-row';
 
       html += `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">${CAT_ICO[e.cat] || '🎫'}</div>
         <div class="tl-main">
-          <div class="tl-titre">${esc(e.v.nom || e.venue)}</div>
+          <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${evFlames}</span></div>
           <div class="tl-lieu">${esc(e.titre)}</div>
         </div>
         <div class="tl-right">
