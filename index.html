@@ -633,6 +633,104 @@ dialog .sheet{
   font-size:11px;font-weight:600}
 .vempty .ei{display:block;font-size:30px;margin-bottom:6px}
 
+/* ═══ Tier badges (théâtres prioritaires) ═══ */
+.tier-info{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:11px 13px;margin-bottom:14px;
+  font-size:11px;
+}
+.tier-row{
+  display:flex;align-items:center;gap:8px;padding:4px 0;
+  color:var(--ink2);font-weight:600;
+}
+.tier-row+.tier-row{border-top:1px solid var(--line);padding-top:7px;margin-top:3px}
+.tier-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:26px;height:22px;border-radius:6px;
+  font-size:10px;font-weight:900;letter-spacing:.3px;flex-shrink:0;
+}
+.tier-badge.t3{background:var(--accent);color:#fff}
+.tier-badge.t2{background:var(--gold);color:#0D0D0D}
+.tier-badge.t1{background:var(--card2);color:var(--ink2)}
+.tier-desc{color:var(--ink3);font-weight:600;font-size:10px;margin-left:auto}
+
+/* Timeline row enrichi pour théâtres avec tier */
+.tl-row.tier3{border-left-width:4px;border-left-color:var(--accent)}
+.tl-row.tier2{border-left-width:4px;border-left-color:var(--gold)}
+.tl-row.tier1{border-left-width:3px}
+.tl-row .tl-tier-chip{
+  display:inline-block;background:var(--card2);border-radius:4px;
+  padding:1px 5px;font-size:8px;font-weight:900;letter-spacing:.3px;
+  color:var(--ink3);margin-left:4px;
+}
+.tl-row.tier3 .tl-tier-chip{background:var(--accent);color:#fff}
+.tl-row.tier2 .tl-tier-chip{background:var(--gold);color:#0D0D0D}
+
+/* ═══ MODAL Event Details ═══ */
+.ev-modal{
+  position:fixed;inset:0;display:none;z-index:1000;
+  align-items:center;justify-content:center;padding:16px;
+}
+.ev-modal.show{display:flex;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.ev-modal-backdrop{
+  position:absolute;inset:0;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(4px);
+}
+.ev-modal-box{
+  position:relative;background:var(--bg2);border:1px solid var(--line);
+  border-radius:18px;padding:20px 18px 18px;max-width:480px;width:100%;
+  max-height:85vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.ev-modal-close{
+  position:absolute;top:12px;right:12px;
+  width:30px;height:30px;border-radius:8px;
+  background:var(--card);border:1px solid var(--line);
+  color:var(--ink2);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;
+}
+.ev-modal-close:active{background:var(--card2)}
+
+.em-cat-badge{
+  display:inline-block;background:var(--accent);color:#fff;
+  padding:4px 10px;border-radius:100px;
+  font-size:10px;font-weight:800;letter-spacing:.6px;
+  text-transform:uppercase;margin-bottom:10px;
+}
+.em-cat-badge.sport{background:var(--green)}
+.em-cat-badge.salon{background:var(--gold);color:#0D0D0D}
+.em-cat-badge.theatre{background:#9B51E0}
+
+.em-titre{font-size:22px;font-weight:900;letter-spacing:-.5px;
+  color:var(--ink);line-height:1.2;margin-bottom:10px}
+.em-lieu{font-size:13px;color:var(--ink2);font-weight:700;
+  margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.em-lieu-ico{font-size:16px}
+
+.em-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.em-stat{background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:10px 11px}
+.em-stat-k{font-size:9px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:700;color:var(--ink3);margin-bottom:3px}
+.em-stat-v{font-family:var(--mono);font-size:17px;font-weight:800;color:var(--ink);
+  letter-spacing:-.3px}
+.em-stat-v.accent{color:var(--accent)}
+.em-stat-v.gold{color:var(--gold)}
+
+.em-bio-title{font-size:11px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:800;color:var(--ink3);margin:14px 0 7px}
+.em-bio{font-size:13px;color:var(--ink);font-weight:500;line-height:1.55}
+
+.em-tips{background:rgba(255,69,0,.08);border:1px solid rgba(255,69,0,.2);
+  border-radius:11px;padding:11px 13px;margin-top:14px}
+.em-tips-hdr{font-size:10px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:800;color:var(--accent);margin-bottom:5px}
+.em-tips-body{font-size:12px;color:var(--ink);font-weight:600;line-height:1.5}
+
 /* ═══ TRAJET (onglet Prix course) ═══ */
 .trajet-box{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
@@ -698,7 +796,8 @@ dialog .sheet{
   <div class="nav-tabs">
     <button class="active" data-tab="tab-now">🚂 Gares</button>
     <button data-tab="tab-stats">📊 Rush</button>
-    <button data-tab="tab-venues">🎫 Salles</button>
+    <button data-tab="tab-theatres">🎭 Théâtres</button>
+    <button data-tab="tab-events">🎫 Events</button>
     <button data-tab="tab-trajet">💶 Trajet</button>
   </div>
 </header>
@@ -747,45 +846,84 @@ dialog .sheet{
     <div id="events-today"></div>
   </section>
 
-  <!-- ══ SALLES — Dashboard chauffeur temps réel ══ -->
-  <section class="tab" id="tab-venues">
+  <!-- ══ THÉÂTRES — Classés par priorité chauffeur ══ -->
+  <section class="tab" id="tab-theatres">
 
-    <!-- Banner fixe en haut : events qui finissent MAINTENANT -->
-    <div id="rush-alert" class="rush-alert" style="display:none"></div>
+    <div id="th-rush-alert" class="rush-alert" style="display:none"></div>
 
-    <!-- Hero résumé -->
     <div class="venues-hero">
       <div class="vh-left">
-        <div class="vh-date" id="vh-date">—</div>
-        <div class="vh-main" id="vh-main">—</div>
+        <div class="vh-date" id="th-date">—</div>
+        <div class="vh-main" id="th-main">Théâtres parisiens · ce soir</div>
       </div>
       <div class="vh-right">
-        <div class="vh-kpi" id="vh-kpi">0</div>
-        <div class="vh-kpi-lbl">events ce soir</div>
+        <div class="vh-kpi" id="th-kpi">0</div>
+        <div class="vh-kpi-lbl">spectacles</div>
       </div>
     </div>
 
-    <!-- TOP 3 : prochains events à cibler -->
-    <div class="stitle" style="margin-top:2px">🎯 À cibler maintenant</div>
-    <div id="top-events"></div>
+    <div class="tier-info">
+      <div class="tier-row"><span class="tier-badge t3">S+</span> Garnier · Bastille <span class="tier-desc">clientèle premium, gros pourboires</span></div>
+      <div class="tier-row"><span class="tier-badge t2">A</span> Champs-Élysées · Marigny <span class="tier-desc">quartier huppé</span></div>
+      <div class="tier-row"><span class="tier-badge t1">B</span> Autres théâtres <span class="tier-desc">intérêt moyen</span></div>
+    </div>
 
-    <!-- Timeline chronologique de la journée -->
     <div class="v-toolbar">
-      <div class="stitle" style="margin:0">📅 Ordre chronologique</div>
-      <div class="v-chips" id="v-day-chips">
-        <button class="vchip active" data-day="0">Aujourd'hui</button>
+      <div class="stitle" style="margin:0">📅 Chronologie</div>
+      <div class="v-chips" id="th-day-chips">
+        <button class="vchip active" data-day="0">Ce soir</button>
         <button class="vchip" data-day="1">Demain</button>
         <button class="vchip" data-day="7">7 jours</button>
       </div>
     </div>
-    <div id="timeline-events"></div>
-
-    <!-- Liste des salles en mode compact, derrière un toggle -->
-    <details class="v-details">
-      <summary class="v-summary">🏟 Voir les 34 salles référencées</summary>
-      <div id="venues-list"></div>
-    </details>
+    <div id="theatres-timeline"></div>
   </section>
+
+  <!-- ══ EVENTS — Concerts, matchs, salons ══ -->
+  <section class="tab" id="tab-events">
+
+    <div id="ev-rush-alert" class="rush-alert" style="display:none"></div>
+
+    <div class="venues-hero">
+      <div class="vh-left">
+        <div class="vh-date" id="ev-date">—</div>
+        <div class="vh-main" id="ev-main">Concerts · Matchs · Salons</div>
+      </div>
+      <div class="vh-right">
+        <div class="vh-kpi" id="ev-kpi">0</div>
+        <div class="vh-kpi-lbl">events ce soir</div>
+      </div>
+    </div>
+
+    <div class="stitle" style="margin-top:2px">🎯 À cibler maintenant</div>
+    <div id="ev-top"></div>
+
+    <div class="v-toolbar">
+      <div class="stitle" style="margin:0">📅 Chronologie</div>
+      <div class="v-chips" id="ev-cat-chips">
+        <button class="vchip active" data-cat="all">Tout</button>
+        <button class="vchip" data-cat="concert">🎤 Concert</button>
+        <button class="vchip" data-cat="sport">⚽ Sport</button>
+        <button class="vchip" data-cat="salon">🎪 Salon</button>
+      </div>
+    </div>
+    <div class="v-chips" id="ev-day-chips" style="margin-bottom:12px">
+      <button class="vchip active" data-day="0">Ce soir</button>
+      <button class="vchip" data-day="1">Demain</button>
+      <button class="vchip" data-day="7">7 jours</button>
+      <button class="vchip" data-day="30">Mois</button>
+    </div>
+    <div id="events-timeline"></div>
+  </section>
+
+  <!-- Modal détails (flottant via classList) -->
+  <div class="ev-modal" id="ev-modal">
+    <div class="ev-modal-backdrop" onclick="closeEvModal()"></div>
+    <div class="ev-modal-box">
+      <button class="ev-modal-close" onclick="closeEvModal()">✕</button>
+      <div id="ev-modal-content"></div>
+    </div>
+  </div>
 
   <!-- ══ TRAJET — Estimateur course ══ -->
   <section class="tab" id="tab-trajet">
@@ -2285,8 +2423,51 @@ const EVENTS = [
   { d:'2026-04-22', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
   { d:'2026-04-23', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
   { d:'2026-04-24', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
-  { d:'2026-04-25', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical (matinée + soirée)',      cat:'theatre' },
-  { d:'2026-04-20', fin:'22:45', venue:'marigny',        titre:'Amadeus',                                       cat:'theatre' }
+  { d:'2026-04-25', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
+  { d:'2026-04-20', fin:'22:45', venue:'marigny',        titre:'Amadeus',                                       cat:'theatre' },
+
+  // ═══ OPÉRA BASTILLE — Roméo et Juliette (Noureev) du 2 avril au 12 mai 2026 ═══
+  { d:'2026-04-20', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-04-22', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-04-24', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-04-26', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-04-28', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-04-30', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-05-02', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-05-05', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-05-07', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet',          cat:'theatre' },
+  { d:'2026-05-10', fin:'22:30', venue:'opera_bastille', titre:'Roméo et Juliette · Noureev · Ballet · Clôture',cat:'theatre' },
+
+  // ═══ OPÉRA BASTILLE — Rusalka (Dvořák) 2 → 20 mai 2026 ═══
+  { d:'2026-05-03', fin:'23:00', venue:'opera_bastille', titre:'Rusalka · Dvořák · Opéra',                      cat:'theatre' },
+  { d:'2026-05-06', fin:'23:00', venue:'opera_bastille', titre:'Rusalka · Dvořák · Opéra',                      cat:'theatre' },
+  { d:'2026-05-09', fin:'23:00', venue:'opera_bastille', titre:'Rusalka · Dvořák · Opéra',                      cat:'theatre' },
+  { d:'2026-05-12', fin:'23:00', venue:'opera_bastille', titre:'Rusalka · Dvořák · Opéra',                      cat:'theatre' },
+  { d:'2026-05-15', fin:'23:00', venue:'opera_bastille', titre:'Rusalka · Dvořák · Opéra',                      cat:'theatre' },
+  { d:'2026-05-18', fin:'23:00', venue:'opera_bastille', titre:'Rusalka · Dvořák · Opéra',                      cat:'theatre' },
+  { d:'2026-05-20', fin:'23:00', venue:'opera_bastille', titre:'Rusalka · Dvořák · Opéra · Clôture',            cat:'theatre' },
+
+  // ═══ OPÉRA GARNIER — Satyagraha (Philip Glass) 10 avril → 3 mai 2026 ═══
+  { d:'2026-04-21', fin:'23:00', venue:'opera_garnier',  titre:'Satyagraha · Philip Glass · Opéra',             cat:'theatre' },
+  { d:'2026-04-24', fin:'23:00', venue:'opera_garnier',  titre:'Satyagraha · Philip Glass · Opéra',             cat:'theatre' },
+  { d:'2026-04-27', fin:'23:00', venue:'opera_garnier',  titre:'Satyagraha · Philip Glass · Opéra',             cat:'theatre' },
+  { d:'2026-04-30', fin:'23:00', venue:'opera_garnier',  titre:'Satyagraha · Philip Glass · Opéra',             cat:'theatre' },
+  { d:'2026-05-03', fin:'23:00', venue:'opera_garnier',  titre:'Satyagraha · Philip Glass · Clôture',           cat:'theatre' },
+
+  // ═══ OPÉRA GARNIER — La Dame aux Camélias (Neumeier) 5 → 23 mai 2026 ═══
+  { d:'2026-05-05', fin:'22:45', venue:'opera_garnier',  titre:'La Dame aux Camélias · Neumeier · Ballet',      cat:'theatre' },
+  { d:'2026-05-08', fin:'22:45', venue:'opera_garnier',  titre:'La Dame aux Camélias · Neumeier · Ballet',      cat:'theatre' },
+  { d:'2026-05-12', fin:'22:45', venue:'opera_garnier',  titre:'La Dame aux Camélias · Neumeier · Ballet',      cat:'theatre' },
+  { d:'2026-05-15', fin:'22:45', venue:'opera_garnier',  titre:'La Dame aux Camélias · Neumeier · Ballet',      cat:'theatre' },
+  { d:'2026-05-19', fin:'22:45', venue:'opera_garnier',  titre:'La Dame aux Camélias · Neumeier · Ballet',      cat:'theatre' },
+  { d:'2026-05-23', fin:'22:45', venue:'opera_garnier',  titre:'La Dame aux Camélias · Neumeier · Clôture',     cat:'theatre' },
+
+  // ═══ Champs-Élysées · Châtelet ═══
+  { d:'2026-04-22', fin:'22:30', venue:'champs_elysees', titre:'Concert classique · Orchestre',                 cat:'theatre' },
+  { d:'2026-04-25', fin:'22:30', venue:'champs_elysees', titre:'Ballet contemporain',                           cat:'theatre' },
+  { d:'2026-05-02', fin:'22:30', venue:'champs_elysees', titre:'Musique de chambre',                            cat:'theatre' },
+  { d:'2026-04-23', fin:'22:30', venue:'chatelet',       titre:'Comédie musicale',                              cat:'theatre' },
+  { d:'2026-04-26', fin:'22:30', venue:'chatelet',       titre:'Opéra-comique',                                 cat:'theatre' }
 ];
 
 function todayYMD(){
@@ -2301,19 +2482,487 @@ function switchTab(id){
     renderStats();
     renderEvents();
   }
-  if(id === 'tab-venues'){
-    renderVenuesPage();
-  }
+  if(id === 'tab-theatres') renderTheatres();
+  if(id === 'tab-events')   renderEventsTab();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 /* ═══════════════════════════════════════════════
-   VENUES TAB — Dashboard chauffeur action-first
-   - Rush alert 20 min après fin d'un gros event
-   - TOP 3 events à cibler (tri par timing)
-   - Timeline chronologique
+   TIER SYSTEM & BIOS — priorisation chauffeur
 ═══════════════════════════════════════════════ */
-let venuesDayFilter = 0; // 0=aujourd'hui, 1=demain, 7=7 jours
+
+// Tier 3 = priorité max (S+), 2 = priorité (A), 1 = standard (B)
+const THEATRE_TIERS = {
+  opera_garnier:  3, opera_bastille: 3,
+  champs_elysees: 2, marigny:        2,
+  chatelet:       2, mogador:        2,
+  // tout le reste = tier 1 (défini par défaut dans le code)
+};
+
+// Conseils chauffeur spécifiques par lieu
+const TIPS = {
+  opera_garnier:    'Sortie clientèle aisée · station directement devant · pourboires fréquents',
+  opera_bastille:   'Place Bastille · clients souvent destinations Marais / 6e / 7e',
+  champs_elysees:   'Avenue Montaigne · clientèle luxe · souvent hôtels palaces',
+  marigny:          'Sortie Champs-Élysées · clients souvent 8e / Trocadéro / luxe',
+  chatelet:         'Place du Châtelet · bien desservie · clients variés',
+  mogador:          'Musical Le Roi Lion · sorties familles + touristes',
+  bercy_arena:      '20 300 spectateurs · se placer bd de Bercy ou devant la Gare',
+  defense_arena:    '40 000 places · RER A saturé après · pic de demande taxi énorme',
+  stade_france:     '80 000 places · RER D/B saturés · taxis très demandés 30 min après',
+  parc_princes:     '47 000 spectateurs · sortie Porte de Saint-Cloud / Molitor',
+  jean_bouin:       '20 000 pax rugby · sortie Porte Saint-Cloud',
+  zenith:           'Porte de Pantin · se placer av. Jean Jaurès',
+  seine_musicale:   'Île Seguin · tram T2 saturé · forte demande taxi',
+  porte_versailles: 'Gros flux le week-end · se placer Porte de Versailles M12',
+  villepinte:       'RER B direction CDG · clients souvent aéroports ou hôtels',
+  olympia:          'Centre Opéra · clientèle aisée · nombreux hôtels autour'
+};
+
+// Mini-bios/descriptions pour les events (ajoutées aux events sensibles)
+// Clé = titre simplifié en minuscules, ou ID event dans EVENTS
+const EVENT_BIOS = {
+  'charlotte cardin': 'Artiste canadienne pop/soul · tournée après succès du 99 Nights Tour · Accor Arena 1ère fois',
+  'tame impala': 'Projet de Kevin Parker · rock psychédélique australien · tournée mondiale 2026',
+  'worakls orchestra': 'Producteur électro français · show avec orchestre symphonique · unique en son genre',
+  'ne-yo & akon': 'Duo R&B/soul américain · tubes cumulés mondiaux 2M+ streams',
+  'twice': 'Groupe K-pop féminin sud-coréen · 9 membres · This Is For World Tour · sold-out massif',
+  'star academy tour': 'Tournée issue du télé-crochet TF1 · clientèle familles + ados',
+  'doja cat': 'Rappeuse/chanteuse US · 4 Grammy nominations · Ma Vie World Tour',
+  'scorpions': 'Groupe rock allemand · 60 ans de carrière · tournée anniversaire · clientèle 40-60 ans',
+  'joe bonamassa': 'Guitariste blues-rock américain · 25 ans carrière · public connaisseur',
+  'les flammes awards': 'Cérémonie des récompenses rap/R&B françaises · gros événement média',
+  'tayc': 'Chanteur R&B français · origine Cameroun · après succès Vertigo album',
+  'metallica': 'Groupe metal américain · M72 World Tour · 40 000 fans/soir à Défense Arena',
+  'damso': 'Rappeur belge-congolais · BĒYĀH Tour · 4 soirs consécutifs à Défense Arena (160K spectateurs total)',
+  'fally ipupa': 'Star congolaise rumba · 2 Stade de France consécutifs · record public africain Paris',
+  'jul': 'Rappeur marseillais · roi du streaming FR · 2 Stade de France · clientèle jeunes 15-30',
+  'cassius': 'Duo electro French Touch · relance par Boombass après disparition de Zdar',
+  'ben mazué': 'Chanteur folk français · album Famille · 3 soirs au Zénith',
+  'psg · liverpool': '1/2 finale Ligue des Champions · gros pic de taxis après match (fin ~23h)',
+  'psg · nantes': 'Match L1 · sortie ~23h · clients souvent 16e/Neuilly/Défense',
+  'stade français': 'Top 14 rugby · ambiance familiale · sortie Porte Saint-Cloud',
+  'foire de paris': '400 000 visiteurs/12 jours · ouvert 10h-19h (22h samedi 9/5) · clientèle grand public',
+  'comic con france': 'Convention pop culture · cosplayers · beaucoup de groupes d\'amis',
+  'eurosatory': 'Salon pro défense/sécurité · professionnels internationaux · clients hôtels 4/5 étoiles',
+  'festival du livre': 'Grand Palais · éditeurs/auteurs · public premium · nocturne vendredi 23h',
+  'rhum fest': 'Parc Floral · 3 jours · public 25-45 · finit 19h',
+  'le roi lion': 'Disney musical · plus longue durée sur Paris · familles avec enfants',
+  'roméo et juliette': 'Ballet de Rudolf Noureev · chef-d\'œuvre tragique sur musique de Prokofiev · Étoiles de l\'Opéra · 2745 places',
+  'rusalka': 'Opéra de Dvořák · conte de fée tchèque sur une sirène · décors magiques · en tchèque surtitré FR',
+  'satyagraha': 'Opéra de Philip Glass sur Gandhi · musique minimaliste envoûtante · en sanskrit · production contemporaine',
+  'dame aux camélias': 'Ballet de John Neumeier sur musique de Chopin · adaptation du roman de Dumas fils · l\'un des grands ballets romantiques',
+  'amadeus': 'Pièce culte sur la rivalité Mozart-Salieri · Théâtre Marigny · clientèle 30-60 ans aisée'
+};
+
+function getEventBio(ev){
+  const t = ev.titre.toLowerCase();
+  // Match le plus long d'abord
+  const keys = Object.keys(EVENT_BIOS).sort((a,b) => b.length - a.length);
+  for(const k of keys){
+    if(t.includes(k)) return EVENT_BIOS[k];
+  }
+  return null;
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER THÉÂTRES — tab dédié avec tiers
+═══════════════════════════════════════════════ */
+let theatresDayFilter = 0;
+
+function renderTheatres(){
+  const now = new Date();
+  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Tous les events théâtre
+  const thEvents = EVENTS
+    .filter(e => e.cat === 'theatre')
+    .map(e => ({ ...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {} }))
+    .sort((a,b) => a.finDate - b.finDate);
+
+  // Filtre par jour
+  const filtered = thEvents.filter(e => {
+    const dd = daysBetween(today0, parseEventDate(e.d));
+    return dd >= 0 && dd <= theatresDayFilter;
+  });
+
+  // Rush alert : gros théâtre (tier 3) qui finit bientôt
+  const rushEl = document.getElementById('th-rush-alert');
+  const critical = thEvents.find(e => {
+    const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+    const tier = THEATRE_TIERS[e.venue] || 1;
+    return diffMin >= -20 && diffMin <= 40 && tier >= 2;
+  });
+  if(critical){
+    const diffMin = Math.round((critical.finDate.getTime() - now.getTime()) / 60000);
+    let statusTxt = diffMin < 0 ? `Fini il y a ${Math.abs(diffMin)} min · rush en cours`
+                 : diffMin <= 10 ? `Se termine dans ${diffMin} min · prépare-toi`
+                 : `Se termine à ${critical.fin} (dans ${diffMin} min)`;
+    rushEl.innerHTML = `
+      <div class="ra-top"><span class="ra-dot"></span><span>CIBLE PREMIUM</span></div>
+      <div class="ra-title">${esc(critical.titre)}</div>
+      <div class="ra-sub">${esc(critical.v.nom)} · ${(critical.v.cap || 0).toLocaleString('fr-FR')} spectateurs · ${statusTxt}</div>
+      <div class="ra-cta">⚡ Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</div>
+    `;
+    rushEl.style.display = 'block';
+    rushEl.onclick = () => openEvModal(critical);
+  } else {
+    rushEl.style.display = 'none';
+  }
+
+  // Hero
+  const todayStr = todayYMD();
+  const todayEvents = thEvents.filter(e => e.d === todayStr && e.finDate.getTime() >= now.getTime());
+  document.getElementById('th-date').textContent =
+    `${JOURS_LONG[now.getDay()]} ${now.getDate()} ${MOIS_LONG[now.getMonth()]}`.toUpperCase();
+  const paxSum = todayEvents.reduce((s,e) => s + (e.v.cap || 0), 0);
+  document.getElementById('th-main').textContent = todayEvents.length > 0
+    ? `${paxSum.toLocaleString('fr-FR')} spectateurs à la sortie ce soir`
+    : 'Aucun théâtre majeur restant ce soir';
+  document.getElementById('th-kpi').textContent = todayEvents.length;
+
+  // Timeline groupée par jour, puis triée par tier (décroissant) puis par heure
+  const tlEl = document.getElementById('theatres-timeline');
+  if(filtered.length === 0){
+    tlEl.innerHTML = '<div class="vempty"><span class="ei">🎭</span>Aucun spectacle sur la période</div>';
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(e => { (groups[e.d] = groups[e.d] || []).push(e); });
+
+  let html = '';
+  Object.keys(groups).sort().forEach(dateKey => {
+    const dt = parseEventDate(dateKey);
+    const dd = daysBetween(today0, dt);
+    const label = dd === 0 ? "CE SOIR"
+                : dd === 1 ? 'DEMAIN'
+                : `${JOURS_LONG[dt.getDay()].toUpperCase()} ${dt.getDate()} ${MOIS_FR[dt.getMonth()]}`;
+
+    // Tri : par tier décroissant, puis par heure de fin
+    const sorted = groups[dateKey].sort((a,b) => {
+      const tA = THEATRE_TIERS[a.venue] || 1;
+      const tB = THEATRE_TIERS[b.venue] || 1;
+      if(tB !== tA) return tB - tA;
+      return a.finDate - b.finDate;
+    });
+
+    html += `<div class="tl-group">
+      <div class="tl-group-hdr"><span>${label}</span><span class="tl-group-line"></span><span>${sorted.length} spectacle${sorted.length>1?'s':''}</span></div>`;
+
+    sorted.forEach(e => {
+      const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+      const isNow = diffMin >= -15 && diffMin <= 45;
+      const isPast = diffMin < -15;
+      const tier = THEATRE_TIERS[e.venue] || 1;
+      const tierLbl = tier === 3 ? 'S+' : tier === 2 ? 'A' : 'B';
+      let cls = `tier${tier}`;
+      if(isNow) cls += ' now-row';
+      if(isPast) cls += ' past';
+
+      html += `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
+        <div class="tl-hour">${esc(e.fin)}</div>
+        <div class="tl-ico">🎭</div>
+        <div class="tl-main">
+          <div class="tl-titre">${esc(e.titre)} <span class="tl-tier-chip">${tierLbl}</span></div>
+          <div class="tl-lieu">${esc(e.v.nom || e.venue)}</div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
+          <div class="tl-cap-l">pax</div>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  tlEl.innerHTML = html;
+
+  // Bind clicks
+  tlEl.querySelectorAll('.tl-row').forEach(row => {
+    row.onclick = () => {
+      const idx = parseInt(row.dataset.evIdx);
+      if(!isNaN(idx)) openEvModal(EVENTS[idx]);
+    };
+  });
+}
+
+function initTheatresFilters(){
+  document.querySelectorAll('#th-day-chips .vchip').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#th-day-chips .vchip').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      theatresDayFilter = parseInt(b.dataset.day);
+      renderTheatres();
+      if(navigator.vibrate) navigator.vibrate(8);
+    };
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER EVENTS (concerts/sport/salons)
+═══════════════════════════════════════════════ */
+let evDayFilter = 0;
+let evCatFilter = 'all';
+
+function renderEventsTab(){
+  const now = new Date();
+  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Tous sauf théâtres
+  const allEv = EVENTS
+    .filter(e => e.cat !== 'theatre')
+    .map(e => ({ ...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {} }))
+    .sort((a,b) => a.finDate - b.finDate);
+
+  // Rush alert : gros event (≥2000 pax) dans ±40 min
+  const rushEl = document.getElementById('ev-rush-alert');
+  const critical = allEv.find(e => {
+    const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+    return diffMin >= -20 && diffMin <= 40 && (e.v.cap || 0) >= 2000;
+  });
+  if(critical){
+    const diffMin = Math.round((critical.finDate.getTime() - now.getTime()) / 60000);
+    const statusTxt = diffMin < 0 ? `Fini il y a ${Math.abs(diffMin)} min · rush en cours`
+                   : diffMin <= 10 ? `Se termine dans ${diffMin} min`
+                   : `Fin à ${critical.fin} (dans ${diffMin} min)`;
+    rushEl.innerHTML = `
+      <div class="ra-top"><span class="ra-dot"></span><span>RUSH MAJEUR</span></div>
+      <div class="ra-title">${esc(critical.titre)}</div>
+      <div class="ra-sub">${esc(critical.v.nom)} · ${(critical.v.cap||0).toLocaleString('fr-FR')} spectateurs · ${statusTxt}</div>
+      <div class="ra-cta">⚡ Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</div>
+    `;
+    rushEl.style.display = 'block';
+    rushEl.onclick = () => openEvModal(critical);
+  } else {
+    rushEl.style.display = 'none';
+  }
+
+  // Hero
+  const todayStr = todayYMD();
+  const todayEvents = allEv.filter(e => e.d === todayStr && e.finDate.getTime() >= now.getTime());
+  document.getElementById('ev-date').textContent =
+    `${JOURS_LONG[now.getDay()]} ${now.getDate()} ${MOIS_LONG[now.getMonth()]}`.toUpperCase();
+  const paxSum = todayEvents.reduce((s,e) => s + (e.v.cap || 0), 0);
+  document.getElementById('ev-main').textContent = todayEvents.length > 0
+    ? `${paxSum.toLocaleString('fr-FR')} spectateurs en sortie`
+    : 'Aucun event majeur ce soir';
+  document.getElementById('ev-kpi').textContent = todayEvents.length;
+
+  // TOP 3
+  const top3 = allEv
+    .filter(e => {
+      const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+      return diffMin >= -15 && diffMin <= 180;
+    })
+    .slice(0, 3);
+
+  const topEl = document.getElementById('ev-top');
+  if(top3.length === 0){
+    topEl.innerHTML = '<div class="vempty"><span class="ei">😴</span>Aucun event imminent</div>';
+  } else {
+    topEl.innerHTML = top3.map((e, i) => {
+      const diffMin = Math.round((e.finDate.getTime() - now.getTime()) / 60000);
+      const isNow = diffMin <= 15;
+      const isSoon = diffMin > 15 && diffMin <= 60;
+      const cls = isNow ? 'now' : (isSoon ? 'soon' : '');
+      const timeLbl = diffMin < 0 ? `il y a ${Math.abs(diffMin)}min`
+                    : diffMin === 0 ? 'maintenant'
+                    : diffMin < 60 ? `dans ${diffMin}min`
+                    : `dans ${Math.floor(diffMin/60)}h${String(diffMin%60).padStart(2,'0')}`;
+      return `<div class="top-ev ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
+        <div class="te-rank">
+          <div class="te-rank-n">${i+1}</div>
+          <div class="te-rank-l">cible</div>
+        </div>
+        <div class="te-body">
+          <div>
+            <div class="te-titre">${CAT_ICO[e.cat] || '🎫'} ${esc(e.titre)}</div>
+            <div class="te-venue">${esc(e.v.nom || e.venue)}</div>
+          </div>
+          <div class="te-meta">
+            <span class="te-fin">fin ${esc(e.fin)}</span>
+            <span class="te-in">${timeLbl}</span>
+            <span class="te-cap">👥 ${(e.v.cap || 0).toLocaleString('fr-FR')}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    topEl.querySelectorAll('.top-ev').forEach(c => {
+      c.onclick = () => {
+        const idx = parseInt(c.dataset.evIdx);
+        if(!isNaN(idx)) openEvModal(EVENTS[idx]);
+      };
+    });
+  }
+
+  // Timeline filtrée par cat+jour
+  let filtered = allEv.filter(e => {
+    const dd = daysBetween(today0, parseEventDate(e.d));
+    return dd >= 0 && dd <= evDayFilter;
+  });
+  if(evCatFilter !== 'all'){
+    filtered = filtered.filter(e => e.cat === evCatFilter);
+  }
+
+  const tlEl = document.getElementById('events-timeline');
+  if(filtered.length === 0){
+    tlEl.innerHTML = '<div class="vempty"><span class="ei">📅</span>Aucun event sur ce filtre</div>';
+    return;
+  }
+
+  const groups = {};
+  filtered.forEach(e => { (groups[e.d] = groups[e.d] || []).push(e); });
+
+  let html = '';
+  Object.keys(groups).sort().forEach(dateKey => {
+    const dt = parseEventDate(dateKey);
+    const dd = daysBetween(today0, dt);
+    const label = dd === 0 ? "CE SOIR"
+                : dd === 1 ? 'DEMAIN'
+                : `${JOURS_LONG[dt.getDay()].toUpperCase()} ${dt.getDate()} ${MOIS_FR[dt.getMonth()]}`;
+
+    html += `<div class="tl-group">
+      <div class="tl-group-hdr"><span>${label}</span><span class="tl-group-line"></span><span>${groups[dateKey].length} évt</span></div>`;
+
+    groups[dateKey].sort((a,b) => a.finDate - b.finDate).forEach(e => {
+      const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+      const isNow = diffMin >= -15 && diffMin <= 45;
+      const isSoon = diffMin > 45 && diffMin <= 120;
+      const isPast = diffMin < -15;
+      let cls = '';
+      if(isPast) cls = 'past';
+      else if(isNow) cls = 'now-row';
+      else if(isSoon) cls = 'soon-row';
+
+      html += `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
+        <div class="tl-hour">${esc(e.fin)}</div>
+        <div class="tl-ico">${CAT_ICO[e.cat] || '🎫'}</div>
+        <div class="tl-main">
+          <div class="tl-titre">${esc(e.titre)}</div>
+          <div class="tl-lieu">${esc(e.v.nom || e.venue)}</div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
+          <div class="tl-cap-l">pax</div>
+        </div>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  tlEl.innerHTML = html;
+
+  tlEl.querySelectorAll('.tl-row').forEach(row => {
+    row.onclick = () => {
+      const idx = parseInt(row.dataset.evIdx);
+      if(!isNaN(idx)) openEvModal(EVENTS[idx]);
+    };
+  });
+}
+
+function initEventsFilters(){
+  document.querySelectorAll('#ev-day-chips .vchip').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#ev-day-chips .vchip').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      evDayFilter = parseInt(b.dataset.day);
+      renderEventsTab();
+      if(navigator.vibrate) navigator.vibrate(8);
+    };
+  });
+  document.querySelectorAll('#ev-cat-chips .vchip').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#ev-cat-chips .vchip').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      evCatFilter = b.dataset.cat;
+      renderEventsTab();
+      if(navigator.vibrate) navigator.vibrate(8);
+    };
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   MODAL : détails + bio event
+═══════════════════════════════════════════════ */
+function openEvModal(ev){
+  if(!ev) return;
+  const v = VENUES[ev.venue] || {};
+  const now = new Date();
+  const finDate = parseEventFin(ev);
+  const diffMin = Math.round((finDate.getTime() - now.getTime()) / 60000);
+
+  const catLbl = { concert:'🎤 Concert', sport:'⚽ Sport',
+                   salon:'🎪 Salon', theatre:'🎭 Théâtre' }[ev.cat] || '🎫 Event';
+  const timeLbl = diffMin < -15 ? `terminé depuis ${Math.abs(diffMin)} min`
+               : diffMin <= 0 ? 'en cours / vient de finir'
+               : diffMin < 60 ? `dans ${diffMin} min`
+               : diffMin < 1440 ? `dans ${Math.floor(diffMin/60)}h${String(diffMin%60).padStart(2,'0')}`
+               : parseEventDate(ev.d).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long'});
+
+  const bio = getEventBio(ev);
+  const tip = TIPS[ev.venue];
+
+  const content = document.getElementById('ev-modal-content');
+  content.innerHTML = `
+    <span class="em-cat-badge ${ev.cat}">${catLbl}</span>
+    <div class="em-titre">${esc(ev.titre)}</div>
+    <div class="em-lieu">
+      <span class="em-lieu-ico">${v.ico || '🏛'}</span>
+      <span>${esc(v.nom || ev.venue)}${v.adr ? ' · ' + esc(v.adr) : ''}</span>
+    </div>
+
+    <div class="em-grid">
+      <div class="em-stat">
+        <div class="em-stat-k">Heure de fin</div>
+        <div class="em-stat-v accent">${esc(ev.fin)}</div>
+      </div>
+      <div class="em-stat">
+        <div class="em-stat-k">Timing</div>
+        <div class="em-stat-v ${diffMin <= 45 && diffMin >= -15 ? 'accent' : 'gold'}">${timeLbl}</div>
+      </div>
+      <div class="em-stat">
+        <div class="em-stat-k">Capacité</div>
+        <div class="em-stat-v">${(v.cap || 0).toLocaleString('fr-FR')}</div>
+      </div>
+      <div class="em-stat">
+        <div class="em-stat-k">Date</div>
+        <div class="em-stat-v">${parseEventDate(ev.d).toLocaleDateString('fr-FR', {day:'2-digit',month:'short'})}</div>
+      </div>
+    </div>
+
+    ${bio ? `
+      <div class="em-bio-title">À propos</div>
+      <div class="em-bio">${esc(bio)}</div>
+    ` : ''}
+
+    ${v.gare ? `
+      <div class="em-bio-title">Gare SNCF la plus proche</div>
+      <div class="em-bio">🚂 ${esc(v.gare)}</div>
+    ` : ''}
+
+    ${tip ? `
+      <div class="em-tips">
+        <div class="em-tips-hdr">💡 Conseil chauffeur</div>
+        <div class="em-tips-body">${esc(tip)}</div>
+      </div>
+    ` : ''}
+  `;
+
+  document.getElementById('ev-modal').classList.add('show');
+  if(navigator.vibrate) navigator.vibrate(12);
+}
+
+function closeEvModal(){
+  document.getElementById('ev-modal').classList.remove('show');
+}
+
+// Escape key close
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeEvModal();
+});
 
 const MOIS_FR = ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
 const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -2334,191 +2983,13 @@ function daysBetween(d1, d2){
   return Math.floor(ms / (1000*60*60*24));
 }
 
-function renderVenuesPage(){
-  const now = new Date();
-  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  // ─── 1. RUSH ALERT : event dont la fin est dans les 20 dernières minutes OU les 40 prochaines minutes
-  // On regarde les events de CAPACITÉ >= 2000 qui viennent de finir (< 20 min) ou finissent bientôt (< 40 min)
-  const rushAlert = document.getElementById('rush-alert');
-  const candidates = EVENTS.map(e => ({...e, finDate: parseEventFin(e)}))
-    .filter(e => {
-      const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
-      return diffMin >= -20 && diffMin <= 40; // 20 min après OU 40 min avant
-    })
-    .map(e => ({ ...e, v: VENUES[e.venue] || {} }))
-    .filter(e => e.v.cap >= 2000)
-    .sort((a, b) => Math.abs(a.finDate - now) - Math.abs(b.finDate - now));
-
-  if(candidates.length > 0){
-    const big = candidates[0];
-    const diffMin = Math.round((big.finDate.getTime() - now.getTime()) / 60000);
-    let statusTxt, ctaTxt;
-    if(diffMin < 0){
-      statusTxt = `Fini il y a ${Math.abs(diffMin)} min · rush en cours`;
-      ctaTxt = `⚡ Fonce à ${big.v.nom.split(' ').slice(0,3).join(' ')}`;
-    } else if(diffMin <= 10){
-      statusTxt = `Se termine dans ${diffMin} min`;
-      ctaTxt = `⚡ Prépare-toi · va à ${big.v.nom.split(' ').slice(0,3).join(' ')}`;
-    } else {
-      statusTxt = `Se termine à ${big.fin} (dans ${diffMin} min)`;
-      ctaTxt = `🎯 Direction ${big.v.nom.split(' ').slice(0,3).join(' ')}`;
-    }
-
-    rushAlert.innerHTML = `
-      <div class="ra-top"><span class="ra-dot"></span><span>RUSH MAJEUR</span></div>
-      <div class="ra-title">${esc(big.titre)}</div>
-      <div class="ra-sub">${esc(big.v.nom)} · ${big.v.cap.toLocaleString('fr-FR')} spectateurs · ${statusTxt}</div>
-      <div class="ra-cta">${ctaTxt}</div>
-    `;
-    rushAlert.style.display = 'block';
-  } else {
-    rushAlert.style.display = 'none';
-  }
-
-  // ─── 2. HERO : date + compteur events à venir aujourd'hui
-  const todayStr = todayYMD();
-  const eventsToday = EVENTS.filter(e => e.d === todayStr && parseEventFin(e).getTime() >= now.getTime());
-  document.getElementById('vh-date').textContent =
-    `${JOURS_LONG[now.getDay()]} ${now.getDate()} ${MOIS_LONG[now.getMonth()]}`;
-  const totalPax = eventsToday.reduce((s, e) => s + (VENUES[e.venue]?.cap || 0), 0);
-  document.getElementById('vh-main').textContent =
-    eventsToday.length > 0
-      ? `${totalPax.toLocaleString('fr-FR')} spectateurs en sortie ce soir`
-      : 'Aucun gros event restant ce soir';
-  document.getElementById('vh-kpi').textContent = eventsToday.length;
-
-  // ─── 3. TOP 3 : events qui finissent dans les prochaines 3h, triés par timing
-  const next3h = EVENTS.map(e => ({...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {}}))
-    .filter(e => {
-      const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
-      return diffMin >= -15 && diffMin <= 180;
-    })
-    .sort((a,b) => a.finDate - b.finDate)
-    .slice(0, 3);
-
-  const topEl = document.getElementById('top-events');
-  if(next3h.length === 0){
-    topEl.innerHTML = '<div class="vempty"><span class="ei">😴</span>Aucun événement imminent.<br>Regarde la timeline en dessous.</div>';
-  } else {
-    topEl.innerHTML = next3h.map((e, i) => {
-      const diffMin = Math.round((e.finDate.getTime() - now.getTime()) / 60000);
-      const isNow  = diffMin <= 15;
-      const isSoon = diffMin > 15 && diffMin <= 60;
-      const cls = isNow ? 'now' : (isSoon ? 'soon' : '');
-      const timeLbl = diffMin < 0 ? `il y a ${Math.abs(diffMin)}min`
-                    : diffMin === 0 ? 'maintenant'
-                    : diffMin < 60  ? `dans ${diffMin}min`
-                    : `dans ${Math.floor(diffMin/60)}h${String(diffMin%60).padStart(2,'0')}`;
-      return `<div class="top-ev ${cls}">
-        <div class="te-rank">
-          <div class="te-rank-n">${i+1}</div>
-          <div class="te-rank-l">cible</div>
-        </div>
-        <div class="te-body">
-          <div>
-            <div class="te-titre">${CAT_ICO[e.cat] || '🎫'} ${esc(e.titre)}</div>
-            <div class="te-venue">${esc(e.v.nom || e.venue)}</div>
-          </div>
-          <div class="te-meta">
-            <span class="te-fin">fin ${esc(e.fin)}</span>
-            <span class="te-in">${timeLbl}</span>
-            <span class="te-cap">👥 ${(e.v.cap || 0).toLocaleString('fr-FR')}</span>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  // ─── 4. TIMELINE chronologique
-  const filterLimit = venuesDayFilter; // 0=today only, 1=today+demain, 7=7j
-  const tlEvents = EVENTS
-    .map(e => ({...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {}}))
-    .filter(e => {
-      const dd = daysBetween(today0, parseEventDate(e.d));
-      return dd >= 0 && dd <= filterLimit;
-    })
-    .sort((a,b) => a.finDate - b.finDate);
-
-  const tlEl = document.getElementById('timeline-events');
-  if(tlEvents.length === 0){
-    tlEl.innerHTML = '<div class="vempty"><span class="ei">📅</span>Aucun événement sur la période</div>';
-  } else {
-    // Grouper par date
-    const groups = {};
-    tlEvents.forEach(e => {
-      if(!groups[e.d]) groups[e.d] = [];
-      groups[e.d].push(e);
-    });
-    let html = '';
-    Object.keys(groups).sort().forEach(dateKey => {
-      const dt = parseEventDate(dateKey);
-      const dd = daysBetween(today0, dt);
-      const label = dd === 0 ? "AUJOURD'HUI"
-                  : dd === 1 ? 'DEMAIN'
-                  : `${JOURS_LONG[dt.getDay()].toUpperCase()} ${dt.getDate()} ${MOIS_FR[dt.getMonth()]}`;
-      html += `<div class="tl-group">
-        <div class="tl-group-hdr"><span>${label}</span><span class="tl-group-line"></span><span>${groups[dateKey].length} évt</span></div>`;
-      groups[dateKey].forEach(e => {
-        const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
-        const isNow  = diffMin >= -15 && diffMin <= 45;
-        const isSoon = diffMin > 45 && diffMin <= 120;
-        const isPast = diffMin < -15;
-        const cls = isPast ? 'past' : isNow ? 'now-row' : isSoon ? 'soon-row' : '';
-        html += `<div class="tl-row ${cls}">
-          <div class="tl-hour">${esc(e.fin)}</div>
-          <div class="tl-ico">${CAT_ICO[e.cat] || '🎫'}</div>
-          <div class="tl-main">
-            <div class="tl-titre">${esc(e.titre)}</div>
-            <div class="tl-lieu">${esc(e.v.nom || e.venue)}</div>
-          </div>
-          <div class="tl-right">
-            <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
-            <div class="tl-cap-l">pax</div>
-          </div>
-        </div>`;
-      });
-      html += `</div>`;
-    });
-    tlEl.innerHTML = html;
-  }
-
-  // ─── 5. Liste des salles (triée par capacité)
-  const venuesSorted = Object.entries(VENUES).sort((a,b) => b[1].cap - a[1].cap);
-  document.getElementById('venues-list').innerHTML = venuesSorted.map(([id, v]) => {
-    const nEv = EVENTS.filter(e => e.venue === id && parseEventDate(e.d).getTime() >= today0.getTime()).length;
-    return `<div class="vv-card">
-      <div class="vv-ico">${v.ico}</div>
-      <div class="vv-main">
-        <div class="vv-nom">${esc(v.nom)}</div>
-        <div class="vv-adr">${esc(v.adr)}${nEv > 0 ? ' · ' + nEv + ' évt' : ''}</div>
-      </div>
-      <div class="vv-right">
-        <div class="vv-cap">${v.cap.toLocaleString('fr-FR')}</div>
-        <div class="vv-cap-l">pax</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function initVenuesFilters(){
-  document.querySelectorAll('#v-day-chips .vchip').forEach(b => {
-    b.onclick = () => {
-      document.querySelectorAll('#v-day-chips .vchip').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-      venuesDayFilter = parseInt(b.dataset.day);
-      renderVenuesPage();
-      if(navigator.vibrate) navigator.vibrate(8);
-    };
-  });
-}
-
-// Auto-refresh quand l'onglet est visible (toutes les 60s pour rester à jour)
+// Auto-refresh toutes les 60s pour garder timings à jour quand un onglet events/theatres est actif
 setInterval(() => {
-  const tab = document.getElementById('tab-venues');
-  if(tab && tab.classList.contains('active')){
-    renderVenuesPage();
-  }
+  const thTab = document.getElementById('tab-theatres');
+  const evTab = document.getElementById('tab-events');
+  if(thTab && thTab.classList.contains('active')) renderTheatres();
+  else if(evTab && evTab.classList.contains('active')) renderEventsTab();
 }, 60000);
 
 function renderEvents(){
@@ -3136,7 +3607,8 @@ document.addEventListener('visibilitychange', ()=>{
 /* ═══ BOOT ═══ */
 function boot(){
   initTrajetSegments();
-  initVenuesFilters();
+  initTheatresFilters();
+  initEventsFilters();
 
   // Charge immédiatement le cache persistant pour avoir des données à l'ouverture
   CACHE = loadCache();
