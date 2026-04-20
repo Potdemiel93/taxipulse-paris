@@ -633,6 +633,16 @@ dialog .sheet{
   font-size:11px;font-weight:600}
 .vempty .ei{display:block;font-size:30px;margin-bottom:6px}
 
+/* Bouton Waze dans header gare */
+.gd-waze{
+  background:rgba(5,199,242,.15);border:1px solid rgba(5,199,242,.35);
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;color:#05C7F2;
+  font-family:inherit;flex-shrink:0;margin-right:6px;
+}
+.gd-waze:active{transform:scale(.92);background:rgba(5,199,242,.3)}
+
 /* ═══ Tier badges (théâtres prioritaires) ═══ */
 .tier-info{
   background:var(--card);border:1px solid var(--line);border-radius:12px;
@@ -732,6 +742,36 @@ dialog .sheet{
 .em-tips-hdr{font-size:10px;text-transform:uppercase;letter-spacing:1px;
   font-weight:800;color:var(--accent);margin-bottom:5px}
 .em-tips-body{font-size:12px;color:var(--ink);font-weight:600;line-height:1.5}
+
+/* ═══ BOUTON WAZE ═══ */
+.em-waze-btn{
+  width:100%;background:linear-gradient(135deg, #33CCFF 0%, #05C7F2 100%);
+  border:none;border-radius:13px;padding:13px 15px;margin-top:6px;margin-bottom:4px;
+  display:flex;align-items:center;gap:12px;cursor:pointer;
+  font-family:inherit;color:#fff;
+  box-shadow:0 4px 16px rgba(5,199,242,.35);
+  transition:transform .1s;
+}
+.em-waze-btn:active{transform:scale(.98)}
+.em-waze-ico{font-size:24px;flex-shrink:0}
+.em-waze-main{flex:1;text-align:left;min-width:0}
+.em-waze-title{display:block;font-size:15px;font-weight:900;letter-spacing:-.2px;line-height:1.2}
+.em-waze-sub{display:block;font-size:10px;font-weight:600;opacity:.9;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.em-waze-arrow{font-size:22px;font-weight:900;flex-shrink:0;opacity:.9}
+
+/* Mini bouton Waze sur les lignes timeline (pour aller vite) */
+.tl-waze{
+  flex-shrink:0;width:34px;height:34px;border-radius:9px;
+  background:rgba(5,199,242,.15);border:1px solid rgba(5,199,242,.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;cursor:pointer;color:#05C7F2;
+  font-family:inherit;
+  transition:all .15s;
+  margin-left:2px;
+}
+.tl-waze:active{transform:scale(.9);background:rgba(5,199,242,.3)}
+.tl-waze:hover{background:rgba(5,199,242,.25)}
 
 /* ═══ TRAJET (onglet Prix course) ═══ */
 .trajet-box{
@@ -1017,10 +1057,11 @@ dialog .sheet{
     <div class="dpill"></div>
     <div class="dhdr">
       <div class="dhdr-top">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="dhdr-name" id="gd-nom">—</div>
           <div class="dhdr-sub" id="gd-sub">—</div>
         </div>
+        <button class="gd-waze" id="gd-waze" title="Naviguer avec Waze">🧭</button>
         <button class="close-btn" id="gd-close">✕</button>
       </div>
       <div class="dstats">
@@ -1064,12 +1105,12 @@ const PROXY = 'https://taxipulse-proxy.boughida-sofiane.workers.dev/?url=';
    GARES
 ═══════════════════════════════════════════════ */
 const GARES = [
-  { id:'nord',         nom:'Gare du Nord',       sub:'Eurostar · TGV Nord · TER HDF',            ico:'🇬🇧', metro:'M4/5 · RER B/D/E', sid:'stop_area:SNCF:87271007' },
-  { id:'lyon',         nom:'Gare de Lyon',        sub:'TGV Sud-Est · Lyria Suisse · Italie',      ico:'🗼', metro:'M1/14 · RER A/D',  sid:'stop_area:SNCF:87686006' },
-  { id:'montparnasse', nom:'Montparnasse',         sub:'TGV Atlantique · Bretagne · Sud-Ouest',    ico:'🌊', metro:'M4/6/12/13',       sid:'stop_area:SNCF:87391003' },
-  { id:'est',          nom:"Gare de l'Est",        sub:'TGV Est · ICE Allemagne · Nightjet',       ico:'🍺', metro:'M4/5/7 · RER E',   sid:'stop_area:SNCF:87113001' },
-  { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités Sud-Ouest · Trains de nuit',    ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:SNCF:87547000' },
-  { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités Clermont-Fd · OUIGO classique', ico:'🎪', metro:'M6/14',            sid:'stop_area:SNCF:87686667' },
+  { id:'nord',         nom:'Gare du Nord',       sub:'Eurostar · TGV Nord · TER HDF',            ico:'🇬🇧', metro:'M4/5 · RER B/D/E', sid:'stop_area:SNCF:87271007', lat:48.8809, lng:2.3553 },
+  { id:'lyon',         nom:'Gare de Lyon',        sub:'TGV Sud-Est · Lyria Suisse · Italie',      ico:'🗼', metro:'M1/14 · RER A/D',  sid:'stop_area:SNCF:87686006', lat:48.8448, lng:2.3740 },
+  { id:'montparnasse', nom:'Montparnasse',         sub:'TGV Atlantique · Bretagne · Sud-Ouest',    ico:'🌊', metro:'M4/6/12/13',       sid:'stop_area:SNCF:87391003', lat:48.8412, lng:2.3208 },
+  { id:'est',          nom:"Gare de l'Est",        sub:'TGV Est · ICE Allemagne · Nightjet',       ico:'🍺', metro:'M4/5/7 · RER E',   sid:'stop_area:SNCF:87113001', lat:48.8763, lng:2.3588 },
+  { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités Sud-Ouest · Trains de nuit',    ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:SNCF:87547000', lat:48.8424, lng:2.3654 },
+  { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités Clermont-Fd · OUIGO classique', ico:'🎪', metro:'M6/14',            sid:'stop_area:SNCF:87686667', lat:48.8397, lng:2.3822 },
 ];
 
 /* ═══════════════════════════════════════════════
@@ -2252,51 +2293,51 @@ function renderStats(){
 ═══════════════════════════════════════════════ */
 const VENUES = {
   // Grandes arenas
-  bercy_arena:      { nom:'Accor Arena',                  adr:'8 bd de Bercy · 12e',              cap:20300, ico:'🏟', cat:'arena',   gare:'Gare de Lyon / Bercy' },
-  defense_arena:    { nom:'Paris La Défense Arena',       adr:'99 rue du Château · Nanterre',     cap:40000, ico:'🏟', cat:'arena',   gare:'La Défense (RER A)' },
-  adidas_arena:     { nom:'Adidas Arena',                 adr:'Porte de la Chapelle · 18e',       cap:8000,  ico:'🏟', cat:'arena',   gare:'Gare du Nord' },
+  bercy_arena:      { nom:'Accor Arena',                  adr:'8 bd de Bercy · 12e',              cap:20300, ico:'🏟', cat:'arena',   gare:'Gare de Lyon / Bercy',        lat:48.8386, lng:2.3786 },
+  defense_arena:    { nom:'Paris La Défense Arena',       adr:'99 rue du Château · Nanterre',     cap:40000, ico:'🏟', cat:'arena',   gare:'La Défense (RER A)',          lat:48.8951, lng:2.2278 },
+  adidas_arena:     { nom:'Adidas Arena',                 adr:'Porte de la Chapelle · 18e',       cap:8000,  ico:'🏟', cat:'arena',   gare:'Gare du Nord',                lat:48.8972, lng:2.3601 },
 
   // Stades
-  stade_france:     { nom:'Stade de France',              adr:'93 Saint-Denis',                    cap:80000, ico:'⚽', cat:'sport',   gare:'Gare du Nord (RER D)' },
-  parc_princes:     { nom:'Parc des Princes',             adr:'24 rue du Cdt Guilbaud · 16e',     cap:47929, ico:'⚽', cat:'sport',   gare:'Montparnasse (M10)' },
-  jean_bouin:       { nom:'Stade Jean-Bouin',             adr:'9 allée Brennus · 16e',            cap:20000, ico:'🏉', cat:'sport',   gare:'Montparnasse (M10)' },
-  roland_garros:    { nom:'Roland-Garros',                adr:'2 av. Gordon-Bennett · 16e',       cap:15000, ico:'🎾', cat:'sport',   gare:'Montparnasse (M10)' },
-  coubertin:        { nom:'Stade Pierre-de-Coubertin',    adr:'82 av. G. Lafont · 16e',           cap:4200,  ico:'🏐', cat:'sport',   gare:'Montparnasse (M10)' },
+  stade_france:     { nom:'Stade de France',              adr:'93 Saint-Denis',                    cap:80000, ico:'⚽', cat:'sport',   gare:'Gare du Nord (RER D)',        lat:48.9245, lng:2.3601 },
+  parc_princes:     { nom:'Parc des Princes',             adr:'24 rue du Cdt Guilbaud · 16e',     cap:47929, ico:'⚽', cat:'sport',   gare:'Montparnasse (M10)',          lat:48.8414, lng:2.2530 },
+  jean_bouin:       { nom:'Stade Jean-Bouin',             adr:'9 allée Brennus · 16e',            cap:20000, ico:'🏉', cat:'sport',   gare:'Montparnasse (M10)',          lat:48.8432, lng:2.2547 },
+  roland_garros:    { nom:'Roland-Garros',                adr:'2 av. Gordon-Bennett · 16e',       cap:15000, ico:'🎾', cat:'sport',   gare:'Montparnasse (M10)',          lat:48.8471, lng:2.2497 },
+  coubertin:        { nom:'Stade Pierre-de-Coubertin',    adr:'82 av. G. Lafont · 16e',           cap:4200,  ico:'🏐', cat:'sport',   gare:'Montparnasse (M10)',          lat:48.8420, lng:2.2571 },
 
   // Salles concert
-  zenith:           { nom:'Zénith La Villette',           adr:'211 av. J. Jaurès · 19e',          cap:6300,  ico:'🎤', cat:'concert', gare:'Gare du Nord / Est' },
-  olympia:          { nom:"L'Olympia",                    adr:'28 bd des Capucines · 9e',         cap:1980,  ico:'🎭', cat:'concert', gare:'Gare du Nord / Saint-Lazare' },
-  pleyel:           { nom:'Salle Pleyel',                 adr:'252 rue du Fg Saint-Honoré · 8e',  cap:1913,  ico:'🎻', cat:'concert', gare:'Saint-Lazare' },
-  seine_musicale:   { nom:'La Seine Musicale',            adr:'Île Seguin · Boulogne',            cap:6000,  ico:'🎼', cat:'concert', gare:'Montparnasse' },
-  bataclan:         { nom:'Le Bataclan',                  adr:'50 bd Voltaire · 11e',             cap:1500,  ico:'🎸', cat:'concert', gare:'Gare de Lyon / Nord' },
-  cigale:           { nom:'La Cigale',                    adr:'120 bd Rochechouart · 18e',        cap:1389,  ico:'🎸', cat:'concert', gare:'Gare du Nord' },
-  trianon:          { nom:'Le Trianon',                   adr:'80 bd Rochechouart · 18e',         cap:1000,  ico:'🎤', cat:'concert', gare:'Gare du Nord' },
-  casino_paris:     { nom:'Casino de Paris',              adr:'16 rue de Clichy · 9e',            cap:1500,  ico:'🎭', cat:'concert', gare:'Saint-Lazare' },
-  folies_bergere:   { nom:'Folies Bergère',               adr:'32 rue Richer · 9e',               cap:1600,  ico:'✨', cat:'concert', gare:'Gare du Nord / Est' },
-  elysee_mmtre:     { nom:'Élysée Montmartre',            adr:'72 bd Rochechouart · 18e',         cap:1400,  ico:'🎸', cat:'concert', gare:'Gare du Nord' },
-  philharmonie:     { nom:'Philharmonie de Paris',        adr:'221 av. J. Jaurès · 19e',          cap:2400,  ico:'🎻', cat:'concert', gare:'Gare du Nord / Est' },
-  gaite_lyrique:    { nom:'Gaîté Lyrique',                adr:'3 bis rue Papin · 3e',             cap:750,   ico:'🎤', cat:'concert', gare:'Gare de l\'Est' },
-  new_morning:      { nom:'New Morning',                  adr:'7-9 rue Petites-Écuries · 10e',    cap:400,   ico:'🎷', cat:'concert', gare:'Gare du Nord / Est' },
-  rex:              { nom:'Le Grand Rex',                 adr:'1 bd Poissonnière · 2e',           cap:2800,  ico:'🎬', cat:'concert', gare:'Gare du Nord / Est' },
-  cabaret_sauvage:  { nom:'Cabaret Sauvage',              adr:'Parc de la Villette · 19e',        cap:1200,  ico:'🎪', cat:'concert', gare:'Gare du Nord / Est' },
-  cirque_hiver:     { nom:"Cirque d'Hiver Bouglione",     adr:'110 rue Amelot · 11e',             cap:1650,  ico:'🎪', cat:'concert', gare:'Gare de Lyon' },
+  zenith:           { nom:'Zénith La Villette',           adr:'211 av. J. Jaurès · 19e',          cap:6300,  ico:'🎤', cat:'concert', gare:'Gare du Nord / Est',          lat:48.8942, lng:2.3928 },
+  olympia:          { nom:"L'Olympia",                    adr:'28 bd des Capucines · 9e',         cap:1980,  ico:'🎭', cat:'concert', gare:'Gare du Nord / Saint-Lazare', lat:48.8705, lng:2.3281 },
+  pleyel:           { nom:'Salle Pleyel',                 adr:'252 rue du Fg Saint-Honoré · 8e',  cap:1913,  ico:'🎻', cat:'concert', gare:'Saint-Lazare',                lat:48.8785, lng:2.3018 },
+  seine_musicale:   { nom:'La Seine Musicale',            adr:'Île Seguin · Boulogne',            cap:6000,  ico:'🎼', cat:'concert', gare:'Montparnasse',                lat:48.8277, lng:2.2314 },
+  bataclan:         { nom:'Le Bataclan',                  adr:'50 bd Voltaire · 11e',             cap:1500,  ico:'🎸', cat:'concert', gare:'Gare de Lyon / Nord',         lat:48.8630, lng:2.3706 },
+  cigale:           { nom:'La Cigale',                    adr:'120 bd Rochechouart · 18e',        cap:1389,  ico:'🎸', cat:'concert', gare:'Gare du Nord',                lat:48.8824, lng:2.3406 },
+  trianon:          { nom:'Le Trianon',                   adr:'80 bd Rochechouart · 18e',         cap:1000,  ico:'🎤', cat:'concert', gare:'Gare du Nord',                lat:48.8822, lng:2.3443 },
+  casino_paris:     { nom:'Casino de Paris',              adr:'16 rue de Clichy · 9e',            cap:1500,  ico:'🎭', cat:'concert', gare:'Saint-Lazare',                lat:48.8766, lng:2.3301 },
+  folies_bergere:   { nom:'Folies Bergère',               adr:'32 rue Richer · 9e',               cap:1600,  ico:'✨', cat:'concert', gare:'Gare du Nord / Est',          lat:48.8759, lng:2.3439 },
+  elysee_mmtre:     { nom:'Élysée Montmartre',            adr:'72 bd Rochechouart · 18e',         cap:1400,  ico:'🎸', cat:'concert', gare:'Gare du Nord',                lat:48.8822, lng:2.3488 },
+  philharmonie:     { nom:'Philharmonie de Paris',        adr:'221 av. J. Jaurès · 19e',          cap:2400,  ico:'🎻', cat:'concert', gare:'Gare du Nord / Est',          lat:48.8897, lng:2.3933 },
+  gaite_lyrique:    { nom:'Gaîté Lyrique',                adr:'3 bis rue Papin · 3e',             cap:750,   ico:'🎤', cat:'concert', gare:'Gare de l\'Est',              lat:48.8672, lng:2.3540 },
+  new_morning:      { nom:'New Morning',                  adr:'7-9 rue Petites-Écuries · 10e',    cap:400,   ico:'🎷', cat:'concert', gare:'Gare du Nord / Est',          lat:48.8729, lng:2.3505 },
+  rex:              { nom:'Le Grand Rex',                 adr:'1 bd Poissonnière · 2e',           cap:2800,  ico:'🎬', cat:'concert', gare:'Gare du Nord / Est',          lat:48.8706, lng:2.3479 },
+  cabaret_sauvage:  { nom:'Cabaret Sauvage',              adr:'Parc de la Villette · 19e',        cap:1200,  ico:'🎪', cat:'concert', gare:'Gare du Nord / Est',          lat:48.8954, lng:2.3902 },
+  cirque_hiver:     { nom:"Cirque d'Hiver Bouglione",     adr:'110 rue Amelot · 11e',             cap:1650,  ico:'🎪', cat:'concert', gare:'Gare de Lyon',                lat:48.8637, lng:2.3681 },
 
   // Salons / Expo
-  porte_versailles: { nom:'Paris Expo Porte de Versailles',adr:'1 pl. Porte de Versailles · 15e', cap:30000, ico:'🏢', cat:'salon',   gare:'Montparnasse (M12)' },
-  villepinte:       { nom:'Paris Nord Villepinte',        adr:'ZAC Paris Nord 2 · 93',            cap:40000, ico:'🏢', cat:'salon',   gare:'Gare du Nord / Est (RER B)' },
-  bourget:          { nom:'Parc Expo Le Bourget',         adr:'93 Le Bourget',                     cap:35000, ico:'🏢', cat:'salon',   gare:'Gare du Nord / Est' },
-  grand_palais:     { nom:'Grand Palais',                 adr:'3 av. Général-Eisenhower · 8e',    cap:15000, ico:'🏛', cat:'salon',   gare:'Gare du Nord / Saint-Lazare' },
-  carreau_temple:   { nom:'Le Carreau du Temple',         adr:'4 rue E. Spuller · 3e',            cap:1500,  ico:'🏢', cat:'salon',   gare:'Gare de l\'Est' },
-  palais_brongniart:{ nom:'Palais Brongniart',            adr:'28 pl. Bourse · 2e',               cap:2000,  ico:'🏛', cat:'salon',   gare:'Gare du Nord' },
-  parc_floral:      { nom:'Parc Floral de Paris',         adr:'Rte Pyramide · 12e',               cap:20000, ico:'🌳', cat:'salon',   gare:'Gare de Lyon' },
+  porte_versailles: { nom:'Paris Expo Porte de Versailles',adr:'1 pl. Porte de Versailles · 15e', cap:30000, ico:'🏢', cat:'salon',   gare:'Montparnasse (M12)',          lat:48.8314, lng:2.2875 },
+  villepinte:       { nom:'Paris Nord Villepinte',        adr:'ZAC Paris Nord 2 · 93',            cap:40000, ico:'🏢', cat:'salon',   gare:'Gare du Nord / Est (RER B)',  lat:48.9711, lng:2.5175 },
+  bourget:          { nom:'Parc Expo Le Bourget',         adr:'93 Le Bourget',                     cap:35000, ico:'🏢', cat:'salon',   gare:'Gare du Nord / Est',          lat:48.9561, lng:2.4412 },
+  grand_palais:     { nom:'Grand Palais',                 adr:'3 av. Général-Eisenhower · 8e',    cap:15000, ico:'🏛', cat:'salon',   gare:'Gare du Nord / Saint-Lazare', lat:48.8662, lng:2.3122 },
+  carreau_temple:   { nom:'Le Carreau du Temple',         adr:'4 rue E. Spuller · 3e',            cap:1500,  ico:'🏢', cat:'salon',   gare:'Gare de l\'Est',              lat:48.8631, lng:2.3635 },
+  palais_brongniart:{ nom:'Palais Brongniart',            adr:'28 pl. Bourse · 2e',               cap:2000,  ico:'🏛', cat:'salon',   gare:'Gare du Nord',                lat:48.8690, lng:2.3412 },
+  parc_floral:      { nom:'Parc Floral de Paris',         adr:'Rte Pyramide · 12e',               cap:20000, ico:'🌳', cat:'salon',   gare:'Gare de Lyon',                lat:48.8333, lng:2.4525 },
 
   // Théâtres majeurs
-  mogador:          { nom:'Théâtre Mogador',              adr:'25 rue Mogador · 9e',              cap:1600,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare' },
-  marigny:          { nom:'Théâtre Marigny',              adr:'Av. Marigny · 8e',                 cap:1024,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare' },
-  chatelet:         { nom:'Théâtre du Châtelet',          adr:'1 pl. du Châtelet · 1er',          cap:2010,  ico:'🎭', cat:'theatre', gare:'Gare de Lyon' },
-  opera_garnier:    { nom:'Opéra Garnier',                adr:'Pl. de l\'Opéra · 9e',             cap:1900,  ico:'🏛', cat:'theatre', gare:'Saint-Lazare / Nord' },
-  opera_bastille:   { nom:'Opéra Bastille',               adr:'Pl. de la Bastille · 12e',         cap:2745,  ico:'🏛', cat:'theatre', gare:'Gare de Lyon' },
-  champs_elysees:   { nom:'Théâtre des Champs-Élysées',   adr:'15 av. Montaigne · 8e',            cap:1905,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare' }
+  mogador:          { nom:'Théâtre Mogador',              adr:'25 rue Mogador · 9e',              cap:1600,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8751, lng:2.3318 },
+  marigny:          { nom:'Théâtre Marigny',              adr:'Av. Marigny · 8e',                 cap:1024,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8679, lng:2.3145 },
+  chatelet:         { nom:'Théâtre du Châtelet',          adr:'1 pl. du Châtelet · 1er',          cap:2010,  ico:'🎭', cat:'theatre', gare:'Gare de Lyon',                lat:48.8577, lng:2.3471 },
+  opera_garnier:    { nom:'Opéra Garnier',                adr:'Pl. de l\'Opéra · 9e',             cap:1900,  ico:'🏛', cat:'theatre', gare:'Saint-Lazare / Nord',         lat:48.8719, lng:2.3316 },
+  opera_bastille:   { nom:'Opéra Bastille',               adr:'Pl. de la Bastille · 12e',         cap:2745,  ico:'🏛', cat:'theatre', gare:'Gare de Lyon',                lat:48.8523, lng:2.3699 },
+  champs_elysees:   { nom:'Théâtre des Champs-Élysées',   adr:'15 av. Montaigne · 8e',            cap:1905,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8656, lng:2.3040 }
 };
 
 /* ═══ EVENTS : base 2026 vérifiée (sources au 20/04/2026) ═══
@@ -2673,6 +2714,7 @@ function renderTheatres(){
           <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
           <div class="tl-cap-l">pax</div>
         </div>
+        ${e.v.lat && e.v.lng ? `<button class="tl-waze" onclick="event.stopPropagation();openWaze(${e.v.lat},${e.v.lng});" title="Naviguer avec Waze">🧭</button>` : ''}
       </div>`;
     });
 
@@ -2849,6 +2891,7 @@ function renderEventsTab(){
           <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
           <div class="tl-cap-l">pax</div>
         </div>
+        ${e.v.lat && e.v.lng ? `<button class="tl-waze" onclick="event.stopPropagation();openWaze(${e.v.lat},${e.v.lng});" title="Naviguer avec Waze">🧭</button>` : ''}
       </div>`;
     });
 
@@ -2889,6 +2932,25 @@ function initEventsFilters(){
 /* ═══════════════════════════════════════════════
    MODAL : détails + bio event
 ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   WAZE — Navigation GPS directe vers une salle
+═══════════════════════════════════════════════ */
+function openWaze(lat, lng, label){
+  if(!lat || !lng){
+    alert('Coordonnées GPS non disponibles pour cette salle');
+    return;
+  }
+  // Feedback haptique avant redirection
+  if(navigator.vibrate) navigator.vibrate(25);
+
+  // URL universelle Waze : fonctionne sur iOS, Android, Desktop
+  // - Mobile + Waze installé → ouvre Waze avec nav directe
+  // - Mobile sans Waze → ouvre waze.com (propose de télécharger)
+  // - Desktop → ouvre Waze Live Map
+  const url = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
 function openEvModal(ev){
   if(!ev) return;
   const v = VENUES[ev.venue] || {};
@@ -2935,6 +2997,17 @@ function openEvModal(ev){
         <div class="em-stat-v">${parseEventDate(ev.d).toLocaleDateString('fr-FR', {day:'2-digit',month:'short'})}</div>
       </div>
     </div>
+
+    ${v.lat && v.lng ? `
+      <button class="em-waze-btn" onclick="openWaze(${v.lat}, ${v.lng}, '${esc((v.nom||'').replace(/'/g,'')).replace(/"/g,'')}')">
+        <span class="em-waze-ico">🧭</span>
+        <span class="em-waze-main">
+          <span class="em-waze-title">Y aller avec Waze</span>
+          <span class="em-waze-sub">Navigation GPS · ${esc(v.nom || '')}</span>
+        </span>
+        <span class="em-waze-arrow">→</span>
+      </button>
+    ` : ''}
 
     ${bio ? `
       <div class="em-bio-title">À propos</div>
@@ -3392,6 +3465,18 @@ function openDialog(gareId){
 
   document.getElementById('gd-nom').textContent = gare.nom;
   document.getElementById('gd-sub').textContent = gare.sub;
+
+  // Bouton Waze vers la gare
+  const wazeBtn = document.getElementById('gd-waze');
+  if(wazeBtn && gare.lat && gare.lng){
+    wazeBtn.onclick = (e) => {
+      e.stopPropagation();
+      openWaze(gare.lat, gare.lng, gare.nom);
+    };
+    wazeBtn.style.display = 'flex';
+  } else if(wazeBtn){
+    wazeBtn.style.display = 'none';
+  }
 
   const c = CACHE[gareId];
   // Reset bloc sticky
