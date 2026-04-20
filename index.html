@@ -450,117 +450,188 @@ dialog .sheet{
 .ev-cap{color:var(--ink2);font-weight:600;font-family:var(--mono)}
 .ev-impact{color:var(--accent);font-weight:700}
 
-/* ═══ VENUES / SALLES (onglet dédié) ═══ */
+/* ═══ VENUES / SALLES — Dashboard chauffeur ═══ */
+
+/* RUSH ALERT — bandeau qui reste 20 min après la fin d'un gros event */
+.rush-alert{
+  background:linear-gradient(135deg, #FF4500 0%, #d93600 100%);
+  border-radius:14px;padding:14px 16px;margin-bottom:14px;
+  color:#fff;position:relative;
+  animation:pulse-rush 2s ease-in-out infinite;
+  box-shadow:0 6px 24px rgba(255,69,0,.35);
+}
+@keyframes pulse-rush{
+  0%,100%{box-shadow:0 6px 24px rgba(255,69,0,.35)}
+  50%{box-shadow:0 6px 32px rgba(255,69,0,.55)}
+}
+.ra-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;
+  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+.ra-dot{width:8px;height:8px;border-radius:50%;background:#fff;
+  animation:blink 1.1s ease-in-out infinite}
+.ra-title{font-size:18px;font-weight:900;letter-spacing:-.3px;
+  margin-bottom:3px;line-height:1.2}
+.ra-sub{font-size:12px;opacity:.95;font-weight:600}
+.ra-cta{
+  background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+  border-radius:100px;padding:4px 10px;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.8px;display:inline-block;margin-top:8px;
+}
+
+/* HERO — simple, info-dense */
 .venues-hero{
-  background:linear-gradient(135deg, rgba(255,69,0,.12), rgba(255,69,0,.03));
-  border:1px solid rgba(255,69,0,.25); border-radius:18px;
-  padding:18px 18px 16px; margin-bottom:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:16px 18px;margin-bottom:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
 }
-.vh-title{font-size:22px;font-weight:900;letter-spacing:-.5px;color:var(--ink);
-  margin-bottom:3px}
-.vh-sub{font-size:11px;color:var(--ink3);font-weight:600;
-  text-transform:uppercase;letter-spacing:1px}
+.vh-left{flex:1;min-width:0}
+.vh-date{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;
+  font-weight:700;color:var(--ink3);margin-bottom:3px}
+.vh-main{font-size:17px;font-weight:900;letter-spacing:-.3px;color:var(--ink);
+  line-height:1.25}
+.vh-right{text-align:right;flex-shrink:0;border-left:1px solid var(--line);padding-left:14px}
+.vh-kpi{font-family:var(--mono);font-size:26px;font-weight:900;
+  letter-spacing:-1px;color:var(--accent);line-height:1}
+.vh-kpi-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.8px;
+  font-weight:700;color:var(--ink3);margin-top:2px}
 
-.venues-filters{
-  display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;
-  scrollbar-width:none;-webkit-overflow-scrolling:touch;
-}
-.venues-filters::-webkit-scrollbar{display:none}
-.vf{
-  flex-shrink:0;background:var(--card);border:1px solid var(--line);
-  color:var(--ink2);border-radius:100px;padding:8px 14px;
-  font-size:12px;font-weight:700;cursor:pointer;
-  font-family:inherit;transition:all .15s;
-}
-.vf.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.vf:active{transform:scale(.95)}
-
-.venues-stats{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
-  background:var(--card);border:1px solid var(--line);
-  border-radius:14px;padding:14px 10px;
-}
-.vstat{text-align:center}
-.vstat .vk{font-size:9px;text-transform:uppercase;letter-spacing:1px;
-  font-weight:700;color:var(--ink3);margin-bottom:4px}
-.vstat .vv{font-family:var(--mono);font-size:20px;font-weight:900;
-  letter-spacing:-.5px;color:var(--accent)}
-.vstat .vv.g{color:var(--green)}
-.vstat .vv.gold{color:var(--gold)}
-
-/* Event card rich */
-.vev-card{
+/* TOP events — grosses cartes action */
+.top-ev{
   background:var(--card);border:1px solid var(--line);border-radius:15px;
-  padding:14px;margin-bottom:10px;
-  transition:transform .15s,border-color .15s;
-  cursor:pointer;
+  padding:14px;margin-bottom:9px;
+  display:flex;gap:12px;align-items:stretch;
+  transition:transform .12s,border-color .15s;
 }
-.vev-card:active{transform:scale(.99)}
-.vev-card.today{border-color:var(--accent);
-  box-shadow:0 0 0 1px rgba(255,69,0,.15), 0 4px 20px rgba(255,69,0,.08)}
-.vev-card.past{opacity:.4}
-
-.vev-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
-.vev-date-box{
-  width:56px;flex-shrink:0;text-align:center;
-  background:var(--bg);border:1px solid var(--line);
-  border-radius:11px;padding:7px 4px;
+.top-ev:active{transform:scale(.99)}
+.top-ev.now{
+  border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(255,69,0,.2),0 6px 20px rgba(255,69,0,.1);
 }
-.vev-date-d{font-family:var(--mono);font-size:22px;font-weight:900;
-  letter-spacing:-.8px;color:var(--ink);line-height:1}
-.vev-date-m{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;
-  font-weight:800;color:var(--ink3);margin-top:2px}
-.vev-card.today .vev-date-d{color:var(--accent)}
+.top-ev.soon{border-color:var(--gold)}
 
-.vev-body{flex:1;min-width:0}
-.vev-titre{font-size:15px;font-weight:800;letter-spacing:-.3px;color:var(--ink);
-  line-height:1.3;margin-bottom:5px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden}
-.vev-venue{font-size:11px;color:var(--ink2);font-weight:600;
-  display:flex;align-items:center;gap:5px}
-.vev-venue .vev-venue-ico{font-size:14px}
-
-.vev-footer{display:flex;gap:10px;padding-top:10px;
-  border-top:1px solid var(--line);flex-wrap:wrap}
-.vev-chip{
-  background:var(--card2);border-radius:8px;padding:5px 9px;
-  font-size:10px;font-weight:700;letter-spacing:.3px;
-  display:inline-flex;align-items:center;gap:4px;
+.te-rank{
+  width:42px;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg);border-radius:11px;
+  padding:6px 0;
 }
-.vev-chip.hot{background:rgba(255,69,0,.15);color:var(--accent)}
-.vev-chip.cap{color:var(--ink2)}
-.vev-chip.fin{color:var(--gold);background:rgba(212,184,119,.12)}
-.vev-chip.cat{background:rgba(20,148,95,.15);color:var(--green)}
-.vev-chip.jour{background:rgba(100,100,100,.15);color:var(--ink2)}
+.te-rank-n{font-family:var(--mono);font-size:22px;font-weight:900;
+  letter-spacing:-.5px;color:var(--ink);line-height:1}
+.te-rank-l{font-size:8px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:800;color:var(--ink3);margin-top:3px}
+.top-ev.now .te-rank-n{color:var(--accent)}
 
-/* Venue card (liste complète des salles) */
+.te-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between}
+.te-titre{font-size:14px;font-weight:800;letter-spacing:-.2px;color:var(--ink);
+  line-height:1.3;margin-bottom:4px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.te-venue{font-size:10px;color:var(--ink2);font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.te-meta{display:flex;gap:8px;margin-top:7px;align-items:center;flex-wrap:wrap}
+.te-fin{font-family:var(--mono);font-size:13px;font-weight:800;
+  color:var(--accent);letter-spacing:-.3px}
+.te-cap{font-family:var(--mono);font-size:11px;color:var(--ink2);font-weight:700}
+.te-in{font-size:10px;font-weight:800;color:var(--gold);
+  background:rgba(212,184,119,.15);padding:3px 7px;border-radius:100px;
+  text-transform:uppercase;letter-spacing:.5px}
+.top-ev.now .te-in{color:var(--accent);background:rgba(255,69,0,.15)}
+
+/* TOOLBAR : Timeline avec filtres jour */
+.v-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:22px 0 10px;flex-wrap:wrap;
+}
+.v-chips{display:flex;gap:5px}
+.vchip{
+  background:var(--card);border:1px solid var(--line);color:var(--ink2);
+  font-family:inherit;font-size:10px;font-weight:700;
+  padding:6px 10px;border-radius:100px;cursor:pointer;
+  text-transform:uppercase;letter-spacing:.5px;
+  transition:all .15s;
+}
+.vchip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.vchip:active{transform:scale(.95)}
+
+/* TIMELINE — carte compacte chronologique */
+.tl-group{margin-bottom:14px}
+.tl-group-hdr{
+  font-size:10px;text-transform:uppercase;letter-spacing:1.8px;font-weight:800;
+  color:var(--ink3);padding:4px 0 8px;
+  display:flex;align-items:center;gap:8px;
+}
+.tl-group-line{flex:1;height:1px;background:var(--line)}
+
+.tl-row{
+  background:var(--card);border:1px solid var(--line);
+  border-left:3px solid var(--ink3);
+  border-radius:10px;padding:10px 12px;margin-bottom:6px;
+  display:flex;align-items:center;gap:11px;
+  transition:transform .12s;
+}
+.tl-row:active{transform:scale(.99)}
+.tl-row.now-row{border-left-color:var(--accent);background:rgba(255,69,0,.04)}
+.tl-row.soon-row{border-left-color:var(--gold)}
+.tl-row.past{opacity:.42}
+
+.tl-hour{
+  font-family:var(--mono);font-size:14px;font-weight:800;
+  color:var(--ink);letter-spacing:-.3px;
+  min-width:46px;flex-shrink:0;
+}
+.tl-row.now-row .tl-hour{color:var(--accent)}
+.tl-ico{font-size:15px;flex-shrink:0;width:22px;text-align:center}
+.tl-main{flex:1;min-width:0}
+.tl-titre{font-size:12px;font-weight:700;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:-.1px;line-height:1.3}
+.tl-lieu{font-size:10px;color:var(--ink3);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-top:1px}
+.tl-right{text-align:right;flex-shrink:0}
+.tl-cap{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--ink2)}
+.tl-cap-l{font-size:8px;text-transform:uppercase;letter-spacing:.6px;
+  font-weight:700;color:var(--ink3);margin-top:1px}
+
+/* Liste salles derrière un toggle */
+.v-details{margin-top:22px}
+.v-summary{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:13px 15px;cursor:pointer;
+  font-size:12px;font-weight:700;color:var(--ink2);
+  list-style:none;-webkit-tap-highlight-color:transparent;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.v-summary::-webkit-details-marker{display:none}
+.v-summary::after{content:'▾';font-size:14px;color:var(--ink3);
+  transition:transform .2s}
+.v-details[open] .v-summary::after{transform:rotate(180deg)}
+.v-details[open] #venues-list{margin-top:10px}
+
 .vv-card{
-  background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:14px;margin-bottom:8px;
-  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:11px 13px;margin-bottom:6px;
+  display:flex;align-items:center;gap:11px;
 }
 .vv-ico{
-  width:48px;height:48px;border-radius:12px;background:var(--card2);
+  width:38px;height:38px;border-radius:10px;background:var(--card2);
   display:flex;align-items:center;justify-content:center;
-  font-size:22px;flex-shrink:0;
+  font-size:18px;flex-shrink:0;
 }
 .vv-main{flex:1;min-width:0}
-.vv-nom{font-size:14px;font-weight:800;letter-spacing:-.2px;color:var(--ink);
-  margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vv-adr{font-size:10px;color:var(--ink3);font-weight:600;
-  text-transform:uppercase;letter-spacing:.5px}
+.vv-nom{font-size:12px;font-weight:800;color:var(--ink);
+  margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:-.1px}
+.vv-adr{font-size:9px;color:var(--ink3);font-weight:700;
+  text-transform:uppercase;letter-spacing:.7px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vv-right{text-align:right;flex-shrink:0}
-.vv-cap{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--accent)}
-.vv-cap-l{font-size:8px;text-transform:uppercase;letter-spacing:.8px;
+.vv-cap{font-family:var(--mono);font-size:12px;font-weight:800;color:var(--accent)}
+.vv-cap-l{font-size:7px;text-transform:uppercase;letter-spacing:.7px;
   color:var(--ink3);font-weight:700;margin-top:1px}
 
-/* Empty state */
-.vempty{
-  text-align:center;padding:30px 20px;color:var(--ink3);
-  font-size:12px;font-weight:600;
-}
-.vempty .ei{display:block;font-size:34px;margin-bottom:8px}
+.vempty{text-align:center;padding:26px 20px;color:var(--ink3);
+  font-size:11px;font-weight:600}
+.vempty .ei{display:block;font-size:30px;margin-bottom:6px}
 
 /* ═══ TRAJET (onglet Prix course) ═══ */
 .trajet-box{
@@ -676,31 +747,44 @@ dialog .sheet{
     <div id="events-today"></div>
   </section>
 
-  <!-- ══ SALLES — Base événements temps réel ══ -->
+  <!-- ══ SALLES — Dashboard chauffeur temps réel ══ -->
   <section class="tab" id="tab-venues">
 
+    <!-- Banner fixe en haut : events qui finissent MAINTENANT -->
+    <div id="rush-alert" class="rush-alert" style="display:none"></div>
+
+    <!-- Hero résumé -->
     <div class="venues-hero">
-      <div class="vh-title">🎫 Salles & Événements</div>
-      <div class="vh-sub" id="vh-sub">Paris · Île-de-France · temps réel</div>
+      <div class="vh-left">
+        <div class="vh-date" id="vh-date">—</div>
+        <div class="vh-main" id="vh-main">—</div>
+      </div>
+      <div class="vh-right">
+        <div class="vh-kpi" id="vh-kpi">0</div>
+        <div class="vh-kpi-lbl">events ce soir</div>
+      </div>
     </div>
 
-    <div class="venues-filters" id="venues-filters">
-      <button class="vf active" data-filter="all">Tout</button>
-      <button class="vf" data-filter="today">🔥 Aujourd'hui</button>
-      <button class="vf" data-filter="week">Cette semaine</button>
-      <button class="vf" data-filter="concert">🎤 Concerts</button>
-      <button class="vf" data-filter="sport">⚽ Sport</button>
-      <button class="vf" data-filter="salon">🎪 Salons</button>
-      <button class="vf" data-filter="theatre">🎭 Théâtre</button>
+    <!-- TOP 3 : prochains events à cibler -->
+    <div class="stitle" style="margin-top:2px">🎯 À cibler maintenant</div>
+    <div id="top-events"></div>
+
+    <!-- Timeline chronologique de la journée -->
+    <div class="v-toolbar">
+      <div class="stitle" style="margin:0">📅 Ordre chronologique</div>
+      <div class="v-chips" id="v-day-chips">
+        <button class="vchip active" data-day="0">Aujourd'hui</button>
+        <button class="vchip" data-day="1">Demain</button>
+        <button class="vchip" data-day="7">7 jours</button>
+      </div>
     </div>
+    <div id="timeline-events"></div>
 
-    <div class="venues-stats" id="venues-stats"></div>
-
-    <div class="stitle" style="margin-top:20px">📅 Événements à venir</div>
-    <div id="venues-events-list"></div>
-
-    <div class="stitle" style="margin-top:28px">🏟 Toutes les salles</div>
-    <div id="venues-list"></div>
+    <!-- Liste des salles en mode compact, derrière un toggle -->
+    <details class="v-details">
+      <summary class="v-summary">🏟 Voir les 34 salles référencées</summary>
+      <div id="venues-list"></div>
+    </details>
   </section>
 
   <!-- ══ TRAJET — Estimateur course ══ -->
@@ -2224,18 +2308,27 @@ function switchTab(id){
 }
 
 /* ═══════════════════════════════════════════════
-   VENUES TAB — Design pro avec filtres et temps réel
+   VENUES TAB — Dashboard chauffeur action-first
+   - Rush alert 20 min après fin d'un gros event
+   - TOP 3 events à cibler (tri par timing)
+   - Timeline chronologique
 ═══════════════════════════════════════════════ */
-let venuesFilter = 'all';
+let venuesDayFilter = 0; // 0=aujourd'hui, 1=demain, 7=7 jours
 
 const MOIS_FR = ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
-const JOURS_FR = ['dim','lun','mar','mer','jeu','ven','sam'];
+const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const JOURS_LONG = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+const CAT_ICO = { concert:'🎤', sport:'⚽', salon:'🎪', theatre:'🎭', arena:'🏟' };
 
 function parseEventDate(ymd){
   const [y,m,d] = ymd.split('-').map(Number);
   return new Date(y, m-1, d);
 }
-
+function parseEventFin(ev){
+  const [y,m,d] = ev.d.split('-').map(Number);
+  const [h,mn] = ev.fin.split(':').map(Number);
+  return new Date(y, m-1, d, h, mn);
+}
 function daysBetween(d1, d2){
   const ms = d2.getTime() - d1.getTime();
   return Math.floor(ms / (1000*60*60*24));
@@ -2243,137 +2336,190 @@ function daysBetween(d1, d2){
 
 function renderVenuesPage(){
   const now = new Date();
-  const todayStr = todayYMD();
   const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  // Stats globales
-  const nEvTotal = EVENTS.length;
-  const nEvToday = EVENTS.filter(e => e.d === todayStr).length;
-  const nEvWeek  = EVENTS.filter(e => {
-    const dt = parseEventDate(e.d);
-    const dd = daysBetween(today0, dt);
-    return dd >= 0 && dd <= 7;
-  }).length;
+  // ─── 1. RUSH ALERT : event dont la fin est dans les 20 dernières minutes OU les 40 prochaines minutes
+  // On regarde les events de CAPACITÉ >= 2000 qui viennent de finir (< 20 min) ou finissent bientôt (< 40 min)
+  const rushAlert = document.getElementById('rush-alert');
+  const candidates = EVENTS.map(e => ({...e, finDate: parseEventFin(e)}))
+    .filter(e => {
+      const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+      return diffMin >= -20 && diffMin <= 40; // 20 min après OU 40 min avant
+    })
+    .map(e => ({ ...e, v: VENUES[e.venue] || {} }))
+    .filter(e => e.v.cap >= 2000)
+    .sort((a, b) => Math.abs(a.finDate - now) - Math.abs(b.finDate - now));
 
-  document.getElementById('venues-stats').innerHTML = `
-    <div class="vstat">
-      <div class="vk">Aujourd'hui</div>
-      <div class="vv ${nEvToday > 0 ? '' : 'g'}">${nEvToday}</div>
-    </div>
-    <div class="vstat">
-      <div class="vk">Cette semaine</div>
-      <div class="vv gold">${nEvWeek}</div>
-    </div>
-    <div class="vstat">
-      <div class="vk">Base totale</div>
-      <div class="vv">${nEvTotal}</div>
-    </div>
-  `;
+  if(candidates.length > 0){
+    const big = candidates[0];
+    const diffMin = Math.round((big.finDate.getTime() - now.getTime()) / 60000);
+    let statusTxt, ctaTxt;
+    if(diffMin < 0){
+      statusTxt = `Fini il y a ${Math.abs(diffMin)} min · rush en cours`;
+      ctaTxt = `⚡ Fonce à ${big.v.nom.split(' ').slice(0,3).join(' ')}`;
+    } else if(diffMin <= 10){
+      statusTxt = `Se termine dans ${diffMin} min`;
+      ctaTxt = `⚡ Prépare-toi · va à ${big.v.nom.split(' ').slice(0,3).join(' ')}`;
+    } else {
+      statusTxt = `Se termine à ${big.fin} (dans ${diffMin} min)`;
+      ctaTxt = `🎯 Direction ${big.v.nom.split(' ').slice(0,3).join(' ')}`;
+    }
 
-  // Filtrage événements
-  let events = EVENTS.filter(e => {
-    const dt = parseEventDate(e.d);
-    return dt.getTime() >= today0.getTime(); // uniquement à venir
-  }).sort((a,b) => a.d.localeCompare(b.d) || a.fin.localeCompare(b.fin));
-
-  if(venuesFilter === 'today'){
-    events = events.filter(e => e.d === todayStr);
-  } else if(venuesFilter === 'week'){
-    events = events.filter(e => {
-      const dt = parseEventDate(e.d);
-      return daysBetween(today0, dt) <= 7;
-    });
-  } else if(venuesFilter === 'concert' || venuesFilter === 'sport'
-         || venuesFilter === 'salon'   || venuesFilter === 'theatre'){
-    events = events.filter(e => e.cat === venuesFilter);
+    rushAlert.innerHTML = `
+      <div class="ra-top"><span class="ra-dot"></span><span>RUSH MAJEUR</span></div>
+      <div class="ra-title">${esc(big.titre)}</div>
+      <div class="ra-sub">${esc(big.v.nom)} · ${big.v.cap.toLocaleString('fr-FR')} spectateurs · ${statusTxt}</div>
+      <div class="ra-cta">${ctaTxt}</div>
+    `;
+    rushAlert.style.display = 'block';
+  } else {
+    rushAlert.style.display = 'none';
   }
 
-  // Rendu events
-  const evList = document.getElementById('venues-events-list');
-  if(events.length === 0){
-    evList.innerHTML = '<div class="vempty"><span class="ei">📅</span>Aucun événement pour ce filtre</div>';
-  } else {
-    evList.innerHTML = events.slice(0, 40).map(e => {
-      const v = VENUES[e.venue] || { nom:e.venue, adr:'', cap:0, ico:'🎫', cat:'' };
-      const dt = parseEventDate(e.d);
-      const isToday = e.d === todayStr;
-      const dd = daysBetween(today0, dt);
-      const jourTag = isToday ? '🔥 Aujourd\'hui'
-                   : dd === 1  ? 'Demain'
-                   : dd <= 7   ? 'Cette semaine'
-                   : '';
-      const impact = v.cap >= 20000 ? '🔥🔥🔥🔥'
-                   : v.cap >= 5000  ? '🔥🔥🔥'
-                   : v.cap >= 2000  ? '🔥🔥' : '🔥';
-      const catIco = { concert:'🎤 Concert', sport:'⚽ Sport',
-                       salon:'🎪 Salon', theatre:'🎭 Théâtre' }[e.cat] || '🎫';
+  // ─── 2. HERO : date + compteur events à venir aujourd'hui
+  const todayStr = todayYMD();
+  const eventsToday = EVENTS.filter(e => e.d === todayStr && parseEventFin(e).getTime() >= now.getTime());
+  document.getElementById('vh-date').textContent =
+    `${JOURS_LONG[now.getDay()]} ${now.getDate()} ${MOIS_LONG[now.getMonth()]}`;
+  const totalPax = eventsToday.reduce((s, e) => s + (VENUES[e.venue]?.cap || 0), 0);
+  document.getElementById('vh-main').textContent =
+    eventsToday.length > 0
+      ? `${totalPax.toLocaleString('fr-FR')} spectateurs en sortie ce soir`
+      : 'Aucun gros event restant ce soir';
+  document.getElementById('vh-kpi').textContent = eventsToday.length;
 
-      return `<div class="vev-card ${isToday?'today':''}">
-        <div class="vev-head">
-          <div class="vev-date-box">
-            <div class="vev-date-d">${dt.getDate()}</div>
-            <div class="vev-date-m">${MOIS_FR[dt.getMonth()]}</div>
-          </div>
-          <div class="vev-body">
-            <div class="vev-titre">${esc(e.titre)}</div>
-            <div class="vev-venue"><span class="vev-venue-ico">${v.ico}</span>${esc(v.nom)} · ${esc(v.adr.split(' · ').slice(-1)[0] || v.adr)}</div>
-          </div>
+  // ─── 3. TOP 3 : events qui finissent dans les prochaines 3h, triés par timing
+  const next3h = EVENTS.map(e => ({...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {}}))
+    .filter(e => {
+      const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+      return diffMin >= -15 && diffMin <= 180;
+    })
+    .sort((a,b) => a.finDate - b.finDate)
+    .slice(0, 3);
+
+  const topEl = document.getElementById('top-events');
+  if(next3h.length === 0){
+    topEl.innerHTML = '<div class="vempty"><span class="ei">😴</span>Aucun événement imminent.<br>Regarde la timeline en dessous.</div>';
+  } else {
+    topEl.innerHTML = next3h.map((e, i) => {
+      const diffMin = Math.round((e.finDate.getTime() - now.getTime()) / 60000);
+      const isNow  = diffMin <= 15;
+      const isSoon = diffMin > 15 && diffMin <= 60;
+      const cls = isNow ? 'now' : (isSoon ? 'soon' : '');
+      const timeLbl = diffMin < 0 ? `il y a ${Math.abs(diffMin)}min`
+                    : diffMin === 0 ? 'maintenant'
+                    : diffMin < 60  ? `dans ${diffMin}min`
+                    : `dans ${Math.floor(diffMin/60)}h${String(diffMin%60).padStart(2,'0')}`;
+      return `<div class="top-ev ${cls}">
+        <div class="te-rank">
+          <div class="te-rank-n">${i+1}</div>
+          <div class="te-rank-l">cible</div>
         </div>
-        <div class="vev-footer">
-          ${jourTag ? `<span class="vev-chip ${isToday?'hot':'jour'}">${jourTag}</span>` : ''}
-          <span class="vev-chip cat">${catIco}</span>
-          <span class="vev-chip fin">🕐 fin ${esc(e.fin)}</span>
-          <span class="vev-chip cap">👥 ${v.cap.toLocaleString('fr-FR')} pax</span>
-          <span class="vev-chip">🔥 ${impact}</span>
+        <div class="te-body">
+          <div>
+            <div class="te-titre">${CAT_ICO[e.cat] || '🎫'} ${esc(e.titre)}</div>
+            <div class="te-venue">${esc(e.v.nom || e.venue)}</div>
+          </div>
+          <div class="te-meta">
+            <span class="te-fin">fin ${esc(e.fin)}</span>
+            <span class="te-in">${timeLbl}</span>
+            <span class="te-cap">👥 ${(e.v.cap || 0).toLocaleString('fr-FR')}</span>
+          </div>
         </div>
       </div>`;
     }).join('');
   }
 
-  // Liste des salles (filtrée par catégorie si applicable)
-  let venuesToShow = Object.entries(VENUES);
-  if(['concert','sport','salon','theatre','arena'].includes(venuesFilter)){
-    venuesToShow = venuesToShow.filter(([id,v]) =>
-      v.cat === venuesFilter || (venuesFilter === 'concert' && v.cat === 'arena'));
-  }
-  // Tri par capacité décroissante
-  venuesToShow.sort((a,b) => b[1].cap - a[1].cap);
+  // ─── 4. TIMELINE chronologique
+  const filterLimit = venuesDayFilter; // 0=today only, 1=today+demain, 7=7j
+  const tlEvents = EVENTS
+    .map(e => ({...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {}}))
+    .filter(e => {
+      const dd = daysBetween(today0, parseEventDate(e.d));
+      return dd >= 0 && dd <= filterLimit;
+    })
+    .sort((a,b) => a.finDate - b.finDate);
 
-  document.getElementById('venues-list').innerHTML = venuesToShow.map(([id, v]) => {
-    const nEv = EVENTS.filter(e => e.venue === id &&
-      parseEventDate(e.d).getTime() >= today0.getTime()).length;
+  const tlEl = document.getElementById('timeline-events');
+  if(tlEvents.length === 0){
+    tlEl.innerHTML = '<div class="vempty"><span class="ei">📅</span>Aucun événement sur la période</div>';
+  } else {
+    // Grouper par date
+    const groups = {};
+    tlEvents.forEach(e => {
+      if(!groups[e.d]) groups[e.d] = [];
+      groups[e.d].push(e);
+    });
+    let html = '';
+    Object.keys(groups).sort().forEach(dateKey => {
+      const dt = parseEventDate(dateKey);
+      const dd = daysBetween(today0, dt);
+      const label = dd === 0 ? "AUJOURD'HUI"
+                  : dd === 1 ? 'DEMAIN'
+                  : `${JOURS_LONG[dt.getDay()].toUpperCase()} ${dt.getDate()} ${MOIS_FR[dt.getMonth()]}`;
+      html += `<div class="tl-group">
+        <div class="tl-group-hdr"><span>${label}</span><span class="tl-group-line"></span><span>${groups[dateKey].length} évt</span></div>`;
+      groups[dateKey].forEach(e => {
+        const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
+        const isNow  = diffMin >= -15 && diffMin <= 45;
+        const isSoon = diffMin > 45 && diffMin <= 120;
+        const isPast = diffMin < -15;
+        const cls = isPast ? 'past' : isNow ? 'now-row' : isSoon ? 'soon-row' : '';
+        html += `<div class="tl-row ${cls}">
+          <div class="tl-hour">${esc(e.fin)}</div>
+          <div class="tl-ico">${CAT_ICO[e.cat] || '🎫'}</div>
+          <div class="tl-main">
+            <div class="tl-titre">${esc(e.titre)}</div>
+            <div class="tl-lieu">${esc(e.v.nom || e.venue)}</div>
+          </div>
+          <div class="tl-right">
+            <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
+            <div class="tl-cap-l">pax</div>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    tlEl.innerHTML = html;
+  }
+
+  // ─── 5. Liste des salles (triée par capacité)
+  const venuesSorted = Object.entries(VENUES).sort((a,b) => b[1].cap - a[1].cap);
+  document.getElementById('venues-list').innerHTML = venuesSorted.map(([id, v]) => {
+    const nEv = EVENTS.filter(e => e.venue === id && parseEventDate(e.d).getTime() >= today0.getTime()).length;
     return `<div class="vv-card">
       <div class="vv-ico">${v.ico}</div>
       <div class="vv-main">
         <div class="vv-nom">${esc(v.nom)}</div>
-        <div class="vv-adr">${esc(v.adr)}${nEv > 0 ? ' · ' + nEv + ' évt à venir' : ''}</div>
+        <div class="vv-adr">${esc(v.adr)}${nEv > 0 ? ' · ' + nEv + ' évt' : ''}</div>
       </div>
       <div class="vv-right">
         <div class="vv-cap">${v.cap.toLocaleString('fr-FR')}</div>
-        <div class="vv-cap-l">pax max</div>
+        <div class="vv-cap-l">pax</div>
       </div>
     </div>`;
   }).join('');
-
-  // Sous-titre avec date du jour
-  const joursLongs = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-  const moisLongs  = ['janvier','février','mars','avril','mai','juin','juillet','août',
-                      'septembre','octobre','novembre','décembre'];
-  document.getElementById('vh-sub').textContent =
-    `${joursLongs[now.getDay()]} ${now.getDate()} ${moisLongs[now.getMonth()]} ${now.getFullYear()}`;
 }
 
 function initVenuesFilters(){
-  document.querySelectorAll('#venues-filters .vf').forEach(b => {
+  document.querySelectorAll('#v-day-chips .vchip').forEach(b => {
     b.onclick = () => {
-      document.querySelectorAll('#venues-filters .vf').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('#v-day-chips .vchip').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
-      venuesFilter = b.dataset.filter;
+      venuesDayFilter = parseInt(b.dataset.day);
       renderVenuesPage();
       if(navigator.vibrate) navigator.vibrate(8);
     };
   });
 }
+
+// Auto-refresh quand l'onglet est visible (toutes les 60s pour rester à jour)
+setInterval(() => {
+  const tab = document.getElementById('tab-venues');
+  if(tab && tab.classList.contains('active')){
+    renderVenuesPage();
+  }
+}, 60000);
 
 function renderEvents(){
   const today = todayYMD();
