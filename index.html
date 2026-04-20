@@ -450,6 +450,118 @@ dialog .sheet{
 .ev-cap{color:var(--ink2);font-weight:600;font-family:var(--mono)}
 .ev-impact{color:var(--accent);font-weight:700}
 
+/* ═══ VENUES / SALLES (onglet dédié) ═══ */
+.venues-hero{
+  background:linear-gradient(135deg, rgba(255,69,0,.12), rgba(255,69,0,.03));
+  border:1px solid rgba(255,69,0,.25); border-radius:18px;
+  padding:18px 18px 16px; margin-bottom:14px;
+}
+.vh-title{font-size:22px;font-weight:900;letter-spacing:-.5px;color:var(--ink);
+  margin-bottom:3px}
+.vh-sub{font-size:11px;color:var(--ink3);font-weight:600;
+  text-transform:uppercase;letter-spacing:1px}
+
+.venues-filters{
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.venues-filters::-webkit-scrollbar{display:none}
+.vf{
+  flex-shrink:0;background:var(--card);border:1px solid var(--line);
+  color:var(--ink2);border-radius:100px;padding:8px 14px;
+  font-size:12px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:all .15s;
+}
+.vf.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.vf:active{transform:scale(.95)}
+
+.venues-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:14px 10px;
+}
+.vstat{text-align:center}
+.vstat .vk{font-size:9px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:700;color:var(--ink3);margin-bottom:4px}
+.vstat .vv{font-family:var(--mono);font-size:20px;font-weight:900;
+  letter-spacing:-.5px;color:var(--accent)}
+.vstat .vv.g{color:var(--green)}
+.vstat .vv.gold{color:var(--gold)}
+
+/* Event card rich */
+.vev-card{
+  background:var(--card);border:1px solid var(--line);border-radius:15px;
+  padding:14px;margin-bottom:10px;
+  transition:transform .15s,border-color .15s;
+  cursor:pointer;
+}
+.vev-card:active{transform:scale(.99)}
+.vev-card.today{border-color:var(--accent);
+  box-shadow:0 0 0 1px rgba(255,69,0,.15), 0 4px 20px rgba(255,69,0,.08)}
+.vev-card.past{opacity:.4}
+
+.vev-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.vev-date-box{
+  width:56px;flex-shrink:0;text-align:center;
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:11px;padding:7px 4px;
+}
+.vev-date-d{font-family:var(--mono);font-size:22px;font-weight:900;
+  letter-spacing:-.8px;color:var(--ink);line-height:1}
+.vev-date-m{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;
+  font-weight:800;color:var(--ink3);margin-top:2px}
+.vev-card.today .vev-date-d{color:var(--accent)}
+
+.vev-body{flex:1;min-width:0}
+.vev-titre{font-size:15px;font-weight:800;letter-spacing:-.3px;color:var(--ink);
+  line-height:1.3;margin-bottom:5px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden}
+.vev-venue{font-size:11px;color:var(--ink2);font-weight:600;
+  display:flex;align-items:center;gap:5px}
+.vev-venue .vev-venue-ico{font-size:14px}
+
+.vev-footer{display:flex;gap:10px;padding-top:10px;
+  border-top:1px solid var(--line);flex-wrap:wrap}
+.vev-chip{
+  background:var(--card2);border-radius:8px;padding:5px 9px;
+  font-size:10px;font-weight:700;letter-spacing:.3px;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.vev-chip.hot{background:rgba(255,69,0,.15);color:var(--accent)}
+.vev-chip.cap{color:var(--ink2)}
+.vev-chip.fin{color:var(--gold);background:rgba(212,184,119,.12)}
+.vev-chip.cat{background:rgba(20,148,95,.15);color:var(--green)}
+.vev-chip.jour{background:rgba(100,100,100,.15);color:var(--ink2)}
+
+/* Venue card (liste complète des salles) */
+.vv-card{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px;margin-bottom:8px;
+  display:flex;align-items:center;gap:12px;
+}
+.vv-ico{
+  width:48px;height:48px;border-radius:12px;background:var(--card2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.vv-main{flex:1;min-width:0}
+.vv-nom{font-size:14px;font-weight:800;letter-spacing:-.2px;color:var(--ink);
+  margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vv-adr{font-size:10px;color:var(--ink3);font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px}
+.vv-right{text-align:right;flex-shrink:0}
+.vv-cap{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--accent)}
+.vv-cap-l{font-size:8px;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--ink3);font-weight:700;margin-top:1px}
+
+/* Empty state */
+.vempty{
+  text-align:center;padding:30px 20px;color:var(--ink3);
+  font-size:12px;font-weight:600;
+}
+.vempty .ei{display:block;font-size:34px;margin-bottom:8px}
+
 /* ═══ TRAJET (onglet Prix course) ═══ */
 .trajet-box{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
@@ -515,6 +627,7 @@ dialog .sheet{
   <div class="nav-tabs">
     <button class="active" data-tab="tab-now">🚂 Gares</button>
     <button data-tab="tab-stats">📊 Rush</button>
+    <button data-tab="tab-venues">🎫 Salles</button>
     <button data-tab="tab-trajet">💶 Trajet</button>
   </div>
 </header>
@@ -561,6 +674,33 @@ dialog .sheet{
 
     <div class="stitle">🎤 Événements aujourd'hui · fin de soirée</div>
     <div id="events-today"></div>
+  </section>
+
+  <!-- ══ SALLES — Base événements temps réel ══ -->
+  <section class="tab" id="tab-venues">
+
+    <div class="venues-hero">
+      <div class="vh-title">🎫 Salles & Événements</div>
+      <div class="vh-sub" id="vh-sub">Paris · Île-de-France · temps réel</div>
+    </div>
+
+    <div class="venues-filters" id="venues-filters">
+      <button class="vf active" data-filter="all">Tout</button>
+      <button class="vf" data-filter="today">🔥 Aujourd'hui</button>
+      <button class="vf" data-filter="week">Cette semaine</button>
+      <button class="vf" data-filter="concert">🎤 Concerts</button>
+      <button class="vf" data-filter="sport">⚽ Sport</button>
+      <button class="vf" data-filter="salon">🎪 Salons</button>
+      <button class="vf" data-filter="theatre">🎭 Théâtre</button>
+    </div>
+
+    <div class="venues-stats" id="venues-stats"></div>
+
+    <div class="stitle" style="margin-top:20px">📅 Événements à venir</div>
+    <div id="venues-events-list"></div>
+
+    <div class="stitle" style="margin-top:28px">🏟 Toutes les salles</div>
+    <div id="venues-list"></div>
   </section>
 
   <!-- ══ TRAJET — Estimateur course ══ -->
@@ -1878,96 +2018,191 @@ function renderStats(){
 }
 
 /* ═══════════════════════════════════════════════
-   ÉVÉNEMENTS Paris & Grand Paris — base de données
-   Sources : Accor Arena, Seine Musicale, Paris Expo, Villepinte, Le Bourget
-   Format : date YYYY-MM-DD, heure fin, capacité, lieu + icon + coords
+   SALLES & ÉVÉNEMENTS — base de données enrichie
+   Sources : sortiraparis, agendaculturel, infoconcert, psg.fr, bandsintown,
+             expo.paris, le-zenith.com, tourisme93, grand-roissy-tourisme
+   Format VENUES : { nom, adr, cap, ico, cat, gare }
+     cat : 'arena' | 'concert' | 'sport' | 'salon' | 'theatre'
+     gare : gare SNCF la plus proche (pour conseil chauffeur)
+   Format EVENTS : { d, fin, venue, titre, cat }
 ═══════════════════════════════════════════════ */
 const VENUES = {
-  bercy_arena:      { nom:'Accor Arena',               adr:'Bercy · 12e',              cap:20000, ico:'🎤' },
-  zenith:           { nom:'Zénith La Villette',        adr:'Porte de Pantin · 19e',    cap:6300,  ico:'🎸' },
-  olympia:          { nom:"L'Olympia",                 adr:'Opéra · 9e',               cap:1980,  ico:'🎭' },
-  pleyel:           { nom:'Salle Pleyel',              adr:'Étoile · 8e',              cap:1913,  ico:'🎻' },
-  seine_musicale:   { nom:'La Seine Musicale',         adr:'Boulogne-Billancourt',     cap:6000,  ico:'🎼' },
-  defense_arena:    { nom:'Paris La Défense Arena',    adr:'Nanterre',                 cap:40000, ico:'🏟' },
-  porte_versailles: { nom:'Paris Expo Porte Versailles',adr:'Porte de Versailles · 15e',cap:30000, ico:'🎪' },
-  villepinte:       { nom:'Paris Nord Villepinte',     adr:'Villepinte (93)',          cap:40000, ico:'🏛' },
-  bourget:          { nom:'Parc Expo Le Bourget',      adr:'Le Bourget (93)',          cap:35000, ico:'✈' },
-  stade_france:     { nom:'Stade de France',           adr:'Saint-Denis (93)',         cap:80000, ico:'⚽' }
+  // Grandes arenas
+  bercy_arena:      { nom:'Accor Arena',                  adr:'8 bd de Bercy · 12e',              cap:20300, ico:'🏟', cat:'arena',   gare:'Gare de Lyon / Bercy' },
+  defense_arena:    { nom:'Paris La Défense Arena',       adr:'99 rue du Château · Nanterre',     cap:40000, ico:'🏟', cat:'arena',   gare:'La Défense (RER A)' },
+  adidas_arena:     { nom:'Adidas Arena',                 adr:'Porte de la Chapelle · 18e',       cap:8000,  ico:'🏟', cat:'arena',   gare:'Gare du Nord' },
+
+  // Stades
+  stade_france:     { nom:'Stade de France',              adr:'93 Saint-Denis',                    cap:80000, ico:'⚽', cat:'sport',   gare:'Gare du Nord (RER D)' },
+  parc_princes:     { nom:'Parc des Princes',             adr:'24 rue du Cdt Guilbaud · 16e',     cap:47929, ico:'⚽', cat:'sport',   gare:'Montparnasse (M10)' },
+  jean_bouin:       { nom:'Stade Jean-Bouin',             adr:'9 allée Brennus · 16e',            cap:20000, ico:'🏉', cat:'sport',   gare:'Montparnasse (M10)' },
+  roland_garros:    { nom:'Roland-Garros',                adr:'2 av. Gordon-Bennett · 16e',       cap:15000, ico:'🎾', cat:'sport',   gare:'Montparnasse (M10)' },
+  coubertin:        { nom:'Stade Pierre-de-Coubertin',    adr:'82 av. G. Lafont · 16e',           cap:4200,  ico:'🏐', cat:'sport',   gare:'Montparnasse (M10)' },
+
+  // Salles concert
+  zenith:           { nom:'Zénith La Villette',           adr:'211 av. J. Jaurès · 19e',          cap:6300,  ico:'🎤', cat:'concert', gare:'Gare du Nord / Est' },
+  olympia:          { nom:"L'Olympia",                    adr:'28 bd des Capucines · 9e',         cap:1980,  ico:'🎭', cat:'concert', gare:'Gare du Nord / Saint-Lazare' },
+  pleyel:           { nom:'Salle Pleyel',                 adr:'252 rue du Fg Saint-Honoré · 8e',  cap:1913,  ico:'🎻', cat:'concert', gare:'Saint-Lazare' },
+  seine_musicale:   { nom:'La Seine Musicale',            adr:'Île Seguin · Boulogne',            cap:6000,  ico:'🎼', cat:'concert', gare:'Montparnasse' },
+  bataclan:         { nom:'Le Bataclan',                  adr:'50 bd Voltaire · 11e',             cap:1500,  ico:'🎸', cat:'concert', gare:'Gare de Lyon / Nord' },
+  cigale:           { nom:'La Cigale',                    adr:'120 bd Rochechouart · 18e',        cap:1389,  ico:'🎸', cat:'concert', gare:'Gare du Nord' },
+  trianon:          { nom:'Le Trianon',                   adr:'80 bd Rochechouart · 18e',         cap:1000,  ico:'🎤', cat:'concert', gare:'Gare du Nord' },
+  casino_paris:     { nom:'Casino de Paris',              adr:'16 rue de Clichy · 9e',            cap:1500,  ico:'🎭', cat:'concert', gare:'Saint-Lazare' },
+  folies_bergere:   { nom:'Folies Bergère',               adr:'32 rue Richer · 9e',               cap:1600,  ico:'✨', cat:'concert', gare:'Gare du Nord / Est' },
+  elysee_mmtre:     { nom:'Élysée Montmartre',            adr:'72 bd Rochechouart · 18e',         cap:1400,  ico:'🎸', cat:'concert', gare:'Gare du Nord' },
+  philharmonie:     { nom:'Philharmonie de Paris',        adr:'221 av. J. Jaurès · 19e',          cap:2400,  ico:'🎻', cat:'concert', gare:'Gare du Nord / Est' },
+  gaite_lyrique:    { nom:'Gaîté Lyrique',                adr:'3 bis rue Papin · 3e',             cap:750,   ico:'🎤', cat:'concert', gare:'Gare de l\'Est' },
+  new_morning:      { nom:'New Morning',                  adr:'7-9 rue Petites-Écuries · 10e',    cap:400,   ico:'🎷', cat:'concert', gare:'Gare du Nord / Est' },
+  rex:              { nom:'Le Grand Rex',                 adr:'1 bd Poissonnière · 2e',           cap:2800,  ico:'🎬', cat:'concert', gare:'Gare du Nord / Est' },
+  cabaret_sauvage:  { nom:'Cabaret Sauvage',              adr:'Parc de la Villette · 19e',        cap:1200,  ico:'🎪', cat:'concert', gare:'Gare du Nord / Est' },
+  cirque_hiver:     { nom:"Cirque d'Hiver Bouglione",     adr:'110 rue Amelot · 11e',             cap:1650,  ico:'🎪', cat:'concert', gare:'Gare de Lyon' },
+
+  // Salons / Expo
+  porte_versailles: { nom:'Paris Expo Porte de Versailles',adr:'1 pl. Porte de Versailles · 15e', cap:30000, ico:'🎪', cat:'salon',   gare:'Montparnasse (M12)' },
+  villepinte:       { nom:'Paris Nord Villepinte',        adr:'ZAC Paris Nord 2 · 93',            cap:40000, ico:'🏛', cat:'salon',   gare:'Gare du Nord / Est (RER B)' },
+  bourget:          { nom:'Parc Expo Le Bourget',         adr:'93 Le Bourget',                     cap:35000, ico:'✈', cat:'salon',   gare:'Gare du Nord / Est' },
+  grand_palais:     { nom:'Grand Palais',                 adr:'3 av. Général-Eisenhower · 8e',    cap:15000, ico:'🏛', cat:'salon',   gare:'Gare du Nord / Saint-Lazare' },
+  carreau_temple:   { nom:'Le Carreau du Temple',         adr:'4 rue E. Spuller · 3e',            cap:1500,  ico:'🎪', cat:'salon',   gare:'Gare de l\'Est' },
+  palais_brongniart:{ nom:'Palais Brongniart',            adr:'28 pl. Bourse · 2e',               cap:2000,  ico:'🏛', cat:'salon',   gare:'Gare du Nord' },
+  parc_floral:      { nom:'Parc Floral de Paris',         adr:'Rte Pyramide · 12e',               cap:20000, ico:'🌸', cat:'salon',   gare:'Gare de Lyon' },
+
+  // Théâtres majeurs
+  mogador:          { nom:'Théâtre Mogador',              adr:'25 rue Mogador · 9e',              cap:1600,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare' },
+  marigny:          { nom:'Théâtre Marigny',              adr:'Av. Marigny · 8e',                 cap:1024,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare' },
+  chatelet:         { nom:'Théâtre du Châtelet',          adr:'1 pl. du Châtelet · 1er',          cap:2010,  ico:'🎭', cat:'theatre', gare:'Gare de Lyon' },
+  opera_garnier:    { nom:'Opéra Garnier',                adr:'Pl. de l\'Opéra · 9e',             cap:1900,  ico:'🏛', cat:'theatre', gare:'Saint-Lazare / Nord' },
+  opera_bastille:   { nom:'Opéra Bastille',               adr:'Pl. de la Bastille · 12e',         cap:2745,  ico:'🏛', cat:'theatre', gare:'Gare de Lyon' },
+  champs_elysees:   { nom:'Théâtre des Champs-Élysées',   adr:'15 av. Montaigne · 8e',            cap:1905,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare' }
 };
 
-/* Events avril-mai 2026 (sources : sortiraparis, agendaculturel, infoconcert, expo.paris)
-   Format : { d:"YYYY-MM-DD", fin:"HH:MM", venue:'key', titre:"..." }
-   Ajoute ici les nouveaux événements au fur et à mesure.
+/* ═══ EVENTS : base 2026 vérifiée (sources au 20/04/2026) ═══
+   Ajouter au fil du temps - chaque entrée : date ISO, heure fin, salle, titre, catégorie
+   cat : 'concert' | 'sport' | 'salon' | 'theatre'
 */
 const EVENTS = [
-  // Accor Arena (Bercy) - avril 2026
-  { d:'2026-04-18', fin:'22:30', venue:'bercy_arena', titre:'Julien Doré - Tournée' },
-  { d:'2026-04-20', fin:'22:30', venue:'bercy_arena', titre:'Sting - My Songs Tour' },
-  { d:'2026-04-21', fin:'22:30', venue:'bercy_arena', titre:'5 Seconds of Summer' },
-  { d:'2026-04-29', fin:'22:30', venue:'bercy_arena', titre:'Naza - Tournée' },
-  { d:'2026-04-30', fin:'22:30', venue:'bercy_arena', titre:'Charlotte Cardin' },
+  // ═══ ACCOR ARENA (Bercy) ═══
+  { d:'2026-04-20', fin:'22:30', venue:'bercy_arena',    titre:'Chanson urbaine · Pop/Rock',                    cat:'concert' },
+  { d:'2026-04-21', fin:'22:00', venue:'bercy_arena',    titre:'5 Seconds of Summer',                           cat:'concert' },
+  { d:'2026-04-29', fin:'22:30', venue:'bercy_arena',    titre:'Concert RnB/Musiques urbaines',                 cat:'concert' },
+  { d:'2026-04-30', fin:'22:30', venue:'bercy_arena',    titre:'Charlotte Cardin · 99 Nights Tour',             cat:'concert' },
+  { d:'2026-05-02', fin:'22:30', venue:'bercy_arena',    titre:'Worakls Orchestra',                             cat:'concert' },
+  { d:'2026-05-03', fin:'22:30', venue:'bercy_arena',    titre:'Tame Impala',                                   cat:'concert' },
+  { d:'2026-05-10', fin:'17:00', venue:'bercy_arena',    titre:'France vs Canada · Hockey',                     cat:'sport' },
+  { d:'2026-05-12', fin:'22:30', venue:'bercy_arena',    titre:'Ne-Yo & Akon',                                  cat:'concert' },
+  { d:'2026-05-16', fin:'22:30', venue:'bercy_arena',    titre:'Twice · K-Pop World Tour (J1)',                 cat:'concert' },
+  { d:'2026-05-17', fin:'22:30', venue:'bercy_arena',    titre:'Twice · K-Pop World Tour (J2)',                 cat:'concert' },
+  { d:'2026-05-20', fin:'22:30', venue:'bercy_arena',    titre:'Star Academy Tour',                             cat:'concert' },
+  { d:'2026-05-23', fin:'22:00', venue:'bercy_arena',    titre:'Finales Coupe de France Handball',              cat:'sport' },
+  { d:'2026-05-24', fin:'19:00', venue:'bercy_arena',    titre:'Finales Coupe de France Handball (J2)',         cat:'sport' },
+  { d:'2026-05-29', fin:'22:30', venue:'bercy_arena',    titre:'Bouss · Pour la Famille (J1)',                  cat:'concert' },
+  { d:'2026-05-30', fin:'22:30', venue:'bercy_arena',    titre:'Bouss · Pour la Famille (J2)',                  cat:'concert' },
+  { d:'2026-06-05', fin:'22:30', venue:'bercy_arena',    titre:'Lynda',                                         cat:'concert' },
+  { d:'2026-06-08', fin:'22:30', venue:'bercy_arena',    titre:'WWE Monday Night RAW',                          cat:'sport' },
+  { d:'2026-06-09', fin:'22:30', venue:'bercy_arena',    titre:'Doja Cat · Ma Vie World Tour',                  cat:'concert' },
+  { d:'2026-06-28', fin:'22:30', venue:'bercy_arena',    titre:'Star Academy Tour (date sup)',                  cat:'concert' },
+  { d:'2026-07-01', fin:'22:30', venue:'bercy_arena',    titre:'Scorpions · Coming Home 2026',                  cat:'concert' },
+  { d:'2026-07-02', fin:'22:30', venue:'bercy_arena',    titre:'Scorpions · Coming Home 2026 (J2)',             cat:'concert' },
+  { d:'2026-07-03', fin:'22:30', venue:'bercy_arena',    titre:'Scorpions · Coming Home 2026 (J3)',             cat:'concert' },
 
-  // Accor Arena - mai 2026
-  { d:'2026-05-02', fin:'22:30', venue:'bercy_arena', titre:'Worakls Orchestra' },
-  { d:'2026-05-03', fin:'22:30', venue:'bercy_arena', titre:'Tame Impala' },
-  { d:'2026-05-10', fin:'17:00', venue:'bercy_arena', titre:'France vs Canada · Hockey' },
-  { d:'2026-05-12', fin:'22:30', venue:'bercy_arena', titre:'Ne-Yo & Akon' },
-  { d:'2026-05-16', fin:'22:30', venue:'bercy_arena', titre:'Twice - K-Pop World Tour' },
-  { d:'2026-05-17', fin:'22:30', venue:'bercy_arena', titre:'Twice - K-Pop World Tour (J2)' },
-  { d:'2026-05-20', fin:'22:30', venue:'bercy_arena', titre:'Star Academy Tour' },
-  { d:'2026-05-23', fin:'22:00', venue:'bercy_arena', titre:'Finales Coupe de France Handball' },
-  { d:'2026-05-24', fin:'19:00', venue:'bercy_arena', titre:'Finales Coupe de France Handball (J2)' },
+  // ═══ PARC DES PRINCES (PSG) ═══
+  { d:'2026-04-22', fin:'21:00', venue:'parc_princes',   titre:'PSG · Nantes (Ligue 1)',                        cat:'sport' },
+  { d:'2026-04-28', fin:'23:00', venue:'parc_princes',   titre:'PSG · Demi-finale Ligue des Champions · Aller', cat:'sport' },
+  { d:'2026-05-02', fin:'19:00', venue:'parc_princes',   titre:'PSG · Lorient (Ligue 1)',                       cat:'sport' },
+  { d:'2026-05-09', fin:'23:00', venue:'parc_princes',   titre:'PSG · Ligue 1 (à confirmer)',                   cat:'sport' },
 
-  // Zénith Paris - avril 2026
-  { d:'2026-04-16', fin:'22:30', venue:'zenith', titre:'Ben Mazué - Famille' },
-  { d:'2026-04-17', fin:'22:30', venue:'zenith', titre:'Ben Mazué - Famille (J2)' },
-  { d:'2026-04-18', fin:'22:30', venue:'zenith', titre:'Ben Mazué - Famille (J3)' },
+  // ═══ JEAN BOUIN (Stade Français rugby + PSG foot féminin) ═══
+  { d:'2026-04-25', fin:'16:30', venue:'jean_bouin',     titre:'Stade Français · Top 14 (J22)',                 cat:'sport' },
+  { d:'2026-05-16', fin:'23:00', venue:'jean_bouin',     titre:'PSG féminines · Ligue 1 (à confirmer)',         cat:'sport' },
 
-  // L'Olympia - avril 2026
-  { d:'2026-04-22', fin:'22:30', venue:'olympia', titre:'Cassius (Boombass)' },
+  // ═══ ZÉNITH LA VILLETTE ═══
+  { d:'2026-04-22', fin:'22:30', venue:'zenith',         titre:'Jason Derulo',                                  cat:'concert' },
+  { d:'2026-04-23', fin:'22:30', venue:'zenith',         titre:'Ken Carson · More Chaos Tour',                  cat:'concert' },
+  { d:'2026-04-24', fin:'22:30', venue:'zenith',         titre:'Thylacine · Roads vol. 3',                      cat:'concert' },
+  { d:'2026-04-25', fin:'22:30', venue:'zenith',         titre:'Goldmen · Tribute Goldman',                     cat:'concert' },
+  { d:'2026-04-26', fin:'22:30', venue:'zenith',         titre:'Kungs · Nuit électro',                          cat:'concert' },
+  { d:'2026-04-28', fin:'22:30', venue:'zenith',         titre:'Electro Symphony Vol. 2',                       cat:'concert' },
+  { d:'2026-05-15', fin:'22:30', venue:'zenith',         titre:'Étienne Daho (J1)',                             cat:'concert' },
+  { d:'2026-05-16', fin:'22:30', venue:'zenith',         titre:'Étienne Daho (J2)',                             cat:'concert' },
 
-  // Seine Musicale (Boulogne) - avril-mai 2026
-  { d:'2026-04-10', fin:'22:30', venue:'seine_musicale', titre:'Festival Chorus (J1)' },
-  { d:'2026-04-11', fin:'22:30', venue:'seine_musicale', titre:'Festival Chorus (J2)' },
-  { d:'2026-04-12', fin:'22:30', venue:'seine_musicale', titre:'Festival Chorus (J3)' },
-  { d:'2026-04-14', fin:'22:00', venue:'seine_musicale', titre:'Ciné-concert' },
-  { d:'2026-04-23', fin:'23:00', venue:'seine_musicale', titre:'Les Flammes Awards 2026 (rap/R&B)' },
-  { d:'2026-04-25', fin:'22:30', venue:'seine_musicale', titre:'Joe Bonamassa (blues rock)' },
-  { d:'2026-05-06', fin:'22:30', venue:'seine_musicale', titre:'Ballet Preljocaj' },
-  { d:'2026-05-15', fin:'22:30', venue:'seine_musicale', titre:'Tayc' },
-  { d:'2026-05-16', fin:'22:30', venue:'seine_musicale', titre:'Tayc (J2)' },
-  { d:'2026-05-28', fin:'22:00', venue:'seine_musicale', titre:'Clair Obscur · Expedition 33' },
+  // ═══ L'OLYMPIA ═══
+  { d:'2026-04-22', fin:'22:30', venue:'olympia',        titre:'Cassius (Boombass)',                            cat:'concert' },
+  { d:'2026-05-31', fin:'22:30', venue:'olympia',        titre:'Alan Stivell · Liberté 60 ans',                 cat:'concert' },
 
-  // Paris Expo Porte de Versailles
-  { d:'2026-04-18', fin:'19:00', venue:'porte_versailles', titre:'Gala TCG · Pokémon/Magic (J1)' },
-  { d:'2026-04-19', fin:'19:00', venue:'porte_versailles', titre:'Gala TCG · Pokémon/Magic (J2)' },
-  // Foire de Paris 30 avril - 11 mai (12 jours)
-  { d:'2026-04-30', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris · Ouverture' },
-  { d:'2026-05-01', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-02', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-03', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-04', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-05', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-06', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-07', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-08', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-09', fin:'22:00', venue:'porte_versailles', titre:'Foire de Paris · Nocturne (22h)' },
-  { d:'2026-05-10', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris' },
-  { d:'2026-05-11', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris · Clôture' },
-  { d:'2026-05-29', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J1)' },
-  { d:'2026-05-30', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J2)' },
-  { d:'2026-05-31', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J3)' },
+  // ═══ SEINE MUSICALE (Boulogne) ═══
+  { d:'2026-04-23', fin:'23:00', venue:'seine_musicale', titre:'Les Flammes Awards 2026',                       cat:'concert' },
+  { d:'2026-04-25', fin:'22:30', venue:'seine_musicale', titre:'Joe Bonamassa · blues rock',                    cat:'concert' },
+  { d:'2026-05-06', fin:'22:30', venue:'seine_musicale', titre:'Ballet Preljocaj (J1)',                         cat:'concert' },
+  { d:'2026-05-07', fin:'22:30', venue:'seine_musicale', titre:'Ballet Preljocaj (J2)',                         cat:'concert' },
+  { d:'2026-05-08', fin:'22:30', venue:'seine_musicale', titre:'Ballet Preljocaj (J3)',                         cat:'concert' },
+  { d:'2026-05-09', fin:'22:30', venue:'seine_musicale', titre:'Ballet Preljocaj (J4)',                         cat:'concert' },
+  { d:'2026-05-15', fin:'22:30', venue:'seine_musicale', titre:'Tayc (J1)',                                     cat:'concert' },
+  { d:'2026-05-16', fin:'22:30', venue:'seine_musicale', titre:'Tayc (J2)',                                     cat:'concert' },
+  { d:'2026-05-28', fin:'22:00', venue:'seine_musicale', titre:'Clair Obscur · Expedition 33',                  cat:'concert' },
+  { d:'2026-05-29', fin:'22:00', venue:'seine_musicale', titre:'Sevilla, Insula Orchestra',                     cat:'concert' },
+  { d:'2026-05-30', fin:'21:00', venue:'seine_musicale', titre:'Puccini Tosca · classique décalé',              cat:'concert' },
 
-  // Paris Nord Villepinte (salons)
-  { d:'2026-06-15', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J1)' },
-  { d:'2026-06-16', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J2)' },
-  { d:'2026-06-17', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J3)' },
-  { d:'2026-06-18', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J4)' },
-  { d:'2026-06-19', fin:'18:00', venue:'villepinte', titre:'Eurosatory · Défense (J5)' },
+  // ═══ DÉFENSE ARENA (Nanterre) ═══
+  { d:'2026-05-28', fin:'22:30', venue:'defense_arena',  titre:'Damso · BĒYĀH Tour (J1)',                       cat:'concert' },
+  { d:'2026-05-29', fin:'22:30', venue:'defense_arena',  titre:'Damso · BĒYĀH Tour (J2)',                       cat:'concert' },
+  { d:'2026-05-30', fin:'22:30', venue:'defense_arena',  titre:'Damso · BĒYĀH Tour (J3) + Metallica M72',       cat:'concert' },
+  { d:'2026-05-31', fin:'22:30', venue:'defense_arena',  titre:'Metallica · M72 Tour (J2)',                     cat:'concert' },
 
-  // Paris La Défense Arena (Nanterre)
-  { d:'2026-05-30', fin:'22:30', venue:'defense_arena', titre:'Metallica (M72 Tour)' },
-  { d:'2026-05-31', fin:'22:30', venue:'defense_arena', titre:'Metallica (J2)' }
+  // ═══ ADIDAS ARENA ═══
+  { d:'2026-05-27', fin:'22:30', venue:'adidas_arena',   titre:'Zucchero · World Tour 2026',                    cat:'concert' },
+
+  // ═══ STADE DE FRANCE ═══
+  { d:'2026-05-02', fin:'23:30', venue:'stade_france',   titre:'Fally Ipupa (J1)',                              cat:'concert' },
+  { d:'2026-05-03', fin:'23:30', venue:'stade_france',   titre:'Fally Ipupa (J2) · second complet',             cat:'concert' },
+  { d:'2026-05-15', fin:'23:30', venue:'stade_france',   titre:'JUL (J1) · marseillais',                        cat:'concert' },
+  { d:'2026-05-16', fin:'23:30', venue:'stade_france',   titre:'JUL (J2)',                                      cat:'concert' },
+
+  // ═══ PORTE DE VERSAILLES — Foire de Paris + salons ═══
+  { d:'2026-04-30', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris · Ouverture',                  cat:'salon' },
+  { d:'2026-05-01', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-02', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-03', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-04', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-05', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-06', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-07', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-08', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-09', fin:'22:00', venue:'porte_versailles', titre:'Foire de Paris · Nocturne (22h)',             cat:'salon' },
+  { d:'2026-05-10', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris',                              cat:'salon' },
+  { d:'2026-05-11', fin:'19:00', venue:'porte_versailles', titre:'Foire de Paris · Clôture',                    cat:'salon' },
+  { d:'2026-05-29', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J1)',                        cat:'salon' },
+  { d:'2026-05-30', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J2)',                        cat:'salon' },
+  { d:'2026-05-31', fin:'18:00', venue:'porte_versailles', titre:'Salon Naturally (J3)',                        cat:'salon' },
+
+  // ═══ PARIS NORD VILLEPINTE — Comic Con + Eurosatory ═══
+  { d:'2026-04-18', fin:'19:00', venue:'villepinte',     titre:'Comic Con France (J1)',                         cat:'salon' },
+  { d:'2026-04-19', fin:'19:00', venue:'villepinte',     titre:'Comic Con France (J2) · cosplay',               cat:'salon' },
+  { d:'2026-06-15', fin:'18:00', venue:'villepinte',     titre:'Eurosatory · Défense/Sécurité (J1)',            cat:'salon' },
+  { d:'2026-06-16', fin:'18:00', venue:'villepinte',     titre:'Eurosatory (J2)',                               cat:'salon' },
+  { d:'2026-06-17', fin:'18:00', venue:'villepinte',     titre:'Eurosatory (J3)',                               cat:'salon' },
+  { d:'2026-06-18', fin:'18:00', venue:'villepinte',     titre:'Eurosatory (J4)',                               cat:'salon' },
+  { d:'2026-06-19', fin:'18:00', venue:'villepinte',     titre:'Eurosatory (J5) · Clôture',                     cat:'salon' },
+
+  // ═══ GRAND PALAIS ═══
+  { d:'2026-04-17', fin:'23:00', venue:'grand_palais',   titre:'Festival du Livre de Paris (J1 · nocturne)',    cat:'salon' },
+  { d:'2026-04-18', fin:'20:00', venue:'grand_palais',   titre:'Festival du Livre de Paris (J2)',               cat:'salon' },
+  { d:'2026-04-19', fin:'19:00', venue:'grand_palais',   titre:'Festival du Livre de Paris (J3)',               cat:'salon' },
+
+  // ═══ PARC FLORAL ═══
+  { d:'2026-04-18', fin:'19:00', venue:'parc_floral',    titre:'Rhum Fest (J1)',                                cat:'salon' },
+  { d:'2026-04-19', fin:'19:00', venue:'parc_floral',    titre:'Rhum Fest (J2)',                                cat:'salon' },
+  { d:'2026-04-20', fin:'19:00', venue:'parc_floral',    titre:'Rhum Fest (J3)',                                cat:'salon' },
+  { d:'2026-04-24', fin:'19:00', venue:'parc_floral',    titre:'Salon du Vélo (J1)',                            cat:'salon' },
+  { d:'2026-04-25', fin:'19:00', venue:'parc_floral',    titre:'Salon du Vélo (J2)',                            cat:'salon' },
+  { d:'2026-04-26', fin:'19:00', venue:'parc_floral',    titre:'Salon du Vélo (J3)',                            cat:'salon' },
+
+  // ═══ THÉÂTRES (exemples, à compléter) ═══
+  { d:'2026-04-20', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
+  { d:'2026-04-21', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
+  { d:'2026-04-22', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
+  { d:'2026-04-23', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
+  { d:'2026-04-24', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical',                         cat:'theatre' },
+  { d:'2026-04-25', fin:'22:30', venue:'mogador',        titre:'Le Roi Lion · Musical (matinée + soirée)',      cat:'theatre' },
+  { d:'2026-04-20', fin:'22:45', venue:'marigny',        titre:'Amadeus',                                       cat:'theatre' }
 ];
 
 function todayYMD(){
@@ -1982,7 +2217,162 @@ function switchTab(id){
     renderStats();
     renderEvents();
   }
+  if(id === 'tab-venues'){
+    renderVenuesPage();
+  }
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ═══════════════════════════════════════════════
+   VENUES TAB — Design pro avec filtres et temps réel
+═══════════════════════════════════════════════ */
+let venuesFilter = 'all';
+
+const MOIS_FR = ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
+const JOURS_FR = ['dim','lun','mar','mer','jeu','ven','sam'];
+
+function parseEventDate(ymd){
+  const [y,m,d] = ymd.split('-').map(Number);
+  return new Date(y, m-1, d);
+}
+
+function daysBetween(d1, d2){
+  const ms = d2.getTime() - d1.getTime();
+  return Math.floor(ms / (1000*60*60*24));
+}
+
+function renderVenuesPage(){
+  const now = new Date();
+  const todayStr = todayYMD();
+  const today0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Stats globales
+  const nEvTotal = EVENTS.length;
+  const nEvToday = EVENTS.filter(e => e.d === todayStr).length;
+  const nEvWeek  = EVENTS.filter(e => {
+    const dt = parseEventDate(e.d);
+    const dd = daysBetween(today0, dt);
+    return dd >= 0 && dd <= 7;
+  }).length;
+
+  document.getElementById('venues-stats').innerHTML = `
+    <div class="vstat">
+      <div class="vk">Aujourd'hui</div>
+      <div class="vv ${nEvToday > 0 ? '' : 'g'}">${nEvToday}</div>
+    </div>
+    <div class="vstat">
+      <div class="vk">Cette semaine</div>
+      <div class="vv gold">${nEvWeek}</div>
+    </div>
+    <div class="vstat">
+      <div class="vk">Base totale</div>
+      <div class="vv">${nEvTotal}</div>
+    </div>
+  `;
+
+  // Filtrage événements
+  let events = EVENTS.filter(e => {
+    const dt = parseEventDate(e.d);
+    return dt.getTime() >= today0.getTime(); // uniquement à venir
+  }).sort((a,b) => a.d.localeCompare(b.d) || a.fin.localeCompare(b.fin));
+
+  if(venuesFilter === 'today'){
+    events = events.filter(e => e.d === todayStr);
+  } else if(venuesFilter === 'week'){
+    events = events.filter(e => {
+      const dt = parseEventDate(e.d);
+      return daysBetween(today0, dt) <= 7;
+    });
+  } else if(venuesFilter === 'concert' || venuesFilter === 'sport'
+         || venuesFilter === 'salon'   || venuesFilter === 'theatre'){
+    events = events.filter(e => e.cat === venuesFilter);
+  }
+
+  // Rendu events
+  const evList = document.getElementById('venues-events-list');
+  if(events.length === 0){
+    evList.innerHTML = '<div class="vempty"><span class="ei">📅</span>Aucun événement pour ce filtre</div>';
+  } else {
+    evList.innerHTML = events.slice(0, 40).map(e => {
+      const v = VENUES[e.venue] || { nom:e.venue, adr:'', cap:0, ico:'🎫', cat:'' };
+      const dt = parseEventDate(e.d);
+      const isToday = e.d === todayStr;
+      const dd = daysBetween(today0, dt);
+      const jourTag = isToday ? '🔥 Aujourd\'hui'
+                   : dd === 1  ? 'Demain'
+                   : dd <= 7   ? 'Cette semaine'
+                   : '';
+      const impact = v.cap >= 20000 ? '🔥🔥🔥🔥'
+                   : v.cap >= 5000  ? '🔥🔥🔥'
+                   : v.cap >= 2000  ? '🔥🔥' : '🔥';
+      const catIco = { concert:'🎤 Concert', sport:'⚽ Sport',
+                       salon:'🎪 Salon', theatre:'🎭 Théâtre' }[e.cat] || '🎫';
+
+      return `<div class="vev-card ${isToday?'today':''}">
+        <div class="vev-head">
+          <div class="vev-date-box">
+            <div class="vev-date-d">${dt.getDate()}</div>
+            <div class="vev-date-m">${MOIS_FR[dt.getMonth()]}</div>
+          </div>
+          <div class="vev-body">
+            <div class="vev-titre">${esc(e.titre)}</div>
+            <div class="vev-venue"><span class="vev-venue-ico">${v.ico}</span>${esc(v.nom)} · ${esc(v.adr.split(' · ').slice(-1)[0] || v.adr)}</div>
+          </div>
+        </div>
+        <div class="vev-footer">
+          ${jourTag ? `<span class="vev-chip ${isToday?'hot':'jour'}">${jourTag}</span>` : ''}
+          <span class="vev-chip cat">${catIco}</span>
+          <span class="vev-chip fin">🕐 fin ${esc(e.fin)}</span>
+          <span class="vev-chip cap">👥 ${v.cap.toLocaleString('fr-FR')} pax</span>
+          <span class="vev-chip">🔥 ${impact}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Liste des salles (filtrée par catégorie si applicable)
+  let venuesToShow = Object.entries(VENUES);
+  if(['concert','sport','salon','theatre','arena'].includes(venuesFilter)){
+    venuesToShow = venuesToShow.filter(([id,v]) =>
+      v.cat === venuesFilter || (venuesFilter === 'concert' && v.cat === 'arena'));
+  }
+  // Tri par capacité décroissante
+  venuesToShow.sort((a,b) => b[1].cap - a[1].cap);
+
+  document.getElementById('venues-list').innerHTML = venuesToShow.map(([id, v]) => {
+    const nEv = EVENTS.filter(e => e.venue === id &&
+      parseEventDate(e.d).getTime() >= today0.getTime()).length;
+    return `<div class="vv-card">
+      <div class="vv-ico">${v.ico}</div>
+      <div class="vv-main">
+        <div class="vv-nom">${esc(v.nom)}</div>
+        <div class="vv-adr">${esc(v.adr)}${nEv > 0 ? ' · ' + nEv + ' évt à venir' : ''}</div>
+      </div>
+      <div class="vv-right">
+        <div class="vv-cap">${v.cap.toLocaleString('fr-FR')}</div>
+        <div class="vv-cap-l">pax max</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Sous-titre avec date du jour
+  const joursLongs = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  const moisLongs  = ['janvier','février','mars','avril','mai','juin','juillet','août',
+                      'septembre','octobre','novembre','décembre'];
+  document.getElementById('vh-sub').textContent =
+    `${joursLongs[now.getDay()]} ${now.getDate()} ${moisLongs[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function initVenuesFilters(){
+  document.querySelectorAll('#venues-filters .vf').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#venues-filters .vf').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      venuesFilter = b.dataset.filter;
+      renderVenuesPage();
+      if(navigator.vibrate) navigator.vibrate(8);
+    };
+  });
 }
 
 function renderEvents(){
@@ -2600,6 +2990,7 @@ document.addEventListener('visibilitychange', ()=>{
 /* ═══ BOOT ═══ */
 function boot(){
   initTrajetSegments();
+  initVenuesFilters();
 
   // Charge immédiatement le cache persistant pour avoir des données à l'ouverture
   CACHE = loadCache();
