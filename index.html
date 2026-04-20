@@ -11,8 +11,13 @@
 <meta name="description" content="TaxiPulse Paris — Arrivées SNCF temps réel + estimateur demande taxi pour chauffeurs de taxi parisiens">
 <title>TaxiPulse Paris</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FF4500'/%3E%3Ctext x='50' y='72' font-size='64' text-anchor='middle' fill='white' font-family='Arial Black'%3E🚕%3C/text%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23FF4500'/%3E%3Ctext x='90' y='130' font-size='110' text-anchor='middle'%3E🚕%3C/text%3E%3C/svg%3E">
-<link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22TaxiPulse+Paris%22,%22short_name%22:%22TaxiPulse%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230D0D0D%22,%22theme_color%22:%22%23FF4500%22,%22orientation%22:%22portrait%22}">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TaxiPulse">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
@@ -652,6 +657,44 @@ dialog .sheet{
 }
 .gd-waze:active{transform:scale(.92);background:rgba(5,199,242,.3)}
 
+/* Comparaison prix fluide vs trafic */
+.tr-compare{
+  background:var(--bg);border:1px solid var(--line);border-radius:11px;
+  padding:10px 13px;margin:14px 0 10px;
+}
+.tr-compare-row{
+  display:flex;justify-content:space-between;align-items:center;padding:4px 0;
+  font-size:12px;
+}
+.tr-compare-row+.tr-compare-row{border-top:1px dashed var(--line);padding-top:7px;margin-top:4px}
+.tr-compare-k{color:var(--ink2);font-weight:700}
+.tr-compare-v{color:var(--ink);font-weight:800;font-family:var(--mono);letter-spacing:-.3px}
+.tr-compare-row.now .tr-compare-v{font-size:14px}
+
+/* Breakdown transparent du prix */
+.tr-breakdown{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;margin-bottom:12px;
+}
+.tr-bd-hdr{
+  font-size:10px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:800;color:var(--ink3);margin-bottom:8px;padding-bottom:6px;
+  border-bottom:1px solid var(--line);
+}
+.tr-bd-row{
+  display:flex;justify-content:space-between;padding:4px 0;font-size:12px;
+  color:var(--ink2);font-weight:600;
+}
+.tr-bd-row span:last-child{font-family:var(--mono);font-weight:800;color:var(--ink)}
+.tr-bd-row.hot{color:var(--accent)}
+.tr-bd-row.hot span:last-child{color:var(--accent)}
+.tr-bd-row.total{
+  border-top:1px solid var(--line);margin-top:5px;padding-top:8px;
+  font-size:13px;font-weight:900;color:var(--ink);
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.tr-bd-row.total span:last-child{color:var(--accent);font-size:15px}
+
 /* ═══ Tier system — FLAMMES (cohérent avec l'app) ═══ */
 .tier-info{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
@@ -899,7 +942,173 @@ dialog .sheet{
 .tl-waze:active{transform:scale(.9);background:rgba(5,199,242,.3)}
 .tl-waze:hover{background:rgba(5,199,242,.25)}
 
-/* ═══ TRAJET (onglet Prix course) ═══ */
+/* ═══ BOUTON & MODAL INSTALLATION PWA ═══ */
+.install-btn{
+  position:fixed;bottom:22px;right:22px;z-index:998;
+  background:linear-gradient(135deg, #FF4500 0%, #d93600 100%);
+  border:none;border-radius:100px;padding:11px 18px 11px 14px;
+  color:#fff;font-family:inherit;font-weight:800;font-size:13px;
+  letter-spacing:-.1px;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 10px 30px rgba(255,69,0,.45), 0 2px 8px rgba(0,0,0,.3);
+  animation:installFloat 2.5s ease-in-out infinite, installBounceIn .6s cubic-bezier(.175,.885,.32,1.275);
+  -webkit-tap-highlight-color:transparent;
+}
+.install-btn:active{transform:scale(.95)}
+.install-ico{font-size:18px}
+.install-txt{white-space:nowrap}
+@keyframes installFloat{
+  0%,100%{box-shadow:0 10px 30px rgba(255,69,0,.45), 0 2px 8px rgba(0,0,0,.3)}
+  50%{box-shadow:0 14px 40px rgba(255,69,0,.6), 0 2px 8px rgba(0,0,0,.3)}
+}
+@keyframes installBounceIn{
+  0%{opacity:0;transform:scale(.3) translateY(40px)}
+  70%{transform:scale(1.08) translateY(-4px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+
+/* Modal install */
+.install-modal{
+  position:fixed;inset:0;z-index:1500;display:none;
+  align-items:flex-end;justify-content:center;
+}
+.install-modal.show{display:flex;animation:fadeIn .2s ease}
+.install-modal-backdrop{
+  position:absolute;inset:0;background:rgba(0,0,0,.8);
+  backdrop-filter:blur(6px);
+}
+.install-modal-box{
+  position:relative;background:var(--bg2);
+  border-top:1px solid var(--line);
+  border-radius:24px 24px 0 0;
+  width:100%;max-width:520px;
+  padding:22px 18px 28px;
+  max-height:90vh;overflow-y:auto;
+  animation:installSlideUp .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes installSlideUp{
+  from{transform:translateY(100%)}
+  to{transform:translateY(0)}
+}
+.install-close{
+  position:absolute;top:14px;right:14px;
+  width:32px;height:32px;border-radius:10px;
+  background:var(--card);border:1px solid var(--line);
+  color:var(--ink2);font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-family:inherit;z-index:2;
+}
+.install-close:active{background:var(--card2)}
+
+.install-hero{text-align:center;padding:8px 0 20px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.install-hero-ico{
+  font-size:46px;line-height:1;margin-bottom:8px;
+  animation:installIconPulse 2s ease-in-out infinite;
+  display:inline-block;
+}
+@keyframes installIconPulse{
+  0%,100%{transform:scale(1) rotate(-3deg)}
+  50%{transform:scale(1.08) rotate(3deg)}
+}
+.install-hero-title{font-size:22px;font-weight:900;letter-spacing:-.5px;color:var(--ink);margin-bottom:4px}
+.install-hero-sub{font-size:12px;color:var(--ink2);font-weight:600;line-height:1.5;padding:0 20px}
+
+/* Contenu dynamique (iOS ou Android) */
+.install-content{margin-bottom:18px}
+.install-platform-title{
+  font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
+  font-weight:800;color:var(--accent);margin-bottom:10px;
+}
+.install-steps{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:14px 16px;
+}
+.install-step{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:10px 0;
+}
+.install-step+.install-step{border-top:1px solid var(--line)}
+.install-step-num{
+  flex-shrink:0;width:26px;height:26px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  font-family:var(--mono);font-weight:900;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+}
+.install-step-body{flex:1;font-size:13px;color:var(--ink);font-weight:600;line-height:1.45}
+.install-step-body b{color:var(--accent);font-weight:800}
+.install-step-ico{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:7px;
+  background:var(--card2);margin:0 3px;
+  font-size:15px;vertical-align:middle;
+}
+
+.install-cta-btn{
+  width:100%;margin-top:14px;
+  background:linear-gradient(135deg, #FF4500 0%, #d93600 100%);
+  border:none;border-radius:14px;padding:16px;
+  color:#fff;font-family:inherit;font-weight:900;font-size:15px;
+  letter-spacing:-.2px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 8px 24px rgba(255,69,0,.35);
+}
+.install-cta-btn:active{transform:scale(.98)}
+.install-cta-ico{font-size:20px}
+
+/* Benefits grid */
+.install-benefits{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-top:6px;
+}
+.install-benefit{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:11px 12px;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.install-benefit .ib-ico{font-size:20px;flex-shrink:0;line-height:1.2}
+.install-benefit > div{font-size:11px;color:var(--ink2);font-weight:600;line-height:1.35;min-width:0}
+.install-benefit b{color:var(--ink);font-weight:800;font-size:12px;display:block;margin-bottom:1px}
+.install-benefit span{color:var(--ink3);font-size:10px}
+
+/* Petit indicateur visuel du bouton Partager iOS */
+.safari-share-demo{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:24px;height:24px;border-radius:6px;
+  background:rgba(0,122,255,.2);
+  vertical-align:middle;margin:0 2px;
+  color:#007AFF;font-size:14px;font-weight:800;
+}
+
+/* ═══ TRAJET — Estimateur avec trafic live (style Uber/Bolt) ═══ */
+
+/* Hero en haut de page avec badge trafic live */
+.trajet-hero{
+  background:linear-gradient(135deg, rgba(255,69,0,.12) 0%, rgba(255,69,0,.02) 100%);
+  border:1px solid rgba(255,69,0,.25);border-radius:16px;
+  padding:16px 18px;margin-bottom:14px;
+  position:relative;overflow:hidden;
+}
+.trhero-title{font-size:20px;font-weight:900;letter-spacing:-.5px;color:var(--ink);margin-bottom:3px}
+.trhero-sub{font-size:11px;color:var(--ink2);font-weight:600;margin-bottom:10px}
+.trhero-live{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,0,0,.3);border:1px solid var(--line);
+  padding:6px 12px;border-radius:100px;
+  font-size:11px;font-weight:800;letter-spacing:.3px;color:var(--ink);
+}
+.tr-live-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--green);
+  animation:pulse-dot 1.8s ease-in-out infinite;
+  box-shadow:0 0 8px rgba(20,148,95,.6);
+}
+.trhero-live.heavy .tr-live-dot{background:var(--accent);box-shadow:0 0 8px rgba(255,69,0,.6)}
+.trhero-live.extreme .tr-live-dot{background:#FF0000;box-shadow:0 0 10px rgba(255,0,0,.8)}
+@keyframes pulse-dot{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.3);opacity:.7}
+}
+
+/* Box de saisie */
 .trajet-box{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
   padding:16px;margin-bottom:14px;
@@ -907,46 +1116,177 @@ dialog .sheet{
 .tr-field{margin-bottom:14px}
 .tr-field:last-of-type{margin-bottom:18px}
 .tr-field label{display:block;font-size:10px;text-transform:uppercase;
-  letter-spacing:1px;font-weight:800;color:var(--ink3);margin-bottom:6px}
+  letter-spacing:1px;font-weight:800;color:var(--ink3);margin-bottom:7px}
 .tr-field select{
   width:100%;background:var(--card2);border:1px solid var(--line);
-  border-radius:10px;color:var(--ink);padding:11px 12px;font-size:14px;
-  font-family:inherit;font-weight:600;appearance:none;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23F0F0EB' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
-  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+  border-radius:11px;color:var(--ink);padding:13px 14px;font-size:14px;
+  font-family:inherit;font-weight:700;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%23FF4500' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+  transition:border-color .15s;
 }
+.tr-field select:focus{outline:none;border-color:var(--accent)}
 .tr-segment{display:flex;gap:6px}
 .tr-segment button{
   flex:1;background:var(--card2);border:1px solid var(--line);color:var(--ink2);
-  border-radius:10px;padding:10px 6px;font-size:12px;font-weight:700;
-  font-family:inherit;cursor:pointer;
+  border-radius:10px;padding:11px 6px;font-size:12px;font-weight:800;
+  font-family:inherit;cursor:pointer;transition:all .15s;
 }
-.tr-segment button.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.tr-help{
-  font-size:10px;color:var(--ink3);margin-top:8px;line-height:1.6;
-  padding:8px 10px;background:var(--bg);border-radius:8px;
+.tr-segment button.active{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+  box-shadow:0 4px 12px rgba(255,69,0,.3);
 }
-.tr-help strong{color:var(--accent)}
+.tr-segment button:active{transform:scale(.95)}
+
 .tr-calc-btn{
-  width:100%;background:var(--accent);color:#fff;border:none;
-  border-radius:12px;padding:14px;font-size:14px;font-weight:800;
-  text-transform:uppercase;letter-spacing:1px;font-family:inherit;cursor:pointer;
+  width:100%;background:linear-gradient(135deg, #FF4500 0%, #d93600 100%);
+  color:#fff;border:none;border-radius:14px;padding:16px;
+  font-size:15px;font-weight:900;letter-spacing:-.2px;font-family:inherit;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 8px 24px rgba(255,69,0,.35);
+  transition:transform .1s;
 }
 .tr-calc-btn:active{transform:scale(.98)}
+.tr-calc-arrow{font-size:18px;font-weight:900}
 
+/* Résultat style Uber/Bolt */
 .tr-result{
-  background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:18px;margin-bottom:14px;
+  animation:resultSlideUp .45s cubic-bezier(.175,.885,.32,1.275);
 }
-.tr-price{font-size:36px;font-weight:900;color:var(--accent);
-  font-family:var(--mono);letter-spacing:-1px;line-height:1;margin-bottom:6px}
-.tr-range{font-size:12px;color:var(--ink2);margin-bottom:14px}
-.tr-info-row{display:flex;justify-content:space-between;padding:8px 0;
-  border-top:1px solid var(--line);font-size:13px}
-.tr-info-row:first-of-type{border-top:0}
+@keyframes resultSlideUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+.tr-main-card{
+  background:linear-gradient(160deg, var(--card) 0%, rgba(255,69,0,.04) 100%);
+  border:1px solid var(--line);border-radius:18px;
+  padding:20px;margin-bottom:12px;position:relative;overflow:hidden;
+}
+.tr-main-card.forfait{
+  background:linear-gradient(160deg, rgba(20,148,95,.08) 0%, var(--card) 100%);
+  border-color:rgba(20,148,95,.3);
+}
+
+.tr-badge-top{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--card2);padding:5px 10px;border-radius:100px;
+  font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--ink2);margin-bottom:14px;
+}
+.tr-badge-top.forfait{background:rgba(20,148,95,.15);color:var(--green)}
+
+.tr-price-big{
+  font-size:44px;font-weight:900;color:var(--accent);
+  font-family:var(--mono);letter-spacing:-2px;line-height:1;
+  margin-bottom:4px;
+}
+.tr-main-card.forfait .tr-price-big{color:var(--green)}
+.tr-price-range{font-size:12px;color:var(--ink2);font-weight:700;margin-bottom:16px}
+
+/* Grid stats trajet */
+.tr-stats-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;
+}
+.tr-stat{
+  background:var(--card2);border:1px solid var(--line);
+  border-radius:11px;padding:11px 13px;
+}
+.tr-stat-k{font-size:9px;text-transform:uppercase;letter-spacing:1px;
+  font-weight:800;color:var(--ink3);margin-bottom:3px}
+.tr-stat-v{font-family:var(--mono);font-size:18px;font-weight:900;color:var(--ink);
+  letter-spacing:-.5px;line-height:1.1}
+.tr-stat-v.accent{color:var(--accent)}
+.tr-stat-v.green{color:var(--green)}
+.tr-stat-v.gold{color:var(--gold)}
+.tr-stat-extra{font-size:10px;color:var(--ink3);font-weight:600;margin-top:3px}
+
+/* Barre de trafic visuelle */
+.tr-traffic-bar{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:14px;margin-bottom:12px;
+}
+.tr-tb-head{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;
+  font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+}
+.tr-tb-label{color:var(--ink2)}
+.tr-tb-status{font-size:12px;font-weight:900;letter-spacing:-.2px}
+.tr-tb-status.fluid{color:var(--green)}
+.tr-tb-status.moderate{color:var(--gold)}
+.tr-tb-status.heavy{color:var(--accent)}
+.tr-tb-status.extreme{color:#FF0000}
+
+.tr-tb-meter{
+  height:10px;background:var(--card2);border-radius:10px;overflow:hidden;
+  position:relative;
+}
+.tr-tb-fill{
+  height:100%;border-radius:10px;transition:width .6s cubic-bezier(.25,.8,.25,1);
+  animation:fillSlide .8s ease-out;
+}
+@keyframes fillSlide{from{width:0!important}}
+.tr-tb-fill.fluid{background:linear-gradient(90deg, #14945F 0%, #1BC77E 100%)}
+.tr-tb-fill.moderate{background:linear-gradient(90deg, #1BC77E 0%, #D4B877 100%)}
+.tr-tb-fill.heavy{background:linear-gradient(90deg, #D4B877 0%, #FF4500 100%)}
+.tr-tb-fill.extreme{background:linear-gradient(90deg, #FF4500 0%, #FF0000 100%)}
+
+.tr-tb-labels{
+  display:flex;justify-content:space-between;margin-top:6px;
+  font-size:9px;color:var(--ink3);font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+}
+
+/* Conseil chauffeur */
+.tr-tip{
+  background:rgba(255,69,0,.08);border:1px solid rgba(255,69,0,.2);
+  border-radius:12px;padding:12px 14px;margin-bottom:12px;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.tr-tip-ico{font-size:18px;flex-shrink:0}
+.tr-tip-body{flex:1;font-size:12px;color:var(--ink);font-weight:600;line-height:1.5}
+.tr-tip-body b{color:var(--accent);font-weight:800}
+
+/* Bouton Waze vers destination */
+.tr-waze-btn{
+  width:100%;background:linear-gradient(135deg, #33CCFF 0%, #05C7F2 100%);
+  border:none;border-radius:12px;padding:14px;margin-top:10px;
+  color:#fff;font-family:inherit;font-weight:900;font-size:14px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 6px 20px rgba(5,199,242,.3);
+}
+.tr-waze-btn:active{transform:scale(.98)}
+
+/* Détails (prise en charge, tarif, etc.) */
+.tr-details{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px 14px;margin-bottom:12px;
+}
+.tr-info-row{
+  display:flex;justify-content:space-between;padding:7px 0;
+  border-top:1px solid var(--line);font-size:12px;
+}
+.tr-info-row:first-child{border-top:0;padding-top:0}
 .tr-info-row .k{color:var(--ink3);font-weight:600}
 .tr-info-row .v{color:var(--ink);font-weight:800;font-family:var(--mono)}
-.tr-disclaimer{font-size:10px;color:var(--ink3);margin-top:10px;line-height:1.5;font-style:italic}
+
+.tr-disclaimer{
+  font-size:10px;color:var(--ink3);margin-top:8px;line-height:1.5;
+  padding:10px 12px;background:var(--card);border-radius:10px;
+  border:1px solid var(--line);
+}
+
+/* Skeleton loading */
+.tr-loading{
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:24px;text-align:center;
+}
+.tr-loading-spinner{
+  width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--accent);
+  border-radius:50%;margin:0 auto 12px;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tr-loading-txt{font-size:12px;color:var(--ink2);font-weight:700;letter-spacing:.3px}
 
 ::-webkit-scrollbar{width:0}
 </style>
@@ -968,6 +1308,49 @@ dialog .sheet{
     <button data-tab="tab-events">🎫 Events</button>
     <button data-tab="tab-trajet">💶 Trajet</button>
   </div>
+
+<!-- Bouton install flottant (caché par défaut, apparaît si PWA installable) -->
+<button id="install-btn" class="install-btn" style="display:none" onclick="showInstallModal()">
+  <span class="install-ico">📲</span>
+  <span class="install-txt">Installer l'app</span>
+</button>
+
+<!-- Modal d'installation (iOS ou Android) -->
+<div class="install-modal" id="install-modal">
+  <div class="install-modal-backdrop" onclick="closeInstallModal()"></div>
+  <div class="install-modal-box">
+    <button class="install-close" onclick="closeInstallModal()">✕</button>
+
+    <div class="install-hero">
+      <div class="install-hero-ico">🚕</div>
+      <div class="install-hero-title">Installer TaxiPulse</div>
+      <div class="install-hero-sub">Comme une vraie app · ouverture directe · icône sur l'écran d'accueil</div>
+    </div>
+
+    <div class="install-content" id="install-content">
+      <!-- Rempli dynamiquement selon la plateforme (iOS / Android / autre) -->
+    </div>
+
+    <div class="install-benefits">
+      <div class="install-benefit">
+        <span class="ib-ico">⚡</span>
+        <div><b>Ouverture instantanée</b><br><span>Plus besoin de passer par Safari/Chrome</span></div>
+      </div>
+      <div class="install-benefit">
+        <span class="ib-ico">📱</span>
+        <div><b>Plein écran</b><br><span>Aucune barre de navigation parasite</span></div>
+      </div>
+      <div class="install-benefit">
+        <span class="ib-ico">🔋</span>
+        <div><b>Fonctionne hors-ligne</b><br><span>Dernières données en cache</span></div>
+      </div>
+      <div class="install-benefit">
+        <span class="ib-ico">🚀</span>
+        <div><b>Aucun App Store</b><br><span>Zéro téléchargement, 0 Mo utilisé</span></div>
+      </div>
+    </div>
+  </div>
+</div>
 </header>
 
 <main>
@@ -1107,25 +1490,47 @@ dialog .sheet{
 
   <!-- ══ TRAJET — Estimateur course ══ -->
   <section class="tab" id="tab-trajet">
-    <div class="stitle">💶 Estimateur course taxi parisien</div>
+    <div class="trajet-hero">
+      <div class="trhero-title">💶 Estimateur course</div>
+      <div class="trhero-sub">Distance routière réelle · Trafic Paris en live</div>
+      <div class="trhero-live" id="trhero-live">
+        <span class="tr-live-dot"></span>
+        <span id="trhero-live-txt">Chargement trafic...</span>
+      </div>
+    </div>
 
     <div class="trajet-box">
       <div class="tr-field">
-        <label>Départ (gare)</label>
+        <label>📍 Départ</label>
         <select id="tr-depart">
-          <option value="nord">Gare du Nord</option>
-          <option value="lyon">Gare de Lyon</option>
-          <option value="montparnasse">Montparnasse</option>
-          <option value="est">Gare de l'Est</option>
-          <option value="austerlitz">Gare d'Austerlitz</option>
-          <option value="bercy">Gare de Bercy</option>
+          <optgroup label="🚂 Gares">
+            <option value="nord">Gare du Nord</option>
+            <option value="lyon">Gare de Lyon</option>
+            <option value="montparnasse">Montparnasse</option>
+            <option value="est">Gare de l'Est</option>
+            <option value="austerlitz">Gare d'Austerlitz</option>
+            <option value="bercy">Gare de Bercy</option>
+          </optgroup>
+          <optgroup label="✈ Aéroports">
+            <option value="cdg">Aéroport CDG</option>
+            <option value="orly">Aéroport Orly</option>
+          </optgroup>
+          <optgroup label="🏙 Zones Paris">
+            <option value="opera">Opéra · Louvre · Châtelet</option>
+            <option value="champs">Champs-Élysées · Étoile</option>
+            <option value="eiffel">Tour Eiffel · 7e</option>
+            <option value="marais">Le Marais · Bastille</option>
+            <option value="mont">Montmartre · 18e</option>
+            <option value="latin">Quartier Latin · 5e/6e</option>
+            <option value="defense">La Défense</option>
+          </optgroup>
         </select>
       </div>
       <div class="tr-field">
-        <label>Arrivée</label>
+        <label>🎯 Arrivée</label>
         <select id="tr-arrivee">
-          <optgroup label="✈ Aéroports (forfait officiel)">
-            <option value="cdg">Aéroport Charles-de-Gaulle (CDG)</option>
+          <optgroup label="✈ Aéroports (forfait)">
+            <option value="cdg">Aéroport CDG</option>
             <option value="orly">Aéroport Orly</option>
             <option value="beauvais">Aéroport Beauvais</option>
           </optgroup>
@@ -1138,7 +1543,7 @@ dialog .sheet{
             <option value="latin">Quartier Latin · 5e · 6e</option>
             <option value="bercy-q">Bercy · 12e est</option>
           </optgroup>
-          <optgroup label="🏢 Banlieue affaires (zone suburbaine)">
+          <optgroup label="🏢 Banlieue">
             <option value="defense">La Défense</option>
             <option value="neuilly">Neuilly-sur-Seine</option>
             <option value="boulogne">Boulogne-Billancourt</option>
@@ -1150,16 +1555,14 @@ dialog .sheet{
             <option value="zenith">Zénith La Villette</option>
             <option value="olympia">L'Olympia</option>
             <option value="pleyel">Salle Pleyel</option>
-            <option value="porte_versailles">Paris Expo Porte de Versailles</option>
-            <option value="seine_musicale">La Seine Musicale (Boulogne)</option>
-            <option value="defense_arena">Paris La Défense Arena (Nanterre)</option>
+            <option value="porte_versailles">Paris Expo Porte Versailles</option>
+            <option value="seine_musicale">La Seine Musicale</option>
+            <option value="defense_arena">Paris La Défense Arena</option>
             <option value="villepinte">Parc Expo Villepinte</option>
             <option value="bourget">Parc Expo Le Bourget</option>
-            <option value="stade_france">Stade de France (St-Denis)</option>
+            <option value="stade_france">Stade de France</option>
           </optgroup>
-          <optgroup label="🎭 Théâtres Paris" id="og-theatres">
-            <!-- Rempli dynamiquement par JS -->
-          </optgroup>
+          <optgroup label="🎭 Théâtres" id="og-theatres"></optgroup>
           <optgroup label="🚂 Autres gares">
             <option value="g-nord">Gare du Nord</option>
             <option value="g-lyon">Gare de Lyon</option>
@@ -1168,20 +1571,18 @@ dialog .sheet{
         </select>
       </div>
       <div class="tr-field">
-        <label>Tarif applicable</label>
+        <label>⚡ Tarif appliqué</label>
         <div class="tr-segment" id="tr-moment">
           <button data-v="auto" class="active">🤖 Auto</button>
           <button data-v="A">A</button>
           <button data-v="B">B</button>
           <button data-v="C">C</button>
         </div>
-        <div class="tr-help">
-          <strong>A</strong> Paris jour sem 10-17h · 1,25€/km &nbsp;·&nbsp;
-          <strong>B</strong> Paris nuit/dim · Banlieue jour · 1,64€/km &nbsp;·&nbsp;
-          <strong>C</strong> Paris dim nuit · Banlieue nuit/dim · 1,79€/km
-        </div>
       </div>
-      <button class="tr-calc-btn" onclick="calcTrajet()">Calculer le prix</button>
+      <button class="tr-calc-btn" onclick="calcTrajet()">
+        <span>Calculer avec trafic en live</span>
+        <span class="tr-calc-arrow">→</span>
+      </button>
     </div>
 
     <div id="tr-resultat" style="display:none"></div>
@@ -3179,8 +3580,174 @@ function closeEvModal(){
 
 // Escape key close
 document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape') closeEvModal();
+  if(e.key === 'Escape'){
+    closeEvModal();
+    closeInstallModal();
+  }
 });
+
+/* ═══════════════════════════════════════════════
+   PWA INSTALL SYSTEM — iOS + Android natif
+═══════════════════════════════════════════════ */
+let deferredInstallPrompt = null;
+
+// Enregistrement Service Worker (requis pour PWA install Android)
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.log('SW register failed:', err);
+    });
+  });
+}
+
+// Détection plateforme
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const IS_ANDROID = /android/i.test(navigator.userAgent);
+const IS_STANDALONE = window.matchMedia('(display-mode: standalone)').matches
+                   || window.navigator.standalone === true;
+
+// Capture beforeinstallprompt (Android/Chrome/Edge — pas iOS)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if(!IS_STANDALONE){
+    document.getElementById('install-btn').style.display = 'flex';
+  }
+});
+
+// Si l'app est déjà installée (standalone mode), on masque tout
+if(IS_STANDALONE){
+  const btn = document.getElementById('install-btn');
+  if(btn) btn.style.display = 'none';
+}
+
+// Sur iOS : pas de beforeinstallprompt, mais on peut afficher le bouton
+// après un délai si on détecte Safari et l'app n'est pas installée
+if(IS_IOS && !IS_STANDALONE){
+  setTimeout(() => {
+    const btn = document.getElementById('install-btn');
+    if(btn) btn.style.display = 'flex';
+  }, 3000); // 3 sec pour laisser l'utilisateur voir l'app d'abord
+}
+
+// Event 'appinstalled' : l'app vient d'être installée
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('install-btn');
+  if(btn) btn.style.display = 'none';
+  deferredInstallPrompt = null;
+  closeInstallModal();
+  if(navigator.vibrate) navigator.vibrate([50, 30, 50]);
+});
+
+function showInstallModal(){
+  const modal = document.getElementById('install-modal');
+  const content = document.getElementById('install-content');
+  if(!modal || !content) return;
+
+  // Contenu dynamique selon plateforme
+  if(IS_IOS){
+    content.innerHTML = `
+      <div class="install-platform-title">🍎 Installation sur iPhone / iPad</div>
+      <div class="install-steps">
+        <div class="install-step">
+          <div class="install-step-num">1</div>
+          <div class="install-step-body">
+            Appuie sur le bouton <b>Partager</b>
+            <span class="safari-share-demo">⎘</span>
+            en bas de Safari
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">2</div>
+          <div class="install-step-body">
+            Fais défiler et choisis<br>
+            <b>«&nbsp;Sur l'écran d'accueil&nbsp;»</b>
+            <span class="install-step-ico">➕</span>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">3</div>
+          <div class="install-step-body">
+            Appuie sur <b>«&nbsp;Ajouter&nbsp;»</b> en haut à droite · TaxiPulse apparaît sur ton écran d'accueil 🚕
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;font-size:11px;color:var(--ink3);text-align:center;font-weight:600">
+        ⚠️ Doit être ouvert dans <b style="color:var(--ink2)">Safari</b> (pas Chrome iOS)
+      </div>
+    `;
+  } else if(IS_ANDROID && deferredInstallPrompt){
+    content.innerHTML = `
+      <div class="install-platform-title">🤖 Installation Android / Chrome</div>
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center">
+        <div style="font-size:13px;color:var(--ink);font-weight:600;line-height:1.5;margin-bottom:4px">
+          Un <b style="color:var(--accent)">tap</b> et c'est installé.<br>
+          L'app apparaît sur ton écran comme n'importe quelle autre.
+        </div>
+      </div>
+      <button class="install-cta-btn" onclick="triggerAndroidInstall()">
+        <span class="install-cta-ico">📲</span>
+        <span>Installer maintenant</span>
+      </button>
+    `;
+  } else if(IS_ANDROID){
+    // Android sans beforeinstallprompt (Firefox, Samsung Internet, etc.)
+    content.innerHTML = `
+      <div class="install-platform-title">📱 Installation Android</div>
+      <div class="install-steps">
+        <div class="install-step">
+          <div class="install-step-num">1</div>
+          <div class="install-step-body">
+            Ouvre le menu <b>⋮</b> (3 points) en haut à droite
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">2</div>
+          <div class="install-step-body">
+            Choisis <b>«&nbsp;Installer l'application&nbsp;»</b><br>
+            ou <b>«&nbsp;Ajouter à l'écran d'accueil&nbsp;»</b>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">3</div>
+          <div class="install-step-body">
+            TaxiPulse apparaît sur ton écran comme une vraie app 🚕
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    // Desktop / autre
+    content.innerHTML = `
+      <div class="install-platform-title">💻 Sur ordinateur</div>
+      <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;font-size:12px;color:var(--ink);line-height:1.6;font-weight:600">
+        Dans la barre d'adresse Chrome / Edge, clique sur l'<b>icône ⊕ d'installation</b> à droite de l'URL.<br><br>
+        <span style="color:var(--ink3);font-size:11px">Tu peux aussi ouvrir cette page sur ton téléphone pour une installation native.</span>
+      </div>
+    `;
+  }
+
+  modal.classList.add('show');
+  if(navigator.vibrate) navigator.vibrate(10);
+}
+
+function closeInstallModal(){
+  const modal = document.getElementById('install-modal');
+  if(modal) modal.classList.remove('show');
+}
+
+function triggerAndroidInstall(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then((choiceResult) => {
+    if(choiceResult.outcome === 'accepted'){
+      if(navigator.vibrate) navigator.vibrate([50, 30, 50]);
+    }
+    deferredInstallPrompt = null;
+    closeInstallModal();
+    document.getElementById('install-btn').style.display = 'none';
+  });
+}
 
 const MOIS_FR = ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
 const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
@@ -3503,98 +4070,481 @@ function buildTheatreTrajets(){
 buildTheatreTrajets();
 
 // Init segments interactifs
+/* ═══════════════════════════════════════════════
+   ESTIMATEUR TRAJET — Modèle trafic Paris IDF
+   + OSRM pour distance réelle
+═══════════════════════════════════════════════ */
+
+// Coordonnées GPS pour toutes les destinations de l'estimateur
+const TRAJET_COORDS = {
+  // Gares (départs)
+  nord:          { lat:48.8809, lng:2.3553, nom:'Gare du Nord' },
+  lyon:          { lat:48.8448, lng:2.3740, nom:'Gare de Lyon' },
+  montparnasse:  { lat:48.8412, lng:2.3208, nom:'Gare Montparnasse' },
+  est:           { lat:48.8763, lng:2.3588, nom:"Gare de l'Est" },
+  austerlitz:    { lat:48.8424, lng:2.3654, nom:"Gare d'Austerlitz" },
+  bercy:         { lat:48.8397, lng:2.3822, nom:'Gare de Bercy' },
+  // Aéroports
+  cdg:           { lat:49.0097, lng:2.5479, nom:'Aéroport CDG', zone:'suburb', airport:true },
+  orly:          { lat:48.7262, lng:2.3652, nom:'Aéroport Orly', zone:'suburb', airport:true },
+  beauvais:      { lat:49.4544, lng:2.1128, nom:'Aéroport Beauvais', zone:'farsuburb', airport:true },
+  // Zones Paris intra-muros
+  opera:         { lat:48.8698, lng:2.3316, nom:'Opéra · Louvre · Châtelet', zone:'paris_centre' },
+  champs:        { lat:48.8738, lng:2.2950, nom:'Champs-Élysées · Étoile', zone:'paris_centre' },
+  eiffel:        { lat:48.8584, lng:2.2945, nom:'Tour Eiffel · 7e', zone:'paris_centre' },
+  marais:        { lat:48.8566, lng:2.3590, nom:'Le Marais · Bastille · 4e', zone:'paris_centre' },
+  mont:          { lat:48.8867, lng:2.3431, nom:'Montmartre · 18e', zone:'paris_nord' },
+  latin:         { lat:48.8497, lng:2.3471, nom:'Quartier Latin · 5e/6e', zone:'paris_centre' },
+  'bercy-q':     { lat:48.8348, lng:2.3864, nom:'Bercy · 12e est', zone:'paris_est' },
+  // Banlieue
+  defense:       { lat:48.8924, lng:2.2361, nom:'La Défense', zone:'suburb_west' },
+  neuilly:       { lat:48.8838, lng:2.2685, nom:'Neuilly-sur-Seine', zone:'suburb_west' },
+  boulogne:      { lat:48.8359, lng:2.2399, nom:'Boulogne-Billancourt', zone:'suburb_west' },
+  levallois:     { lat:48.8939, lng:2.2878, nom:'Levallois-Perret', zone:'suburb_west' },
+  issy:          { lat:48.8247, lng:2.2717, nom:'Issy-les-Moulineaux', zone:'suburb_west' },
+  // Salles
+  bercy_arena:   { lat:48.8386, lng:2.3786, nom:'Accor Arena', zone:'paris_est' },
+  zenith:        { lat:48.8942, lng:2.3928, nom:'Zénith La Villette', zone:'paris_nord' },
+  olympia:       { lat:48.8705, lng:2.3281, nom:"L'Olympia", zone:'paris_centre' },
+  pleyel:        { lat:48.8785, lng:2.3018, nom:'Salle Pleyel', zone:'paris_centre' },
+  porte_versailles:{ lat:48.8314, lng:2.2875, nom:'Paris Expo Porte Versailles', zone:'paris_sud' },
+  seine_musicale:{ lat:48.8277, lng:2.2314, nom:'Seine Musicale', zone:'suburb_west' },
+  defense_arena: { lat:48.8951, lng:2.2278, nom:'Paris La Défense Arena', zone:'suburb_west' },
+  villepinte:    { lat:48.9711, lng:2.5175, nom:'Parc Expo Villepinte', zone:'farsuburb' },
+  bourget:       { lat:48.9561, lng:2.4412, nom:'Parc Expo Le Bourget', zone:'suburb_ne' },
+  stade_france:  { lat:48.9245, lng:2.3601, nom:'Stade de France', zone:'suburb_ne' },
+  // Gares bis
+  'g-nord':      { lat:48.8809, lng:2.3553, nom:'Gare du Nord' },
+  'g-lyon':      { lat:48.8448, lng:2.3740, nom:'Gare de Lyon' },
+  'g-mont':      { lat:48.8412, lng:2.3208, nom:'Gare Montparnasse' }
+};
+
+// Ajoute dynamiquement les théâtres aux coords trajet
+Object.keys(THEATRES || {}).forEach(id => {
+  const t = THEATRES[id];
+  if(t.lat && t.lng) TRAJET_COORDS[id] = { lat:t.lat, lng:t.lng, nom:t.nom, zone:'paris_centre' };
+});
+
+/* MODÈLE DE TRAFIC PARIS
+   Basé sur les données Sytadin/Bison Futé/heures de pointe connues IDF
+   Retourne un multiplicateur sur la durée free-flow (ex: 1.4 = trajet 40% plus long)
+*/
+function parisTrafficMultiplier(now, zoneFrom, zoneTo){
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const dow = now.getDay(); // 0=dim, 6=sam
+  const hm = h + m/60; // heure décimale
+
+  // Weekend : trafic plus léger (sauf événements)
+  const isWeekend = (dow === 0 || dow === 6);
+  const isFriday = (dow === 5);
+
+  // Heures de pointe matin/soir (lun-ven)
+  let mult = 1.0;
+
+  if(!isWeekend){
+    // Heure de pointe du matin 7h30-10h
+    if(hm >= 7.5 && hm <= 10.0){
+      const peak = Math.max(0, 1 - Math.abs(hm - 8.5) / 1.5); // pic à 8h30
+      mult = 1.0 + 0.75 * peak;  // jusqu'à x1.75
+    }
+    // Déjeuner 12h-14h : léger
+    else if(hm >= 12 && hm <= 14){
+      mult = 1.15;
+    }
+    // Heure de pointe soir 17h-20h30
+    else if(hm >= 17 && hm <= 20.5){
+      const peak = Math.max(0, 1 - Math.abs(hm - 18.5) / 2.0); // pic à 18h30
+      mult = 1.0 + 0.85 * peak;  // jusqu'à x1.85
+      if(isFriday) mult += 0.15;  // vendredi soir +15% (Paris quitte)
+    }
+    // Nuit 21h-6h : très fluide
+    else if(hm >= 21 || hm <= 6){
+      mult = 0.85;
+    }
+    // Heures creuses jour
+    else{
+      mult = 1.05;
+    }
+  } else {
+    // Weekend
+    // Samedi après-midi : centre-ville chargé (shopping, touristes)
+    if(dow === 6 && hm >= 14 && hm <= 19){
+      const isCenter = (zoneFrom && zoneFrom.includes('paris')) || (zoneTo && zoneTo.includes('paris'));
+      mult = isCenter ? 1.35 : 1.1;
+    }
+    // Dimanche : fluide sauf sorties ouest (retour)
+    else if(dow === 0 && hm >= 17 && hm <= 21){
+      const isWest = (zoneFrom === 'suburb_west') || (zoneTo === 'suburb_west');
+      mult = isWest ? 1.25 : 0.9;
+    }
+    // Autres cas weekend : fluide
+    else {
+      mult = hm >= 23 || hm <= 7 ? 0.8 : 0.95;
+    }
+  }
+
+  // Bonus malus selon zones
+  if((zoneFrom === 'farsuburb' && zoneTo && zoneTo.includes('paris'))
+  || (zoneTo === 'farsuburb' && zoneFrom && zoneFrom.includes('paris'))){
+    // Villepinte, Beauvais : A1/A3 souvent bouchés
+    if(!isWeekend && (hm >= 7 && hm <= 10 || hm >= 17 && hm <= 20.5)) mult *= 1.15;
+  }
+
+  if(zoneFrom === 'suburb_west' || zoneTo === 'suburb_west'){
+    // La Défense : pont de Neuilly / tunnel souvent saturé
+    if(!isWeekend && hm >= 7.5 && hm <= 9.5) mult *= 1.2; // direction Paris matin
+    if(!isWeekend && hm >= 17.5 && hm <= 20) mult *= 1.2; // direction ouest soir
+  }
+
+  return Math.max(0.8, Math.min(2.2, mult));
+}
+
+function trafficLevel(mult){
+  if(mult < 1.05) return { key:'fluid',   label:'Fluide',    pct: 18 };
+  if(mult < 1.25) return { key:'moderate',label:'Modéré',    pct: 40 };
+  if(mult < 1.55) return { key:'heavy',   label:'Chargé',    pct: 70 };
+  return { key:'extreme', label:'Très chargé', pct: 95 };
+}
+
+function trafficAdvice(mult, now){
+  const h = now.getHours();
+  const dow = now.getDay();
+  if(mult >= 1.55){
+    if(h >= 17 && h <= 20) return "Pointe du soir · attends 21h si possible ou prends les quais de Seine";
+    if(h >= 7 && h <= 10) return "Pointe du matin · évite le périph, passe par les boulevards";
+    return "Très chargé · attends 15 min et retente";
+  }
+  if(mult >= 1.25){
+    return "Trafic chargé · prévois +10 min · évite A86 et périph intérieur";
+  }
+  if(mult >= 1.05){
+    return "Trafic modéré · route normale, peu de risques";
+  }
+  return "Route fluide · tu peux foncer 🚀";
+}
+
+/* Cache OSRM (évite de re-requêter le même trajet) */
+const ROUTE_CACHE = {};
+
+async function fetchOsrmRoute(fromCoord, toCoord){
+  const key = `${fromCoord.lat},${fromCoord.lng}_${toCoord.lat},${toCoord.lng}`;
+  if(ROUTE_CACHE[key] && (Date.now() - ROUTE_CACHE[key].ts < 3600000)){
+    return ROUTE_CACHE[key].data;
+  }
+  try{
+    const url = `https://taxipulse-proxi.boughida-sofiane.workers.dev/route?from=${fromCoord.lat},${fromCoord.lng}&to=${toCoord.lat},${toCoord.lng}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if(data.error) throw new Error(data.error);
+    ROUTE_CACHE[key] = { data, ts: Date.now() };
+    return data;
+  } catch(err){
+    return null; // fallback vers estimations
+  }
+}
+
+/* Met à jour le badge trafic live dans le hero */
+function updateTrafficHero(){
+  const el = document.getElementById('trhero-live');
+  const txt = document.getElementById('trhero-live-txt');
+  if(!el || !txt) return;
+  const mult = parisTrafficMultiplier(new Date(), 'paris_centre', 'paris_centre');
+  const lvl = trafficLevel(mult);
+  el.classList.remove('heavy','extreme');
+  if(lvl.key === 'heavy') el.classList.add('heavy');
+  if(lvl.key === 'extreme') el.classList.add('extreme');
+  txt.innerHTML = `Paris · trafic <b style="color:${lvl.key==='fluid'?'var(--green)':lvl.key==='extreme'?'#FF0000':'var(--accent)'}">${lvl.label.toLowerCase()}</b> · ${Math.round((mult-1)*100)}% vs fluide`;
+}
+
 function initTrajetSegments(){
   document.querySelectorAll('#tr-moment button').forEach(b => {
     b.onclick = () => {
       document.querySelectorAll('#tr-moment button').forEach(x => x.classList.remove('active'));
       b.classList.add('active');
+      if(navigator.vibrate) navigator.vibrate(6);
     };
   });
 
-  // Remplissage dynamique de l'optgroup théâtres (trié alphabétiquement)
+  // Remplissage dynamique de l'optgroup théâtres
   const og = document.getElementById('og-theatres');
-  if(og && !og.children.length){
+  if(og && !og.children.length && typeof THEATRES !== 'undefined'){
     const entries = Object.entries(THEATRES)
       .sort((a,b) => a[1].nom.localeCompare(b[1].nom, 'fr'));
     og.innerHTML = entries.map(([id, t]) =>
       `<option value="${id}">${esc(t.nom)} · ${esc(t.adr.split(' · ')[0])}</option>`
     ).join('');
   }
+
+  // Badge trafic hero
+  updateTrafficHero();
+  setInterval(updateTrafficHero, 60000); // refresh chaque minute
 }
 
-function calcTrajet(){
+async function calcTrajet(){
   const depart = document.getElementById('tr-depart').value;
   const arrivee = document.getElementById('tr-arrivee').value;
-  const momentChoix = document.querySelector('#tr-moment button.active').dataset.v; // 'auto' | 'A' | 'B' | 'C'
+  const momentChoix = document.querySelector('#tr-moment button.active').dataset.v;
 
-  const km = TRAJETS_KM[depart] && TRAJETS_KM[depart][arrivee];
-  const min = TRAJETS_MIN[depart] && TRAJETS_MIN[depart][arrivee];
-
-  if(!km){
-    document.getElementById('tr-resultat').style.display = 'block';
-    document.getElementById('tr-resultat').innerHTML =
-      '<div class="empty"><span class="ei">❓</span>Trajet non disponible. Essaie une autre destination.</div>';
-    return;
-  }
-
-  // === TARIFS OFFICIELS TAXIS PARISIENS 2025 ===
-  const PRISE = 3.00;
-  const MIN_COURSE = 8.00;
-
-  // Détermine la zone (intra-muros vs banlieue suburbaine)
-  const zone = ZONES[arrivee] || 'paris';
-  const tarifLettre = momentChoix === 'auto' ? tarifAutoNow(zone) : momentChoix;
-  const t = tarifKmParisien(zone, tarifLettre);
-
-  let prix = PRISE + km * t.km;
-  // Supplément 5e passager : ici on ne modélise pas le nb passagers ; ignoré pour simplicité
-  // Minimum course
-  if(prix < MIN_COURSE) prix = MIN_COURSE;
-
-  // === FORFAITS OFFICIELS AÉROPORTS (obligatoires si intra-muros ↔ CDG/Orly) ===
-  // Paris ↔ CDG  : 56€ Rive Droite / 65€ Rive Gauche
-  // Paris ↔ Orly : 44€ Rive Droite / 36€ Rive Gauche
-  let forfaitHtml = '';
-  let usedForfait = false;
-  if(arrivee === 'cdg' || arrivee === 'orly'){
-    // Rive Droite / Rive Gauche (gares)
-    //   Rive Droite (Nord) : Gare du Nord, Gare de l'Est
-    //   Rive Gauche (Sud)  : Montparnasse, Austerlitz, Bercy (Bercy limite floue mais RG historique)
-    //   Lyon est sur Rive Droite
-    const riveDroite = ['nord', 'est', 'lyon'].includes(depart);
-    const forfait = arrivee === 'cdg'
-      ? (riveDroite ? 56 : 65)
-      : (riveDroite ? 44 : 36);
-    const riveLbl = riveDroite ? 'Rive Droite' : 'Rive Gauche';
-    const aeroLbl = arrivee === 'cdg' ? 'Roissy-CDG' : 'Orly';
-    forfaitHtml = `<div class="tr-info-row" style="background:var(--adim);margin:8px -18px 0;padding:10px 18px;border-radius:0">
-      <span class="k">✓ Forfait officiel ${aeroLbl} · ${riveLbl}</span>
-      <span class="v" style="color:var(--accent);font-size:17px">${forfait}€</span>
-    </div>`;
-    prix = forfait;
-    usedForfait = true;
-  }
-
-  // Fourchette ± 12% (trafic)
-  const low  = Math.round(prix * 0.88);
-  const high = Math.round(prix * 1.15);
+  const fromCoord = TRAJET_COORDS[depart];
+  const toCoord   = TRAJET_COORDS[arrivee];
 
   const res = document.getElementById('tr-resultat');
   res.style.display = 'block';
-  res.innerHTML = `<div class="tr-result">
-    <div class="tr-price">${Math.round(prix)}€</div>
-    <div class="tr-range">Fourchette estimée : ${low}€ — ${high}€</div>
-    ${forfaitHtml}
-    <div class="tr-info-row"><span class="k">🛣 Distance</span><span class="v">${km} km</span></div>
-    <div class="tr-info-row"><span class="k">⏱ Durée estimée</span><span class="v">${min} min</span></div>
-    ${!usedForfait ? `<div class="tr-info-row"><span class="k">⚡ Tarif appliqué</span><span class="v">${t.tarif} · ${t.km.toFixed(2)}€/km</span></div>` : ''}
-    ${!usedForfait ? `<div class="tr-info-row"><span class="k">📍 Prise en charge</span><span class="v">${PRISE.toFixed(2)}€</span></div>` : ''}
-    ${!usedForfait ? `<div class="tr-info-row" style="font-size:11px;color:var(--ink3)"><span class="k">Zone</span><span class="v" style="color:var(--ink3)">${zone === 'paris' ? 'Paris intra-muros' : 'Suburbaine'}</span></div>` : ''}
-    <div class="tr-disclaimer">Grille officielle taxis parisiens (arrêté préfectoral Paris). Prise en charge 3,00€ · Tarif A 1,25€/km · B 1,64€/km · C 1,79€/km · Minimum course 8€ · Forfaits CDG/Orly ↔ Paris en vigueur. Supplément 5e passager : +5,50€. Prix indicatif, le taximètre fait foi.</div>
+
+  if(!fromCoord || !toCoord){
+    res.innerHTML = '<div class="empty"><span class="ei">❓</span>Trajet non disponible.</div>';
+    return;
+  }
+
+  if(navigator.vibrate) navigator.vibrate(12);
+  res.innerHTML = `<div class="tr-loading">
+    <div class="tr-loading-spinner"></div>
+    <div class="tr-loading-txt">Analyse du trafic en direct...</div>
   </div>`;
 
-  // Vibration haptique sur smartphone
-  if(navigator.vibrate) navigator.vibrate(10);
+  const routeData = await fetchOsrmRoute(fromCoord, toCoord);
+
+  let km, liveMin, freeFlowMin, delayMin, sourceLbl, hasLiveTraffic;
+  if(routeData && routeData.distance_km){
+    km = routeData.distance_km;
+    liveMin = routeData.duration_live_min;
+    freeFlowMin = routeData.duration_free_flow_min;
+    delayMin = routeData.traffic_delay_min || 0;
+    sourceLbl = routeData.source || 'Route réelle';
+    hasLiveTraffic = sourceLbl.includes('TomTom');
+  } else {
+    km = haversine(fromCoord.lat, fromCoord.lng, toCoord.lat, toCoord.lng) * 1.4;
+    freeFlowMin = Math.round(km / 0.55);
+    const mult = parisTrafficMultiplier(new Date(), fromCoord.zone, toCoord.zone);
+    liveMin = Math.round(freeFlowMin * mult);
+    delayMin = liveMin - freeFlowMin;
+    sourceLbl = 'Estimation';
+    hasLiveTraffic = false;
+  }
+
+  // ═══════════════════════════════════════════════
+  // CALCUL TAXIMÈTRE OFFICIEL HOROKILOMÉTRIQUE
+  // Basé sur l'arrêté préfectoral Paris 2025
+  // ═══════════════════════════════════════════════
+  // Principe : le compteur bascule entre km et horaire selon la vitesse
+  // Seuil de bascule = TARIF_HORAIRE / TARIF_KM (= vitesse en km/h)
+  // - Vitesse > seuil → prix AU KILOMÈTRE
+  // - Vitesse < seuil → prix À L'HEURE (embouteillage/arrêt)
+  //
+  // Pour une estimation précise, je décompose le trajet en 2 phases :
+  //   1. Phase fluide (sans retard trafic) : calculée au km
+  //   2. Phase "ralentie" (retard trafic) : calculée à l'heure
+
+  const PRISE = 3.00;
+  const MIN_COURSE = 8.00;
+  const TARIF_HORAIRE = 41.76;
+
+  const isArrivalSuburb = toCoord.zone && !toCoord.zone.includes('paris');
+  const zone = isArrivalSuburb ? 'suburb' : 'paris';
+  const tarifLettre = momentChoix === 'auto' ? tarifAutoNow(zone) : momentChoix;
+  const t = tarifKmParisien(zone, tarifLettre);  // { tarif, km }
+
+  // Seuil de bascule vitesse (km/h)
+  const seuilVitesse = TARIF_HORAIRE / t.km;
+
+  // Vitesse moyenne réelle sur le trajet (km/h)
+  const vitesseMoy = liveMin > 0 ? (km / liveMin) * 60 : 30;
+
+  // Décomposition du trajet :
+  //   - Distance facturée au km = total km (toujours)
+  //   - Temps facturé à l'heure = temps passé sous le seuil de vitesse
+  //     ≈ temps total - temps qu'on aurait passé sans trafic
+  //     ≈ delayMin (le retard causé par le trafic)
+  //
+  // En pratique : le délai trafic correspond précisément au temps passé en circulation ralentie
+  const heuresBouchons = delayMin / 60;
+  const montantHoraire = heuresBouchons * TARIF_HORAIRE;
+  const montantKm = km * t.km;
+
+  // Calcul du prix base + trafic
+  let prix = PRISE + montantKm + montantHoraire;
+  if(prix < MIN_COURSE) prix = MIN_COURSE;
+
+  // Calcul du prix "fluide" (sans bouchons, pour comparaison)
+  const prixFluide = Math.max(MIN_COURSE, PRISE + montantKm);
+
+  // Supplément bouchons = différence
+  const supplementBouchons = prix - prixFluide;
+
+  // ═══ FORFAITS AÉROPORTS ═══
+  let usedForfait = false;
+  let forfaitInfo = null;
+  if((arrivee === 'cdg' || arrivee === 'orly') && ['nord','est','lyon','montparnasse','austerlitz','bercy','opera','champs','eiffel','marais','mont','latin','bercy-q'].includes(depart)){
+    const riveDroite = ['nord','est','lyon','opera','champs','mont','marais'].includes(depart);
+    const forfait = arrivee === 'cdg' ? (riveDroite ? 56 : 65) : (riveDroite ? 44 : 36);
+    prix = forfait;
+    usedForfait = true;
+    forfaitInfo = {
+      aero: arrivee === 'cdg' ? 'Roissy-CDG' : 'Orly',
+      rive: riveDroite ? 'Rive Droite' : 'Rive Gauche'
+    };
+  }
+
+  // Niveau de trafic (visuel)
+  const delayPct = freeFlowMin > 0 ? (delayMin / freeFlowMin) : 0;
+  let lvl;
+  if(delayPct < 0.08)      lvl = { key:'fluid',    label:'Fluide',      pct: 18 };
+  else if(delayPct < 0.25) lvl = { key:'moderate', label:'Modéré',      pct: 40 };
+  else if(delayPct < 0.55) lvl = { key:'heavy',    label:'Chargé',      pct: 70 };
+  else                     lvl = { key:'extreme',  label:'Très chargé', pct: 95 };
+
+  // Conseil
+  const now = new Date();
+  const h = now.getHours();
+  let advice;
+  if(usedForfait){
+    advice = `Forfait fixe ${forfaitInfo.aero} · garanti quelle que soit la durée`;
+  } else if(delayPct >= 0.55){
+    if(h >= 17 && h <= 20) advice = `Pointe du soir · +${supplementBouchons.toFixed(2)}€ de bouchons déjà · attends 21h`;
+    else if(h >= 7 && h <= 10) advice = `Pointe matin · +${supplementBouchons.toFixed(2)}€ de bouchons · itinéraire boulevards`;
+    else advice = `Très chargé · +${supplementBouchons.toFixed(2)}€ de tarif horaire en plus`;
+  } else if(delayPct >= 0.25){
+    advice = `Trafic chargé · +${supplementBouchons.toFixed(2)}€ de tarif horaire pour ${delayMin}min de ralenti`;
+  } else if(delayPct >= 0.08){
+    advice = `Trafic modéré · impact tarif horaire minime`;
+  } else {
+    advice = "Route fluide · 100% au kilomètre · pas de tarif horaire 🚀";
+  }
+
+  // Fourchette basée sur incertitude du trafic live (±15% sur le delay)
+  const low  = Math.round(prix * 0.94);
+  const high = usedForfait ? Math.round(prix * 1.02) : Math.round(prix * (1.06 + delayPct * 0.20));
+
+  const wazeUrl = `openWaze(${toCoord.lat}, ${toCoord.lng})`;
+  const liveBadge = hasLiveTraffic
+    ? '<span style="color:var(--green);font-weight:900">● LIVE</span>'
+    : '<span style="color:var(--ink3);font-weight:700">~ Estimation</span>';
+
+  // Breakdown price : affichage transparent
+  const priceBreakdown = usedForfait ? '' : `
+    <div class="tr-breakdown">
+      <div class="tr-bd-hdr">💡 Décomposition taximètre</div>
+      <div class="tr-bd-row">
+        <span>Prise en charge</span>
+        <span>${PRISE.toFixed(2)}€</span>
+      </div>
+      <div class="tr-bd-row">
+        <span>Kilomètres (${km} km × ${t.km.toFixed(2)}€)</span>
+        <span>${montantKm.toFixed(2)}€</span>
+      </div>
+      ${supplementBouchons > 0 ? `
+      <div class="tr-bd-row hot">
+        <span>⚠️ Tarif horaire (${delayMin} min bouchons)</span>
+        <span>+${supplementBouchons.toFixed(2)}€</span>
+      </div>` : ''}
+      <div class="tr-bd-row total">
+        <span>TOTAL ESTIMÉ</span>
+        <span>${prix.toFixed(2)}€</span>
+      </div>
+    </div>
+  `;
+
+  res.innerHTML = `
+    <div class="tr-result">
+      <div class="tr-main-card ${usedForfait?'forfait':''}">
+        <div class="tr-badge-top ${usedForfait?'forfait':''}">
+          ${usedForfait ? '✓ Forfait officiel préfectoral' : '💶 Calcul taximètre horokilométrique'}
+        </div>
+        <div class="tr-price-big">${Math.round(prix)}€</div>
+        <div class="tr-price-range">${usedForfait ? `Tarif fixe ${forfaitInfo.aero} · ${forfaitInfo.rive}` : `Fourchette : ${low}€ — ${high}€`}</div>
+
+        ${!usedForfait && supplementBouchons > 0.5 ? `
+          <div class="tr-compare">
+            <div class="tr-compare-row">
+              <span class="tr-compare-k">🟢 Si route fluide</span>
+              <span class="tr-compare-v">${Math.round(prixFluide)}€</span>
+            </div>
+            <div class="tr-compare-row now">
+              <span class="tr-compare-k">🚦 Avec trafic actuel</span>
+              <span class="tr-compare-v">${Math.round(prix)}€ · <b style="color:var(--accent)">+${supplementBouchons.toFixed(2)}€</b></span>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="tr-stats-grid">
+          <div class="tr-stat">
+            <div class="tr-stat-k">🛣 Distance</div>
+            <div class="tr-stat-v">${km} km</div>
+            <div class="tr-stat-extra">${sourceLbl}</div>
+          </div>
+          <div class="tr-stat">
+            <div class="tr-stat-k">⏱ Durée ${liveBadge}</div>
+            <div class="tr-stat-v ${lvl.key==='fluid'?'green':lvl.key==='extreme'?'accent':''}">${liveMin} min</div>
+            <div class="tr-stat-extra">${delayMin > 0 ? `Fluide : ${freeFlowMin} min · <b style="color:var(--accent)">+${delayMin} min</b>` : 'Pas de retard'}</div>
+          </div>
+          <div class="tr-stat">
+            <div class="tr-stat-k">🚗 Vitesse moy.</div>
+            <div class="tr-stat-v ${vitesseMoy < seuilVitesse ? 'accent' : 'green'}">${Math.round(vitesseMoy)} km/h</div>
+            <div class="tr-stat-extra">${vitesseMoy < seuilVitesse ? `< seuil ${Math.round(seuilVitesse)} km/h` : `> seuil ${Math.round(seuilVitesse)} km/h`}</div>
+          </div>
+          <div class="tr-stat">
+            <div class="tr-stat-k">⚡ Tarif ${t.tarif}</div>
+            <div class="tr-stat-v">${t.km.toFixed(2)}€/km</div>
+            <div class="tr-stat-extra">${TARIF_HORAIRE.toFixed(2)}€/h si bouchons</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tr-traffic-bar">
+        <div class="tr-tb-head">
+          <span class="tr-tb-label">🚦 Trafic ${hasLiveTraffic ? 'live' : 'estimé'}</span>
+          <span class="tr-tb-status ${lvl.key}">${lvl.label.toUpperCase()}${delayMin > 0 ? ' · +' + delayMin + ' MIN' : ''}</span>
+        </div>
+        <div class="tr-tb-meter">
+          <div class="tr-tb-fill ${lvl.key}" style="width:${lvl.pct}%"></div>
+        </div>
+        <div class="tr-tb-labels">
+          <span>🟢 Fluide</span>
+          <span>🟡 Modéré</span>
+          <span>🟠 Chargé</span>
+          <span>🔴 Saturé</span>
+        </div>
+      </div>
+
+      <div class="tr-tip">
+        <span class="tr-tip-ico">💡</span>
+        <div class="tr-tip-body">${advice}</div>
+      </div>
+
+      ${priceBreakdown}
+
+      <div class="tr-details">
+        <div class="tr-info-row"><span class="k">📍 De</span><span class="v">${esc(fromCoord.nom)}</span></div>
+        <div class="tr-info-row"><span class="k">🎯 Vers</span><span class="v">${esc(toCoord.nom)}</span></div>
+        ${!usedForfait ? `<div class="tr-info-row"><span class="k">Zone</span><span class="v">${zone === 'paris' ? 'Paris intra-muros' : 'Banlieue'}</span></div>` : ''}
+        ${!usedForfait ? `<div class="tr-info-row"><span class="k">Seuil de bascule</span><span class="v">${seuilVitesse.toFixed(1)} km/h</span></div>` : ''}
+      </div>
+
+      <button class="tr-waze-btn" onclick="${wazeUrl}">
+        <span>🧭</span>
+        <span>Démarrer la navigation Waze</span>
+      </button>
+
+      <div class="tr-disclaimer">
+        <b>Taximètre horokilométrique</b> · La course utilise le tarif ${t.tarif} en alternance :
+        au kilomètre si vitesse > ${seuilVitesse.toFixed(1)} km/h, à l'heure (${TARIF_HORAIRE}€/h) si vitesse inférieure (bouchons/arrêt).
+        ${hasLiveTraffic ? '<b>Trafic live TomTom</b> · données en direct.' : '<b>Trafic estimé</b> · clé TomTom non configurée.'}
+        Prix indicatif · le taximètre fait foi · tarif préfectoral Paris 2025.
+      </div>
+    </div>
+  `;
+
+  if(navigator.vibrate) navigator.vibrate(8);
+}
+
+// Distance haversine (fallback si OSRM indisponible)
+function haversine(lat1, lng1, lat2, lng2){
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return Math.round(2 * R * Math.asin(Math.sqrt(a)) * 10) / 10;
 }
 
 /* ═══ DIALOG GARE ═══ */
