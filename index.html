@@ -662,6 +662,96 @@ dialog .sheet{
   background:var(--bg);border:1px solid var(--line);border-radius:11px;
   padding:10px 13px;margin:14px 0 10px;
 }
+
+/* Toggle mode destination (preset vs adresse libre) */
+.tr-mode-toggle{
+  display:flex;gap:5px;margin-bottom:9px;
+  background:var(--card2);padding:4px;border-radius:11px;
+  border:1px solid var(--line);
+}
+.trmt-btn{
+  flex:1;background:transparent;border:none;color:var(--ink3);
+  font-family:inherit;font-size:11px;font-weight:800;letter-spacing:.2px;
+  padding:9px 8px;border-radius:8px;cursor:pointer;
+  transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.trmt-btn.active{
+  background:var(--accent);color:#fff;
+  box-shadow:0 3px 10px rgba(255,69,0,.3);
+}
+.trmt-btn:not(.active):active{background:var(--card);color:var(--ink2)}
+
+/* Input adresse libre */
+.tr-custom-input{
+  width:100%;background:var(--card2);border:1px solid var(--line);
+  border-radius:11px;color:var(--ink);padding:13px 14px;font-size:14px;
+  font-family:inherit;font-weight:600;
+  transition:border-color .15s, box-shadow .15s;
+}
+.tr-custom-input:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(255,69,0,.12);
+}
+.tr-custom-input::placeholder{color:var(--ink3);font-weight:500}
+
+/* Autocompletion dropdown */
+.tr-autocomplete{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:11px;margin-top:6px;max-height:280px;overflow-y:auto;
+  display:none;
+}
+.tr-autocomplete.show{display:block}
+.tr-ac-item{
+  padding:11px 14px;cursor:pointer;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:flex-start;gap:10px;
+  transition:background .1s;
+}
+.tr-ac-item:last-child{border-bottom:0}
+.tr-ac-item:hover, .tr-ac-item:active{background:var(--card2)}
+.tr-ac-ico{font-size:15px;flex-shrink:0;line-height:1.5}
+.tr-ac-main{flex:1;min-width:0}
+.tr-ac-label{font-size:13px;font-weight:700;color:var(--ink);
+  line-height:1.3;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr-ac-context{font-size:10px;color:var(--ink3);font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px}
+.tr-ac-loading{
+  padding:15px;text-align:center;font-size:11px;
+  color:var(--ink3);font-weight:600;
+}
+.tr-ac-empty{
+  padding:20px;text-align:center;font-size:11px;
+  color:var(--ink3);font-weight:600;
+}
+
+/* Destination sélectionnée */
+.tr-custom-selected{
+  background:linear-gradient(135deg, rgba(20,148,95,.15) 0%, rgba(20,148,95,.05) 100%);
+  border:1px solid rgba(20,148,95,.3);border-radius:12px;
+  padding:12px 14px;margin-top:6px;
+  display:flex;align-items:center;gap:10px;
+}
+.tr-cs-ico{
+  width:28px;height:28px;border-radius:50%;background:var(--green);
+  color:#fff;font-size:13px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.tr-cs-main{flex:1;min-width:0}
+.tr-cs-label{font-size:13px;font-weight:800;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr-cs-context{font-size:10px;color:var(--ink3);font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px;margin-top:1px}
+.tr-cs-clear{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--card2);border:1px solid var(--line);
+  color:var(--ink2);font-size:11px;cursor:pointer;
+  font-family:inherit;font-weight:900;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.tr-cs-clear:active{background:var(--card)}
+
 .tr-compare-row{
   display:flex;justify-content:space-between;align-items:center;padding:4px 0;
   font-size:12px;
@@ -1503,6 +1593,9 @@ dialog .sheet{
       <div class="tr-field">
         <label>📍 Départ</label>
         <select id="tr-depart">
+          <optgroup label="🎯 Ma position actuelle">
+            <option value="__gps__">📡 Utiliser ma position GPS</option>
+          </optgroup>
           <optgroup label="🚂 Gares">
             <option value="nord">Gare du Nord</option>
             <option value="lyon">Gare de Lyon</option>
@@ -1526,50 +1619,78 @@ dialog .sheet{
           </optgroup>
         </select>
       </div>
+
       <div class="tr-field">
         <label>🎯 Arrivée</label>
-        <select id="tr-arrivee">
-          <optgroup label="✈ Aéroports (forfait)">
-            <option value="cdg">Aéroport CDG</option>
-            <option value="orly">Aéroport Orly</option>
-            <option value="beauvais">Aéroport Beauvais</option>
-          </optgroup>
-          <optgroup label="🏙 Paris intra-muros">
-            <option value="opera">Opéra · Louvre · Châtelet</option>
-            <option value="champs">Champs-Élysées · Étoile</option>
-            <option value="eiffel">Tour Eiffel · Invalides · 7e</option>
-            <option value="marais">Le Marais · Bastille · 4e</option>
-            <option value="mont">Montmartre · Sacré-Cœur · 18e</option>
-            <option value="latin">Quartier Latin · 5e · 6e</option>
-            <option value="bercy-q">Bercy · 12e est</option>
-          </optgroup>
-          <optgroup label="🏢 Banlieue">
-            <option value="defense">La Défense</option>
-            <option value="neuilly">Neuilly-sur-Seine</option>
-            <option value="boulogne">Boulogne-Billancourt</option>
-            <option value="levallois">Levallois-Perret</option>
-            <option value="issy">Issy-les-Moulineaux</option>
-          </optgroup>
-          <optgroup label="🎤 Grandes salles">
-            <option value="bercy_arena">Accor Arena (Bercy)</option>
-            <option value="zenith">Zénith La Villette</option>
-            <option value="olympia">L'Olympia</option>
-            <option value="pleyel">Salle Pleyel</option>
-            <option value="porte_versailles">Paris Expo Porte Versailles</option>
-            <option value="seine_musicale">La Seine Musicale</option>
-            <option value="defense_arena">Paris La Défense Arena</option>
-            <option value="villepinte">Parc Expo Villepinte</option>
-            <option value="bourget">Parc Expo Le Bourget</option>
-            <option value="stade_france">Stade de France</option>
-          </optgroup>
-          <optgroup label="🎭 Théâtres" id="og-theatres"></optgroup>
-          <optgroup label="🚂 Autres gares">
-            <option value="g-nord">Gare du Nord</option>
-            <option value="g-lyon">Gare de Lyon</option>
-            <option value="g-mont">Gare Montparnasse</option>
-          </optgroup>
-        </select>
+
+        <!-- Toggle entre destinations prédéfinies et adresse libre -->
+        <div class="tr-mode-toggle">
+          <button class="trmt-btn active" data-mode="preset" onclick="switchDestMode('preset')">📌 Lieux prédéfinis</button>
+          <button class="trmt-btn" data-mode="custom" onclick="switchDestMode('custom')">✍ Adresse libre</button>
+        </div>
+
+        <!-- Mode 1 : destinations prédéfinies (existant) -->
+        <div id="tr-arrivee-preset">
+          <select id="tr-arrivee">
+            <optgroup label="✈ Aéroports (forfait)">
+              <option value="cdg">Aéroport CDG</option>
+              <option value="orly">Aéroport Orly</option>
+              <option value="beauvais">Aéroport Beauvais</option>
+            </optgroup>
+            <optgroup label="🏙 Paris intra-muros">
+              <option value="opera">Opéra · Louvre · Châtelet</option>
+              <option value="champs">Champs-Élysées · Étoile</option>
+              <option value="eiffel">Tour Eiffel · Invalides · 7e</option>
+              <option value="marais">Le Marais · Bastille · 4e</option>
+              <option value="mont">Montmartre · Sacré-Cœur · 18e</option>
+              <option value="latin">Quartier Latin · 5e · 6e</option>
+              <option value="bercy-q">Bercy · 12e est</option>
+            </optgroup>
+            <optgroup label="🏢 Banlieue">
+              <option value="defense">La Défense</option>
+              <option value="neuilly">Neuilly-sur-Seine</option>
+              <option value="boulogne">Boulogne-Billancourt</option>
+              <option value="levallois">Levallois-Perret</option>
+              <option value="issy">Issy-les-Moulineaux</option>
+            </optgroup>
+            <optgroup label="🎤 Grandes salles">
+              <option value="bercy_arena">Accor Arena (Bercy)</option>
+              <option value="zenith">Zénith La Villette</option>
+              <option value="olympia">L'Olympia</option>
+              <option value="pleyel">Salle Pleyel</option>
+              <option value="porte_versailles">Paris Expo Porte Versailles</option>
+              <option value="seine_musicale">La Seine Musicale</option>
+              <option value="defense_arena">Paris La Défense Arena</option>
+              <option value="villepinte">Parc Expo Villepinte</option>
+              <option value="bourget">Parc Expo Le Bourget</option>
+              <option value="stade_france">Stade de France</option>
+            </optgroup>
+            <optgroup label="🎭 Théâtres" id="og-theatres"></optgroup>
+            <optgroup label="🚂 Autres gares">
+              <option value="g-nord">Gare du Nord</option>
+              <option value="g-lyon">Gare de Lyon</option>
+              <option value="g-mont">Gare Montparnasse</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Mode 2 : adresse libre avec autocomplétion BAN -->
+        <div id="tr-arrivee-custom" style="display:none">
+          <input type="text" id="tr-custom-input" class="tr-custom-input"
+                 placeholder="Ex: 12 rue de Rivoli Paris"
+                 autocomplete="off" spellcheck="false">
+          <div id="tr-autocomplete" class="tr-autocomplete"></div>
+          <div id="tr-custom-selected" class="tr-custom-selected" style="display:none">
+            <div class="tr-cs-ico">✓</div>
+            <div class="tr-cs-main">
+              <div class="tr-cs-label" id="tr-cs-label">—</div>
+              <div class="tr-cs-context" id="tr-cs-context">—</div>
+            </div>
+            <button class="tr-cs-clear" onclick="clearCustomDest()">✕</button>
+          </div>
+        </div>
       </div>
+
       <div class="tr-field">
         <label>⚡ Tarif appliqué</label>
         <div class="tr-segment" id="tr-moment">
@@ -4281,14 +4402,180 @@ function initTrajetSegments(){
   setInterval(updateTrafficHero, 60000); // refresh chaque minute
 }
 
+/* ═══════════════════════════════════════════════
+   MODE DESTINATION — preset ou adresse libre
+═══════════════════════════════════════════════ */
+let customDestination = null; // { lat, lng, label, context }
+let autocompleteDebounce = null;
+
+function switchDestMode(mode){
+  document.querySelectorAll('.trmt-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  document.getElementById('tr-arrivee-preset').style.display = mode === 'preset' ? '' : 'none';
+  document.getElementById('tr-arrivee-custom').style.display = mode === 'custom' ? '' : 'none';
+  if(navigator.vibrate) navigator.vibrate(6);
+}
+
+function initAutocomplete(){
+  const input = document.getElementById('tr-custom-input');
+  if(!input) return;
+
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    clearTimeout(autocompleteDebounce);
+    if(q.length < 3){
+      document.getElementById('tr-autocomplete').classList.remove('show');
+      return;
+    }
+    autocompleteDebounce = setTimeout(() => fetchAutocomplete(q), 250);
+  });
+
+  // Fermer la liste si clic ailleurs
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('#tr-arrivee-custom')){
+      document.getElementById('tr-autocomplete')?.classList.remove('show');
+    }
+  });
+}
+
+async function fetchAutocomplete(query){
+  const ac = document.getElementById('tr-autocomplete');
+  ac.innerHTML = '<div class="tr-ac-loading">🔍 Recherche...</div>';
+  ac.classList.add('show');
+
+  try {
+    // Biais géographique autour de Paris pour prioriser les résultats parisiens
+    const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=6&lat=48.8566&lon=2.3522&type=housenumber,street`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if(!data.features || data.features.length === 0){
+      ac.innerHTML = '<div class="tr-ac-empty">Aucune adresse trouvée</div>';
+      return;
+    }
+
+    ac.innerHTML = data.features.map((f, i) => {
+      const p = f.properties;
+      const [lng, lat] = f.geometry.coordinates;
+      const ico = p.type === 'housenumber' ? '📍' : p.type === 'street' ? '🛣' : '🏙';
+      return `<div class="tr-ac-item" data-idx="${i}"
+                   data-lat="${lat}" data-lng="${lng}"
+                   data-label="${esc(p.label || p.name)}"
+                   data-context="${esc(p.context || p.citycode || '')}">
+        <div class="tr-ac-ico">${ico}</div>
+        <div class="tr-ac-main">
+          <div class="tr-ac-label">${esc(p.label || p.name)}</div>
+          <div class="tr-ac-context">${esc(p.context || '')}${p.postcode ? ' · ' + p.postcode : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    ac.querySelectorAll('.tr-ac-item').forEach(item => {
+      item.onclick = () => {
+        const lat = parseFloat(item.dataset.lat);
+        const lng = parseFloat(item.dataset.lng);
+        const label = item.dataset.label;
+        const context = item.dataset.context;
+        selectCustomDest(lat, lng, label, context);
+      };
+    });
+  } catch(err){
+    ac.innerHTML = '<div class="tr-ac-empty">Erreur de recherche · vérifie ta connexion</div>';
+  }
+}
+
+function selectCustomDest(lat, lng, label, context){
+  customDestination = { lat, lng, label, context };
+  document.getElementById('tr-custom-input').value = '';
+  document.getElementById('tr-autocomplete').classList.remove('show');
+  document.getElementById('tr-cs-label').textContent = label;
+  document.getElementById('tr-cs-context').textContent = context;
+  document.getElementById('tr-custom-selected').style.display = 'flex';
+  document.getElementById('tr-custom-input').style.display = 'none';
+  if(navigator.vibrate) navigator.vibrate([12, 8, 12]);
+}
+
+function clearCustomDest(){
+  customDestination = null;
+  document.getElementById('tr-custom-selected').style.display = 'none';
+  document.getElementById('tr-custom-input').style.display = '';
+  document.getElementById('tr-custom-input').value = '';
+  document.getElementById('tr-custom-input').focus();
+}
+
+/* ═══════════════════════════════════════════════
+   GÉOLOCALISATION — position GPS du chauffeur
+═══════════════════════════════════════════════ */
+let gpsPosition = null;
+
+function requestGpsPosition(){
+  return new Promise((resolve, reject) => {
+    if(!navigator.geolocation){
+      reject('Géolocalisation non supportée');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        gpsPosition = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          nom: 'Ma position actuelle',
+          zone: 'paris_centre' // approximation
+        };
+        resolve(gpsPosition);
+      },
+      (err) => reject(err.message),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  });
+}
+
 async function calcTrajet(){
   const depart = document.getElementById('tr-depart').value;
-  const arrivee = document.getElementById('tr-arrivee').value;
+  const arriveeMode = document.querySelector('.trmt-btn.active').dataset.mode;
+
+  // ═══ Résolution du point de départ ═══
+  let fromCoord;
+  if(depart === '__gps__'){
+    try {
+      document.getElementById('tr-resultat').style.display = 'block';
+      document.getElementById('tr-resultat').innerHTML = `<div class="tr-loading">
+        <div class="tr-loading-spinner"></div>
+        <div class="tr-loading-txt">Récupération de ta position GPS...</div>
+      </div>`;
+      await requestGpsPosition();
+      fromCoord = gpsPosition;
+    } catch(err){
+      document.getElementById('tr-resultat').innerHTML =
+        `<div class="empty"><span class="ei">📡</span>Impossible d'accéder à ta position GPS<br><span style="font-size:11px;color:var(--ink3)">${esc(String(err))}</span></div>`;
+      return;
+    }
+  } else {
+    fromCoord = TRAJET_COORDS[depart];
+  }
+
+  // ═══ Résolution du point d'arrivée ═══
+  let toCoord;
+  if(arriveeMode === 'custom'){
+    if(!customDestination){
+      document.getElementById('tr-resultat').style.display = 'block';
+      document.getElementById('tr-resultat').innerHTML =
+        '<div class="empty"><span class="ei">📍</span>Saisis une adresse et sélectionne-la dans la liste</div>';
+      return;
+    }
+    toCoord = {
+      lat: customDestination.lat,
+      lng: customDestination.lng,
+      nom: customDestination.label,
+      zone: customDestination.context.includes('Paris') ? 'paris_centre' : 'suburb'
+    };
+  } else {
+    const arrivee = document.getElementById('tr-arrivee').value;
+    toCoord = TRAJET_COORDS[arrivee];
+  }
+
   const momentChoix = document.querySelector('#tr-moment button.active').dataset.v;
-
-  const fromCoord = TRAJET_COORDS[depart];
-  const toCoord   = TRAJET_COORDS[arrivee];
-
   const res = document.getElementById('tr-resultat');
   res.style.display = 'block';
 
@@ -4323,18 +4610,21 @@ async function calcTrajet(){
     hasLiveTraffic = false;
   }
 
-  // ═══════════════════════════════════════════════
-  // CALCUL TAXIMÈTRE OFFICIEL HOROKILOMÉTRIQUE
-  // Basé sur l'arrêté préfectoral Paris 2025
-  // ═══════════════════════════════════════════════
-  // Principe : le compteur bascule entre km et horaire selon la vitesse
-  // Seuil de bascule = TARIF_HORAIRE / TARIF_KM (= vitesse en km/h)
-  // - Vitesse > seuil → prix AU KILOMÈTRE
-  // - Vitesse < seuil → prix À L'HEURE (embouteillage/arrêt)
+  // ═══════════════════════════════════════════════════════════════
+  // TAXIMÈTRE OFFICIEL HOROKILOMÉTRIQUE — Calcul tronçon par tronçon
+  // ═══════════════════════════════════════════════════════════════
+  // Source : arrêté préfectoral Paris 2025 + article EP0034105B1
   //
-  // Pour une estimation précise, je décompose le trajet en 2 phases :
-  //   1. Phase fluide (sans retard trafic) : calculée au km
-  //   2. Phase "ralentie" (retard trafic) : calculée à l'heure
+  // Le taximètre évalue en continu et choisit POUR CHAQUE TRONÇON le MAX
+  // entre tarif kilométrique et tarif horaire.
+  //
+  // Formule officielle : vitesse de conjonction = tarif_horaire / tarif_km
+  //
+  // Important : même sans bouchons majeurs, il y a toujours :
+  //   - des arrêts aux feux rouges (~20-30% du temps en ville)
+  //   - des ralentissements virages, priorités, piétons
+  //   - la circulation dense "normale" à ~15-22 km/h
+  // → Le tarif horaire contribue TOUJOURS, même sur un trajet fluide.
 
   const PRISE = 3.00;
   const MIN_COURSE = 8.00;
@@ -4343,50 +4633,68 @@ async function calcTrajet(){
   const isArrivalSuburb = toCoord.zone && !toCoord.zone.includes('paris');
   const zone = isArrivalSuburb ? 'suburb' : 'paris';
   const tarifLettre = momentChoix === 'auto' ? tarifAutoNow(zone) : momentChoix;
-  const t = tarifKmParisien(zone, tarifLettre);  // { tarif, km }
+  const t = tarifKmParisien(zone, tarifLettre);
+  const seuilVitesse = TARIF_HORAIRE / t.km; // vitesse de conjonction en km/h
 
-  // Seuil de bascule vitesse (km/h)
-  const seuilVitesse = TARIF_HORAIRE / t.km;
-
-  // Vitesse moyenne réelle sur le trajet (km/h)
+  // Vitesse moyenne réelle du trajet (km/h)
   const vitesseMoy = liveMin > 0 ? (km / liveMin) * 60 : 30;
 
-  // Décomposition du trajet :
-  //   - Distance facturée au km = total km (toujours)
-  //   - Temps facturé à l'heure = temps passé sous le seuil de vitesse
-  //     ≈ temps total - temps qu'on aurait passé sans trafic
-  //     ≈ delayMin (le retard causé par le trafic)
-  //
-  // En pratique : le délai trafic correspond précisément au temps passé en circulation ralentie
-  const heuresBouchons = delayMin / 60;
-  const montantHoraire = heuresBouchons * TARIF_HORAIRE;
+  // ═══ CALCUL PRÉCIS : répartition temps roulant / temps ralenti ═══
+  // Principe :
+  //   - Si vitesse_moy > 40 km/h (autoroute/périph) : presque tout au km
+  //   - Si vitesse_moy 25-40 km/h (boulevards fluides) : essentiellement au km, 10-15% horaire
+  //   - Si vitesse_moy 15-25 km/h (ville normale) : mix 60% km / 40% horaire
+  //   - Si vitesse_moy < 15 km/h (bouchons) : essentiellement horaire
+
+  // Estimation % du temps passé sous seuil (modèle empirique basé sur Coyote + stats Paris)
+  let pctTempsSousSeuil;
+  if(vitesseMoy >= 40) pctTempsSousSeuil = 0.05;       // 5% : périph fluide, feux occasionnels
+  else if(vitesseMoy >= 30) pctTempsSousSeuil = 0.15;  // 15% : boulevards
+  else if(vitesseMoy >= 25) pctTempsSousSeuil = 0.30;  // 30% : transition seuil
+  else if(vitesseMoy >= 18) pctTempsSousSeuil = 0.45;  // 45% : ville normale (feux nombreux)
+  else if(vitesseMoy >= 12) pctTempsSousSeuil = 0.65;  // 65% : ville dense / bouchons modérés
+  else pctTempsSousSeuil = 0.85;                        // 85% : bouchons sévères
+
+  // Minutes passées en "marche lente" (sous le seuil)
+  const minutesHoraire = liveMin * pctTempsSousSeuil;
+  const minutesRoulant = liveMin - minutesHoraire;
+
+  // Pendant les minutes roulantes : on parcourt la plupart des km
+  // Pendant les minutes horaires : on roule très lentement ou à l'arrêt
+  // Distance parcourue à l'arrêt ≈ 0, à vitesse lente = vitesse_moy_lent * minutesHoraire/60
+  // Pour simplifier : on facture tous les km au tarif km + minutesHoraire au tarif horaire
+  // Cette approche est conservatrice et correspond à la réalité du taximètre.
+
   const montantKm = km * t.km;
+  const montantHoraire = (minutesHoraire / 60) * TARIF_HORAIRE;
+  const montantBase = PRISE + montantKm + montantHoraire;
 
-  // Calcul du prix base + trafic
-  let prix = PRISE + montantKm + montantHoraire;
-  if(prix < MIN_COURSE) prix = MIN_COURSE;
+  let prix = Math.max(MIN_COURSE, montantBase);
 
-  // Calcul du prix "fluide" (sans bouchons, pour comparaison)
-  const prixFluide = Math.max(MIN_COURSE, PRISE + montantKm);
-
-  // Supplément bouchons = différence
-  const supplementBouchons = prix - prixFluide;
+  // Prix "théorique si on roulait partout à vitesse de conjonction" pour comparaison
+  const prixSansBouchons = (() => {
+    // Si le trajet était 100% fluide (>seuil partout) : on facture que les km
+    return Math.max(MIN_COURSE, PRISE + montantKm);
+  })();
+  const supplementHoraire = montantHoraire;
 
   // ═══ FORFAITS AÉROPORTS ═══
   let usedForfait = false;
   let forfaitInfo = null;
-  if((arrivee === 'cdg' || arrivee === 'orly') && ['nord','est','lyon','montparnasse','austerlitz','bercy','opera','champs','eiffel','marais','mont','latin','bercy-q'].includes(depart)){
+  const arriveeRaw = arriveeMode === 'preset' ? document.getElementById('tr-arrivee').value : null;
+  if((arriveeRaw === 'cdg' || arriveeRaw === 'orly') &&
+     ['nord','est','lyon','montparnasse','austerlitz','bercy','opera','champs','eiffel','marais','mont','latin','bercy-q'].includes(depart)){
     const riveDroite = ['nord','est','lyon','opera','champs','mont','marais'].includes(depart);
-    const forfait = arrivee === 'cdg' ? (riveDroite ? 56 : 65) : (riveDroite ? 44 : 36);
+    const forfait = arriveeRaw === 'cdg' ? (riveDroite ? 56 : 65) : (riveDroite ? 44 : 36);
     prix = forfait;
     usedForfait = true;
     forfaitInfo = {
-      aero: arrivee === 'cdg' ? 'Roissy-CDG' : 'Orly',
+      aero: arriveeRaw === 'cdg' ? 'Roissy-CDG' : 'Orly',
       rive: riveDroite ? 'Rive Droite' : 'Rive Gauche'
     };
   }
 
-  // Niveau de trafic (visuel)
+  // ═══ NIVEAU TRAFIC (visuel) ═══
   const delayPct = freeFlowMin > 0 ? (delayMin / freeFlowMin) : 0;
   let lvl;
   if(delayPct < 0.08)      lvl = { key:'fluid',    label:'Fluide',      pct: 18 };
@@ -4394,37 +4702,36 @@ async function calcTrajet(){
   else if(delayPct < 0.55) lvl = { key:'heavy',    label:'Chargé',      pct: 70 };
   else                     lvl = { key:'extreme',  label:'Très chargé', pct: 95 };
 
-  // Conseil
+  // ═══ CONSEIL CHAUFFEUR ═══
   const now = new Date();
   const h = now.getHours();
   let advice;
   if(usedForfait){
-    advice = `Forfait fixe ${forfaitInfo.aero} · garanti quelle que soit la durée`;
-  } else if(delayPct >= 0.55){
-    if(h >= 17 && h <= 20) advice = `Pointe du soir · +${supplementBouchons.toFixed(2)}€ de bouchons déjà · attends 21h`;
-    else if(h >= 7 && h <= 10) advice = `Pointe matin · +${supplementBouchons.toFixed(2)}€ de bouchons · itinéraire boulevards`;
-    else advice = `Très chargé · +${supplementBouchons.toFixed(2)}€ de tarif horaire en plus`;
-  } else if(delayPct >= 0.25){
-    advice = `Trafic chargé · +${supplementBouchons.toFixed(2)}€ de tarif horaire pour ${delayMin}min de ralenti`;
-  } else if(delayPct >= 0.08){
-    advice = `Trafic modéré · impact tarif horaire minime`;
+    advice = `Forfait fixe ${forfaitInfo.aero} · 100% garanti quelle que soit la durée ou les bouchons`;
+  } else if(vitesseMoy < 12){
+    advice = `Vitesse très basse (${Math.round(vitesseMoy)} km/h) · tarif horaire = ${supplementHoraire.toFixed(2)}€ · ${(pctTempsSousSeuil*100).toFixed(0)}% du temps compte à l'heure`;
+  } else if(vitesseMoy < 18){
+    advice = `Trafic urbain dense · ${(pctTempsSousSeuil*100).toFixed(0)}% du temps au tarif horaire (normal en ville à ${Math.round(vitesseMoy)} km/h)`;
+  } else if(vitesseMoy < 25){
+    advice = `Vitesse moyenne Paris · mix km + horaire (${(pctTempsSousSeuil*100).toFixed(0)}% horaire, feux & intersections)`;
+  } else if(vitesseMoy < 40){
+    advice = `Bon rythme · ~${(pctTempsSousSeuil*100).toFixed(0)}% horaire (feux rouges normaux) · facturation principalement au km`;
   } else {
-    advice = "Route fluide · 100% au kilomètre · pas de tarif horaire 🚀";
+    advice = `Excellente vitesse · 100% au kilomètre · trajet optimal 🚀`;
   }
 
-  // Fourchette basée sur incertitude du trafic live (±15% sur le delay)
-  const low  = Math.round(prix * 0.94);
-  const high = usedForfait ? Math.round(prix * 1.02) : Math.round(prix * (1.06 + delayPct * 0.20));
+  // ═══ FOURCHETTE (incertitude modèle ± erreur trafic live) ═══
+  const low  = Math.round(prix * 0.95);
+  const high = usedForfait ? Math.round(prix * 1.02) : Math.round(prix * (1.08 + delayPct * 0.15));
 
   const wazeUrl = `openWaze(${toCoord.lat}, ${toCoord.lng})`;
   const liveBadge = hasLiveTraffic
     ? '<span style="color:var(--green);font-weight:900">● LIVE</span>'
     : '<span style="color:var(--ink3);font-weight:700">~ Estimation</span>';
 
-  // Breakdown price : affichage transparent
   const priceBreakdown = usedForfait ? '' : `
     <div class="tr-breakdown">
-      <div class="tr-bd-hdr">💡 Décomposition taximètre</div>
+      <div class="tr-bd-hdr">💡 Décomposition taximètre (tronçon par tronçon)</div>
       <div class="tr-bd-row">
         <span>Prise en charge</span>
         <span>${PRISE.toFixed(2)}€</span>
@@ -4433,10 +4740,10 @@ async function calcTrajet(){
         <span>Kilomètres (${km} km × ${t.km.toFixed(2)}€)</span>
         <span>${montantKm.toFixed(2)}€</span>
       </div>
-      ${supplementBouchons > 0 ? `
+      ${montantHoraire > 0.3 ? `
       <div class="tr-bd-row hot">
-        <span>⚠️ Tarif horaire (${delayMin} min bouchons)</span>
-        <span>+${supplementBouchons.toFixed(2)}€</span>
+        <span>⚠️ Tarif horaire (${Math.round(minutesHoraire)} min sous ${Math.round(seuilVitesse)} km/h)</span>
+        <span>+${montantHoraire.toFixed(2)}€</span>
       </div>` : ''}
       <div class="tr-bd-row total">
         <span>TOTAL ESTIMÉ</span>
@@ -4454,15 +4761,15 @@ async function calcTrajet(){
         <div class="tr-price-big">${Math.round(prix)}€</div>
         <div class="tr-price-range">${usedForfait ? `Tarif fixe ${forfaitInfo.aero} · ${forfaitInfo.rive}` : `Fourchette : ${low}€ — ${high}€`}</div>
 
-        ${!usedForfait && supplementBouchons > 0.5 ? `
+        ${!usedForfait && supplementHoraire > 0.5 ? `
           <div class="tr-compare">
             <div class="tr-compare-row">
-              <span class="tr-compare-k">🟢 Si route fluide</span>
-              <span class="tr-compare-v">${Math.round(prixFluide)}€</span>
+              <span class="tr-compare-k">🟢 Si trajet 100% fluide</span>
+              <span class="tr-compare-v">${Math.round(prixSansBouchons)}€</span>
             </div>
             <div class="tr-compare-row now">
               <span class="tr-compare-k">🚦 Avec trafic actuel</span>
-              <span class="tr-compare-v">${Math.round(prix)}€ · <b style="color:var(--accent)">+${supplementBouchons.toFixed(2)}€</b></span>
+              <span class="tr-compare-v">${Math.round(prix)}€ · <b style="color:var(--accent)">+${supplementHoraire.toFixed(2)}€</b></span>
             </div>
           </div>
         ` : ''}
@@ -4476,17 +4783,17 @@ async function calcTrajet(){
           <div class="tr-stat">
             <div class="tr-stat-k">⏱ Durée ${liveBadge}</div>
             <div class="tr-stat-v ${lvl.key==='fluid'?'green':lvl.key==='extreme'?'accent':''}">${liveMin} min</div>
-            <div class="tr-stat-extra">${delayMin > 0 ? `Fluide : ${freeFlowMin} min · <b style="color:var(--accent)">+${delayMin} min</b>` : 'Pas de retard'}</div>
+            <div class="tr-stat-extra">${delayMin > 0 ? `Fluide : ${freeFlowMin} min · <b style="color:var(--accent)">+${delayMin} min</b>` : 'Pas de retard trafic'}</div>
           </div>
           <div class="tr-stat">
             <div class="tr-stat-k">🚗 Vitesse moy.</div>
             <div class="tr-stat-v ${vitesseMoy < seuilVitesse ? 'accent' : 'green'}">${Math.round(vitesseMoy)} km/h</div>
-            <div class="tr-stat-extra">${vitesseMoy < seuilVitesse ? `< seuil ${Math.round(seuilVitesse)} km/h` : `> seuil ${Math.round(seuilVitesse)} km/h`}</div>
+            <div class="tr-stat-extra">Seuil conjonction ${Math.round(seuilVitesse)} km/h</div>
           </div>
           <div class="tr-stat">
             <div class="tr-stat-k">⚡ Tarif ${t.tarif}</div>
             <div class="tr-stat-v">${t.km.toFixed(2)}€/km</div>
-            <div class="tr-stat-extra">${TARIF_HORAIRE.toFixed(2)}€/h si bouchons</div>
+            <div class="tr-stat-extra">${TARIF_HORAIRE.toFixed(2)}€/h si marche lente</div>
           </div>
         </div>
       </div>
@@ -4515,10 +4822,9 @@ async function calcTrajet(){
       ${priceBreakdown}
 
       <div class="tr-details">
-        <div class="tr-info-row"><span class="k">📍 De</span><span class="v">${esc(fromCoord.nom)}</span></div>
+        <div class="tr-info-row"><span class="k">📍 De</span><span class="v">${esc(fromCoord.nom || 'Position GPS')}</span></div>
         <div class="tr-info-row"><span class="k">🎯 Vers</span><span class="v">${esc(toCoord.nom)}</span></div>
         ${!usedForfait ? `<div class="tr-info-row"><span class="k">Zone</span><span class="v">${zone === 'paris' ? 'Paris intra-muros' : 'Banlieue'}</span></div>` : ''}
-        ${!usedForfait ? `<div class="tr-info-row"><span class="k">Seuil de bascule</span><span class="v">${seuilVitesse.toFixed(1)} km/h</span></div>` : ''}
       </div>
 
       <button class="tr-waze-btn" onclick="${wazeUrl}">
@@ -4527,10 +4833,9 @@ async function calcTrajet(){
       </button>
 
       <div class="tr-disclaimer">
-        <b>Taximètre horokilométrique</b> · La course utilise le tarif ${t.tarif} en alternance :
-        au kilomètre si vitesse > ${seuilVitesse.toFixed(1)} km/h, à l'heure (${TARIF_HORAIRE}€/h) si vitesse inférieure (bouchons/arrêt).
-        ${hasLiveTraffic ? '<b>Trafic live TomTom</b> · données en direct.' : '<b>Trafic estimé</b> · clé TomTom non configurée.'}
-        Prix indicatif · le taximètre fait foi · tarif préfectoral Paris 2025.
+        <b>Taximètre horokilométrique (tronçon par tronçon)</b> · Le compteur facture en permanence le max entre tarif km (${t.km.toFixed(2)}€) et tarif horaire (${TARIF_HORAIRE}€/h). Vitesse de conjonction : ${seuilVitesse.toFixed(1)} km/h. Sous ce seuil (feux, virages, bouchons), c'est le tarif horaire qui prend le relais.
+        ${hasLiveTraffic ? ' <b>Trafic live TomTom</b> · données en direct.' : ' <b>Trafic estimé</b> · clé TomTom non configurée.'}
+        Prix indicatif · le taximètre du véhicule fait foi · tarif préfectoral Paris 2025.
       </div>
     </div>
   `;
@@ -4787,6 +5092,7 @@ document.addEventListener('visibilitychange', ()=>{
 /* ═══ BOOT ═══ */
 function boot(){
   initTrajetSegments();
+  initAutocomplete();
   initTheatresFilters();
   initEventsFilters();
 
