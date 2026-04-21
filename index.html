@@ -4233,7 +4233,7 @@ async function fetchOsrmRoute(fromCoord, toCoord){
     return ROUTE_CACHE[key].data;
   }
   try{
-    const url = `https://taxipulse-proxi.boughida-sofiane.workers.dev/route?from=${fromCoord.lat},${fromCoord.lng}&to=${toCoord.lat},${toCoord.lng}`;
+    const url = `https://taxipulse-proxy.boughida-sofiane.workers.dev/route?from=${fromCoord.lat},${fromCoord.lng}&to=${toCoord.lat},${toCoord.lng}`;
     const resp = await fetch(url);
     const data = await resp.json();
     if(data.error) throw new Error(data.error);
