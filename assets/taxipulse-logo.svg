@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="tp-logo-title">
+  <title id="tp-logo-title">TaxiPulse</title>
+  <defs>
+    <linearGradient id="tpBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF7A3D"></stop>
+      <stop offset=".55" stop-color="#E85D1A"></stop>
+      <stop offset="1" stop-color="#C44A0F"></stop>
+    </linearGradient>
+    <linearGradient id="tpShine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".28"></stop>
+      <stop offset=".45" stop-color="#FFFFFF" stop-opacity="0"></stop>
+    </linearGradient>
+    <radialGradient id="tpGlow" cx=".5" cy=".38" r=".65">
+      <stop offset="0" stop-color="#FFE3C9" stop-opacity=".55"></stop>
+      <stop offset="1" stop-color="#FFE3C9" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+
+  
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#tpBg)"></rect>
+  
+  <rect x="0" y="0" width="512" height="256" rx="112" ry="112" fill="url(#tpShine)"></rect>
+  
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#tpGlow)"></rect>
+
+  
+  <g transform="translate(256 320)" fill="none" stroke="#FFFFFF" stroke-linecap="round" opacity=".32">
+    <circle cx="0" cy="0" r="88" stroke-width="6"></circle>
+    <circle cx="0" cy="0" r="140" stroke-width="4" opacity=".7"></circle>
+    <circle cx="0" cy="0" r="188" stroke-width="3" opacity=".45"></circle>
+  </g>
+
+  
+  <g transform="translate(256 198)">
+    
+    <rect x="-112" y="-52" width="224" height="104" rx="26" fill="#1A0F06" opacity=".22"></rect>
+    
+    <rect x="-108" y="-48" width="216" height="96" rx="22" fill="#FFFBEF" stroke="#1A0F06" stroke-width="6"></rect>
+    
+    <rect x="-88" y="-40" width="176" height="14" rx="7" fill="#FFD47A"></rect>
+    
+    <g transform="translate(0 14)">
+      <path d="M -82 0 L -52 0 L -38 -18 L -20 22 L -2 -22 L 18 14 L 34 -10 L 52 0 L 82 0" fill="none" stroke="#E85D1A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path>
+    </g>
+  </g>
+
+  
+  <g transform="translate(256 360)">
+    
+    <path d="M -62 0&#xA;             Q -58 -8 -42 -10&#xA;             L 62 -10&#xA;             Q 68 -4 60 6&#xA;             L 26 6&#xA;             L 6 72&#xA;             Q 2 80 -10 80&#xA;             Q -20 80 -16 68&#xA;             L 4 6&#xA;             L -46 6&#xA;             Q -60 6 -62 0 Z" fill="#FFFBEF"></path>
+    
+    <path d="M -4 78 Q 4 82 12 78" fill="none" stroke="#FFFBEF" stroke-width="4" stroke-linecap="round"></path>
+  </g>
+
+  
+  <circle cx="356" cy="150" r="16" fill="#FFE3C9"></circle>
+  <circle cx="356" cy="150" r="9" fill="#FF7A3D"></circle>
+  <circle cx="356" cy="150" r="4" fill="#FFFBEF"></circle>
+</svg>

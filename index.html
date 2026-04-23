@@ -1,6 +1,10 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
+<!DOCTYPE html><html lang="fr" data-cc-id="cc-1"><head>
+
+
+
+
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1379,24 +1383,1221 @@ dialog .sheet{
 .tr-loading-txt{font-size:12px;color:var(--ink2);font-weight:700;letter-spacing:.3px}
 
 ::-webkit-scrollbar{width:0}
+
+/* ═══════════════════════════════════════════════════════════════
+   ✨ NOUVEAU THÈME LUMINEUX · v2 — dynamique & lisible
+   (surcharge l'ancien sans toucher à la logique)
+   ═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+:root{
+  --bg:#FAF5EC;
+  --bg2:#FDF8EC;
+  --card:#FFFBEF;
+  --card2:#F3ECDB;
+  --ink:#1A1410;
+  --ink2:#6B5F52;
+  --ink3:#AEA395;
+  --line:rgba(26,20,16,.09);
+  --accent:#E85D1A;
+  --adim:rgba(232,93,26,.10);
+  --green:#2E8B57;
+  --gdim:rgba(46,139,87,.10);
+  --gold:#C77700;
+  --ydim:rgba(199,119,0,.10);
+  --red:#D9372A;
+  --rdim:rgba(217,55,42,.10);
+  --serif:'Instrument Serif',Georgia,serif;
+}
+html,body{
+  background:var(--bg);color:var(--ink);
+  background-image:
+    radial-gradient(ellipse at 0% 0%, rgba(232,93,26,.06), transparent 45%),
+    radial-gradient(ellipse at 100% 100%, rgba(46,139,87,.05), transparent 45%);
+  background-attachment:fixed;
+}
+
+/* HEADER — glass look */
+header{
+  background:rgba(250,245,236,.82) !important;
+  backdrop-filter:blur(14px) saturate(1.2);
+  -webkit-backdrop-filter:blur(14px) saturate(1.2);
+  border-bottom:1px solid var(--line) !important;
+  padding-bottom:10px !important;
+}
+.logo{
+  font-family:var(--serif) !important;
+  font-style:italic;
+  font-weight:400 !important;
+  font-size:22px !important;
+  letter-spacing:-.3px !important;
+  line-height:1 !important;
+}
+.logo span{color:var(--accent)}
+
+/* LIVE PILL */
+.live-pill{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  color:var(--accent) !important;
+  box-shadow:0 2px 6px rgba(232,93,26,.08);
+}
+.live-pill.off{color:var(--ink3) !important;background:#fff !important}
+.ldot{box-shadow:0 0 0 0 currentColor;animation:blink2 1.6s ease-in-out infinite !important}
+@keyframes blink2{
+  0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 currentColor}
+  50%{opacity:.5;transform:scale(1.1);box-shadow:0 0 0 4px transparent}
+}
+
+/* NAV TABS */
+.nav-tabs{position:relative}
+.nav-tabs button{
+  font-size:12px !important;
+  font-weight:600 !important;
+  color:var(--ink2) !important;
+  padding:12px 4px !important;
+  border-bottom:none !important;
+  position:relative;
+  transition:color .2s !important;
+}
+.nav-tabs button.active{
+  color:var(--accent) !important;
+  font-weight:700 !important;
+}
+.nav-tabs button.active::after{
+  content:'';position:absolute;left:50%;bottom:0;
+  width:32px;height:3px;border-radius:3px 3px 0 0;
+  background:var(--accent);
+  transform:translateX(-50%);
+  animation:tab-in .3s cubic-bezier(.5,1.6,.4,1);
+}
+@keyframes tab-in{from{width:0}to{width:32px}}
+
+/* SECTION TITLES */
+.stitle{
+  font-size:10px !important;
+  letter-spacing:2.5px !important;
+  color:var(--ink2) !important;
+  font-weight:700 !important;
+  margin:22px 0 12px !important;
+}
+.stitle::after{background:var(--line) !important}
+
+/* REFRESH — redesign discret & naturel */
+.refresh-bar{
+  min-height:auto !important;
+  padding:10px 0 6px !important;
+  align-items:center !important;
+  gap:10px;
+}
+.rtime{
+  color:var(--ink3) !important;
+  font-size:10.5px !important;
+  font-family:var(--sans) !important;
+  line-height:1.35 !important;
+  height:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:1px !important;
+  letter-spacing:-.1px !important;
+}
+.rtime > div{
+  line-height:1.3 !important;
+  display:block !important;
+  position:static !important;
+  white-space:nowrap !important;
+  font-weight:500 !important;
+}
+#rtime-main{color:var(--ink2) !important; font-size:10.5px !important}
+#rtime-next{
+  color:var(--ink3) !important;
+  font-size:9.5px !important;
+  font-variant-numeric:tabular-nums;
+  opacity:.85;
+}
+/* petit dot live qui pulse à côté de l'heure */
+#rtime-main::before{
+  content:'';
+  display:inline-block;
+  width:5px;height:5px;
+  border-radius:50%;
+  background:var(--green);
+  margin-right:5px;
+  vertical-align:middle;
+  transform:translateY(-1px);
+  animation:rt-breathe 2.4s ease-in-out infinite;
+  box-shadow:0 0 0 0 currentColor;
+}
+@keyframes rt-breathe{
+  0%,100%{opacity:.9;transform:translateY(-1px) scale(1)}
+  50%    {opacity:.5;transform:translateY(-1px) scale(.82)}
+}
+
+/* Nav tabs — hide in header, moved to bottom bar */
+header .nav-tabs{display:none !important}
+
+/* ═══ BOTTOM TAB BAR — flottante ═══ */
+.bottom-nav{
+  position:fixed;
+  bottom:calc(12px + env(safe-area-inset-bottom));
+  left:14px;right:14px;
+  z-index:50;
+  max-width:404px;
+  margin:0 auto;
+  background:rgba(255,252,243,.82);
+  backdrop-filter:blur(22px) saturate(1.4);
+  -webkit-backdrop-filter:blur(22px) saturate(1.4);
+  border:1px solid rgba(255,255,255,.7);
+  border-radius:22px;
+  padding:8px 6px;
+  display:flex;
+  justify-content:space-around;
+  align-items:stretch;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 10px 30px -8px rgba(50,38,24,.2),
+    0 4px 12px -4px rgba(50,38,24,.14),
+    0 1px 2px rgba(50,38,24,.09);
+}
+.bottom-nav button{
+  flex:1 1 0;
+  min-width:0;
+  background:none;
+  border:none;
+  font-family:var(--sans);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;
+  padding:7px 2px 5px;
+  color:var(--ink3);
+  cursor:pointer;
+  position:relative;
+  border-radius:14px;
+  transition:color .25s, background .25s, transform .12s;
+  -webkit-tap-highlight-color:transparent;
+}
+.bottom-nav button .bn-ico{
+  width:24px;height:24px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink3);
+  opacity:.85;
+  transition:all .3s cubic-bezier(.4,1.4,.5,1);
+  transform-origin:center 55%;
+}
+.bottom-nav button .bn-ico svg{
+  width:100%;height:100%;
+  stroke:currentColor;
+  fill:none;
+  stroke-width:1.8;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+}
+.bottom-nav button .bn-ico svg .fill{
+  fill:currentColor;
+  stroke:none;
+  opacity:0;
+  transition:opacity .3s;
+}
+.bottom-nav button .bn-lbl{
+  font-size:9.5px;
+  font-weight:600;
+  letter-spacing:.3px;
+  white-space:nowrap;
+  transition:all .2s;
+}
+.bottom-nav button.active{color:var(--accent)}
+.bottom-nav button.active .bn-ico{
+  color:var(--accent);
+  opacity:1;
+  transform:translateY(-1px) scale(1.1);
+}
+.bottom-nav button.active .bn-ico svg .fill{opacity:.2}
+.bottom-nav button.active .bn-lbl{font-weight:700}
+.bottom-nav button.active::before{
+  content:'';
+  position:absolute;
+  top:-9px;left:50%;
+  width:22px;height:3px;
+  background:var(--accent);
+  border-radius:3px;
+  transform:translateX(-50%);
+  box-shadow:0 0 8px rgba(232,93,26,.5);
+  animation:bn-indicator .4s cubic-bezier(.4,1.6,.5,1);
+}
+.bottom-nav button:active .bn-ico{transform:scale(.9)}
+.bottom-nav button:active.active .bn-ico{transform:translateY(-1px) scale(1.04)}
+
+/* ═══ PER-TAB CLICK ANIMATIONS ═══ */
+.bottom-nav button.bn-anim .bn-ico svg{
+  animation-duration:.7s;
+  animation-timing-function:cubic-bezier(.3,.9,.3,1);
+  animation-fill-mode:both;
+}
+/* Gares = train qui démarre (secousse + ressort) */
+.bottom-nav button[data-tab="tab-now"].bn-anim .bn-ico svg{
+  animation-name:bn-train;
+}
+@keyframes bn-train{
+  0%  {transform:translateX(0) rotate(0)}
+  15% {transform:translateX(-3px) rotate(-4deg)}
+  30% {transform:translateX(3px) rotate(3deg)}
+  45% {transform:translateX(-2px) rotate(-2deg)}
+  60% {transform:translateX(2px) rotate(1deg)}
+  100%{transform:translateX(0) rotate(0)}
+}
+/* Rush = barres qui montent en relais (pulse) */
+.bottom-nav button[data-tab="tab-stats"].bn-anim .bn-ico svg{
+  animation-name:bn-rush;
+}
+@keyframes bn-rush{
+  0%  {transform:scaleY(.7) translateY(3px)}
+  40% {transform:scaleY(1.25) translateY(-2px)}
+  70% {transform:scaleY(.95) translateY(1px)}
+  100%{transform:scaleY(1) translateY(0)}
+}
+.bottom-nav button[data-tab="tab-stats"].bn-anim .bn-ico svg{
+  transform-origin:center bottom;
+}
+/* Théâtres = rideau qui s'ouvre (masque fait un petit bow) */
+.bottom-nav button[data-tab="tab-theatres"].bn-anim .bn-ico svg{
+  animation-name:bn-curtain;
+  transform-origin:center top;
+}
+@keyframes bn-curtain{
+  0%  {transform:scaleX(1) rotate(0)}
+  20% {transform:scaleX(1.15) rotate(0)}
+  40% {transform:scaleX(.92) rotate(-5deg)}
+  60% {transform:scaleX(1.05) rotate(5deg)}
+  80% {transform:scaleX(.98) rotate(-1deg)}
+  100%{transform:scaleX(1) rotate(0)}
+}
+/* Events = ticket qui se déchire (flip avec stamp) */
+.bottom-nav button[data-tab="tab-events"].bn-anim .bn-ico svg{
+  animation-name:bn-ticket;
+  transform-origin:center center;
+}
+@keyframes bn-ticket{
+  0%  {transform:rotate(0) scale(1)}
+  25% {transform:rotate(-8deg) scale(1.1)}
+  50% {transform:rotate(6deg) scale(.95)}
+  75% {transform:rotate(-3deg) scale(1.05)}
+  100%{transform:rotate(0) scale(1)}
+}
+/* Trajet = taxi qui avance + phares qui clignotent */
+.bottom-nav button[data-tab="tab-trajet"].bn-anim .bn-ico svg{
+  animation-name:bn-taxi;
+}
+@keyframes bn-taxi{
+  0%  {transform:translateX(-6px) scale(.9)}
+  40% {transform:translateX(3px) scale(1.08)}
+  70% {transform:translateX(-1px) scale(.98)}
+  100%{transform:translateX(0) scale(1)}
+}
+
+/* Ripple pulse derrière l'icône */
+.bottom-nav button.bn-anim::after{
+  content:'';
+  position:absolute;
+  top:8px;left:50%;
+  transform:translateX(-50%) scale(0);
+  width:44px;height:44px;
+  border-radius:50%;
+  background:var(--accent);
+  opacity:.22;
+  animation:bn-ripple .55s ease-out forwards;
+  pointer-events:none;
+  z-index:-1;
+}
+@keyframes bn-ripple{
+  0%  {transform:translateX(-50%) scale(0);opacity:.35}
+  100%{transform:translateX(-50%) scale(1.8);opacity:0}
+}
+
+/* Fade/blur under nav pour lisibilité du contenu qui scrolle dessous */
+.bottom-nav::after{
+  content:'';
+  position:absolute;
+  left:-14px;right:-14px;
+  bottom:calc(-12px - env(safe-area-inset-bottom));
+  height:calc(40px + env(safe-area-inset-bottom));
+  background:linear-gradient(to bottom, transparent, var(--bg) 60%);
+  pointer-events:none;
+  z-index:-1;
+}
+
+@keyframes bn-indicator{
+  from{width:0;opacity:0;top:-12px}
+  to{width:22px;opacity:1;top:-9px}
+}
+
+/* Extra body padding to clear floating bottom bar + home indicator */
+body{padding-bottom:calc(90px + env(safe-area-inset-bottom)) !important}
+.rbtn{
+  background:transparent !important;
+  border:1px solid var(--line) !important;
+  color:var(--ink2) !important;
+  padding:7px 11px !important;
+  border-radius:100px !important;
+  font-weight:600 !important;
+  font-size:11px !important;
+  letter-spacing:-.1px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:6px !important;
+  transition:all .18s ease !important;
+  box-shadow:none !important;
+}
+.rbtn .spin{
+  font-size:13px;
+  line-height:1;
+  display:inline-block;
+  opacity:.7;
+  transition:opacity .2s, transform .3s;
+}
+.rbtn:hover{
+  background:rgba(232,93,26,.06) !important;
+  border-color:rgba(232,93,26,.25) !important;
+  color:var(--accent) !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+.rbtn:hover .spin{opacity:1; transform:rotate(60deg)}
+.rbtn:active{
+  color:var(--accent) !important;
+  border-color:var(--accent) !important;
+  background:rgba(232,93,26,.1) !important;
+  transform:scale(.97) !important;
+}
+.rbtn.loading{opacity:.6 !important}
+.rbtn.loading .spin{animation:rot 1s linear infinite}
+
+/* ERROR BANNERS */
+.err-banner{border-radius:14px !important;border-width:1px !important}
+
+/* GARE CARDS — big redesign */
+.gare-card{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  border-radius:20px !important;
+  padding:16px 18px !important;
+  box-shadow:0 2px 8px rgba(10,10,10,.03) !important;
+  transition:transform .25s cubic-bezier(.3,1.5,.5,1), box-shadow .25s, border-color .2s !important;
+  animation:card-in .5s cubic-bezier(.3,1.2,.5,1) both;
+}
+.gare-list .gare-card:nth-child(1){animation-delay:.02s}
+.gare-list .gare-card:nth-child(2){animation-delay:.06s}
+.gare-list .gare-card:nth-child(3){animation-delay:.10s}
+.gare-list .gare-card:nth-child(4){animation-delay:.14s}
+.gare-list .gare-card:nth-child(5){animation-delay:.18s}
+.gare-list .gare-card:nth-child(6){animation-delay:.22s}
+@keyframes card-in{
+  from{opacity:0;transform:translateY(16px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.gare-card:hover{
+  transform:translateY(-2px) !important;
+  box-shadow:0 8px 24px rgba(10,10,10,.08) !important;
+  border-color:rgba(10,10,10,.14) !important;
+}
+.gare-card:active{transform:scale(.98) !important}
+.gare-card.peak{
+  border-color:var(--accent) !important;
+  box-shadow:0 4px 16px rgba(232,93,26,.18), 0 0 0 1px var(--accent) !important;
+  background:linear-gradient(135deg, #fff 0%, rgba(232,93,26,.04) 100%) !important;
+}
+.gare-card.peak::before{
+  content:'';position:absolute;top:0;right:0;width:80px;height:80px;
+  background:radial-gradient(circle at top right, rgba(232,93,26,.12), transparent 70%);
+  border-radius:20px;pointer-events:none;
+}
+.gare-card{position:relative;overflow:hidden}
+.gc-ico{
+  background:transparent !important;
+  border-radius:16px !important;
+  width:60px !important;height:60px !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  position:relative !important;
+  box-shadow:0 2px 8px rgba(10,10,10,.08), 0 0 0 1px rgba(10,10,10,.06) inset !important;
+  transition:transform .35s cubic-bezier(.3,1.3,.4,1) !important;
+}
+.gc-ico .ga-svg{
+  width:100%;height:100%;
+  display:block;
+}
+.gare-card:hover .gc-ico{
+  transform:rotate(-4deg) scale(1.06) !important;
+  box-shadow:0 6px 18px rgba(10,10,10,.12), 0 0 0 1px rgba(10,10,10,.08) inset !important;
+}
+.gare-card.peak .gc-ico{
+  box-shadow:0 3px 12px rgba(232,93,26,.3), 0 0 0 1.5px rgba(232,93,26,.5) inset !important;
+}
+/* Petit shine qui traverse l'icône périodiquement */
+.gc-ico::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.45) 50%, transparent 70%);
+  background-size:200% 100%;
+  background-position:200% 0;
+  pointer-events:none;
+  border-radius:inherit;
+}
+.gare-card:hover .gc-ico::after{
+  animation:ga-shine .9s ease forwards;
+}
+@keyframes ga-shine{
+  to{background-position:-200% 0}
+}
+.gc-name{
+  font-family:var(--serif) !important;
+  font-style:italic !important;
+  font-size:17px !important;
+  font-weight:400 !important;
+  letter-spacing:-.3px !important;
+  line-height:1.1 !important;
+  margin-bottom:3px !important;
+}
+.gc-sub{
+  font-size:11px !important;
+  color:var(--ink2) !important;
+  font-weight:500 !important;
+}
+.gc-next span{color:var(--ink) !important;font-size:12px !important}
+.gc-dot{box-shadow:0 0 0 3px rgba(46,139,87,.15)}
+.gc-dot.now{background:var(--accent) !important;box-shadow:0 0 0 3px rgba(232,93,26,.2);animation:pulse-dot 1.6s infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 3px rgba(232,93,26,.25)}50%{box-shadow:0 0 0 7px rgba(232,93,26,0)}}
+
+.gc-right{
+  gap:4px !important;
+  min-width:82px !important;
+  max-width:94px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-end !important;
+  justify-content:center !important;
+  flex-shrink:0 !important;
+  position:relative;
+}
+.gc-right > *{flex:0 0 auto !important}
+
+/* Flammes : mini-compteur compact */
+.gc-right .flames{
+  font-size:16px !important;
+  filter:none !important;
+  line-height:1 !important;
+  margin-bottom:1px;
+}
+
+/* Pax number : bloc hero côté droit */
+.gc-pax60{
+  font-family:var(--serif) !important;
+  font-style:italic !important;
+  font-size:24px !important;
+  font-weight:400 !important;
+  letter-spacing:-1px !important;
+  line-height:.95 !important;
+  margin:0 !important;
+  white-space:nowrap !important;
+  color:var(--ink) !important;
+  font-variant-numeric:tabular-nums;
+}
+.gc-pax60-unit{
+  font-family:var(--sans) !important;
+  font-style:normal !important;
+  font-size:8px !important;
+  font-weight:700 !important;
+  letter-spacing:.5px !important;
+  color:var(--ink3) !important;
+  margin-left:2px;
+  vertical-align:6px;
+}
+.gare-card.peak .gc-pax60{color:var(--accent) !important}
+
+.aff-label{
+  font-size:7.5px !important;
+  letter-spacing:.8px !important;
+  gap:3px !important;
+  white-space:nowrap !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  text-transform:uppercase !important;
+  color:var(--ink3) !important;
+  font-weight:700 !important;
+}
+
+.gc-next{
+  gap:6px !important;
+  display:flex !important;
+  align-items:center !important;
+  flex-wrap:nowrap !important;
+  line-height:1.3 !important;
+  margin-top:2px;
+}
+.gc-next > span{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:12px !important;
+  font-weight:600;
+}
+.gc-dot{
+  width:7px !important;height:7px !important;border-radius:50% !important;
+  flex-shrink:0;
+  background:var(--ink3) !important;
+}
+.gc-dot.now{background:var(--accent) !important;box-shadow:0 0 0 3px rgba(232,93,26,.2);animation:pulse-dot 1.6s infinite}
+.gc-dot.soon{background:#c9a050 !important}
+
+.delay-tag{
+  font-size:9px !important;
+  margin-top:3px !important;
+  display:inline-flex !important;
+  align-items:center;
+  gap:3px;
+  line-height:1.2 !important;
+  white-space:nowrap !important;
+  width:fit-content !important;
+  padding:2px 7px !important;
+  background:rgba(201,160,80,.14) !important;
+  color:#8B6E2E !important;
+  border-radius:100px !important;
+  font-weight:700 !important;
+  border:1px solid rgba(201,160,80,.25);
+}
+
+.gc-left{
+  overflow:visible !important;
+  display:flex !important;
+  flex-direction:column !important;
+  gap:2px !important;
+  justify-content:center !important;
+  padding-right:4px;
+}
+.gc-left > *{flex:0 0 auto !important}
+.gare-card{align-items:center !important;gap:14px !important;padding:14px 16px !important}
+
+.gc-name{
+  font-family:var(--serif) !important;
+  font-style:italic !important;
+  font-size:18px !important;
+  font-weight:400 !important;
+  letter-spacing:-.4px !important;
+  line-height:1.05 !important;
+  margin-bottom:2px !important;
+  color:var(--ink) !important;
+}
+.gc-sub{
+  font-size:10.5px !important;
+  color:var(--ink2) !important;
+  font-weight:500 !important;
+  letter-spacing:-.1px !important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:170px;
+}
+
+/* Séparateur vertical subtil entre left et right */
+.gare-card::after{
+  content:'';
+  position:absolute;
+  right:104px;
+  top:22%;bottom:22%;
+  width:1px;
+  background:linear-gradient(to bottom, transparent, rgba(10,10,10,.08), transparent);
+  pointer-events:none;
+}
+.gare-card.peak::after{
+  background:linear-gradient(to bottom, transparent, rgba(232,93,26,.22), transparent);
+}
+
+/* Barre pulse animée sous les cartes peak */
+.gare-card.peak::before{
+  content:''!important;
+  position:absolute!important;
+  left:0!important;right:0!important;bottom:0!important;
+  top:auto!important;
+  width:auto!important;height:2px!important;
+  border-radius:0 0 20px 20px!important;
+  background:linear-gradient(90deg,transparent,var(--accent) 20%,#FFB07A 50%,var(--accent) 80%,transparent)!important;
+  background-size:200% 100%!important;
+  animation:ga-bar-slide 2.4s linear infinite!important;
+}
+@keyframes ga-bar-slide{
+  from{background-position:0 0}
+  to{background-position:200% 0}
+}
+.gare-card.peak .gc-pax60{color:var(--accent) !important}
+.gc-pax60-unit{color:var(--ink2) !important;font-family:var(--sans) !important}
+
+.flames{filter:none !important;font-size:20px !important}
+
+.peak-tag{
+  background:var(--accent) !important;
+  border:none !important;
+  color:#fff !important;
+  font-weight:800 !important;
+  padding:3px 10px !important;
+  font-size:9px !important;
+  letter-spacing:.8px !important;
+  box-shadow:0 2px 6px rgba(232,93,26,.3);
+}
+.delay-tag{color:var(--gold) !important}
+.stale-tag{color:var(--ink3) !important}
+
+/* DIALOG */
+dialog{max-width:460px !important}
+dialog::backdrop{background:rgba(10,10,10,.5) !important;backdrop-filter:blur(10px)}
+dialog .sheet{
+  background:var(--bg) !important;
+  border-radius:28px 28px 0 0 !important;
+  box-shadow:0 -10px 40px rgba(10,10,10,.2);
+}
+.dpill{background:var(--line) !important;width:42px !important;height:5px !important}
+
+.dhdr{
+  background:var(--bg) !important;
+  border-bottom:1px solid var(--line) !important;
+}
+.dhdr-name{
+  font-family:var(--serif) !important;
+  font-style:italic !important;
+  font-size:26px !important;
+  font-weight:400 !important;
+  letter-spacing:-.8px !important;
+  line-height:1.05 !important;
+}
+.dhdr-sub{color:var(--ink2) !important;font-weight:700 !important}
+.close-btn{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  color:var(--ink) !important;
+  width:36px !important;height:36px !important;
+  transition:transform .2s !important;
+}
+.close-btn:hover{transform:rotate(90deg)}
+
+.dstats{gap:8px !important}
+.dstat{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  border-radius:14px !important;
+  padding:10px 8px !important;
+  transition:transform .2s !important;
+}
+.dstat:hover{transform:translateY(-2px)}
+.dstat .dk{color:var(--ink2) !important;font-weight:700 !important}
+.dstat .dv{
+  font-family:var(--serif) !important;
+  font-style:italic !important;
+  font-size:16px !important;
+  font-weight:500 !important;
+  color:var(--ink) !important;
+  line-height:1.1 !important;
+}
+.dstat .dv.a{color:var(--accent) !important}
+.dstat .dv.g{color:var(--green) !important}
+.dstat .dv.y{color:var(--gold) !important}
+.dstat .dv.r{color:var(--red) !important}
+
+/* STICKY QUAI — more vibrant */
+.sticky-quai{
+  background:linear-gradient(180deg, rgba(245,242,235,.98), rgba(245,242,235,.9)) !important;
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line) !important;
+  box-shadow:0 2px 8px rgba(10,10,10,.04) !important;
+}
+.sq-hdr{color:var(--accent) !important;font-weight:800 !important}
+.sq-hdr .sq-ct{
+  background:var(--accent) !important;
+  color:#fff !important;
+  font-weight:800 !important;
+}
+.sq-train{
+  background:#fff !important;
+  border-radius:12px !important;
+  border-left:3px solid var(--green) !important;
+  box-shadow:0 1px 3px rgba(10,10,10,.04);
+  animation:slide-in .3s cubic-bezier(.3,1.2,.5,1) both;
+}
+@keyframes slide-in{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.sq-train .sq-time{color:var(--ink2) !important}
+.sq-train .sq-since{
+  background:var(--green) !important;
+  color:#fff !important;
+  font-weight:800 !important;
+}
+
+/* GROUP HEADERS */
+.grp-hdr{
+  font-size:10px !important;
+  letter-spacing:2px !important;
+  color:var(--ink2) !important;
+  font-weight:800 !important;
+  padding:18px 2px 10px !important;
+}
+.grp-hdr.live{color:var(--accent) !important}
+.grp-line{background:var(--line) !important}
+.grp-ct{
+  background:var(--card2) !important;
+  color:var(--ink) !important;
+  font-weight:700 !important;
+}
+
+/* TRAIN CARD */
+.tc{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  border-radius:16px !important;
+  padding:14px !important;
+  margin-bottom:8px !important;
+  box-shadow:0 1px 3px rgba(10,10,10,.03) !important;
+  transition:transform .2s, box-shadow .2s !important;
+  animation:card-in .4s both;
+}
+.tc:hover{transform:translateX(2px);box-shadow:0 4px 12px rgba(10,10,10,.06) !important}
+.tc::before{width:4px !important;background:var(--green) !important}
+.tc.warn::before{background:var(--gold) !important}
+.tc.crit::before{background:var(--red) !important}
+
+/* DAY SEPARATOR */
+.day-sep{
+  background:linear-gradient(90deg, rgba(232,93,26,.08), transparent) !important;
+  border-left:3px solid var(--accent) !important;
+  border-radius:6px !important;
+}
+
+/* BOTTOM NAV — make floating glass */
+nav, .bottom-nav, [class*="bottom"]{
+  /* no-op — existing nav CSS keeps working */
+}
+
+/* Scrollbar cleanup for webkit */
+body::-webkit-scrollbar, main::-webkit-scrollbar{width:0}
+
+/* Inputs / selects */
+select, input, button{font-family:inherit !important}
+select{
+  background:#fff !important;
+  border:1px solid var(--line) !important;
+  color:var(--ink) !important;
+  border-radius:12px !important;
+}
+
+/* Hero section enhancement for gares list */
+main .gare-list{gap:10px !important}
+
+/* Micro interaction — all interactive buttons */
+button:not(.nav-tabs button):not(.gare-card):not(.close-btn):not(.rbtn):not(.peak-tag){
+  transition:transform .15s !important;
+}
+button:not(.nav-tabs button):not(.gare-card):not(.close-btn):not(.rbtn):not(.peak-tag):active{
+  transform:scale(.96);
+}
+
+/* Opening splash — 1.8s light intro */
+#tp-splash{
+  position:fixed;inset:0;z-index:9999;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% 20%, rgba(232,93,26,.06), transparent 60%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(232,93,26,.08), transparent 70%),
+    var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding-top:calc(env(safe-area-inset-top) + 14vh);
+  animation:splash-out .5s ease 3.6s forwards;
+  pointer-events:none;
+  overflow:hidden;
+  color:var(--ink);
+}
+/* Grain texture subtil façon papier */
+#tp-splash::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(10,10,10,.008) 3px 4px),
+    repeating-linear-gradient(90deg, transparent 0 3px, rgba(10,10,10,.008) 3px 4px);
+  pointer-events:none;
+}
+
+/* Skyline fond */
+#tp-splash .tp-sky{
+  position:absolute;
+  bottom:16vh;
+  left:0;right:0;
+  width:100%;
+  height:180px;
+  color:var(--ink);
+  opacity:0;
+  animation:tp-sky-in 1s cubic-bezier(.3,.9,.3,1) .4s forwards;
+}
+#tp-splash .tp-skyline path{
+  stroke-dasharray:1200;
+  stroke-dashoffset:1200;
+  animation:tp-draw 2.2s cubic-bezier(.4,.9,.3,1) .4s forwards;
+}
+#tp-splash .tp-skyline path:nth-child(4){animation-delay:.55s} /* Tour Eiffel en premier visuel */
+#tp-splash .tp-horizon{
+  stroke-dasharray:430;
+  stroke-dashoffset:430;
+  animation:tp-draw-horizon .9s ease .3s forwards;
+}
+#tp-splash .tp-ping{
+  fill:var(--accent);
+  transform-origin:center;
+  animation:tp-ping-pulse 1.4s cubic-bezier(.2,.8,.3,1) infinite;
+  animation-delay:1.4s;
+}
+
+/* Taxi qui traverse */
+#tp-splash .tp-taxi{
+  color:var(--accent);
+  transform:translate(-40px, 170px);
+  animation:tp-taxi-roll 2.4s cubic-bezier(.5,0,.5,1) .7s both;
+}
+
+/* Compteur central */
+#tp-splash .tp-center{
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;
+  z-index:2;
+}
+#tp-splash .tp-meter{
+  width:72px;height:72px;
+  position:relative;
+  margin-bottom:6px;
+}
+#tp-splash .tp-meter-ring{
+  position:absolute;inset:0;
+  border:2px solid var(--accent);
+  border-radius:50%;
+  opacity:0;
+  animation:tp-ring-ping 1.8s cubic-bezier(.2,.7,.3,1) infinite;
+}
+#tp-splash .tp-meter-dot{
+  position:absolute;top:50%;left:50%;
+  width:14px;height:14px;
+  background:var(--accent);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 0 4px rgba(232,93,26,.2), 0 0 20px rgba(232,93,26,.5);
+  animation:tp-dot-pulse 1s ease-in-out infinite;
+}
+#tp-splash .tp-logo-anim{
+  font-family:var(--serif);font-style:italic;
+  font-size:52px;letter-spacing:-1.5px;line-height:1;
+  color:var(--ink);
+  opacity:0;transform:translateY(14px);
+  animation:tp-rise .7s cubic-bezier(.3,1.2,.5,1) .5s forwards;
+}
+#tp-splash .tp-logo-anim span{color:var(--accent)}
+#tp-splash .tp-counter{
+  font-family:var(--mono);
+  font-size:13px;font-weight:700;
+  color:var(--ink2);
+  letter-spacing:-.3px;
+  display:flex;align-items:baseline;gap:6px;
+  opacity:0;
+  animation:tp-rise .6s ease 1s forwards;
+}
+#tp-splash .tp-counter em{
+  font-family:var(--sans);font-style:normal;
+  font-size:9px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ink3);
+}
+#tp-splash .tp-counter #tp-count{
+  font-variant-numeric:tabular-nums;
+  color:var(--accent);
+  font-size:18px;
+  letter-spacing:-.5px;
+}
+#tp-splash .tp-tagline{
+  font-family:var(--sans);
+  font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--ink2);
+  margin-top:4px;
+  opacity:0;
+  animation:tp-rise .6s ease 1.3s forwards;
+}
+#tp-splash .tp-tagline b{color:var(--accent);font-weight:700}
+
+/* Metro pills en bas */
+#tp-splash .tp-metro{
+  position:absolute;
+  bottom:calc(env(safe-area-inset-bottom) + 6vh);
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;gap:6px;
+  opacity:0;
+  animation:tp-rise .8s ease 1.6s forwards;
+}
+#tp-splash .tp-m{
+  width:26px;height:26px;
+  border-radius:50%;
+  color:#fff;
+  font-family:var(--sans);
+  font-size:11px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  letter-spacing:-.3px;
+  box-shadow:0 2px 6px rgba(10,10,10,.12);
+  animation:tp-metro-pop .5s cubic-bezier(.3,1.4,.5,1) both;
+}
+#tp-splash .tp-metro .tp-m:nth-child(1){animation-delay:1.6s}
+#tp-splash .tp-metro .tp-m:nth-child(2){animation-delay:1.68s}
+#tp-splash .tp-metro .tp-m:nth-child(3){animation-delay:1.76s}
+#tp-splash .tp-metro .tp-m:nth-child(4){animation-delay:1.84s}
+#tp-splash .tp-metro .tp-m:nth-child(5){animation-delay:1.92s}
+#tp-splash .tp-metro .tp-m:nth-child(6){animation-delay:2s}
+#tp-splash .tp-metro .tp-m:nth-child(7){animation-delay:2.08s}
+#tp-splash .tp-rer{
+  width:30px;border-radius:4px;
+}
+
+/* Animations */
+@keyframes tp-draw{
+  to{stroke-dashoffset:0}
+}
+@keyframes tp-draw-horizon{
+  to{stroke-dashoffset:0}
+}
+@keyframes tp-sky-in{
+  to{opacity:.85}
+}
+@keyframes tp-taxi-roll{
+  0%{transform:translate(-30px, 170px)}
+  100%{transform:translate(460px, 170px)}
+}
+@keyframes tp-ring-ping{
+  0%{transform:scale(.4);opacity:.9}
+  70%{opacity:0}
+  100%{transform:scale(2.4);opacity:0}
+}
+@keyframes tp-dot-pulse{
+  0%,100%{transform:translate(-50%,-50%) scale(1)}
+  50%{transform:translate(-50%,-50%) scale(1.15)}
+}
+@keyframes tp-ping-pulse{
+  0%{r:2;opacity:1}
+  80%{r:10;opacity:0}
+  100%{r:10;opacity:0}
+}
+@keyframes tp-rise{
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes tp-metro-pop{
+  from{opacity:0;transform:translateY(8px) scale(.6)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes splash-out{
+  to{opacity:0;visibility:hidden}
+}
+
+/* Header title pill — upgrade to serif */
+.hd-top .logo{transition:transform .3s cubic-bezier(.3,1.5,.5,1)}
+header:hover .logo{transform:scale(1.02)}
+
+/* Smooth scrolling everywhere */
+html{scroll-behavior:smooth}
+
+/* Boost all text-based uppercase labels */
+[class*="-label"], [class*="-sub"], .aff-label{
+  letter-spacing:1.2px !important;
+}
+
+/* Peak flame intensity */
+.gare-card.peak .flames{
+  filter:drop-shadow(0 2px 8px rgba(232,93,26,.5)) !important;
+  animation:flame-dance 2s ease-in-out infinite;
+}
+@keyframes flame-dance{
+  0%,100%{transform:translateY(0) rotate(-2deg)}
+  50%{transform:translateY(-2px) rotate(2deg)}
+}
+
+/* Large numeric displays throughout */
+.gc-pax60, .dv, .dhdr-name{font-feature-settings:'tnum' 1}
+
+/* ═══════════════════════════════════════════════
+   CREAM HARMONIZATION — dematerialized pass
+   Remplace tous les blancs durs par la palette crème
+   + peps accents orange discrets
+═══════════════════════════════════════════════ */
+.live-pill{background:var(--card) !important}
+.live-pill.off{background:var(--card) !important}
+/* rbtn reste transparent — défini plus haut */
+.gare-card{background:var(--card) !important}
+.gare-card.peak{
+  background:linear-gradient(135deg, var(--card) 0%, rgba(232,93,26,.06) 100%) !important;
+}
+.close-btn{background:var(--card) !important}
+.dstat{background:var(--card) !important}
+.sq-train{background:var(--card) !important}
+.tc{background:var(--card) !important}
+select{background:var(--card) !important}
+input[type="text"], input[type="number"], input[type="search"], textarea{
+  background:var(--card) !important;
+  border:1px solid var(--line) !important;
+  color:var(--ink) !important;
+}
+
+/* Body & sections : fond crème uniforme, pas de blanc */
+body{background:var(--bg) !important}
+main, .tab, section, .sheet, dialog{background:transparent}
+dialog::backdrop{background:rgba(26,20,16,.35)}
+
+/* Modals & sheets : fond crème avec glow peps */
+dialog .sheet,
+.ev-modal-box,
+#gare-dialog .sheet{
+  background:var(--bg2) !important;
+  border:1px solid var(--line) !important;
+}
+
+/* Accent peps : petite barre orange sur les cards actives */
+.gare-card{
+  position:relative;
+  transition:transform .15s ease, box-shadow .2s ease, background .2s ease !important;
+}
+.gare-card:active{transform:scale(.98)}
+.gare-card::before{
+  content:'';
+  position:absolute;top:0;left:14px;right:14px;height:2px;
+  background:linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+  opacity:0;
+  transition:opacity .3s ease;
+  border-radius:2px;
+}
+.gare-card:hover::before{opacity:.6}
+.gare-card.peak::before{opacity:.85}
+
+/* Dématérialisation : cards avec bordures plus douces + ombre subtile */
+.gare-card, .tc, .sq-train, .dstat, .rbtn, .live-pill, select{
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.6) inset,
+    0 1px 2px rgba(50,38,24,.04),
+    0 2px 8px -2px rgba(50,38,24,.06) !important;
+}
+
+/* Peps : touch de chaleur dans les boutons primaires */
+button.rbtn:active,
+button.close-btn:active{
+  background:rgba(232,93,26,.08) !important;
+}
+
+/* Scrollbar discret crème */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(26,20,16,.15);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(232,93,26,.4)}
+
+/* Petit pop orange sur focus */
+input:focus, select:focus, textarea:focus{
+  outline:none !important;
+  border-color:var(--accent) !important;
+  box-shadow:0 0 0 3px rgba(232,93,26,.12) !important;
+}
+
+/* Info-popup & autres popups : fond crème */
+.info-popup-box{
+  background:var(--bg2) !important;
+  border:1px solid var(--line) !important;
+}
+
+/* Header : fond crème, pas de blanc -- renforce le ton chaud */
+header{
+  background:linear-gradient(180deg, rgba(250,245,236,.95) 0%, rgba(250,245,236,.82) 100%) !important;
+}
+
+/* Peak badge / peak tag — touch peps */
+.peak-tag{
+  background:linear-gradient(135deg, rgba(232,93,26,.12), rgba(232,93,26,.05)) !important;
+  border:1px solid rgba(232,93,26,.25) !important;
+  color:var(--accent) !important;
+  font-weight:700 !important;
+}
+
+/* Sq-train left border en orange accent pour peps */
+.sq-train.highlight{
+  border-left:3px solid var(--accent) !important;
+}
+
 </style>
-</head>
-<body>
+<link id="gfont-Inter" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"></head>
+<body data-cc-id="cc-1" style="font-family: -apple-system; background-color: rgb(255, 249, 234); cursor: crosshair;">
+<div id="tp-splash">
+  <svg class="tp-sky" viewBox="0 0 430 180" preserveAspectRatio="xMidYEnd meet" aria-hidden="true">
+    <!-- Skyline Paris : Sacré-Cœur, Opéra, Tour Eiffel, Invalides, Panthéon, Arc de Triomphe -->
+    <g class="tp-skyline" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round">
+      <!-- Sacré-Cœur : 3 dômes byzantins sur butte Montmartre -->
+      <path d="M8,170 L8,135 L18,135 L20,130 L22,135 L28,135 L28,125 Q32,115 36,115 Q40,115 40,125 L40,132 Q44,108 48,108 Q52,108 56,108 Q60,108 60,132 L60,125 Q60,115 64,115 Q68,115 72,125 L72,135 L78,135 L80,130 L82,135 L92,135 L92,170 Z M50,108 L50,98 M48,100 L52,100 M36,115 L36,110 M64,115 L64,110"></path>
+      <!-- Louvre : pyramide de verre centrale + ailes basses + Arc du Carrousel -->
+      <path d="M100,170 L100,150 L114,150 L114,170 M114,150 L122,125 L130,150 L114,150 M122,125 L122,118 M130,150 L144,150 L144,170 M114,155 L144,155 M106,158 L106,166 M108,158 L112,158 M136,158 L140,158 M136,162 L140,162"></path>
+      <!-- Opéra Garnier : façade + fronton triangulaire + dôme vert -->
+      <path d="M154,170 L154,140 L158,140 L158,130 L170,130 L170,125 Q174,115 178,125 L178,130 L190,130 L190,140 L194,140 L194,170 Z M158,130 L174,115 L190,130 M174,115 L174,108 M172,110 L176,110 M162,145 L162,165 M166,145 L166,165 M182,145 L182,165 M186,145 L186,165"></path>
+      <!-- Tour Eiffel : 3 étages, base arquée très large -->
+      <path d="M224,170 L210,170 L215,155 L212,155 L218,130 L222,130 L221,105 L226,85 L228,68 L230,68 L232,85 L237,105 L236,130 L240,130 L246,155 L243,155 L248,170 L234,170 M215,155 L243,155 M218,130 L240,130 M221,105 L237,105 M226,85 L232,85 M229,68 L229,58"></path>
+      <!-- Invalides : dôme doré caractéristique, très haut et pointu -->
+      <path d="M258,170 L258,150 L266,150 L266,142 Q266,130 272,120 Q275,115 275,108 Q275,105 278,105 Q281,105 281,108 Q281,115 284,120 Q290,130 290,142 L290,150 L298,150 L298,170 Z M278,105 L278,92 M276,95 L280,95 M276,98 L280,98"></path>
+      <!-- Arc de Triomphe : arche monumentale large avec corniche -->
+      <path d="M308,170 L308,148 Q308,132 322,132 L338,132 Q352,132 352,148 L352,170 M308,138 L352,138 M320,170 L320,155 Q330,145 340,155 L340,170 M315,125 L345,125 M315,128 L345,128 M312,132 L312,125 L348,125 L348,132"></path>
+      <!-- Notre-Dame : 2 tours carrées gothiques + flèche centrale + rosace -->
+      <path d="M362,170 L362,135 L372,135 L372,126 L378,126 L378,135 L384,135 L384,126 L390,126 L390,135 L394,135 L394,118 L396,115 L398,118 L402,115 L404,118 L404,135 L408,135 L408,126 L414,126 L414,135 L420,135 L420,126 L426,126 L426,135 L428,135 L428,170 Z M394,135 L394,105 L396,88 L398,105 L398,135 M395,92 L397,92 M378,148 L378,155 Q383,150 388,155 L388,148 Q383,144 378,148 M382,152 L382,148"></path>
+    </g>
+    <!-- Horizon line -->
+    <line class="tp-horizon" x1="0" y1="170" x2="430" y2="170" stroke="currentColor" stroke-width=".6" opacity=".3"></line>
+    <!-- Radar pings at stations -->
+    <g class="tp-pings">
+      <circle cx="50" cy="168" r="2" class="tp-ping"></circle>
+      <circle cx="170" cy="168" r="2" class="tp-ping" style="animation-delay:.25s"></circle>
+      <circle cx="278" cy="168" r="2" class="tp-ping" style="animation-delay:.5s"></circle>
+      <circle cx="395" cy="168" r="2" class="tp-ping" style="animation-delay:.75s"></circle>
+    </g>
+    <!-- Taxi qui roule sur la ligne d'horizon -->
+    <g class="tp-taxi">
+      <rect x="-6" y="-7" width="18" height="7" rx="1.5" fill="currentColor"></rect>
+      <rect x="-3" y="-10" width="10" height="4" rx="1" fill="currentColor" opacity=".9"></rect>
+      <rect x="-1" y="-13" width="3" height="3" fill="#E85D1A"></rect>
+      <circle cx="-3" cy="1" r="1.8" fill="#0a0a0a"></circle>
+      <circle cx="8" cy="1" r="1.8" fill="#0a0a0a"></circle>
+    </g>
+  </svg>
+
+  <div class="tp-center">
+    <div class="tp-meter">
+      <div class="tp-meter-ring"></div>
+      <div class="tp-meter-ring" style="animation-delay:.2s"></div>
+      <div class="tp-meter-ring" style="animation-delay:.4s"></div>
+      <div class="tp-meter-dot"></div>
+    </div>
+    <div class="tp-logo-anim">Taxi<span>Pulse</span></div>
+    <div class="tp-counter"><span id="tp-count">2 847</span><em>pax / 25 min</em></div>
+    <div class="tp-tagline">Le pouls de <b>Paris</b> · en direct</div>
+  </div>
+
+  <div class="tp-metro">
+    <span class="tp-m" style="background:#FFCE00;color:#000">M1</span>
+    <span class="tp-m" style="background:#0064B0">M4</span>
+    <span class="tp-m" style="background:#837902">M6</span>
+    <span class="tp-m" style="background:#F28E42">M8</span>
+    <span class="tp-m" style="background:#00814F">M12</span>
+    <span class="tp-m tp-rer" style="background:#E2231A">A</span>
+    <span class="tp-m tp-rer" style="background:#4B82C3">B</span>
+  </div>
+</div>
 
 <header>
   <div class="hd-top">
-    <div class="logo">Taxi<span>Pulse</span> <span style="font-size:13px;font-weight:600;color:var(--ink3);letter-spacing:0">Paris</span></div>
-    <div class="live-pill off" id="live-pill">
+    <div class="logo" style="display:flex;align-items:center;gap:9px">
+      <img src="assets/taxipulse-logo.svg" width="28" height="28" alt="" style="border-radius:7px;display:block;flex-shrink:0;box-shadow:0 2px 6px rgba(232,93,26,.25)">
+      <span>Taxi<span>Pulse</span> <span style="font-size:13px;font-weight:600;color:var(--ink3);letter-spacing:0">Paris</span></span>
+    </div>
+    <div class="live-pill " id="live-pill">
       <div class="ldot"></div>
-      <span id="live-lbl">DÉMARRAGE</span>
+      <span id="live-lbl">LIVE</span>
     </div>
   </div>
   <div class="nav-tabs">
     <button class="active" data-tab="tab-now">🚂 Gares</button>
-    <button data-tab="tab-stats">📊 Rush</button>
-    <button data-tab="tab-theatres">🎭 Théâtres</button>
-    <button data-tab="tab-events">🎫 Events</button>
-    <button data-tab="tab-trajet">💶 Trajet</button>
+    <button data-tab="tab-stats" class="">📊 Rush</button>
+    <button data-tab="tab-theatres" class="">🎭 Théâtres</button>
+    <button data-tab="tab-events" class="">🎫 Events</button>
+    <button data-tab="tab-trajet" class="">💶 Trajet</button>
   </div>
 
 <!-- Bouton install flottant (caché par défaut, apparaît si PWA installable) -->
@@ -1450,11 +2651,19 @@ dialog .sheet{
 
     <div class="refresh-bar">
       <div class="rtime">
-        <div id="rtime-main">Connexion…</div>
-        <div id="rtime-next" style="font-size:9px"></div>
+        <div id="rtime-main">21:07</div>
+        <div id="rtime-next" style="font-size:9.5px">màj dans 58 s</div>
       </div>
-      <button class="rbtn" id="rbtn" onclick="doRefresh(true)">
-        <span class="spin">↻</span> Actualiser
+      <button class="rbtn" id="rbtn" onclick="doRefresh(true)" aria-label="Actualiser">
+        <span class="spin" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="display:block">
+            <path d="M13.5 4.5A6 6 0 0 0 2.5 7"/>
+            <path d="M2.5 11.5A6 6 0 0 0 13.5 9"/>
+            <polyline points="13.5,1 13.5,4.5 10,4.5"/>
+            <polyline points="2.5,15 2.5,11.5 6,11.5"/>
+          </svg>
+        </span>
+        <span>Actualiser</span>
       </button>
     </div>
 
@@ -1464,9 +2673,350 @@ dialog .sheet{
     </div>
 
     <div class="stitle">6 Grandes Gares · Temps réel</div>
-    <div class="gare-list" id="gare-list">
-      <div class="empty"><span class="ei">⏳</span>Connexion aux données SNCF…</div>
-    </div>
+    <div class="gare-list" id="gare-list"><button class="gare-card peak" type="button" data-gid="nord">
+      <div class="gc-ico"><svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs><linearGradient id="ga-nord" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F1DCBE"></stop><stop offset="1" stop-color="#D9BA8E"></stop>
+    </linearGradient></defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-nord)"></rect>
+    <!-- Aile gauche -->
+    <rect x="7" y="28" width="11" height="20" fill="#BC8F5C"></rect>
+    <path d="M7 28h11l-1-3H8z" fill="#8B5E2B"></path>
+    <rect x="9" y="32" width="2" height="4" fill="#3D2616"></rect>
+    <rect x="13" y="32" width="2" height="4" fill="#3D2616"></rect>
+    <rect x="9" y="38" width="2" height="4" fill="#3D2616"></rect>
+    <rect x="13" y="38" width="2" height="4" fill="#3D2616"></rect>
+    <!-- Aile droite -->
+    <rect x="38" y="28" width="11" height="20" fill="#BC8F5C"></rect>
+    <path d="M38 28h11l-1-3h-9z" fill="#8B5E2B"></path>
+    <rect x="40" y="32" width="2" height="4" fill="#3D2616"></rect>
+    <rect x="44" y="32" width="2" height="4" fill="#3D2616"></rect>
+    <rect x="40" y="38" width="2" height="4" fill="#3D2616"></rect>
+    <rect x="44" y="38" width="2" height="4" fill="#3D2616"></rect>
+    <!-- Corps central : grande arche + fronton -->
+    <rect x="18" y="20" width="20" height="28" fill="#D4A876"></rect>
+    <!-- Fronton triangulaire -->
+    <path d="M18 20 L28 10 L38 20 Z" fill="#C9965D" stroke="#8B5E2B" stroke-width=".8"></path>
+    <!-- Grande arche (verrière) -->
+    <path d="M22 48 L22 32 Q28 22 34 32 L34 48 Z" fill="#EFE5D0" stroke="#6B4A2E" stroke-width="1.1"></path>
+    <!-- Meneaux de la verrière -->
+    <line x1="28" y1="26" x2="28" y2="48" stroke="#6B4A2E" stroke-width=".5"></line>
+    <line x1="24" y1="30" x2="24" y2="48" stroke="#6B4A2E" stroke-width=".4"></line>
+    <line x1="32" y1="30" x2="32" y2="48" stroke="#6B4A2E" stroke-width=".4"></line>
+    <line x1="22" y1="36" x2="34" y2="36" stroke="#6B4A2E" stroke-width=".4"></line>
+    <line x1="22" y1="42" x2="34" y2="42" stroke="#6B4A2E" stroke-width=".4"></line>
+    <!-- 3 statues au sommet -->
+    <circle cx="22" cy="17" r="1.1" fill="#6B4A2E"></circle>
+    <circle cx="28" cy="9" r="1.2" fill="#6B4A2E"></circle>
+    <circle cx="34" cy="17" r="1.1" fill="#6B4A2E"></circle>
+    <rect x="21.2" y="18" width="1.6" height="2.5" fill="#6B4A2E"></rect>
+    <rect x="27.2" y="10" width="1.6" height="3" fill="#6B4A2E"></rect>
+    <rect x="33.2" y="18" width="1.6" height="2.5" fill="#6B4A2E"></rect>
+  </svg></div>
+      <div class="gc-left">
+        <div class="gc-name">Gare du Nord</div>
+        <div class="gc-sub">M4/5 · RER B/D/E</div>
+        <div class="gc-next">
+          <div class="gc-dot now"></div>
+          <span>21:11 · dans 3 min</span>
+        </div>
+        <div class="delay-tag">⚠ 3 retards</div>
+        <div class="peak-tag">🔥 PEAK</div>
+        
+      </div>
+      <div class="gc-right">
+        <div class="flames lvl4">🔥🔥🔥🔥</div>
+        <div class="gc-pax60">476 <span class="gc-pax60-unit">/25min</span></div>
+        <div class="aff-label">
+          demande taxi
+          <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
+        </div>
+      </div>
+    </button><button class="gare-card peak" type="button" data-gid="lyon">
+      <div class="gc-ico"><svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs><linearGradient id="ga-lyon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EBDBA8"></stop><stop offset="1" stop-color="#C9B072"></stop>
+    </linearGradient></defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-lyon)"></rect>
+    <!-- Ciel au-dessus -->
+    <!-- Corps du bâtiment (hall latéral bas) -->
+    <rect x="6" y="40" width="44" height="10" fill="#9C7E48"></rect>
+    <rect x="8" y="42" width="3" height="5" fill="#5B4520"></rect>
+    <rect x="13" y="42" width="3" height="5" fill="#5B4520"></rect>
+    <rect x="40" y="42" width="3" height="5" fill="#5B4520"></rect>
+    <rect x="45" y="42" width="3" height="5" fill="#5B4520"></rect>
+    <!-- Corniche -->
+    <rect x="6" y="39" width="44" height="2" fill="#6F5730"></rect>
+    <!-- Tour de l'Horloge (haute et fine) -->
+    <rect x="23" y="14" width="10" height="26" fill="#BE9A5E"></rect>
+    <!-- Bandeau supérieur de la tour -->
+    <rect x="21" y="12" width="14" height="3" fill="#9C7E48"></rect>
+    <!-- Cadran d'horloge -->
+    <circle cx="28" cy="22" r="4" fill="#FFF8E0" stroke="#5B4520" stroke-width="1.2"></circle>
+    <circle cx="28" cy="22" r="4" fill="none" stroke="#8B6D3A" stroke-width=".4"></circle>
+    <!-- Aiguilles 10h10 -->
+    <path d="M28 22 L28 19" stroke="#5B4520" stroke-width="1" stroke-linecap="round"></path>
+    <path d="M28 22 L30.5 22.5" stroke="#5B4520" stroke-width=".9" stroke-linecap="round"></path>
+    <circle cx="28" cy="22" r=".6" fill="#5B4520"></circle>
+    <!-- Chiffres 12/6 suggérés -->
+    <circle cx="28" cy="19" r=".3" fill="#5B4520"></circle>
+    <circle cx="28" cy="25" r=".3" fill="#5B4520"></circle>
+    <!-- Fenêtres sous l'horloge -->
+    <rect x="25" y="29" width="2" height="4" fill="#5B4520"></rect>
+    <rect x="29" y="29" width="2" height="4" fill="#5B4520"></rect>
+    <rect x="25" y="34" width="2" height="4" fill="#5B4520"></rect>
+    <rect x="29" y="34" width="2" height="4" fill="#5B4520"></rect>
+    <!-- Coiffe / toit en tuiles (style lanternon) -->
+    <path d="M21 12 L28 4 L35 12 Z" fill="#8B6D3A"></path>
+    <!-- Campanile / pointe -->
+    <rect x="27.2" y="4" width="1.6" height="3" fill="#8B6D3A"></rect>
+    <circle cx="28" cy="3" r=".8" fill="#E85D1A"></circle>
+  </svg></div>
+      <div class="gc-left">
+        <div class="gc-name">Gare de Lyon</div>
+        <div class="gc-sub">M1/14 · RER A/D</div>
+        <div class="gc-next">
+          <div class="gc-dot soon"></div>
+          <span>21:19 · dans 11 min</span>
+        </div>
+        <div class="delay-tag">⚠ 4 retards</div>
+        <div class="peak-tag">🔥 PEAK</div>
+        
+      </div>
+      <div class="gc-right">
+        <div class="flames lvl3">🔥🔥🔥</div>
+        <div class="gc-pax60">92 <span class="gc-pax60-unit">/25min</span></div>
+        <div class="aff-label">
+          demande taxi
+          <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
+        </div>
+      </div>
+    </button><button class="gare-card peak" type="button" data-gid="montparnasse">
+      <div class="gc-ico"><svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs>
+      <linearGradient id="ga-mp" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#D8DCE2"></stop><stop offset="1" stop-color="#B0B6C0"></stop>
+      </linearGradient>
+      <linearGradient id="ga-mp-tower" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#2A2F35"></stop><stop offset=".4" stop-color="#4B5360"></stop><stop offset="1" stop-color="#2A2F35"></stop>
+      </linearGradient>
+    </defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-mp)"></rect>
+    <!-- Parvis / gare basse -->
+    <rect x="6" y="44" width="44" height="6" fill="#6F7682"></rect>
+    <rect x="6" y="42" width="44" height="2" fill="#4B5360"></rect>
+    <!-- Immeubles d'accompagnement -->
+    <rect x="7" y="36" width="7" height="8" fill="#8791A0"></rect>
+    <rect x="42" y="36" width="7" height="8" fill="#8791A0"></rect>
+    <!-- LA Tour Montparnasse : rectangle étroit noir qui domine -->
+    <rect x="22" y="8" width="12" height="36" fill="url(#ga-mp-tower)"></rect>
+    <!-- Bandeau horizontal au milieu -->
+    <rect x="22" y="24" width="12" height="1" fill="#1A1F24"></rect>
+    <rect x="22" y="36" width="12" height="1" fill="#1A1F24"></rect>
+    <!-- Fenêtres reflets : petites lignes verticales pour suggérer les étages -->
+    <g fill="#C8D4E0" opacity=".45">
+      <rect x="23.5" y="10" width="1" height="33"></rect>
+      <rect x="26" y="10" width="1" height="33"></rect>
+      <rect x="28.5" y="10" width="1" height="33"></rect>
+      <rect x="31" y="10" width="1" height="33"></rect>
+    </g>
+    <!-- Quelques fenêtres éclairées -->
+    <rect x="23.5" y="14" width="1" height="2" fill="#FFD47A"></rect>
+    <rect x="28.5" y="18" width="1" height="2" fill="#FFD47A"></rect>
+    <rect x="31" y="28" width="1" height="2" fill="#FFD47A"></rect>
+    <rect x="26" y="32" width="1" height="2" fill="#FFD47A"></rect>
+    <!-- Antenne au sommet -->
+    <rect x="27.5" y="5" width="1" height="3" fill="#2A2F35"></rect>
+    <circle cx="28" cy="4" r=".8" fill="#E85D1A"></circle>
+  </svg></div>
+      <div class="gc-left">
+        <div class="gc-name">Montparnasse</div>
+        <div class="gc-sub">M4/6/12/13</div>
+        <div class="gc-next">
+          <div class="gc-dot soon"></div>
+          <span>21:16 · dans 8 min</span>
+        </div>
+        <div class="delay-tag">⚠ 2 retards</div>
+        <div class="peak-tag">🔥 PEAK</div>
+        
+      </div>
+      <div class="gc-right">
+        <div class="flames lvl3">🔥🔥🔥</div>
+        <div class="gc-pax60">163 <span class="gc-pax60-unit">/25min</span></div>
+        <div class="aff-label">
+          demande taxi
+          <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
+        </div>
+      </div>
+    </button><button class="gare-card peak" type="button" data-gid="est">
+      <div class="gc-ico"><svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs><linearGradient id="ga-est" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E4CDAE"></stop><stop offset="1" stop-color="#BC9D7C"></stop>
+    </linearGradient></defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-est)"></rect>
+    <!-- Ailes latérales basses -->
+    <rect x="5" y="32" width="10" height="18" fill="#A88662"></rect>
+    <rect x="41" y="32" width="10" height="18" fill="#A88662"></rect>
+    <rect x="7" y="36" width="2" height="3" fill="#4B3520"></rect>
+    <rect x="11" y="36" width="2" height="3" fill="#4B3520"></rect>
+    <rect x="7" y="41" width="2" height="3" fill="#4B3520"></rect>
+    <rect x="11" y="41" width="2" height="3" fill="#4B3520"></rect>
+    <rect x="43" y="36" width="2" height="3" fill="#4B3520"></rect>
+    <rect x="47" y="36" width="2" height="3" fill="#4B3520"></rect>
+    <rect x="43" y="41" width="2" height="3" fill="#4B3520"></rect>
+    <rect x="47" y="41" width="2" height="3" fill="#4B3520"></rect>
+    <!-- Corps central -->
+    <rect x="15" y="24" width="26" height="26" fill="#C9A379"></rect>
+    <!-- Grand arc en plein cintre — signature de l'Est -->
+    <path d="M18 48 L18 34 Q28 20 38 34 L38 48 Z" fill="#F0E4CC" stroke="#5B3F20" stroke-width="1.3"></path>
+    <!-- Fronton demi-cercle au-dessus de l'arc (tympan) -->
+    <path d="M15 24 Q28 8 41 24" fill="#D4AE7E" stroke="#5B3F20" stroke-width="1.1"></path>
+    <path d="M17 24 Q28 12 39 24" fill="none" stroke="#8B6442" stroke-width=".5"></path>
+    <!-- Verticales de la verrière -->
+    <line x1="24" y1="26" x2="24" y2="48" stroke="#5B3F20" stroke-width=".4"></line>
+    <line x1="28" y1="22" x2="28" y2="48" stroke="#5B3F20" stroke-width=".5"></line>
+    <line x1="32" y1="26" x2="32" y2="48" stroke="#5B3F20" stroke-width=".4"></line>
+    <!-- Horizontales -->
+    <line x1="19" y1="36" x2="37" y2="36" stroke="#5B3F20" stroke-width=".4"></line>
+    <line x1="19" y1="42" x2="37" y2="42" stroke="#5B3F20" stroke-width=".4"></line>
+    <!-- Statue au sommet du fronton (La Ville de Strasbourg) -->
+    <circle cx="28" cy="10" r="1.4" fill="#6B4A2E"></circle>
+    <path d="M26.5 11 L29.5 11 L29.5 15 L26.5 15 Z" fill="#6B4A2E"></path>
+    <!-- Horloge au-dessus de l'arche -->
+    <circle cx="28" cy="20" r="2.2" fill="#FFF8E0" stroke="#5B3F20" stroke-width=".8"></circle>
+  </svg></div>
+      <div class="gc-left">
+        <div class="gc-name">Gare de l'Est</div>
+        <div class="gc-sub">M4/5/7 · RER E</div>
+        <div class="gc-next">
+          <div class="gc-dot now"></div>
+          <span>21:13 · dans 5 min</span>
+        </div>
+        <div class="delay-tag">⚠ 2 retards</div>
+        <div class="peak-tag">🔥 PEAK</div>
+        
+      </div>
+      <div class="gc-right">
+        <div class="flames lvl3">🔥🔥🔥</div>
+        <div class="gc-pax60">92 <span class="gc-pax60-unit">/25min</span></div>
+        <div class="aff-label">
+          demande taxi
+          <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
+        </div>
+      </div>
+    </button><button class="gare-card peak" type="button" data-gid="austerlitz">
+      <div class="gc-ico"><svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs>
+      <linearGradient id="ga-aus" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#CDD8C3"></stop><stop offset="1" stop-color="#8FA382"></stop>
+      </linearGradient>
+      <linearGradient id="ga-aus-glass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FBF6E6"></stop><stop offset="1" stop-color="#D9E2CC"></stop>
+      </linearGradient>
+    </defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-aus)"></rect>
+    <!-- Quais au sol -->
+    <rect x="5" y="44" width="46" height="6" fill="#4A5C3E"></rect>
+    <rect x="5" y="43" width="46" height="1" fill="#2E3B25"></rect>
+    <!-- Deux ailes pignons de pierre -->
+    <path d="M6 44 L6 24 L14 14 L14 44 Z" fill="#8F7A5C" stroke="#3F3020" stroke-width=".8"></path>
+    <path d="M50 44 L50 24 L42 14 L42 44 Z" fill="#8F7A5C" stroke="#3F3020" stroke-width=".8"></path>
+    <!-- Grande halle : toit en voûte -->
+    <path d="M14 44 L14 20 Q28 4 42 20 L42 44 Z" fill="url(#ga-aus-glass)" stroke="#3F3020" stroke-width="1.3"></path>
+    <!-- Charpente métallique type Eiffel : arcs concentriques -->
+    <path d="M17 44 Q28 10 39 44" stroke="#4A5C3E" stroke-width=".7" fill="none"></path>
+    <path d="M20 44 Q28 18 36 44" stroke="#4A5C3E" stroke-width=".5" fill="none" opacity=".7"></path>
+    <path d="M23 44 Q28 25 33 44" stroke="#4A5C3E" stroke-width=".4" fill="none" opacity=".5"></path>
+    <!-- Poutres verticales -->
+    <line x1="28" y1="8" x2="28" y2="44" stroke="#3F3020" stroke-width=".6"></line>
+    <line x1="22" y1="16" x2="22" y2="44" stroke="#3F3020" stroke-width=".4"></line>
+    <line x1="34" y1="16" x2="34" y2="44" stroke="#3F3020" stroke-width=".4"></line>
+    <!-- Horizontales -->
+    <line x1="16" y1="30" x2="40" y2="30" stroke="#3F3020" stroke-width=".4"></line>
+    <line x1="14" y1="38" x2="42" y2="38" stroke="#3F3020" stroke-width=".4"></line>
+    <!-- Croissant de lune (trains de nuit = identité) -->
+    <circle cx="44" cy="11" r="3" fill="#FDF3B7"></circle>
+    <circle cx="45.5" cy="10" r="2.5" fill="url(#ga-aus)"></circle>
+    <!-- Fenêtres dans les pignons -->
+    <rect x="8" y="28" width="4" height="4" fill="#2E3B25"></rect>
+    <rect x="44" y="28" width="4" height="4" fill="#2E3B25"></rect>
+    <rect x="8" y="35" width="4" height="4" fill="#2E3B25"></rect>
+    <rect x="44" y="35" width="4" height="4" fill="#2E3B25"></rect>
+  </svg></div>
+      <div class="gc-left">
+        <div class="gc-name">Gare d'Austerlitz</div>
+        <div class="gc-sub">M5/10 · RER C</div>
+        <div class="gc-next">
+          <div class="gc-dot soon"></div>
+          <span>21:16 · dans 8 min</span>
+        </div>
+        <div class="delay-tag">⚠ 1 retard</div>
+        <div class="peak-tag">🔥 PEAK</div>
+        
+      </div>
+      <div class="gc-right">
+        <div class="flames lvl3">🔥🔥🔥</div>
+        <div class="gc-pax60">99 <span class="gc-pax60-unit">/25min</span></div>
+        <div class="aff-label">
+          demande taxi
+          <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
+        </div>
+      </div>
+    </button><button class="gare-card" type="button" data-gid="bercy">
+      <div class="gc-ico"><svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs><linearGradient id="ga-bercy" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EAD4B6"></stop><stop offset="1" stop-color="#C69A72"></stop>
+    </linearGradient></defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-bercy)"></rect>
+    <!-- Sol -->
+    <rect x="5" y="46" width="46" height="4" fill="#7A5434"></rect>
+    <!-- Long bâtiment horizontal bas -->
+    <rect x="7" y="32" width="42" height="14" fill="#D9B68C"></rect>
+    <rect x="7" y="30" width="42" height="2" fill="#9C7040"></rect>
+    <!-- Grand auvent plat moderne qui dépasse -->
+    <rect x="4" y="26" width="48" height="3" fill="#6B4A2E"></rect>
+    <rect x="4" y="29" width="48" height="1" fill="#3D2616" opacity=".5"></rect>
+    <!-- Piliers de soutien -->
+    <rect x="10" y="22" width="1.5" height="4" fill="#6B4A2E"></rect>
+    <rect x="20" y="22" width="1.5" height="4" fill="#6B4A2E"></rect>
+    <rect x="34.5" y="22" width="1.5" height="4" fill="#6B4A2E"></rect>
+    <rect x="44.5" y="22" width="1.5" height="4" fill="#6B4A2E"></rect>
+    <!-- Enseigne au centre -->
+    <rect x="20" y="14" width="16" height="8" rx="1" fill="#1A1410"></rect>
+    <rect x="21" y="15" width="14" height="6" rx=".5" fill="#E85D1A"></rect>
+    <text x="28" y="19.5" text-anchor="middle" font-family="system-ui" font-size="4" font-weight="800" fill="#fff">BERCY</text>
+    <!-- Portes vitrées -->
+    <rect x="12" y="36" width="5" height="10" fill="#4A6670"></rect>
+    <rect x="21" y="36" width="5" height="10" fill="#4A6670"></rect>
+    <rect x="30" y="36" width="5" height="10" fill="#4A6670"></rect>
+    <rect x="39" y="36" width="5" height="10" fill="#4A6670"></rect>
+    <line x1="14.5" y1="36" x2="14.5" y2="46" stroke="#1A1410" stroke-width=".4"></line>
+    <line x1="23.5" y1="36" x2="23.5" y2="46" stroke="#1A1410" stroke-width=".4"></line>
+    <line x1="32.5" y1="36" x2="32.5" y2="46" stroke="#1A1410" stroke-width=".4"></line>
+    <line x1="41.5" y1="36" x2="41.5" y2="46" stroke="#1A1410" stroke-width=".4"></line>
+    <!-- Chapiteau orange signature -->
+    <path d="M14 14 L20 8 L28 10 L36 8 L42 14" fill="#E85D1A" opacity=".75"></path>
+  </svg></div>
+      <div class="gc-left">
+        <div class="gc-name">Gare de Bercy</div>
+        <div class="gc-sub">M6/14</div>
+        <div class="gc-next">
+          <div class="gc-dot "></div>
+          <span>21:50 · dans 42 min</span>
+        </div>
+        
+        
+        
+      </div>
+      <div class="gc-right">
+        <div class="flames lvl0">💤</div>
+        <div class="gc-pax60">0 <span class="gc-pax60-unit">/25min</span></div>
+        <div class="aff-label">
+          demande taxi
+          <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
+        </div>
+      </div>
+    </button></div>
 
 
 
@@ -1475,16 +3025,167 @@ dialog .sheet{
   <!-- ══ RUSH — Analyse ══ -->
   <section class="tab" id="tab-stats">
     <div class="stitle">🔥 Rush prochaines 25 min</div>
-    <div id="rush-now"></div>
+    <div id="rush-now"><div class="rush-card top">
+      <div class="rush-now-title">🔥 Prochaines 25 minutes toutes gares</div>
+      <div class="rush-now-big">922 clients potentiels</div>
+      <div class="rush-now-sub">🔥🔥🔥🔥 RUSH MAXIMUM · 17 trains à venir</div>
+      <div class="rush-now-title" style="margin-top:14px">🎯 Prochain gros arrivant</div><div class="rush-next">
+        <div class="rn-ico">🇬🇧</div>
+        <div class="rn-main">
+          <div class="rn-gare">Gare du Nord</div>
+          <div class="rn-train">EUROSTAR · Londres St Pancras</div>
+        </div>
+        <div class="rn-time">dans 16min</div>
+      </div>
+    </div></div>
 
     <div class="stitle">📈 Meilleures heures aujourd'hui</div>
-    <div id="rush-hours"></div>
+    <div id="rush-hours"><div class="hour-bar"><div class="hour-col">
+      <div class="hb " style="height:3%"></div>
+      <div class="hh">00h</div>
+    </div><div class="hour-col">
+      <div class="hb " style="height:3%"></div>
+      <div class="hh">01h</div>
+    </div><div class="hour-col">
+      <div class="hb " style="height:3%"></div>
+      <div class="hh">02h</div>
+    </div><div class="hour-col">
+      <div class="hb " style="height:3%"></div>
+      <div class="hh">03h</div>
+    </div><div class="hour-col">
+      <div class="hb " style="height:3%"></div>
+      <div class="hh">04h</div>
+    </div><div class="hour-col">
+      <div class="hb " style="height:3%"></div>
+      <div class="hh">05h</div>
+    </div><div class="hour-col">
+      <div class="hb " style="height:5%"></div>
+      <div class="hh">06h</div>
+    </div><div class="hour-col">
+      <div class="hb warm" style="height:45%"></div>
+      <div class="hh">07h</div>
+    </div><div class="hour-col">
+      <div class="hb hot" style="height:100%"></div>
+      <div class="hh">08h</div>
+    </div><div class="hour-col">
+      <div class="hb hot cur" style="height:68%"></div>
+      <div class="hh">21h</div>
+    </div><div class="hour-col">
+      <div class="hb hot" style="height:92%"></div>
+      <div class="hh">22h</div>
+    </div><div class="hour-col">
+      <div class="hb " style="height:20%"></div>
+      <div class="hh">23h</div>
+    </div></div>
+      <div style="font-size:10px;color:var(--ink3);text-align:center;padding:0 10px">
+        Nombre de clients taxi estimés par heure · <span style="color:var(--accent)">■</span> rush · <span style="color:var(--gold)">■</span> actif
+      </div></div>
 
     <div class="stitle">🏆 Classement gares (25 min à venir)</div>
-    <div id="rush-ranking"></div>
+    <div id="rush-ranking"><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('nord'),300)">
+      <div class="rk-pos p1">1</div>
+      <div class="rk-ico">🇬🇧</div>
+      <div class="rk-name">Gare du Nord</div>
+      <div class="rk-flames">🔥🔥🔥🔥</div>
+      <div class="rk-pax">476</div>
+    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('montparnasse'),300)">
+      <div class="rk-pos p2">2</div>
+      <div class="rk-ico">🌊</div>
+      <div class="rk-name">Montparnasse</div>
+      <div class="rk-flames">🔥🔥🔥</div>
+      <div class="rk-pax">163</div>
+    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('austerlitz'),300)">
+      <div class="rk-pos p3">3</div>
+      <div class="rk-ico">🌙</div>
+      <div class="rk-name">Gare d'Austerlitz</div>
+      <div class="rk-flames">🔥🔥🔥</div>
+      <div class="rk-pax">99</div>
+    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('lyon'),300)">
+      <div class="rk-pos ">4</div>
+      <div class="rk-ico">🗼</div>
+      <div class="rk-name">Gare de Lyon</div>
+      <div class="rk-flames">🔥🔥🔥</div>
+      <div class="rk-pax">92</div>
+    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('est'),300)">
+      <div class="rk-pos ">5</div>
+      <div class="rk-ico">🍺</div>
+      <div class="rk-name">Gare de l'Est</div>
+      <div class="rk-flames">🔥🔥🔥</div>
+      <div class="rk-pax">92</div>
+    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('bercy'),300)">
+      <div class="rk-pos ">6</div>
+      <div class="rk-ico">🎪</div>
+      <div class="rk-name">Gare de Bercy</div>
+      <div class="rk-flames">💤</div>
+      <div class="rk-pax">0</div>
+    </div></div>
 
     <div class="stitle">🎤 Événements aujourd'hui · fin de soirée</div>
-    <div id="events-today"></div>
+    <div id="events-today"><div class="ev-card">
+      <div class="ev-top">
+        <div class="ev-ico">🎤</div>
+        <div class="ev-main">
+          <div class="ev-titre">Ken Carson · More Chaos Tour</div>
+          <div class="ev-lieu">Zénith La Villette · 211 av. J. Jaurès · 19e</div>
+        </div>
+        <div class="ev-fin">
+          <div class="ev-fin-h">22:30</div>
+          <div class="ev-fin-l">fin</div>
+        </div>
+      </div>
+      <div class="ev-bot">
+        <span class="ev-cap">👥 6 300 pax</span>
+        <span class="ev-impact">🔥🔥🔥 rush sortie</span>
+      </div>
+    </div><div class="ev-card">
+      <div class="ev-top">
+        <div class="ev-ico">🎭</div>
+        <div class="ev-main">
+          <div class="ev-titre">Le Roi Lion · Musical</div>
+          <div class="ev-lieu">Théâtre Mogador · 25 rue Mogador · 9e</div>
+        </div>
+        <div class="ev-fin">
+          <div class="ev-fin-h">22:30</div>
+          <div class="ev-fin-l">fin</div>
+        </div>
+      </div>
+      <div class="ev-bot">
+        <span class="ev-cap">👥 1 600 pax</span>
+        <span class="ev-impact">🔥 rush sortie</span>
+      </div>
+    </div><div class="ev-card">
+      <div class="ev-top">
+        <div class="ev-ico">🎭</div>
+        <div class="ev-main">
+          <div class="ev-titre">Comédie musicale</div>
+          <div class="ev-lieu">Théâtre du Châtelet · 1 pl. du Châtelet · 1er</div>
+        </div>
+        <div class="ev-fin">
+          <div class="ev-fin-h">22:30</div>
+          <div class="ev-fin-l">fin</div>
+        </div>
+      </div>
+      <div class="ev-bot">
+        <span class="ev-cap">👥 2 010 pax</span>
+        <span class="ev-impact">🔥🔥 rush sortie</span>
+      </div>
+    </div><div class="ev-card">
+      <div class="ev-top">
+        <div class="ev-ico">🎼</div>
+        <div class="ev-main">
+          <div class="ev-titre">Les Flammes Awards 2026</div>
+          <div class="ev-lieu">La Seine Musicale · Île Seguin · Boulogne</div>
+        </div>
+        <div class="ev-fin">
+          <div class="ev-fin-h">23:00</div>
+          <div class="ev-fin-l">fin</div>
+        </div>
+      </div>
+      <div class="ev-bot">
+        <span class="ev-cap">👥 6 000 pax</span>
+        <span class="ev-impact">🔥🔥🔥 rush sortie</span>
+      </div>
+    </div></div>
   </section>
 
   <!-- ══ THÉÂTRES — Classés par priorité chauffeur ══ -->
@@ -1494,11 +3195,11 @@ dialog .sheet{
 
     <div class="venues-hero">
       <div class="vh-left">
-        <div class="vh-date" id="th-date">—</div>
-        <div class="vh-main" id="th-main">Théâtres parisiens · ce soir</div>
+        <div class="vh-date" id="th-date">JEUDI 23 AVRIL</div>
+        <div class="vh-main" id="th-main">3 610 spectateurs à la sortie ce soir</div>
       </div>
       <div class="vh-right">
-        <div class="vh-kpi" id="th-kpi">0</div>
+        <div class="vh-kpi" id="th-kpi">2</div>
         <div class="vh-kpi-lbl">spectacles</div>
       </div>
     </div>
@@ -1529,7 +3230,32 @@ dialog .sheet{
         <button class="vchip" data-day="7">7 jours</button>
       </div>
     </div>
-    <div id="theatres-timeline"></div>
+    <div id="theatres-timeline"><div class="tl-group">
+      <div class="tl-group-hdr"><span>CE SOIR</span><span class="tl-group-line"></span><span>2 spectacles</span></div><div class="tl-row tier2" data-ev-idx="-1">
+        <div class="tl-hour">22:30</div>
+        <div class="tl-ico">🎭</div>
+        <div class="tl-main">
+          <div class="tl-titre">Théâtre Mogador <span class="tl-flames-inline">🔥🔥</span></div>
+          <div class="tl-lieu">Le Roi Lion · Musical</div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-cap">1 600</div>
+          <div class="tl-cap-l">pax</div>
+        </div>
+        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8751,2.3318);" title="Naviguer avec Waze">🧭</button>
+      </div><div class="tl-row tier2" data-ev-idx="-1">
+        <div class="tl-hour">22:30</div>
+        <div class="tl-ico">🎭</div>
+        <div class="tl-main">
+          <div class="tl-titre">Théâtre du Châtelet <span class="tl-flames-inline">🔥🔥</span></div>
+          <div class="tl-lieu">Comédie musicale</div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-cap">2 010</div>
+          <div class="tl-cap-l">pax</div>
+        </div>
+        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8577,2.3471);" title="Naviguer avec Waze">🧭</button>
+      </div></div></div>
   </section>
 
   <!-- ══ EVENTS — Concerts, matchs, salons ══ -->
@@ -1539,17 +3265,49 @@ dialog .sheet{
 
     <div class="venues-hero">
       <div class="vh-left">
-        <div class="vh-date" id="ev-date">—</div>
-        <div class="vh-main" id="ev-main">Concerts · Matchs · Salons</div>
+        <div class="vh-date" id="ev-date">JEUDI 23 AVRIL</div>
+        <div class="vh-main" id="ev-main">12 300 spectateurs en sortie</div>
       </div>
       <div class="vh-right">
-        <div class="vh-kpi" id="ev-kpi">0</div>
+        <div class="vh-kpi" id="ev-kpi">2</div>
         <div class="vh-kpi-lbl">events ce soir</div>
       </div>
     </div>
 
     <div class="stitle" style="margin-top:2px">🎯 À cibler maintenant</div>
-    <div id="ev-top"></div>
+    <div id="ev-top"><div class="top-ev " data-ev-idx="-1">
+        <div class="te-rank">
+          <div class="te-rank-n">1</div>
+          <div class="te-rank-l">cible</div>
+        </div>
+        <div class="te-body">
+          <div>
+            <div class="te-titre">🎤 Zénith La Villette</div>
+            <div class="te-venue">Ken Carson · More Chaos Tour</div>
+          </div>
+          <div class="te-meta">
+            <span class="te-fin">fin 22:30</span>
+            <span class="te-in">dans 1h21</span>
+            <span class="te-cap">👥 6 300</span>
+          </div>
+        </div>
+      </div><div class="top-ev " data-ev-idx="-1">
+        <div class="te-rank">
+          <div class="te-rank-n">2</div>
+          <div class="te-rank-l">cible</div>
+        </div>
+        <div class="te-body">
+          <div>
+            <div class="te-titre">🎤 La Seine Musicale</div>
+            <div class="te-venue">Les Flammes Awards 2026</div>
+          </div>
+          <div class="te-meta">
+            <span class="te-fin">fin 23:00</span>
+            <span class="te-in">dans 1h51</span>
+            <span class="te-cap">👥 6 000</span>
+          </div>
+        </div>
+      </div></div>
 
     <div class="v-toolbar">
       <div class="stitle" style="margin:0">📅 Chronologie</div>
@@ -1566,7 +3324,32 @@ dialog .sheet{
       <button class="vchip" data-day="7">7 jours</button>
       <button class="vchip" data-day="30">Mois</button>
     </div>
-    <div id="events-timeline"></div>
+    <div id="events-timeline"><div class="tl-group">
+      <div class="tl-group-hdr"><span>CE SOIR</span><span class="tl-group-line"></span><span>2 évt</span></div><div class="tl-row tier2 soon-row" data-ev-idx="-1">
+        <div class="tl-hour">22:30</div>
+        <div class="tl-ico">🎤</div>
+        <div class="tl-main">
+          <div class="tl-titre">Zénith La Villette <span class="tl-flames-inline">🔥🔥</span></div>
+          <div class="tl-lieu">Ken Carson · More Chaos Tour</div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-cap">6 300</div>
+          <div class="tl-cap-l">pax</div>
+        </div>
+        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8942,2.3928);" title="Naviguer avec Waze">🧭</button>
+      </div><div class="tl-row tier2 soon-row" data-ev-idx="-1">
+        <div class="tl-hour">23:00</div>
+        <div class="tl-ico">🎤</div>
+        <div class="tl-main">
+          <div class="tl-titre">La Seine Musicale <span class="tl-flames-inline">🔥🔥</span></div>
+          <div class="tl-lieu">Les Flammes Awards 2026</div>
+        </div>
+        <div class="tl-right">
+          <div class="tl-cap">6 000</div>
+          <div class="tl-cap-l">pax</div>
+        </div>
+        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8277,2.2314);" title="Naviguer avec Waze">🧭</button>
+      </div></div></div>
   </section>
 
   <!-- Modal détails (flottant via classList) -->
@@ -1585,7 +3368,7 @@ dialog .sheet{
       <div class="trhero-sub">Distance routière réelle · Trafic Paris en live</div>
       <div class="trhero-live" id="trhero-live">
         <span class="tr-live-dot"></span>
-        <span id="trhero-live-txt">Chargement trafic...</span>
+        <span id="trhero-live-txt">Paris · trafic <b style="color:var(--green)">fluide</b> · -15% vs fluide</span>
       </div>
     </div>
 
@@ -1665,7 +3448,7 @@ dialog .sheet{
               <option value="bourget">Parc Expo Le Bourget</option>
               <option value="stade_france">Stade de France</option>
             </optgroup>
-            <optgroup label="🎭 Théâtres" id="og-theatres"></optgroup>
+            <optgroup label="🎭 Théâtres" id="og-theatres"><option value="th_radio_france">Auditorium Radio France · 16e</option><option value="th_bobino">Bobino · 14e</option><option value="th_bouffes_parisiens">Bouffes-Parisiens · 2e</option><option value="th_cabaret_sauvage">Cabaret Sauvage · 19e</option><option value="th_cafe_danse">Café de la Danse · 11e</option><option value="th_cafegare">Café de la Gare · 4e</option><option value="th_blancs">Café-Théâtre des Blancs Manteaux · 4e</option><option value="th_casino">Casino de Paris · 9e</option><option value="th_cirque_hiver">Cirque d'Hiver Bouglione · 11e</option><option value="th_cite_musique">Cité de la Musique · 19e</option><option value="th_comedie_bastille">Comédie Bastille · 11e</option><option value="th_comedie_odeon">Comédie Odéon · 6e</option><option value="th_comedie_francaise">Comédie-Française · 1er</option><option value="th_elysee_mmtre">Élysée Montmartre · 18e</option><option value="th_folies_bergere">Folies Bergère · 9e</option><option value="th_gaite_lyrique">Gaîté Lyrique · 3e</option><option value="th_jamel">Jamel Comedy Club · 10e</option><option value="th_boule_noire">La Boule Noire · 18e</option><option value="th_cigale">La Cigale · 18e</option><option value="th_fleche_or">La Flèche d'Or · 20e</option><option value="th_machine_mr">La Machine du Moulin Rouge · 18e</option><option value="th_maroquinerie">La Maroquinerie · 20e</option><option value="th_bataclan">Le Bataclan · 11e</option><option value="th_grandpv">Le Grand Point-Virgule · 15e</option><option value="th_lucernaire">Le Lucernaire · 6e</option><option value="th_pv">Le Point Virgule · 4e</option><option value="th_rex">Le Rex Club / Grand Rex · 2e</option><option value="th_splendid">Le Splendid · 10e</option><option value="th_trianon">Le Trianon · 18e</option><option value="th_funambules">Les Funambules · 18e</option><option value="th_sarfati">Madame Sarfati Comedy Club · 1er</option><option value="th_new_morning">New Morning · 10e</option><option value="th_opera_bastille">Opéra Bastille · 12e</option><option value="th_opera_comique">Opéra Comique · 2e</option><option value="th_opera_garnier">Opéra Garnier · 9e</option><option value="th_petit_bain">Petit Bain · 13e</option><option value="th_philharmonie">Philharmonie de Paris · 19e</option><option value="th_gaveau">Salle Gaveau · 8e</option><option value="th_13">Théâtre 13 · 13e</option><option value="th_14">Théâtre 14 · 14e</option><option value="th_71">Théâtre 71 · Malakoff</option><option value="th_antoine">Théâtre Antoine · 10e</option><option value="th_comedia">Théâtre Comedia · 10e</option><option value="th_daunou">Théâtre Daunou · 2e</option><option value="th_ambigu">Théâtre de l'Ambigu · 10e</option><option value="th_atelier">Théâtre de l'Atelier · 18e</option><option value="th_odeon">Théâtre de l'Odéon · 6e</option><option value="th_contrescarpe">Théâtre de la Contrescarpe · 5e</option><option value="th_madeleine">Théâtre de la Madeleine · 8e</option><option value="th_michodiere">Théâtre de la Michodière · 2e</option><option value="th_pepiniere">Théâtre de la Pépinière · 2e</option><option value="th_stmartin">Théâtre de la Porte Saint-Martin · 10e</option><option value="th_potiniere">Théâtre de la Potinière · 1er</option><option value="th_renaissance">Théâtre de la Renaissance · 10e</option><option value="th_ville">Théâtre de la Ville · 4e</option><option value="th_champs_elysees">Théâtre des Champs-Élysées · 8e</option><option value="th_2anes">Théâtre des Deux Ânes · 18e</option><option value="th_10h">Théâtre des Dix Heures · 18e</option><option value="th_nouveautes">Théâtre des Nouveautés · 9e</option><option value="th_varietes">Théâtre des Variétés · 2e</option><option value="th_chatelet">Théâtre du Châtelet · 1er</option><option value="th_gymnase">Théâtre du Gymnase · 10e</option><option value="th_palais_royal">Théâtre du Palais-Royal · 1er</option><option value="th_rond_point">Théâtre du Rond-Point · 8e</option><option value="th_edouard7">Théâtre Édouard VII · 9e</option><option value="th_gaite">Théâtre Gaîté Montparnasse · 14e</option><option value="th_marigny">Théâtre Marigny · 8e</option><option value="th_mogador">Théâtre Mogador · 9e</option><option value="th_rive_gauche">Théâtre Rive Gauche · 14e</option><option value="th_stgeorges">Théâtre Saint-Georges · 9e</option><option value="th_tristan">Théâtre Tristan Bernard · 8e</option></optgroup>
             <optgroup label="🚂 Autres gares">
               <option value="g-nord">Gare du Nord</option>
               <option value="g-lyon">Gare de Lyon</option>
@@ -1676,9 +3459,7 @@ dialog .sheet{
 
         <!-- Mode 2 : adresse libre avec autocomplétion BAN -->
         <div id="tr-arrivee-custom" style="display:none">
-          <input type="text" id="tr-custom-input" class="tr-custom-input"
-                 placeholder="Ex: 12 rue de Rivoli Paris"
-                 autocomplete="off" spellcheck="false">
+          <input type="text" id="tr-custom-input" class="tr-custom-input" placeholder="Ex: 12 rue de Rivoli Paris" autocomplete="off" spellcheck="false">
           <div id="tr-autocomplete" class="tr-autocomplete"></div>
           <div id="tr-custom-selected" class="tr-custom-selected" style="display:none">
             <div class="tr-cs-ico">✓</div>
@@ -1706,10 +3487,187 @@ dialog .sheet{
       </button>
     </div>
 
-    <div id="tr-resultat" style="display:none"></div>
+    <div id="tr-resultat" style="display: block;">
+    <div class="tr-result">
+      <div class="tr-main-card ">
+        <div class="tr-badge-top ">
+          💶 Calcul taximètre horokilométrique
+        </div>
+        <div class="tr-price-big">60€</div>
+        <div class="tr-price-range">Fourchette : 57€ — 67€</div>
+
+        
+          <div class="tr-compare">
+            <div class="tr-compare-row">
+              <span class="tr-compare-k">🟢 Si trajet 100% fluide</span>
+              <span class="tr-compare-v">54€</span>
+            </div>
+            <div class="tr-compare-row now">
+              <span class="tr-compare-k">🚦 Avec trafic actuel</span>
+              <span class="tr-compare-v">60€ · <b style="color:var(--accent)">+6.26€</b></span>
+            </div>
+          </div>
+        
+
+        <div class="tr-stats-grid">
+          <div class="tr-stat">
+            <div class="tr-stat-k">🛣 Distance</div>
+            <div class="tr-stat-v">30.8 km</div>
+            <div class="tr-stat-extra">TomTom Traffic Live</div>
+          </div>
+          <div class="tr-stat">
+            <div class="tr-stat-k">⏱ Durée <span style="color:var(--green);font-weight:900">● LIVE</span></div>
+            <div class="tr-stat-v ">60 min</div>
+            <div class="tr-stat-extra">Fluide : 39 min · <b style="color:var(--accent)">+12 min</b></div>
+          </div>
+          <div class="tr-stat">
+            <div class="tr-stat-k">🚗 Vitesse moy.</div>
+            <div class="tr-stat-v green">31 km/h</div>
+            <div class="tr-stat-extra">Seuil conjonction 25 km/h</div>
+          </div>
+          <div class="tr-stat">
+            <div class="tr-stat-k">⚡ Tarif B</div>
+            <div class="tr-stat-v">1.64€/km</div>
+            <div class="tr-stat-extra">41.76€/h si marche lente</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tr-traffic-bar">
+        <div class="tr-tb-head">
+          <span class="tr-tb-label">🚦 Trafic live</span>
+          <span class="tr-tb-status heavy">CHARGÉ · +12 MIN</span>
+        </div>
+        <div class="tr-tb-meter">
+          <div class="tr-tb-fill heavy" style="width:70%"></div>
+        </div>
+        <div class="tr-tb-labels">
+          <span>🟢 Fluide</span>
+          <span>🟡 Modéré</span>
+          <span>🟠 Chargé</span>
+          <span>🔴 Saturé</span>
+        </div>
+      </div>
+
+      <div class="tr-tip">
+        <span class="tr-tip-ico">💡</span>
+        <div class="tr-tip-body">Bon rythme · ~15% horaire (feux rouges normaux) · facturation principalement au km</div>
+      </div>
+
+      
+    <div class="tr-breakdown">
+      <div class="tr-bd-hdr">💡 Décomposition taximètre (tronçon par tronçon)</div>
+      <div class="tr-bd-row">
+        <span>Prise en charge</span>
+        <span>3.00€</span>
+      </div>
+      <div class="tr-bd-row">
+        <span>Kilomètres (30.8 km × 1.64€)</span>
+        <span>50.51€</span>
+      </div>
+      
+      <div class="tr-bd-row hot">
+        <span>⚠️ Tarif horaire (9 min sous 25 km/h)</span>
+        <span>+6.26€</span>
+      </div>
+      <div class="tr-bd-row total">
+        <span>TOTAL ESTIMÉ</span>
+        <span>59.78€</span>
+      </div>
+    </div>
+  
+
+      <div class="tr-details">
+        <div class="tr-info-row"><span class="k">📍 De</span><span class="v">Ma position actuelle</span></div>
+        <div class="tr-info-row"><span class="k">🎯 Vers</span><span class="v">Opéra · Louvre · Châtelet</span></div>
+        <div class="tr-info-row"><span class="k">Zone</span><span class="v">Paris intra-muros</span></div>
+      </div>
+
+      <button class="tr-waze-btn" onclick="openWaze(48.8698, 2.3316)">
+        <span>🧭</span>
+        <span>Démarrer la navigation Waze</span>
+      </button>
+
+      <div class="tr-disclaimer">
+        <b>Taximètre horokilométrique (tronçon par tronçon)</b> · Le compteur facture en permanence le max entre tarif km (1.64€) et tarif horaire (41.76€/h). Vitesse de conjonction : 25.5 km/h. Sous ce seuil (feux, virages, bouchons), c'est le tarif horaire qui prend le relais.
+         <b>Trafic live TomTom</b> · données en direct.
+        Prix indicatif · le taximètre du véhicule fait foi · tarif préfectoral Paris 2025.
+      </div>
+    </div>
+  </div>
   </section>
 
 </main>
+
+<!-- ══ BOTTOM TAB BAR ══ -->
+<nav class="bottom-nav" id="bottom-nav">
+  <button class="active" data-tab="tab-now" aria-label="Gares">
+    <span class="bn-ico">
+      <!-- Train / locomotive — profil SNCF -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M5 4h14a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2z"></path>
+        <path d="M5 4h14a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a2 2 0 0 1 2-2z"></path>
+        <path d="M3 10h18"></path>
+        <circle cx="8" cy="14" r="1.2"></circle>
+        <circle cx="16" cy="14" r="1.2"></circle>
+        <path d="M8 18l-2 3M16 18l2 3"></path>
+      </svg>
+    </span>
+    <span class="bn-lbl">Gares</span>
+  </button>
+  <button data-tab="tab-stats" aria-label="Rush" class="">
+    <span class="bn-ico">
+      <!-- Barres + flèche montante -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M4 14h3v6H4zM10 9h3v11h-3zM16 5h3v15h-3z"></path>
+        <path d="M4 20V14h3v6zM10 20V9h3v11zM16 20V5h3v15z"></path>
+        <path d="M3 10l5-5 4 3 7-6" stroke-width="1.6"></path>
+        <path d="M15 2h4v4" stroke-width="1.6"></path>
+      </svg>
+    </span>
+    <span class="bn-lbl">Rush</span>
+  </button>
+  <button data-tab="tab-theatres" aria-label="Théâtres" class="">
+    <span class="bn-ico">
+      <!-- Masque théâtre stylisé -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M5 4h14v8a7 7 0 0 1-14 0V4z"></path>
+        <path d="M5 4h14v8a7 7 0 0 1-14 0V4z"></path>
+        <path d="M9 9c0 .6-.4 1-1 1s-1-.4-1-1"></path>
+        <path d="M17 9c0 .6-.4 1-1 1s-1-.4-1-1"></path>
+        <path d="M9 15c1 1 2 1.5 3 1.5s2-.5 3-1.5"></path>
+        <path d="M7 4v-.5M17 4v-.5" stroke-linecap="round"></path>
+        <path d="M4 5l1 2M20 5l-1 2"></path>
+      </svg>
+    </span>
+    <span class="bn-lbl">Théâtres</span>
+  </button>
+  <button data-tab="tab-events" aria-label="Events" class="">
+    <span class="bn-ico">
+      <!-- Ticket avec perforation -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"></path>
+        <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"></path>
+        <path d="M13 6v2M13 10v2M13 14v2M13 18v0" stroke-dasharray="1.2 1.6" stroke-linecap="round"></path>
+      </svg>
+    </span>
+    <span class="bn-lbl">Events</span>
+  </button>
+  <button data-tab="tab-trajet" aria-label="Trajet" class="">
+    <span class="bn-ico">
+      <!-- Taxi vue de face + taximètre -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M4 12l2-5a2 2 0 0 1 2-1h8a2 2 0 0 1 2 1l2 5v5a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1H8v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z"></path>
+        <path d="M4 12l2-5a2 2 0 0 1 2-1h8a2 2 0 0 1 2 1l2 5v5a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-1H8v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5z"></path>
+        <path d="M4 12h16"></path>
+        <circle cx="7.5" cy="15" r=".8"></circle>
+        <circle cx="16.5" cy="15" r=".8"></circle>
+        <path d="M9 3h6v2H9z"></path>
+      </svg>
+    </span>
+    <span class="bn-lbl">Trajet</span>
+  </button>
+</nav>
 
 <!-- ══ DIALOG GARE ══ -->
 <dialog id="gare-dialog">
@@ -1718,22 +3676,1430 @@ dialog .sheet{
     <div class="dhdr">
       <div class="dhdr-top">
         <div style="flex:1;min-width:0">
-          <div class="dhdr-name" id="gd-nom">—</div>
-          <div class="dhdr-sub" id="gd-sub">—</div>
+          <div class="dhdr-name" id="gd-nom">Montparnasse</div>
+          <div class="dhdr-sub" id="gd-sub">TGV Atlantique · Bretagne · Sud-Ouest</div>
         </div>
-        <button class="gd-waze" id="gd-waze" title="Naviguer avec Waze">🧭</button>
+        <button class="gd-waze" id="gd-waze" title="Naviguer avec Waze" style="display: flex;">🧭</button>
         <button class="close-btn" id="gd-close">✕</button>
       </div>
       <div class="dstats">
-        <div class="dstat"><div class="dk">Arrivées 25min</div><div class="dv a" id="gd-up">—</div></div>
-        <div class="dstat"><div class="dk">Demande taxi</div><div class="dv" id="gd-pax">—</div></div>
-        <div class="dstat"><div class="dk">Retards</div><div class="dv y" id="gd-del">—</div></div>
-        <div class="dstat"><div class="dk">Supprimés</div><div class="dv r" id="gd-can">—</div></div>
+        <div class="dstat"><div class="dk">Arrivées 25min</div><div class="dv a" id="gd-up">5</div></div>
+        <div class="dstat"><div class="dk">Demande taxi</div><div class="dv" id="gd-pax"><span style="font-size:18px">🔥🔥🔥🔥</span></div></div>
+        <div class="dstat"><div class="dk">Retards</div><div class="dv y" id="gd-del">2</div></div>
+        <div class="dstat"><div class="dk">Supprimés</div><div class="dv r" id="gd-can">0</div></div>
       </div>
     </div>
     <!-- Bloc À quai sticky — reste visible en scrollant -->
-    <div class="sticky-quai" id="gd-quai" style="display:none"></div>
-    <div class="dbody" id="gd-body">—</div>
+    <div class="sticky-quai" id="gd-quai" style="display: none;"></div>
+    <div class="dbody" id="gd-body"><div class="grp-hdr live"><span>● Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">88</span></div><div class="day-sep"><span>🌙 Demain · vendredi 24 avril</span></div><div id="next-train" class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862402</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">06:59</div><div class="tc-when">dans 10h04</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862404</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">07:21</div><div class="tc-when">dans 10h26</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Tours</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8300</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">07:27</div><div class="tc-when">dans 10h32</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nogent-le-Rotrou</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862460</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">07:35</div><div class="tc-when">dans 10h40</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8860</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">07:37</div><div class="tc-when">dans 10h42</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862406</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">07:50</div><div class="tc-when">dans 10h55</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Rennes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8072</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">07:51</div><div class="tc-when">dans 10h56</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Mans</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862502</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">07:53</div><div class="tc-when">dans 10h58</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862408</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:06</div><div class="tc-when">dans 11h11</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Tours</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8306</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:06</div><div class="tc-when">dans 11h11</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Poitiers</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8352</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:06</div><div class="tc-when">dans 11h11</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8422</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:09</div><div class="tc-when">dans 11h14</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥🔥</span><span class="tc-aff-l">fort</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Saint-Nazaire</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8900</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:15</div><div class="tc-when">dans 11h20</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Saint-Brieuc</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8680</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:19</div><div class="tc-when">dans 11h24</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862410</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:21</div><div class="tc-when">dans 11h26</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Mans</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862504</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:24</div><div class="tc-when">dans 11h29</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Poitiers</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8330</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:36</div><div class="tc-when">dans 11h41</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nogent-le-Rotrou</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862462</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:37</div><div class="tc-when">dans 11h42</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">La Rochelle</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8370</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:40</div><div class="tc-when">dans 11h45</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8480</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:40</div><div class="tc-when">dans 11h45</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥🔥</span><span class="tc-aff-l">fort</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Lorient</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8790</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:51</div><div class="tc-when">dans 11h56</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥🔥</span><span class="tc-aff-l">fort</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Saint-Malo</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8080</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:51</div><div class="tc-when">dans 11h56</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥🔥</span><span class="tc-aff-l">fort</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862412</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:51</div><div class="tc-when">dans 11h56</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Arcachon</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8478</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:55</div><div class="tc-when">dans 12h</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Mans</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862506</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">08:55</div><div class="tc-when">dans 12h</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Tours</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8308</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:07</div><div class="tc-when">dans 12h12</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Brest</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8602</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:11</div><div class="tc-when">dans 12h16</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥🔥</span><span class="tc-aff-l">fort</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Quimper</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8702</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:11</div><div class="tc-when">dans 12h16</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥🔥</span><span class="tc-aff-l">fort</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#12490</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:15</div><div class="tc-when">dans 12h20</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Les Sables-d'Olonne</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8970</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:15</div><div class="tc-when">dans 12h20</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Granville</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#3410</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:17</div><div class="tc-when">dans 12h22</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862416</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:21</div><div class="tc-when">dans 12h26</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8500</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:23</div><div class="tc-when">dans 12h28</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥🔥</span><span class="tc-aff-l">fort</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Mans</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862540</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:36</div><div class="tc-when">dans 12h41</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Rennes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8052</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:50</div><div class="tc-when">dans 12h55</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Mans</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862508</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">09:55</div><div class="tc-when">dans 13h</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8404</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">10:01</div><div class="tc-when">dans 13h06</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Brest</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8604</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">10:08</div><div class="tc-when">dans 13h13</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Quimper</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8704</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">10:08</div><div class="tc-when">dans 13h13</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-OUIGO">OUIGO</span>
+          <span class="tc-num">#7624</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">10:12</div><div class="tc-when">dans 13h17</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥</span><span class="tc-aff-l">calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8440</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">10:15</div><div class="tc-when">dans 13h20</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8864</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">10:31</div><div class="tc-when">dans 13h36</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862418</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">10:46</div><div class="tc-when">dans 13h51</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Toulouse Matabiau</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8502</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:04</div><div class="tc-when">dans 14h09</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#12250</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:04</div><div class="tc-when">dans 14h09</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Quimper</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8706</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:09</div><div class="tc-when">dans 14h14</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Brest</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8606</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:09</div><div class="tc-when">dans 14h14</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Croisic</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8912</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:14</div><div class="tc-when">dans 14h19</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-OUIGO">OUIGO</span>
+          <span class="tc-num">#7652</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:32</div><div class="tc-when">dans 14h37</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥</span><span class="tc-aff-l">calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">La Rochelle</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8362</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:42</div><div class="tc-when">dans 14h47</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Rennes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8060</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:47</div><div class="tc-when">dans 14h52</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Mans</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862512</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">11:53</div><div class="tc-when">dans 14h58</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Hendaye</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8530</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">12:04</div><div class="tc-when">dans 15h09</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Tarbes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8560</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">12:04</div><div class="tc-when">dans 15h09</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Granville</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#3420</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">12:06</div><div class="tc-when">dans 15h11</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862422</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">12:51</div><div class="tc-when">dans 15h56</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Toulouse Matabiau</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8504</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">12:58</div><div class="tc-when">dans 16h03</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-OUIGO">OUIGO</span>
+          <span class="tc-num">#7622</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:09</div><div class="tc-when">dans 16h14</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥</span><span class="tc-aff-l">calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Brest</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8610</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:15</div><div class="tc-when">dans 16h20</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Quimper</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8710</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:15</div><div class="tc-when">dans 16h20</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8868</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:29</div><div class="tc-when">dans 16h34</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Poitiers</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8340</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:36</div><div class="tc-when">dans 16h41</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Tours</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8314</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:36</div><div class="tc-when">dans 16h41</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">La Rochelle</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8374</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:45</div><div class="tc-when">dans 16h50</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8486</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:45</div><div class="tc-when">dans 16h50</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862516</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">13:53</div><div class="tc-when">dans 16h58</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Saint-Malo</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8090</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">14:18</div><div class="tc-when">dans 17h23</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Hendaye</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8534</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">14:26</div><div class="tc-when">dans 17h31</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Chartres</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862426</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">14:51</div><div class="tc-when">dans 17h56</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-OUIGO">OUIGO</span>
+          <span class="tc-num">#7656</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">14:51</div><div class="tc-when">dans 17h56</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥</span><span class="tc-aff-l">calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nogent-le-Rotrou</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862482</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">20:56</div><div class="tc-when now">dans 1 min</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Hendaye</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8544</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">21:00</div><div class="tc-when now">dans 5 min</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc warn">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#12278</span>
+          <span class="tc-rt live">● LIVE</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h-old">21:00</div><div class="tc-h" style="color:var(--gold)">21:05</div><div class="tc-when soon">dans 10 min</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-warn">⚠ +5 min</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Brest</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8642</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">21:16</div><div class="tc-when">dans 21 min</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Quimper</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8736</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">21:16</div><div class="tc-when">dans 21 min</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8884</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">21:33</div><div class="tc-when">dans 38 min</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Le Mans</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#862532</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">21:54</div><div class="tc-when">dans 59 min</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Tarbes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8584</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">21:58</div><div class="tc-when">dans 1h03</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Toulouse Matabiau</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8516</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">21:58</div><div class="tc-when">dans 1h03</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Bordeaux Saint-Jean</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8450</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">22:03</div><div class="tc-when">dans 1h08</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Pontorson - Mont-Saint-Michel</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#3457</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">22:21</div><div class="tc-when">dans 1h26</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Granville</div>
+        <div class="tc-meta">
+          <span class="badge b-TER">TER</span>
+          <span class="tc-num">#3440</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">22:21</div><div class="tc-when">dans 1h26</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">💤</span><span class="tc-aff-l">très calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">La Rochelle</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8394</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">22:22</div><div class="tc-when">dans 1h27</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Nantes</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8886</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">22:30</div><div class="tc-when">dans 1h35</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Brest</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8646</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">23:07</div><div class="tc-when">dans 2h12</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Quimper</div>
+        <div class="tc-meta">
+          <span class="badge b-INOUI">INOUI</span>
+          <span class="tc-num">#8746</span>
+          <span class="tc-rt base">~ théo</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">23:07</div><div class="tc-when">dans 2h12</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥🔥</span><span class="tc-aff-l">modéré</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Toulouse Matabiau</div>
+        <div class="tc-meta">
+          <span class="badge b-OUIGO">OUIGO</span>
+          <span class="tc-num">#7674</span>
+          <span class="tc-rt live">● LIVE</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h">23:22</div><div class="tc-when">dans 2h27</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥</span><span class="tc-aff-l">calme</span></div>
+      <span class="st-chip st-ok">✓ À l'heure</span>
+    </div>
+  </div><div class="tc crit">
+    <div class="tc-top">
+      <div class="tc-info">
+        <div class="tc-orig">Hendaye</div>
+        <div class="tc-meta">
+          <span class="badge b-OUIGO">OUIGO</span>
+          <span class="tc-num">#7682</span>
+          <span class="tc-rt live">● LIVE</span>
+        </div>
+      </div>
+      <div class="tc-cd"><div class="tc-h-old">23:07</div><div class="tc-h" style="color:var(--gold)">23:22</div><div class="tc-when">dans 2h27</div></div>
+    </div>
+    <div class="tc-bot">
+      <div class="tc-aff"><span class="tc-flames">🔥</span><span class="tc-aff-l">calme</span></div>
+      <span class="st-chip st-crit">⚠ RETARD +15 min</span>
+    </div>
+  </div></div>
   </div>
 </dialog>
 
@@ -1750,7 +5116,7 @@ dialog .sheet{
       <div class="scale-row"><div class="scale-ico">🔥</div><div class="scale-txt">Calme — 5 à 35 clients</div></div>
       <div class="scale-row"><div class="scale-ico">💤</div><div class="scale-txt">Très calme — moins de 5</div></div>
     </div>
-    <p style="font-size:10px;color:var(--ink3)">Estimation basée sur 5 facteurs : type de train, capacité & remplissage, heure, origine (distance/international), gare d'arrivée, et jour (vendredi/dimanche = rush weekend). Ne constitue pas une donnée officielle.</p>
+    <p style="font-size:10px;color:var(--ink3)">Estimation basée sur 5 facteurs : type de train, capacité &amp; remplissage, heure, origine (distance/international), gare d'arrivée, et jour (vendredi/dimanche = rush weekend). Ne constitue pas une donnée officielle.</p>
     <button class="close-info" onclick="closeInfo()">J'ai compris</button>
   </div>
 </div>
@@ -1774,9 +5140,274 @@ const GARES = [
 ];
 
 /* ═══════════════════════════════════════════════
-   CAPACITÉS RÉELLES DES TRAINS
-   Sources vérifiées : Siemens, SNCF fiches techniques, Wikipedia
+   ICÔNES ARCHITECTURALES DES GARES
+   Chaque gare = glyphe SVG reconnaissable
 ═══════════════════════════════════════════════ */
+const GARE_SVG = {
+  // Gare du Nord — façade 1864 Hittorff : fronton triangulaire central + 2 ailes, statues au sommet, grande verrière
+  nord: `<svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs><linearGradient id="ga-nord" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F1DCBE"/><stop offset="1" stop-color="#D9BA8E"/>
+    </linearGradient></defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-nord)"/>
+    <!-- Aile gauche -->
+    <rect x="7" y="28" width="11" height="20" fill="#BC8F5C"/>
+    <path d="M7 28h11l-1-3H8z" fill="#8B5E2B"/>
+    <rect x="9" y="32" width="2" height="4" fill="#3D2616"/>
+    <rect x="13" y="32" width="2" height="4" fill="#3D2616"/>
+    <rect x="9" y="38" width="2" height="4" fill="#3D2616"/>
+    <rect x="13" y="38" width="2" height="4" fill="#3D2616"/>
+    <!-- Aile droite -->
+    <rect x="38" y="28" width="11" height="20" fill="#BC8F5C"/>
+    <path d="M38 28h11l-1-3h-9z" fill="#8B5E2B"/>
+    <rect x="40" y="32" width="2" height="4" fill="#3D2616"/>
+    <rect x="44" y="32" width="2" height="4" fill="#3D2616"/>
+    <rect x="40" y="38" width="2" height="4" fill="#3D2616"/>
+    <rect x="44" y="38" width="2" height="4" fill="#3D2616"/>
+    <!-- Corps central : grande arche + fronton -->
+    <rect x="18" y="20" width="20" height="28" fill="#D4A876"/>
+    <!-- Fronton triangulaire -->
+    <path d="M18 20 L28 10 L38 20 Z" fill="#C9965D" stroke="#8B5E2B" stroke-width=".8"/>
+    <!-- Grande arche (verrière) -->
+    <path d="M22 48 L22 32 Q28 22 34 32 L34 48 Z" fill="#EFE5D0" stroke="#6B4A2E" stroke-width="1.1"/>
+    <!-- Meneaux de la verrière -->
+    <line x1="28" y1="26" x2="28" y2="48" stroke="#6B4A2E" stroke-width=".5"/>
+    <line x1="24" y1="30" x2="24" y2="48" stroke="#6B4A2E" stroke-width=".4"/>
+    <line x1="32" y1="30" x2="32" y2="48" stroke="#6B4A2E" stroke-width=".4"/>
+    <line x1="22" y1="36" x2="34" y2="36" stroke="#6B4A2E" stroke-width=".4"/>
+    <line x1="22" y1="42" x2="34" y2="42" stroke="#6B4A2E" stroke-width=".4"/>
+    <!-- 3 statues au sommet -->
+    <circle cx="22" cy="17" r="1.1" fill="#6B4A2E"/>
+    <circle cx="28" cy="9" r="1.2" fill="#6B4A2E"/>
+    <circle cx="34" cy="17" r="1.1" fill="#6B4A2E"/>
+    <rect x="21.2" y="18" width="1.6" height="2.5" fill="#6B4A2E"/>
+    <rect x="27.2" y="10" width="1.6" height="3" fill="#6B4A2E"/>
+    <rect x="33.2" y="18" width="1.6" height="2.5" fill="#6B4A2E"/>
+  </svg>`,
+
+  // Gare de Lyon — Tour de l'Horloge 67m, emblème absolu
+  lyon: `<svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs><linearGradient id="ga-lyon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EBDBA8"/><stop offset="1" stop-color="#C9B072"/>
+    </linearGradient></defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-lyon)"/>
+    <!-- Ciel au-dessus -->
+    <!-- Corps du bâtiment (hall latéral bas) -->
+    <rect x="6" y="40" width="44" height="10" fill="#9C7E48"/>
+    <rect x="8" y="42" width="3" height="5" fill="#5B4520"/>
+    <rect x="13" y="42" width="3" height="5" fill="#5B4520"/>
+    <rect x="40" y="42" width="3" height="5" fill="#5B4520"/>
+    <rect x="45" y="42" width="3" height="5" fill="#5B4520"/>
+    <!-- Corniche -->
+    <rect x="6" y="39" width="44" height="2" fill="#6F5730"/>
+    <!-- Tour de l'Horloge (haute et fine) -->
+    <rect x="23" y="14" width="10" height="26" fill="#BE9A5E"/>
+    <!-- Bandeau supérieur de la tour -->
+    <rect x="21" y="12" width="14" height="3" fill="#9C7E48"/>
+    <!-- Cadran d'horloge -->
+    <circle cx="28" cy="22" r="4" fill="#FFF8E0" stroke="#5B4520" stroke-width="1.2"/>
+    <circle cx="28" cy="22" r="4" fill="none" stroke="#8B6D3A" stroke-width=".4"/>
+    <!-- Aiguilles 10h10 -->
+    <path d="M28 22 L28 19" stroke="#5B4520" stroke-width="1" stroke-linecap="round"/>
+    <path d="M28 22 L30.5 22.5" stroke="#5B4520" stroke-width=".9" stroke-linecap="round"/>
+    <circle cx="28" cy="22" r=".6" fill="#5B4520"/>
+    <!-- Chiffres 12/6 suggérés -->
+    <circle cx="28" cy="19" r=".3" fill="#5B4520"/>
+    <circle cx="28" cy="25" r=".3" fill="#5B4520"/>
+    <!-- Fenêtres sous l'horloge -->
+    <rect x="25" y="29" width="2" height="4" fill="#5B4520"/>
+    <rect x="29" y="29" width="2" height="4" fill="#5B4520"/>
+    <rect x="25" y="34" width="2" height="4" fill="#5B4520"/>
+    <rect x="29" y="34" width="2" height="4" fill="#5B4520"/>
+    <!-- Coiffe / toit en tuiles (style lanternon) -->
+    <path d="M21 12 L28 4 L35 12 Z" fill="#8B6D3A"/>
+    <!-- Campanile / pointe -->
+    <rect x="27.2" y="4" width="1.6" height="3" fill="#8B6D3A"/>
+    <circle cx="28" cy="3" r=".8" fill="#E85D1A"/>
+  </svg>`,
+
+  // Montparnasse — LA Tour Montparnasse, gratte-ciel noir 210m
+  montparnasse: `<svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs>
+      <linearGradient id="ga-mp" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#D8DCE2"/><stop offset="1" stop-color="#B0B6C0"/>
+      </linearGradient>
+      <linearGradient id="ga-mp-tower" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#2A2F35"/><stop offset=".4" stop-color="#4B5360"/><stop offset="1" stop-color="#2A2F35"/>
+      </linearGradient>
+    </defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-mp)"/>
+    <!-- Parvis / gare basse -->
+    <rect x="6" y="44" width="44" height="6" fill="#6F7682"/>
+    <rect x="6" y="42" width="44" height="2" fill="#4B5360"/>
+    <!-- Immeubles d'accompagnement -->
+    <rect x="7" y="36" width="7" height="8" fill="#8791A0"/>
+    <rect x="42" y="36" width="7" height="8" fill="#8791A0"/>
+    <!-- LA Tour Montparnasse : rectangle étroit noir qui domine -->
+    <rect x="22" y="8" width="12" height="36" fill="url(#ga-mp-tower)"/>
+    <!-- Bandeau horizontal au milieu -->
+    <rect x="22" y="24" width="12" height="1" fill="#1A1F24"/>
+    <rect x="22" y="36" width="12" height="1" fill="#1A1F24"/>
+    <!-- Fenêtres reflets : petites lignes verticales pour suggérer les étages -->
+    <g fill="#C8D4E0" opacity=".45">
+      <rect x="23.5" y="10" width="1" height="33"/>
+      <rect x="26" y="10" width="1" height="33"/>
+      <rect x="28.5" y="10" width="1" height="33"/>
+      <rect x="31" y="10" width="1" height="33"/>
+    </g>
+    <!-- Quelques fenêtres éclairées -->
+    <rect x="23.5" y="14" width="1" height="2" fill="#FFD47A"/>
+    <rect x="28.5" y="18" width="1" height="2" fill="#FFD47A"/>
+    <rect x="31" y="28" width="1" height="2" fill="#FFD47A"/>
+    <rect x="26" y="32" width="1" height="2" fill="#FFD47A"/>
+    <!-- Antenne au sommet -->
+    <rect x="27.5" y="5" width="1" height="3" fill="#2A2F35"/>
+    <circle cx="28" cy="4" r=".8" fill="#E85D1A"/>
+  </svg>`,
+
+  // Gare de l'Est — façade 1849 avec fronton arrondi iconique + sculpture "La Ville de Strasbourg"
+  est: `<svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs><linearGradient id="ga-est" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E4CDAE"/><stop offset="1" stop-color="#BC9D7C"/>
+    </linearGradient></defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-est)"/>
+    <!-- Ailes latérales basses -->
+    <rect x="5" y="32" width="10" height="18" fill="#A88662"/>
+    <rect x="41" y="32" width="10" height="18" fill="#A88662"/>
+    <rect x="7" y="36" width="2" height="3" fill="#4B3520"/>
+    <rect x="11" y="36" width="2" height="3" fill="#4B3520"/>
+    <rect x="7" y="41" width="2" height="3" fill="#4B3520"/>
+    <rect x="11" y="41" width="2" height="3" fill="#4B3520"/>
+    <rect x="43" y="36" width="2" height="3" fill="#4B3520"/>
+    <rect x="47" y="36" width="2" height="3" fill="#4B3520"/>
+    <rect x="43" y="41" width="2" height="3" fill="#4B3520"/>
+    <rect x="47" y="41" width="2" height="3" fill="#4B3520"/>
+    <!-- Corps central -->
+    <rect x="15" y="24" width="26" height="26" fill="#C9A379"/>
+    <!-- Grand arc en plein cintre — signature de l'Est -->
+    <path d="M18 48 L18 34 Q28 20 38 34 L38 48 Z" fill="#F0E4CC" stroke="#5B3F20" stroke-width="1.3"/>
+    <!-- Fronton demi-cercle au-dessus de l'arc (tympan) -->
+    <path d="M15 24 Q28 8 41 24" fill="#D4AE7E" stroke="#5B3F20" stroke-width="1.1"/>
+    <path d="M17 24 Q28 12 39 24" fill="none" stroke="#8B6442" stroke-width=".5"/>
+    <!-- Verticales de la verrière -->
+    <line x1="24" y1="26" x2="24" y2="48" stroke="#5B3F20" stroke-width=".4"/>
+    <line x1="28" y1="22" x2="28" y2="48" stroke="#5B3F20" stroke-width=".5"/>
+    <line x1="32" y1="26" x2="32" y2="48" stroke="#5B3F20" stroke-width=".4"/>
+    <!-- Horizontales -->
+    <line x1="19" y1="36" x2="37" y2="36" stroke="#5B3F20" stroke-width=".4"/>
+    <line x1="19" y1="42" x2="37" y2="42" stroke="#5B3F20" stroke-width=".4"/>
+    <!-- Statue au sommet du fronton (La Ville de Strasbourg) -->
+    <circle cx="28" cy="10" r="1.4" fill="#6B4A2E"/>
+    <path d="M26.5 11 L29.5 11 L29.5 15 L26.5 15 Z" fill="#6B4A2E"/>
+    <!-- Horloge au-dessus de l'arche -->
+    <circle cx="28" cy="20" r="2.2" fill="#FFF8E0" stroke="#5B3F20" stroke-width=".8"/>
+  </svg>`,
+
+  // Gare d'Austerlitz — grande halle 1865 avec verrière courbe emblématique
+  austerlitz: `<svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs>
+      <linearGradient id="ga-aus" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#CDD8C3"/><stop offset="1" stop-color="#8FA382"/>
+      </linearGradient>
+      <linearGradient id="ga-aus-glass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FBF6E6"/><stop offset="1" stop-color="#D9E2CC"/>
+      </linearGradient>
+    </defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-aus)"/>
+    <!-- Quais au sol -->
+    <rect x="5" y="44" width="46" height="6" fill="#4A5C3E"/>
+    <rect x="5" y="43" width="46" height="1" fill="#2E3B25"/>
+    <!-- Deux ailes pignons de pierre -->
+    <path d="M6 44 L6 24 L14 14 L14 44 Z" fill="#8F7A5C" stroke="#3F3020" stroke-width=".8"/>
+    <path d="M50 44 L50 24 L42 14 L42 44 Z" fill="#8F7A5C" stroke="#3F3020" stroke-width=".8"/>
+    <!-- Grande halle : toit en voûte -->
+    <path d="M14 44 L14 20 Q28 4 42 20 L42 44 Z" fill="url(#ga-aus-glass)" stroke="#3F3020" stroke-width="1.3"/>
+    <!-- Charpente métallique type Eiffel : arcs concentriques -->
+    <path d="M17 44 Q28 10 39 44" stroke="#4A5C3E" stroke-width=".7" fill="none"/>
+    <path d="M20 44 Q28 18 36 44" stroke="#4A5C3E" stroke-width=".5" fill="none" opacity=".7"/>
+    <path d="M23 44 Q28 25 33 44" stroke="#4A5C3E" stroke-width=".4" fill="none" opacity=".5"/>
+    <!-- Poutres verticales -->
+    <line x1="28" y1="8" x2="28" y2="44" stroke="#3F3020" stroke-width=".6"/>
+    <line x1="22" y1="16" x2="22" y2="44" stroke="#3F3020" stroke-width=".4"/>
+    <line x1="34" y1="16" x2="34" y2="44" stroke="#3F3020" stroke-width=".4"/>
+    <!-- Horizontales -->
+    <line x1="16" y1="30" x2="40" y2="30" stroke="#3F3020" stroke-width=".4"/>
+    <line x1="14" y1="38" x2="42" y2="38" stroke="#3F3020" stroke-width=".4"/>
+    <!-- Croissant de lune (trains de nuit = identité) -->
+    <circle cx="44" cy="11" r="3" fill="#FDF3B7"/>
+    <circle cx="45.5" cy="10" r="2.5" fill="url(#ga-aus)"/>
+    <!-- Fenêtres dans les pignons -->
+    <rect x="8" y="28" width="4" height="4" fill="#2E3B25"/>
+    <rect x="44" y="28" width="4" height="4" fill="#2E3B25"/>
+    <rect x="8" y="35" width="4" height="4" fill="#2E3B25"/>
+    <rect x="44" y="35" width="4" height="4" fill="#2E3B25"/>
+  </svg>`,
+
+  // Gare de Bercy — façade moderne 1977 avec verrière contemporaine + passerelle Simone-de-Beauvoir signature
+  bercy: `<svg viewBox="0 0 56 56" aria-hidden="true" class="ga-svg">
+    <defs>
+      <linearGradient id="ga-bercy" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#EAD4B6"/><stop offset="1" stop-color="#C69A72"/>
+      </linearGradient>
+      <linearGradient id="ga-bercy-glass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#E8DFC8"/><stop offset="1" stop-color="#B89968"/>
+      </linearGradient>
+    </defs>
+    <rect x="3" y="3" width="50" height="50" rx="14" fill="url(#ga-bercy)"/>
+    <!-- Ailes latérales basses en pierre -->
+    <rect x="6" y="30" width="10" height="18" fill="#A88662"/>
+    <rect x="40" y="30" width="10" height="18" fill="#A88662"/>
+    <rect x="6" y="29" width="10" height="1.5" fill="#7A5434"/>
+    <rect x="40" y="29" width="10" height="1.5" fill="#7A5434"/>
+    <!-- Fenêtres des ailes -->
+    <rect x="8" y="33" width="2" height="3" fill="#4B3520"/>
+    <rect x="12" y="33" width="2" height="3" fill="#4B3520"/>
+    <rect x="8" y="38" width="2" height="3" fill="#4B3520"/>
+    <rect x="12" y="38" width="2" height="3" fill="#4B3520"/>
+    <rect x="8" y="43" width="2" height="3" fill="#4B3520"/>
+    <rect x="12" y="43" width="2" height="3" fill="#4B3520"/>
+    <rect x="42" y="33" width="2" height="3" fill="#4B3520"/>
+    <rect x="46" y="33" width="2" height="3" fill="#4B3520"/>
+    <rect x="42" y="38" width="2" height="3" fill="#4B3520"/>
+    <rect x="46" y="38" width="2" height="3" fill="#4B3520"/>
+    <rect x="42" y="43" width="2" height="3" fill="#4B3520"/>
+    <rect x="46" y="43" width="2" height="3" fill="#4B3520"/>
+    <!-- Corps central en pierre -->
+    <rect x="16" y="24" width="24" height="24" fill="#C9A379"/>
+    <!-- Grande verrière moderne rectangulaire (contemporaine, pas d'arche) -->
+    <rect x="19" y="22" width="18" height="22" fill="url(#ga-bercy-glass)" stroke="#5B3F20" stroke-width="1"/>
+    <!-- Grille moderne de la verrière : lignes verticales et horizontales régulières -->
+    <line x1="23" y1="22" x2="23" y2="44" stroke="#5B3F20" stroke-width=".4"/>
+    <line x1="28" y1="22" x2="28" y2="44" stroke="#5B3F20" stroke-width=".5"/>
+    <line x1="33" y1="22" x2="33" y2="44" stroke="#5B3F20" stroke-width=".4"/>
+    <line x1="19" y1="28" x2="37" y2="28" stroke="#5B3F20" stroke-width=".4"/>
+    <line x1="19" y1="34" x2="37" y2="34" stroke="#5B3F20" stroke-width=".4"/>
+    <line x1="19" y1="40" x2="37" y2="40" stroke="#5B3F20" stroke-width=".4"/>
+    <!-- Toit plat moderne qui dépasse (marquise contemporaine) -->
+    <rect x="15" y="20" width="26" height="2.5" fill="#6B4A2E"/>
+    <rect x="15" y="22.5" width="26" height=".8" fill="#3D2616"/>
+    <!-- Passerelle Simone-de-Beauvoir — courbe iconique en "S" au premier plan -->
+    <path d="M4 50 Q14 44 28 48 T52 42" fill="none" stroke="#E85D1A" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M4 50 Q14 44 28 48 T52 42" fill="none" stroke="#FFF8E0" stroke-width=".4" stroke-linecap="round" opacity=".8"/>
+    <!-- Haubans de la passerelle -->
+    <line x1="14" y1="46.3" x2="14" y2="49" stroke="#6B4A2E" stroke-width=".3"/>
+    <line x1="20" y1="47" x2="20" y2="49" stroke="#6B4A2E" stroke-width=".3"/>
+    <line x1="28" y1="48" x2="28" y2="49.5" stroke="#6B4A2E" stroke-width=".3"/>
+    <line x1="36" y1="47" x2="36" y2="49" stroke="#6B4A2E" stroke-width=".3"/>
+    <line x1="44" y1="44.5" x2="44" y2="48" stroke="#6B4A2E" stroke-width=".3"/>
+    <!-- Horloge moderne centrale (sans texte) -->
+    <circle cx="28" cy="17" r="2.4" fill="#FFF8E0" stroke="#5B3F20" stroke-width=".8"/>
+    <path d="M28 15.2 L28 17 L29.3 17.8" stroke="#5B3F20" stroke-width=".5" fill="none" stroke-linecap="round"/>
+    <!-- Petit drapeau orange signature sur le toit -->
+    <rect x="27.4" y="11" width=".8" height="6" fill="#6B4A2E"/>
+    <path d="M28.2 11 L32 12 L28.2 13.5 Z" fill="#E85D1A"/>
+  </svg>`,
+};
+
+function gareIco(g){
+  return GARE_SVG[g.id] || '<div style="font-size:22px">'+(g.ico||'🚂')+'</div>';
+}
+
 const CAPACITE = {
   // Grande vitesse — valeurs constructeur
   TGV:       510,   // TGV Duplex/Réseau (510 moyenne)
@@ -2617,8 +6248,8 @@ async function doRefresh(force=true){
 
   updatePillState();
 
-  const hms = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  document.getElementById('rtime-main').textContent = `Actualisé à ${hms}`;
+  const hms = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('rtime-main').textContent = hms;
   
 
   showErrBanner();
@@ -2649,7 +6280,7 @@ function startCD(){
     const el  = document.getElementById('rtime-next');
     if(el){
       const m=Math.floor(rem/60), s=rem%60;
-      el.textContent = `prochain dans ${m}:${pad(s)}`;
+      el.textContent = m > 0 ? `màj dans ${m} min` : `màj dans ${s} s`;
     }
   }, 1000);
 }
@@ -2730,7 +6361,7 @@ function renderGares(){
     const c = CACHE[gare.id];
     if(!c){
       return `<button class="gare-card" type="button" data-gid="${gare.id}">
-        <div class="gc-ico">${gare.ico}</div>
+        <div class="gc-ico">${gareIco(gare)}</div>
         <div class="gc-left"><div class="gc-name">${esc(gare.nom)}</div>
           <div class="gc-sub">Chargement…</div></div>
         <div class="gc-right"><div class="flames lvl0">💤</div></div>
@@ -2741,7 +6372,7 @@ function renderGares(){
     if(c.error && (!c.trains || !c.trains.length)){
       const short = c.error.length > 50 ? c.error.slice(0,47)+'…' : c.error;
       return `<button class="gare-card err-card" type="button" data-gid="${gare.id}">
-        <div class="gc-ico">${gare.ico}</div>
+        <div class="gc-ico">${gareIco(gare)}</div>
         <div class="gc-left">
           <div class="gc-name">${esc(gare.nom)}</div>
           <div class="gc-sub" style="color:var(--red)">⚠ ${esc(short)}</div>
@@ -2782,7 +6413,7 @@ function renderGares(){
     }
 
     return `<button class="gare-card${isPeak?' peak':''}" type="button" data-gid="${gare.id}">
-      <div class="gc-ico">${gare.ico}</div>
+      <div class="gc-ico">${gareIco(gare)}</div>
       <div class="gc-left">
         <div class="gc-name">${esc(gare.nom)}</div>
         <div class="gc-sub">${esc(gare.metro)}</div>
@@ -3180,6 +6811,18 @@ function todayYMD(){
 
 function switchTab(id){
   document.querySelectorAll('.nav-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
+  document.querySelectorAll('.bottom-nav button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab===id);
+  });
+  // Animation courte sur le bouton cliqué
+  const clicked = document.querySelector(`.bottom-nav button[data-tab="${id}"]`);
+  if(clicked){
+    clicked.classList.remove('bn-anim');
+    // reflow pour relancer l'anim
+    void clicked.offsetWidth;
+    clicked.classList.add('bn-anim');
+    setTimeout(()=>clicked.classList.remove('bn-anim'), 750);
+  }
   document.querySelectorAll('.tab').forEach(s=>s.classList.toggle('active', s.id===id));
   if(id === 'tab-stats'){
     renderStats();
@@ -5065,7 +8708,7 @@ function closeDialog(){
 
 /* ═══ ÉVÉNEMENTS ═══ */
 document.addEventListener('click', e=>{
-  const nb = e.target.closest('.nav-tabs button');
+  const nb = e.target.closest('.nav-tabs button, .bottom-nav button');
   if(nb && nb.dataset.tab){ switchTab(nb.dataset.tab); return; }
 
   const gc = e.target.closest('.gare-card[data-gid]');
@@ -5107,7 +8750,7 @@ function boot(){
     
     const oldest = Math.min(...Object.values(CACHE).map(c=>c.ts||0));
     const ageMin = Math.floor((Date.now()-oldest)/60000);
-    document.getElementById('rtime-main').textContent = `Dernières données : il y a ${ageMin} min`;
+    document.getElementById('rtime-main').textContent = `il y a ${ageMin} min`;
   } else {
     setPill('off','CONNEXION…');
   }
@@ -5118,6 +8761,25 @@ function boot(){
 }
 
 boot();
+
+/* ═══ SPLASH COUNTER ANIM — compteur 0 → 2847 ═══ */
+(function animateSplashCounter(){
+  const el = document.getElementById('tp-count');
+  if(!el) return;
+  const TARGET = 2847, DURATION = 1400, START = 900;
+  setTimeout(()=>{
+    const t0 = performance.now();
+    function tick(now){
+      const p = Math.min(1, (now - t0) / DURATION);
+      // easeOutExpo
+      const e = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+      el.textContent = Math.round(TARGET * e).toLocaleString('fr-FR');
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }, START);
+})();
 </script>
-</body>
-</html>
+
+
+</body></html>
