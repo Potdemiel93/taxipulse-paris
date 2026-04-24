@@ -2517,6 +2517,124 @@ header{
   border-left:3px solid var(--accent) !important;
 }
 
+/* ═══════════════════════════════════════════════
+   GARE DIALOG — IMPROVEMENTS POUR CHAUFFEURS
+   Fix scroll + icons pro + hiérarchie visuelle
+═══════════════════════════════════════════════ */
+
+/* ── SCROLL FIX : scrollIntoView + scroll-margin pour sticky header ── */
+#gare-dialog .sheet{scroll-behavior:auto !important}
+#gare-dialog #next-train{
+  scroll-margin-top:180px;  /* header (~140) + quai (~0-60) + petit buffer */
+}
+#gare-dialog .sticky-quai{scroll-margin-top:140px}
+
+/* ── ICONS SVG PROS : inline utility class ── */
+.ico{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;line-height:0;vertical-align:middle;
+}
+.ico svg{width:100%;height:100%;display:block}
+.ico-14{width:14px;height:14px}
+.ico-16{width:16px;height:16px}
+.ico-18{width:18px;height:18px}
+.ico-20{width:20px;height:20px}
+.ico-22{width:22px;height:22px}
+
+/* Next train — highlight discret pour guider l'œil du chauffeur */
+#gare-dialog #next-train{
+  position:relative;
+  animation:nextTrainGlow .6s ease-out;
+}
+#gare-dialog #next-train::after{
+  content:'';position:absolute;inset:-2px;pointer-events:none;
+  border-radius:inherit;
+  box-shadow:0 0 0 2px rgba(232,93,26,.18), 0 8px 22px -8px rgba(232,93,26,.25);
+  animation:nextTrainPulse 2.2s ease-out forwards;
+}
+@keyframes nextTrainGlow{
+  0%{transform:scale(.995);opacity:.7}
+  100%{transform:scale(1);opacity:1}
+}
+@keyframes nextTrainPulse{
+  0%{box-shadow:0 0 0 3px rgba(232,93,26,.32),0 10px 28px -8px rgba(232,93,26,.35)}
+  100%{box-shadow:0 0 0 0 rgba(232,93,26,0),0 0 0 0 rgba(232,93,26,0)}
+}
+
+/* Status chips — icônes SVG inline */
+.st-chip{
+  display:inline-flex !important;align-items:center;gap:5px !important;
+  padding:5px 10px !important;border-radius:100px;
+  font-size:10px;font-weight:700;white-space:nowrap;
+}
+.st-chip .ico{color:currentColor}
+
+/* Live/base/est labels — icône à gauche */
+.tc-rt{
+  display:inline-flex !important;align-items:center;gap:3px !important;
+}
+.tc-rt .ico{color:currentColor}
+.tc-rt.live .ico svg circle{fill:currentColor}
+
+/* Day separator — icône lune pro */
+.day-sep span{
+  display:inline-flex !important;align-items:center;gap:8px;
+}
+.day-sep .ico{color:var(--accent);opacity:.85}
+
+/* Sticky quai header — icône plateforme */
+.sq-hdr{
+  display:inline-flex;align-items:center;gap:7px !important;
+}
+.sq-hdr .ico{color:var(--accent);flex-shrink:0}
+.sq-hdr .sq-hdr-lbl{flex:1}
+
+/* Dialog header close + waze buttons */
+.gd-waze, .close-btn{
+  display:inline-flex !important;align-items:center;justify-content:center;
+}
+.gd-waze .ico, .close-btn .ico{color:currentColor}
+
+/* Gare card dot (next train) — cleaner */
+.gc-next{display:flex;align-items:center;gap:7px}
+
+/* Flame level 0 : "très calme" → SVG zzz pro au lieu de 💤 */
+.tc-flames.lvl-calm, .flames.lvl0 .tp-calm-ico{
+  display:inline-flex !important;align-items:center;color:var(--ink3);
+}
+.tc-aff .tc-flames{display:inline-flex !important;align-items:center;line-height:1}
+
+/* Stats grid : couleur du 'Demande taxi' pour flammes */
+.dstat .dv.flames-stat{
+  display:inline-flex;align-items:center;justify-content:center;gap:1px;
+  font-size:14px;letter-spacing:-2px;
+}
+.dstat .dv.flames-stat .tp-calm-ico{letter-spacing:0}
+
+/* Header améliorer : nom gare plus gros + sub plus soft */
+#gare-dialog .dhdr-name{font-size:24px !important;font-weight:800 !important;letter-spacing:-.8px !important}
+#gare-dialog .dhdr-sub{font-size:10.5px !important;opacity:.72}
+
+/* Prochaines arrivées header — icône live */
+.grp-hdr{
+  display:flex !important;align-items:center;gap:8px !important;
+  padding:14px 2px 10px;
+  font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;font-weight:800;
+  color:var(--ink2);
+}
+.grp-hdr.live{color:var(--accent)}
+.grp-hdr .grp-line{flex:1;height:1px;background:var(--line);margin:0 2px}
+.grp-hdr .grp-ct{
+  font-family:var(--mono);font-size:10px;
+  background:var(--card2);padding:2px 8px;border-radius:100px;
+  color:var(--ink);font-weight:700;letter-spacing:0;
+}
+.grp-hdr .ico{color:inherit}
+
+/* Next train — typo horaire plus grande */
+#gare-dialog #next-train .tc-h{font-size:20px !important}
+#gare-dialog #next-train .tc-when{font-size:11px !important}
+
 </style>
 <link id="gfont-Inter" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"></head>
 <body data-cc-id="cc-1" style="font-family: -apple-system; background-color: rgb(255, 249, 234); cursor: crosshair;">
@@ -3679,8 +3797,8 @@ header{
           <div class="dhdr-name" id="gd-nom">Montparnasse</div>
           <div class="dhdr-sub" id="gd-sub">TGV Atlantique · Bretagne · Sud-Ouest</div>
         </div>
-        <button class="gd-waze" id="gd-waze" title="Naviguer avec Waze" style="display: flex;">🧭</button>
-        <button class="close-btn" id="gd-close">✕</button>
+        <button class="gd-waze" id="gd-waze" title="Naviguer avec Waze" style="display: flex;"><span class="ico ico-18"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span></button>
+        <button class="close-btn" id="gd-close"><span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span></button>
       </div>
       <div class="dstats">
         <div class="dstat"><div class="dk">Arrivées 25min</div><div class="dv a" id="gd-up">5</div></div>
@@ -5631,8 +5749,23 @@ function estimerPax(type, heureArrivee, origine, gareId, date){
    NIVEAU DE FLAMMES (clients taxi potentiels)
    Seuils stricts — 1 flamme reste l'exception, pas la règle
 ═══════════════════════════════════════════════ */
+/* ═══ ICÔNES SVG PROS ═══ (Lucide-style, stroke 2) */
+const ICO = {
+  close:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span>',
+  nav:    '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span>',
+  check:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>',
+  warn:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>',
+  moon:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>',
+  platform:'<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16"/><circle cx="8.5" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1" fill="currentColor" stroke="none"/><path d="M8 19l-2 3M16 19l2 3"/></svg></span>',
+  calendar:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>',
+  ban:    '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></span>',
+  livedot:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"><animate attributeName="opacity" values="1;.3;1" dur="1.4s" repeatCount="indefinite"/></circle></svg></span>',
+  clock:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>',
+  zzz:    '<span class="tp-calm-ico ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h7L4 14h7M14 10h5l-5 5h5"/></svg></span>'
+};
+
 function niveauFlammes(totalPax){
-  if(totalPax < 5)       return { lvl:0, ico:'💤',        txt:'très calme' };
+  if(totalPax < 5)       return { lvl:0, ico:ICO.zzz,      txt:'très calme' };
   if(totalPax < 35)      return { lvl:1, ico:'🔥',         txt:'calme'     };
   if(totalPax < 90)      return { lvl:2, ico:'🔥🔥',       txt:'modéré'    };
   if(totalPax < 180)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'      };
@@ -6353,7 +6486,7 @@ function renderGares(){
   const list = document.getElementById('gare-list');
 
   if(!Object.keys(CACHE).length){
-    list.innerHTML = '<div class="empty"><span class="ei">⏳</span>Connexion aux données SNCF…</div>';
+    list.innerHTML = `<div class="empty"><span class="ei">${ICO.clock}</span>Connexion aux données SNCF…</div>`;
     return;
   }
 
@@ -6364,7 +6497,7 @@ function renderGares(){
         <div class="gc-ico">${gareIco(gare)}</div>
         <div class="gc-left"><div class="gc-name">${esc(gare.nom)}</div>
           <div class="gc-sub">Chargement…</div></div>
-        <div class="gc-right"><div class="flames lvl0">💤</div></div>
+        <div class="gc-right"><div class="flames lvl0">${ICO.zzz}</div></div>
       </button>`;
     }
 
@@ -6375,14 +6508,15 @@ function renderGares(){
         <div class="gc-ico">${gareIco(gare)}</div>
         <div class="gc-left">
           <div class="gc-name">${esc(gare.nom)}</div>
-          <div class="gc-sub" style="color:var(--red)">⚠ ${esc(short)}</div>
+          <div class="gc-sub" style="color:var(--red);display:inline-flex;align-items:center;gap:5px">${ICO.warn}${esc(short)}</div>
         </div>
-        <div class="gc-right"><div class="flames lvl0">⚠</div></div>
+        <div class="gc-right"><div class="flames lvl0">${ICO.warn}</div></div>
       </button>`;
     }
 
     const trains   = c.trains || [];
-    const upcoming = trains.filter(t => t.min > -15 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
+    // Fenêtre réduite : trains passés > 8 min filtrés (avant: 15 min)
+    const upcoming = trains.filter(t => t.min > -8 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
     const next25   = upcoming.filter(t => t.min <= 25 && t.min >= 0);
     const totalPax = next25.reduce((s,t)=>s+t.passagers, 0);
     const totalPax25 = totalPax;
@@ -6390,6 +6524,8 @@ function renderGares(){
     const isPeak   = flames.lvl >= 3;
     const delays   = upcoming.filter(t=>t.retard>0).length;
 
+    // Pour l'affichage du prochain train sur la card, on montre SEULEMENT les trains à venir
+    // (sauf si aucun à venir et qu'il y a un juste arrivé < 8 min, alors on le montre)
     const nxt = upcoming.filter(t=>t.min>=0).sort((a,b)=>a.min-b.min)[0]
              || upcoming.filter(t=>t.min<0).sort((a,b)=>b.min-a.min)[0];
     let dotClass='none', nextTxt='Aucun à venir';
@@ -6409,7 +6545,7 @@ function renderGares(){
     const ageMin = Math.floor(ageMs / 60000);
     let staleTag = '';
     if(c.softError || ageMin >= 5){
-      staleTag = `<div class="stale-tag">⏱ ${ageMin < 1 ? 'il y a <1 min' : 'il y a ' + ageMin + ' min'}</div>`;
+      staleTag = `<div class="stale-tag">${ICO.clock} ${ageMin < 1 ? 'il y a <1 min' : 'il y a ' + ageMin + ' min'}</div>`;
     }
 
     return `<button class="gare-card${isPeak?' peak':''}" type="button" data-gid="${gare.id}">
@@ -6421,7 +6557,7 @@ function renderGares(){
           <div class="gc-dot ${dotClass}"></div>
           <span>${esc(nextTxt)}</span>
         </div>
-        ${delays>0 ? `<div class="delay-tag">⚠ ${delays} retard${delays>1?'s':''}</div>` : ''}
+        ${delays>0 ? `<div class="delay-tag">${ICO.warn} ${delays} retard${delays>1?'s':''}</div>` : ''}
         ${isPeak    ? '<div class="peak-tag">🔥 PEAK</div>' : ''}
         ${staleTag}
       </div>
@@ -8529,11 +8665,12 @@ function openDialog(gareId){
     document.getElementById('gd-del').textContent = '—';
     document.getElementById('gd-can').textContent = '—';
     document.getElementById('gd-body').innerHTML  =
-      `<div class="empty" style="margin-top:12px"><span class="ei">⚠</span>${esc(c&&c.error?c.error:'Aucune donnée')}</div>`;
+      `<div class="empty" style="margin-top:12px"><span class="ei">${ICO.warn}</span>${esc(c&&c.error?c.error:'Aucune donnée')}</div>`;
   } else {
     const trains      = [...(c.trains||[])].sort((a,b)=>a.hShow.localeCompare(b.hShow));
-    // Trains arrivés dans les 15 dernières minutes (encore à quai / passagers en sortie)
-    const justArrived = trains.filter(t => t.min < 0 && t.min >= -15 && !t.supprime)
+    // Trains arrivés dans les 8 dernières minutes seulement (passagers encore en sortie)
+    // Avant: 15 min. Réduit pour éviter la pollution de trains déjà passés.
+    const justArrived = trains.filter(t => t.min < 0 && t.min >= -8 && !t.supprime)
                               .sort((a,b) => b.min - a.min); // du plus récent au plus ancien
     // Trains à venir (non encore arrivés)
     const future      = trains.filter(t => t.min >= 0 && !t.supprime)
@@ -8546,14 +8683,14 @@ function openDialog(gareId){
     const cancels     = trains.filter(t => t.supprime).length;
 
     document.getElementById('gd-up').textContent  = next25.length;
-    document.getElementById('gd-pax').innerHTML   = `<span style="font-size:18px">${flames.ico}</span>`;
+    document.getElementById('gd-pax').innerHTML   = `<span class="flames-stat">${flames.ico}</span>`;
     document.getElementById('gd-del').textContent = delays;
     document.getElementById('gd-can').textContent = cancels;
 
     // === BLOC STICKY "À QUAI" — toujours visible en haut ===
     const quaiBlock = document.getElementById('gd-quai');
     if(justArrived.length){
-      let quaiHtml = `<div class="sq-hdr"><span class="sq-dot"></span><span>🚉 À quai · vient d'arriver</span><span class="sq-ct">${justArrived.length}</span></div>`;
+      let quaiHtml = `<div class="sq-hdr">${ICO.platform}<span class="sq-hdr-lbl">À quai · vient d'arriver</span><span class="sq-ct">${justArrived.length}</span></div>`;
       quaiHtml += '<div class="sq-list">';
       quaiHtml += justArrived.map(t => {
         const depuis = Math.abs(t.min);
@@ -8578,7 +8715,7 @@ function openDialog(gareId){
 
     // Section prochaines arrivées
     if(future.length){
-      body += `<div class="grp-hdr live"><span>● Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${future.length}</span></div>`;
+      body += `<div class="grp-hdr live">${ICO.livedot}<span>Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${future.length}</span></div>`;
 
       // Détecte si trains demain : min > (minutes restantes dans la journée d'aujourd'hui)
       const now = new Date();
@@ -8594,7 +8731,7 @@ function openDialog(gareId){
           const joursFR = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
           const moisFR = ['jan.','fév.','mars','avril','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
           const label = `${joursFR[demain.getDay()]} ${demain.getDate()} ${moisFR[demain.getMonth()]}`;
-          separator = `<div class="day-sep"><span>🌙 Demain · ${label}</span></div>`;
+          separator = `<div class="day-sep"><span>${ICO.moon}Demain · ${label}</span></div>`;
         }
         const card = renderTC(t, false);
         const cardWithId = i===0 ? card.replace('<div class="tc', '<div id="next-train" class="tc') : card;
@@ -8603,7 +8740,7 @@ function openDialog(gareId){
     }
 
     if(!justArrived.length && !future.length){
-      body += '<div class="empty"><span class="ei">🌙</span>Plus de train ce soir — prochains trains demain matin</div>';
+      body += `<div class="empty"><span class="ei">${ICO.moon}</span>Plus de train ce soir — prochains trains demain matin</div>`;
     }
 
     document.getElementById('gd-body').innerHTML = body;
@@ -8614,31 +8751,38 @@ function openDialog(gareId){
   const dlg = document.getElementById('gare-dialog');
   if(dlg.showModal) dlg.showModal(); else dlg.setAttribute('open','');
 
-  // ═══ SCROLL DIRECT AU PROCHAIN TRAIN — ultra-fiable ═══
+  // ═══ SCROLL DIRECT AU PROCHAIN TRAIN — méthode scrollIntoView ═══
   // Priorité absolue : le chauffeur doit voir directement les trains à venir
+  // Méthode plus fiable que scrollTop manuel : utilise scroll-margin-top CSS
   const scrollToNext = () => {
+    if(!sheet) return;
     const el = document.getElementById('next-train');
-    if(!el || !sheet) {
-      if(sheet) sheet.scrollTop = 0;  // fallback : pas de train à venir → haut
-      return false;
+    if(!el){
+      sheet.scrollTop = 0;
+      return;
     }
-    const header = document.querySelector('#gare-dialog .dhdr');
-    const quai   = document.getElementById('gd-quai');
-    const headerH = header ? header.offsetHeight : 140;
-    const quaiH   = (quai && quai.style.display !== 'none') ? quai.offsetHeight : 0;
-    const targetY = Math.max(0, el.offsetTop - headerH - quaiH - 4);
-    sheet.scrollTop = targetY;  // Assignation directe = plus fiable
-    return true;
+    // scrollIntoView respecte scroll-margin-top défini en CSS (180px)
+    // ce qui évite que l'élément soit caché derrière le header sticky
+    try {
+      el.scrollIntoView({behavior:'instant', block:'start'});
+    } catch(e){
+      // Fallback navigateurs anciens : calcul manuel
+      const header = document.querySelector('#gare-dialog .dhdr');
+      const quai   = document.getElementById('gd-quai');
+      const headerH = header ? header.offsetHeight : 140;
+      const quaiH   = (quai && quai.style.display !== 'none') ? quai.offsetHeight : 0;
+      sheet.scrollTop = Math.max(0, el.offsetTop - headerH - quaiH - 4);
+    }
   };
 
-  // Triple appel : DOM parfois pas prêt, on garantit l'exécution
+  // Reset initial + double rAF pour garantir que le layout est stable
+  sheet.scrollTop = 0;
   requestAnimationFrame(() => {
-    scrollToNext();
     requestAnimationFrame(() => {
       scrollToNext();
-      setTimeout(scrollToNext, 50);
-      setTimeout(scrollToNext, 150);
-      setTimeout(scrollToNext, 300);
+      // Safety net : iOS peut avoir besoin d'un délai supplémentaire
+      setTimeout(scrollToNext, 80);
+      setTimeout(scrollToNext, 220);
     });
   });
 }
@@ -8646,7 +8790,7 @@ function openDialog(gareId){
 function renderTC(t, isPast){
   const isCrit = t.retard >= 10;
   const isWarn = t.retard > 0 && t.retard < 10;
-  const isQuai = !t.supprime && t.min < 0; // vient d'arriver (< 15 min)
+  const isQuai = !t.supprime && t.min < 0; // vient d'arriver (< 8 min)
   const minDepuisArrivee = isQuai ? Math.abs(t.min) : 0;
 
   let cls = 'tc';
@@ -8670,18 +8814,24 @@ function renderTC(t, isPast){
     : `<div class="tc-h">${esc(t.hShow)}</div>`;
 
   let stHtml='';
-  if(t.supprime)        stHtml='<span class="st-chip st-sup">🚫 Supprimé</span>';
-  else if(isQuai)       stHtml = `<span class="st-chip st-ok">🚉 À quai${minDepuisArrivee > 0 ? ' · ' + minDepuisArrivee + ' min' : ''}</span>`;
+  if(t.supprime)        stHtml=`<span class="st-chip st-sup">${ICO.ban}Supprimé</span>`;
+  else if(isQuai)       stHtml = `<span class="st-chip st-ok">${ICO.platform}À quai${minDepuisArrivee > 0 ? ' · ' + minDepuisArrivee + ' min' : ''}</span>`;
   else if(isCrit){
     // Gros retard : affichage impact fort
     const hTxt = t.retard >= 60 ? `+${Math.floor(t.retard/60)}h${t.retard%60 || ''}` : `+${t.retard} min`;
-    stHtml=`<span class="st-chip st-crit">⚠ RETARD ${hTxt}</span>`;
+    stHtml=`<span class="st-chip st-crit">${ICO.warn}RETARD ${hTxt}</span>`;
   }
-  else if(isWarn)       stHtml=`<span class="st-chip st-warn">⚠ +${t.retard} min</span>`;
-  else                  stHtml='<span class="st-chip st-ok">✓ À l\'heure</span>';
+  else if(isWarn)       stHtml=`<span class="st-chip st-warn">${ICO.warn}+${t.retard} min</span>`;
+  else                  stHtml=`<span class="st-chip st-ok">${ICO.check}À l'heure</span>`;
 
   const tFlame = niveauFlammes(t.passagers);
   const bCls = 'b-' + t.type;
+  // Label temps-réel : ● LIVE (vert) / 📅 planning (Eurostar) / ~ théo (par défaut)
+  const rtLabel = t.live
+    ? `${ICO.livedot}LIVE`
+    : t.isEurostar
+      ? `${ICO.calendar}planning`
+      : '~ théo';
   return `<div class="${cls}">
     <div class="tc-top">
       <div class="tc-info">
@@ -8689,7 +8839,7 @@ function renderTC(t, isPast){
         <div class="tc-meta">
           <span class="badge ${bCls}">${esc(t.type)}</span>
           ${t.numero ? `<span class="tc-num">#${esc(t.numero)}</span>` : ''}
-          <span class="tc-rt ${t.live?'live':(t.isEurostar?'est':'base')}">${t.live?'● LIVE':(t.isEurostar?'📅 planning':'~ théo')}</span>
+          <span class="tc-rt ${t.live?'live':(t.isEurostar?'est':'base')}">${rtLabel}</span>
         </div>
       </div>
       <div class="tc-cd">${heureHtml}<div class="${wCls}">${esc(wTxt)}</div></div>
