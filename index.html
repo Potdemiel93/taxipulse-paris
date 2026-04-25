@@ -2540,6 +2540,17 @@ header{
 .ico-18{width:18px;height:18px}
 .ico-20{width:20px;height:20px}
 .ico-22{width:22px;height:22px}
+.ico-8{width:8px;height:8px}
+.ico-10{width:10px;height:10px}
+.ico-12{width:12px;height:12px}
+.ico-24{width:24px;height:24px}
+.ico-28{width:28px;height:28px}
+.ico-32{width:32px;height:32px}
+/* Couleurs spéciales pour circle indicators */
+.ico.txt-g svg{color:var(--green)}
+.ico.txt-y svg{color:var(--gold)}
+.ico.txt-r svg{color:var(--red)}
+.ico.txt-o svg{color:var(--accent)}
 
 /* Next train — highlight discret pour guider l'œil du chauffeur */
 #gare-dialog #next-train{
@@ -2598,7 +2609,14 @@ header{
 /* Gare card dot (next train) — cleaner */
 .gc-next{display:flex;align-items:center;gap:7px}
 
-/* Flame level 0 : "très calme" → SVG zzz pro au lieu de 💤 */
+/* Flame level 0 : "très calme" - texte caché remplacé par SVG zzz pro via JS */
+.tc-flames{font-size:13px}
+.flames.lvl0{font-size:0 !important}
+.flames.lvl0::before{
+  content:'';display:inline-block;width:16px;height:16px;
+  background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B5F52' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h7L4 14h7M14 10h5l-5 5h5'/%3E%3C/svg%3E");
+  background-size:contain;background-repeat:no-repeat;vertical-align:middle;
+}
 .tc-flames.lvl-calm, .flames.lvl0 .tp-calm-ico{
   display:inline-flex !important;align-items:center;color:var(--ink3);
 }
@@ -2634,6 +2652,315 @@ header{
 /* Next train — typo horaire plus grande */
 #gare-dialog #next-train .tc-h{font-size:20px !important}
 #gare-dialog #next-train .tc-when{font-size:11px !important}
+
+/* ═══════════════════════════════════════════════
+   TARIF A/B/C BADGE — Trajet
+═══════════════════════════════════════════════ */
+.tr-tarif-badge{
+  display:flex;align-items:center;gap:12px;
+  margin:14px 0 10px;
+  padding:12px 14px;
+  background:linear-gradient(135deg, rgba(232,93,26,.08), rgba(232,93,26,.02));
+  border:1px solid rgba(232,93,26,.22);
+  border-radius:12px;
+  position:relative;
+  overflow:hidden;
+}
+.tr-tarif-badge.tarif-a{background:linear-gradient(135deg, rgba(46,139,87,.10), rgba(46,139,87,.02));border-color:rgba(46,139,87,.25)}
+.tr-tarif-badge.tarif-b{background:linear-gradient(135deg, rgba(199,119,0,.10), rgba(199,119,0,.02));border-color:rgba(199,119,0,.28)}
+.tr-tarif-badge.tarif-c{background:linear-gradient(135deg, rgba(220,38,38,.10), rgba(220,38,38,.02));border-color:rgba(220,38,38,.28)}
+.ttb-left{flex-shrink:0}
+.ttb-letter{
+  width:42px;height:42px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:22px;font-weight:900;
+  background:var(--card);color:var(--accent);
+  box-shadow:0 2px 8px rgba(232,93,26,.2), 0 0 0 1px rgba(232,93,26,.15);
+}
+.tarif-a .ttb-letter{color:var(--green);box-shadow:0 2px 8px rgba(46,139,87,.2), 0 0 0 1px rgba(46,139,87,.15)}
+.tarif-b .ttb-letter{color:var(--gold);box-shadow:0 2px 8px rgba(199,119,0,.2), 0 0 0 1px rgba(199,119,0,.15)}
+.tarif-c .ttb-letter{color:#dc2626;box-shadow:0 2px 8px rgba(220,38,38,.2), 0 0 0 1px rgba(220,38,38,.15)}
+.ttb-main{flex:1;min-width:0}
+.ttb-title{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:2px}
+.ttb-sub{font-size:10.5px;color:var(--ink2);line-height:1.3;font-weight:600}
+.ttb-right{flex-shrink:0;text-align:right}
+.ttb-km{font-family:var(--mono);font-size:16px;font-weight:800;color:var(--ink);white-space:nowrap}
+.ttb-km span{font-size:10px;color:var(--ink3);font-weight:600}
+
+/* Improve tr-stat-k to allow inline icon */
+.tr-stat-k{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10.5px;color:var(--ink3);font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;
+}
+.tr-stat-k .ico{color:var(--ink3);opacity:.85}
+
+/* Tr-tb-label alignment */
+.tr-tb-label{display:inline-flex !important;align-items:center;gap:6px}
+.tr-tb-label .ico{color:var(--ink2)}
+
+/* Tr-details row — icône */
+.tr-info-row .k{display:inline-flex;align-items:center;gap:6px}
+.tr-info-row .k .ico{color:var(--ink3);opacity:.9}
+
+/* Tr-compare icone */
+.tr-compare-k{display:inline-flex;align-items:center;gap:6px}
+
+/* Tr-waze-btn et tr-badge-top — inline gap */
+.tr-waze-btn{display:flex !important;align-items:center;justify-content:center;gap:8px !important}
+.tr-badge-top{display:inline-flex;align-items:center;gap:6px;justify-content:center}
+
+/* Breakdown header */
+.tr-bd-hdr{display:inline-flex !important;align-items:center;gap:6px}
+
+/* Hour legend Rush */
+.hour-legend{
+  font-size:10px;color:var(--ink3);text-align:center;padding:6px 10px 0;
+  display:flex;align-items:center;justify-content:center;gap:4px;flex-wrap:wrap;
+}
+.hour-legend .ico{vertical-align:middle}
+
+/* Rush card titles alignment */
+.rush-now-title span{display:inline-flex;align-items:center;gap:6px}
+
+/* Empty state icon */
+.empty .ei, .vempty .ei{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;line-height:1;vertical-align:middle;
+}
+.empty .ei .ico, .vempty .ei .ico{width:20px !important;height:20px !important}
+
+/* Rush ranking flames - no flickering */
+.rk-flames{display:inline-flex;align-items:center;gap:2px}
+.rk-flames .ico{color:var(--ink3)}
+
+/* Event ticket/icon alignment in modal/cards */
+.em-lieu-ico, .tl-ico, .ev-ico{display:inline-flex;align-items:center;justify-content:center}
+.em-cat-badge{display:inline-flex !important;align-items:center;gap:5px;line-height:1}
+.em-bio span, .te-titre > span, .te-cap, .te-cap span, .ev-cap{display:inline-flex;align-items:center;gap:4px}
+
+/* Tr-tip ico alignment */
+.tr-tip-ico{display:inline-flex;align-items:center}
+
+/* Gare card delay tag & peak tag - inline SVG */
+.delay-tag{display:inline-flex !important;align-items:center;gap:4px;font-size:10px;font-weight:700}
+.stale-tag{display:inline-flex !important;align-items:center;gap:4px}
+
+/* ═══════════════════════════════════════════════
+   CA — Chiffre d'affaires
+═══════════════════════════════════════════════ */
+#tab-ca{padding:12px 14px 100px}
+
+.ca-hero{
+  background:linear-gradient(160deg, var(--accent), #D24A0E);
+  color:#fff;
+  padding:18px 18px 20px;
+  border-radius:18px;
+  box-shadow:0 8px 24px rgba(232,93,26,.28);
+  margin-bottom:16px;
+  text-align:center;
+}
+.ca-hero-date{
+  font-size:11px;font-weight:700;letter-spacing:1.2px;
+  text-transform:uppercase;opacity:.85;margin-bottom:4px;
+}
+.ca-hero-total{
+  font-family:var(--mono);
+  font-size:48px;font-weight:900;
+  line-height:1;letter-spacing:-1px;
+  margin-bottom:6px;
+}
+.ca-hero-sub{font-size:12.5px;font-weight:600;opacity:.92;margin-bottom:14px}
+.ca-hero-sub #ca-count{font-weight:900}
+.ca-hero-split{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding-top:14px;border-top:1px solid rgba(255,255,255,.2);
+}
+.ca-split{text-align:center}
+.ca-split-k{font-size:10px;font-weight:800;letter-spacing:1.5px;opacity:.75}
+.ca-split-v{font-family:var(--mono);font-size:20px;font-weight:800;margin-top:2px}
+
+/* Ajout course */
+.ca-add-box{
+  background:var(--card);
+  border:1px solid var(--card2);
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.03);
+}
+.ca-add-title{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px}
+.ca-input-row{display:flex;gap:8px;margin-bottom:8px}
+.ca-amount-input{
+  flex:1;min-width:0;
+  padding:12px 14px;
+  border:1.5px solid var(--card2);
+  border-radius:12px;
+  background:var(--bg2);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:18px;font-weight:800;
+  -webkit-appearance:none;
+}
+.ca-amount-input::placeholder{color:var(--ink3);font-weight:500;font-size:14px;font-family:var(--ui)}
+.ca-amount-input:focus{outline:none;border-color:var(--accent)}
+.ca-pay-toggle{display:flex;border:1.5px solid var(--card2);border-radius:12px;overflow:hidden;flex-shrink:0}
+.ca-pay-btn{
+  padding:12px 16px;
+  background:var(--bg2);color:var(--ink2);
+  border:none;font-family:var(--ui);font-weight:800;font-size:13px;
+  cursor:pointer;transition:all .15s;letter-spacing:.3px;
+}
+.ca-pay-btn.active{background:var(--accent);color:#fff}
+.ca-pay-btn:not(.active):hover{background:var(--card2)}
+
+.ca-note-input{
+  width:100%;
+  padding:10px 14px;
+  border:1.5px solid var(--card2);
+  border-radius:12px;
+  background:var(--bg2);
+  color:var(--ink);
+  font-family:var(--ui);
+  font-size:13px;
+  margin-bottom:10px;
+  -webkit-appearance:none;
+}
+.ca-note-input::placeholder{color:var(--ink3)}
+.ca-note-input:focus{outline:none;border-color:var(--accent)}
+
+.ca-add-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px;
+  background:linear-gradient(135deg, var(--accent), #D24A0E);
+  color:#fff;border:none;
+  border-radius:12px;
+  font-family:var(--ui);font-weight:800;font-size:14px;
+  cursor:pointer;
+  box-shadow:0 3px 10px rgba(232,93,26,.3);
+  transition:transform .1s;
+}
+.ca-add-btn:active{transform:scale(.98)}
+
+/* Liste des courses */
+.ca-list-hdr{
+  display:flex;justify-content:space-between;align-items:center;
+  margin:18px 4px 10px;
+}
+.ca-list-hdr > span{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--ink)}
+.ca-reset-btn{
+  background:transparent;border:1px solid var(--card2);
+  color:var(--ink3);font-size:10.5px;font-weight:700;
+  padding:5px 10px;border-radius:8px;cursor:pointer;
+  transition:all .15s;font-family:var(--ui);
+}
+.ca-reset-btn:hover{color:#dc2626;border-color:#dc2626}
+
+.ca-course{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 14px;
+  background:var(--card);
+  border:1px solid var(--card2);
+  border-radius:12px;
+  margin-bottom:8px;
+  transition:background .15s;
+}
+.ca-course-pay{
+  flex-shrink:0;
+  width:42px;height:42px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:900;
+  letter-spacing:.5px;
+}
+.ca-course-pay.cb{background:rgba(46,139,87,.12);color:var(--green)}
+.ca-course-pay.cash{background:rgba(199,119,0,.12);color:var(--gold)}
+.ca-course-main{flex:1;min-width:0}
+.ca-course-amt{font-family:var(--mono);font-size:17px;font-weight:800;color:var(--ink)}
+.ca-course-meta{font-size:11px;color:var(--ink3);margin-top:2px;font-weight:600}
+.ca-course-note{font-size:12px;color:var(--ink2);font-style:italic;margin-top:1px}
+.ca-course-del{
+  flex-shrink:0;
+  background:transparent;border:none;color:var(--ink3);
+  cursor:pointer;padding:6px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .15s;
+}
+.ca-course-del:hover{color:#dc2626}
+
+/* Semaine */
+.ca-week-hdr{
+  font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--ink);margin:20px 4px 10px;
+}
+.ca-week-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 14px;
+  background:var(--card);
+  border:1px solid var(--card2);
+  border-radius:12px;
+  margin-bottom:6px;
+}
+.ca-week-row.today{border-color:rgba(232,93,26,.3);background:linear-gradient(135deg, rgba(232,93,26,.05), rgba(232,93,26,.01))}
+.ca-week-day{flex:1;font-weight:700;color:var(--ink);font-size:13px}
+.ca-week-day .ca-week-d{font-size:10.5px;color:var(--ink3);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+.ca-week-ct{font-size:11px;color:var(--ink3);font-weight:600;margin-right:8px}
+.ca-week-amt{font-family:var(--mono);font-size:15px;font-weight:800;color:var(--ink);min-width:70px;text-align:right}
+
+/* Total semaine */
+.ca-week-total{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:13px 16px;
+  background:linear-gradient(135deg, rgba(232,93,26,.08), rgba(232,93,26,.02));
+  border:1px solid rgba(232,93,26,.20);
+  border-radius:12px;
+  margin-bottom:14px;
+}
+.ca-wt-k{font-size:11.5px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.6px}
+.ca-wt-v{font-family:var(--mono);font-size:20px;font-weight:900;color:var(--accent)}
+
+/* Bars semaine */
+.ca-week-bars{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:6px;
+  background:var(--card);border:1px solid var(--card2);border-radius:12px;
+  padding:14px 8px 10px;
+}
+.ca-wcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ca-wcol-bar{
+  width:100%;height:80px;
+  display:flex;align-items:flex-end;justify-content:center;
+  background:var(--bg2);border-radius:6px;overflow:hidden;
+}
+.ca-wcol-fill{
+  width:80%;
+  background:linear-gradient(180deg, var(--gold), #B8860B);
+  border-radius:4px 4px 0 0;
+  transition:height .4s cubic-bezier(.4,0,.2,1);
+}
+.ca-wcol.today .ca-wcol-fill{background:linear-gradient(180deg, var(--accent), #D24A0E)}
+.ca-wcol-amt{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--ink2)}
+.ca-wcol.today .ca-wcol-amt{color:var(--accent)}
+.ca-wcol-day{font-size:9.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.4px}
+.ca-wcol.today .ca-wcol-day{color:var(--accent);font-weight:900}
+
+/* Empty state CA */
+.ca-empty{
+  display:flex;align-items:center;gap:14px;
+  padding:24px 16px;
+  background:var(--card);border:1px dashed var(--card2);border-radius:12px;
+  color:var(--ink2);
+}
+.ca-empty-ico{
+  flex-shrink:0;
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(232,93,26,.08);color:var(--accent);
+}
+.ca-empty-ico .ico{width:22px !important;height:22px !important}
+.ca-empty > div{font-size:13px;font-weight:700;color:var(--ink)}
+.ca-empty > div span{font-size:11.5px;font-weight:500;color:var(--ink3);font-style:italic}
+
+/* Loading stub (générique) */
+.loading-stub{text-align:center;padding:18px;color:var(--ink3);font-size:12.5px;font-style:italic}
 
 </style>
 <link id="gfont-Inter" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"></head>
@@ -2711,16 +3038,17 @@ header{
     </div>
   </div>
   <div class="nav-tabs">
-    <button class="active" data-tab="tab-now">🚂 Gares</button>
-    <button data-tab="tab-stats" class="">📊 Rush</button>
-    <button data-tab="tab-theatres" class="">🎭 Théâtres</button>
-    <button data-tab="tab-events" class="">🎫 Events</button>
-    <button data-tab="tab-trajet" class="">💶 Trajet</button>
+    <button class="active" data-tab="tab-now"><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M7 3v2M17 3v2"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/><path d="M6 21l3-3M18 21l-3-3"/></svg></span><span class="nt-txt">Gares</span></button>
+    <button data-tab="tab-stats" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span><span class="nt-txt">Rush</span></button>
+    <button data-tab="tab-theatres" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8a10 10 0 0 1 20 0c0 4-3 8-10 8S2 12 2 8z"/><circle cx="8" cy="9" r=".5" fill="currentColor"/><circle cx="16" cy="9" r=".5" fill="currentColor"/><path d="M9 12s1 2 3 2 3-2 3-2"/></svg></span><span class="nt-txt">Théâtres</span></button>
+    <button data-tab="tab-events" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 0 0 4v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 0 0-4z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span><span class="nt-txt">Events</span></button>
+    <button data-tab="tab-trajet" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14v-6l-2-5H7l-2 5v6zM5 17v2h2v-2M17 17v2h2v-2M9 5V3h6v2"/><circle cx="8.5" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1.5" fill="currentColor" stroke="none"/></svg></span><span class="nt-txt">Trajet</span></button>
+    <button data-tab="tab-ca" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><span class="nt-txt">CA</span></button>
   </div>
 
 <!-- Bouton install flottant (caché par défaut, apparaît si PWA installable) -->
 <button id="install-btn" class="install-btn" style="display:none" onclick="showInstallModal()">
-  <span class="install-ico">📲</span>
+  <span class="install-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
   <span class="install-txt">Installer l'app</span>
 </button>
 
@@ -2728,10 +3056,10 @@ header{
 <div class="install-modal" id="install-modal">
   <div class="install-modal-backdrop" onclick="closeInstallModal()"></div>
   <div class="install-modal-box">
-    <button class="install-close" onclick="closeInstallModal()">✕</button>
+    <button class="install-close" onclick="closeInstallModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
 
     <div class="install-hero">
-      <div class="install-hero-ico">🚕</div>
+      <div class="install-hero-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="32" height="32"><path d="M5 17h14v-6l-2-5H7l-2 5v6zM5 17v2h2v-2M17 17v2h2v-2M9 5V3h6v2"/><circle cx="8.5" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1.5" fill="currentColor" stroke="none"/></svg></div>
       <div class="install-hero-title">Installer TaxiPulse</div>
       <div class="install-hero-sub">Comme une vraie app · ouverture directe · icône sur l'écran d'accueil</div>
     </div>
@@ -2742,19 +3070,19 @@ header{
 
     <div class="install-benefits">
       <div class="install-benefit">
-        <span class="ib-ico">⚡</span>
+        <span class="ib-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
         <div><b>Ouverture instantanée</b><br><span>Plus besoin de passer par Safari/Chrome</span></div>
       </div>
       <div class="install-benefit">
-        <span class="ib-ico">📱</span>
+        <span class="ib-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
         <div><b>Plein écran</b><br><span>Aucune barre de navigation parasite</span></div>
       </div>
       <div class="install-benefit">
-        <span class="ib-ico">🔋</span>
+        <span class="ib-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>
         <div><b>Fonctionne hors-ligne</b><br><span>Dernières données en cache</span></div>
       </div>
       <div class="install-benefit">
-        <span class="ib-ico">🚀</span>
+        <span class="ib-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>
         <div><b>Aucun App Store</b><br><span>Zéro téléchargement, 0 Mo utilisé</span></div>
       </div>
     </div>
@@ -3142,168 +3470,17 @@ header{
 
   <!-- ══ RUSH — Analyse ══ -->
   <section class="tab" id="tab-stats">
-    <div class="stitle">🔥 Rush prochaines 25 min</div>
-    <div id="rush-now"><div class="rush-card top">
-      <div class="rush-now-title">🔥 Prochaines 25 minutes toutes gares</div>
-      <div class="rush-now-big">922 clients potentiels</div>
-      <div class="rush-now-sub">🔥🔥🔥🔥 RUSH MAXIMUM · 17 trains à venir</div>
-      <div class="rush-now-title" style="margin-top:14px">🎯 Prochain gros arrivant</div><div class="rush-next">
-        <div class="rn-ico">🇬🇧</div>
-        <div class="rn-main">
-          <div class="rn-gare">Gare du Nord</div>
-          <div class="rn-train">EUROSTAR · Londres St Pancras</div>
-        </div>
-        <div class="rn-time">dans 16min</div>
-      </div>
-    </div></div>
+    <div class="stitle"><span class="stitle-ico" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg></span><span>Rush prochaines 25 min</span></div>
+    <div id="rush-now"><div class="loading-stub">Chargement…</div></div>
 
-    <div class="stitle">📈 Meilleures heures aujourd'hui</div>
-    <div id="rush-hours"><div class="hour-bar"><div class="hour-col">
-      <div class="hb " style="height:3%"></div>
-      <div class="hh">00h</div>
-    </div><div class="hour-col">
-      <div class="hb " style="height:3%"></div>
-      <div class="hh">01h</div>
-    </div><div class="hour-col">
-      <div class="hb " style="height:3%"></div>
-      <div class="hh">02h</div>
-    </div><div class="hour-col">
-      <div class="hb " style="height:3%"></div>
-      <div class="hh">03h</div>
-    </div><div class="hour-col">
-      <div class="hb " style="height:3%"></div>
-      <div class="hh">04h</div>
-    </div><div class="hour-col">
-      <div class="hb " style="height:3%"></div>
-      <div class="hh">05h</div>
-    </div><div class="hour-col">
-      <div class="hb " style="height:5%"></div>
-      <div class="hh">06h</div>
-    </div><div class="hour-col">
-      <div class="hb warm" style="height:45%"></div>
-      <div class="hh">07h</div>
-    </div><div class="hour-col">
-      <div class="hb hot" style="height:100%"></div>
-      <div class="hh">08h</div>
-    </div><div class="hour-col">
-      <div class="hb hot cur" style="height:68%"></div>
-      <div class="hh">21h</div>
-    </div><div class="hour-col">
-      <div class="hb hot" style="height:92%"></div>
-      <div class="hh">22h</div>
-    </div><div class="hour-col">
-      <div class="hb " style="height:20%"></div>
-      <div class="hh">23h</div>
-    </div></div>
-      <div style="font-size:10px;color:var(--ink3);text-align:center;padding:0 10px">
-        Nombre de clients taxi estimés par heure · <span style="color:var(--accent)">■</span> rush · <span style="color:var(--gold)">■</span> actif
-      </div></div>
+    <div class="stitle"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span><span>Meilleures heures aujourd'hui</span></div>
+    <div id="rush-hours"><div class="loading-stub">Chargement…</div></div>
 
-    <div class="stitle">🏆 Classement gares (25 min à venir)</div>
-    <div id="rush-ranking"><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('nord'),300)">
-      <div class="rk-pos p1">1</div>
-      <div class="rk-ico">🇬🇧</div>
-      <div class="rk-name">Gare du Nord</div>
-      <div class="rk-flames">🔥🔥🔥🔥</div>
-      <div class="rk-pax">476</div>
-    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('montparnasse'),300)">
-      <div class="rk-pos p2">2</div>
-      <div class="rk-ico">🌊</div>
-      <div class="rk-name">Montparnasse</div>
-      <div class="rk-flames">🔥🔥🔥</div>
-      <div class="rk-pax">163</div>
-    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('austerlitz'),300)">
-      <div class="rk-pos p3">3</div>
-      <div class="rk-ico">🌙</div>
-      <div class="rk-name">Gare d'Austerlitz</div>
-      <div class="rk-flames">🔥🔥🔥</div>
-      <div class="rk-pax">99</div>
-    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('lyon'),300)">
-      <div class="rk-pos ">4</div>
-      <div class="rk-ico">🗼</div>
-      <div class="rk-name">Gare de Lyon</div>
-      <div class="rk-flames">🔥🔥🔥</div>
-      <div class="rk-pax">92</div>
-    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('est'),300)">
-      <div class="rk-pos ">5</div>
-      <div class="rk-ico">🍺</div>
-      <div class="rk-name">Gare de l'Est</div>
-      <div class="rk-flames">🔥🔥🔥</div>
-      <div class="rk-pax">92</div>
-    </div><div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=&gt;openDialog('bercy'),300)">
-      <div class="rk-pos ">6</div>
-      <div class="rk-ico">🎪</div>
-      <div class="rk-name">Gare de Bercy</div>
-      <div class="rk-flames">💤</div>
-      <div class="rk-pax">0</div>
-    </div></div>
+    <div class="stitle"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 22h14"/></svg></span><span>Classement gares (25 min à venir)</span></div>
+    <div id="rush-ranking"><div class="loading-stub">Chargement…</div></div>
 
-    <div class="stitle">🎤 Événements aujourd'hui · fin de soirée</div>
-    <div id="events-today"><div class="ev-card">
-      <div class="ev-top">
-        <div class="ev-ico">🎤</div>
-        <div class="ev-main">
-          <div class="ev-titre">Ken Carson · More Chaos Tour</div>
-          <div class="ev-lieu">Zénith La Villette · 211 av. J. Jaurès · 19e</div>
-        </div>
-        <div class="ev-fin">
-          <div class="ev-fin-h">22:30</div>
-          <div class="ev-fin-l">fin</div>
-        </div>
-      </div>
-      <div class="ev-bot">
-        <span class="ev-cap">👥 6 300 pax</span>
-        <span class="ev-impact">🔥🔥🔥 rush sortie</span>
-      </div>
-    </div><div class="ev-card">
-      <div class="ev-top">
-        <div class="ev-ico">🎭</div>
-        <div class="ev-main">
-          <div class="ev-titre">Le Roi Lion · Musical</div>
-          <div class="ev-lieu">Théâtre Mogador · 25 rue Mogador · 9e</div>
-        </div>
-        <div class="ev-fin">
-          <div class="ev-fin-h">22:30</div>
-          <div class="ev-fin-l">fin</div>
-        </div>
-      </div>
-      <div class="ev-bot">
-        <span class="ev-cap">👥 1 600 pax</span>
-        <span class="ev-impact">🔥 rush sortie</span>
-      </div>
-    </div><div class="ev-card">
-      <div class="ev-top">
-        <div class="ev-ico">🎭</div>
-        <div class="ev-main">
-          <div class="ev-titre">Comédie musicale</div>
-          <div class="ev-lieu">Théâtre du Châtelet · 1 pl. du Châtelet · 1er</div>
-        </div>
-        <div class="ev-fin">
-          <div class="ev-fin-h">22:30</div>
-          <div class="ev-fin-l">fin</div>
-        </div>
-      </div>
-      <div class="ev-bot">
-        <span class="ev-cap">👥 2 010 pax</span>
-        <span class="ev-impact">🔥🔥 rush sortie</span>
-      </div>
-    </div><div class="ev-card">
-      <div class="ev-top">
-        <div class="ev-ico">🎼</div>
-        <div class="ev-main">
-          <div class="ev-titre">Les Flammes Awards 2026</div>
-          <div class="ev-lieu">La Seine Musicale · Île Seguin · Boulogne</div>
-        </div>
-        <div class="ev-fin">
-          <div class="ev-fin-h">23:00</div>
-          <div class="ev-fin-l">fin</div>
-        </div>
-      </div>
-      <div class="ev-bot">
-        <span class="ev-cap">👥 6 000 pax</span>
-        <span class="ev-impact">🔥🔥🔥 rush sortie</span>
-      </div>
-    </div></div>
+    <div class="stitle"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></span><span>Événements aujourd'hui · fin de soirée</span></div>
+    <div id="events-today"><div class="loading-stub">Chargement…</div></div>
   </section>
 
   <!-- ══ THÉÂTRES — Classés par priorité chauffeur ══ -->
@@ -3341,39 +3518,14 @@ header{
     </div>
 
     <div class="v-toolbar">
-      <div class="stitle" style="margin:0">📅 Chronologie</div>
+      <div class="stitle" style="margin:0"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span>Chronologie</span></div>
       <div class="v-chips" id="th-day-chips">
         <button class="vchip active" data-day="0">Ce soir</button>
         <button class="vchip" data-day="1">Demain</button>
         <button class="vchip" data-day="7">7 jours</button>
       </div>
     </div>
-    <div id="theatres-timeline"><div class="tl-group">
-      <div class="tl-group-hdr"><span>CE SOIR</span><span class="tl-group-line"></span><span>2 spectacles</span></div><div class="tl-row tier2" data-ev-idx="-1">
-        <div class="tl-hour">22:30</div>
-        <div class="tl-ico">🎭</div>
-        <div class="tl-main">
-          <div class="tl-titre">Théâtre Mogador <span class="tl-flames-inline">🔥🔥</span></div>
-          <div class="tl-lieu">Le Roi Lion · Musical</div>
-        </div>
-        <div class="tl-right">
-          <div class="tl-cap">1 600</div>
-          <div class="tl-cap-l">pax</div>
-        </div>
-        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8751,2.3318);" title="Naviguer avec Waze">🧭</button>
-      </div><div class="tl-row tier2" data-ev-idx="-1">
-        <div class="tl-hour">22:30</div>
-        <div class="tl-ico">🎭</div>
-        <div class="tl-main">
-          <div class="tl-titre">Théâtre du Châtelet <span class="tl-flames-inline">🔥🔥</span></div>
-          <div class="tl-lieu">Comédie musicale</div>
-        </div>
-        <div class="tl-right">
-          <div class="tl-cap">2 010</div>
-          <div class="tl-cap-l">pax</div>
-        </div>
-        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8577,2.3471);" title="Naviguer avec Waze">🧭</button>
-      </div></div></div>
+    <div id="theatres-timeline"><div class="loading-stub">Chargement…</div></div>
   </section>
 
   <!-- ══ EVENTS — Concerts, matchs, salons ══ -->
@@ -3392,48 +3544,16 @@ header{
       </div>
     </div>
 
-    <div class="stitle" style="margin-top:2px">🎯 À cibler maintenant</div>
-    <div id="ev-top"><div class="top-ev " data-ev-idx="-1">
-        <div class="te-rank">
-          <div class="te-rank-n">1</div>
-          <div class="te-rank-l">cible</div>
-        </div>
-        <div class="te-body">
-          <div>
-            <div class="te-titre">🎤 Zénith La Villette</div>
-            <div class="te-venue">Ken Carson · More Chaos Tour</div>
-          </div>
-          <div class="te-meta">
-            <span class="te-fin">fin 22:30</span>
-            <span class="te-in">dans 1h21</span>
-            <span class="te-cap">👥 6 300</span>
-          </div>
-        </div>
-      </div><div class="top-ev " data-ev-idx="-1">
-        <div class="te-rank">
-          <div class="te-rank-n">2</div>
-          <div class="te-rank-l">cible</div>
-        </div>
-        <div class="te-body">
-          <div>
-            <div class="te-titre">🎤 La Seine Musicale</div>
-            <div class="te-venue">Les Flammes Awards 2026</div>
-          </div>
-          <div class="te-meta">
-            <span class="te-fin">fin 23:00</span>
-            <span class="te-in">dans 1h51</span>
-            <span class="te-cap">👥 6 000</span>
-          </div>
-        </div>
-      </div></div>
+    <div class="stitle" style="margin-top:2px"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></span><span>À cibler maintenant</span></div>
+    <div id="ev-top"><div class="loading-stub">Chargement…</div></div>
 
     <div class="v-toolbar">
-      <div class="stitle" style="margin:0">📅 Chronologie</div>
+      <div class="stitle" style="margin:0"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span><span>Chronologie</span></div>
       <div class="v-chips" id="ev-cat-chips">
         <button class="vchip active" data-cat="all">Tout</button>
-        <button class="vchip" data-cat="concert">🎤 Concert</button>
-        <button class="vchip" data-cat="sport">⚽ Sport</button>
-        <button class="vchip" data-cat="salon">🎪 Salon</button>
+        <button class="vchip" data-cat="concert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:4px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>Concert</button>
+        <button class="vchip" data-cat="sport"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:4px"><circle cx="12" cy="12" r="10"/><path d="M12 2l3 4-3 4-3-4zM12 22l-3-4 3-4 3 4zM2 12l4-3 4 3-4 3zM22 12l-4 3-4-3 4-3z"/></svg>Sport</button>
+        <button class="vchip" data-cat="salon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:4px"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></svg>Salon</button>
       </div>
     </div>
     <div class="v-chips" id="ev-day-chips" style="margin-bottom:12px">
@@ -3442,32 +3562,7 @@ header{
       <button class="vchip" data-day="7">7 jours</button>
       <button class="vchip" data-day="30">Mois</button>
     </div>
-    <div id="events-timeline"><div class="tl-group">
-      <div class="tl-group-hdr"><span>CE SOIR</span><span class="tl-group-line"></span><span>2 évt</span></div><div class="tl-row tier2 soon-row" data-ev-idx="-1">
-        <div class="tl-hour">22:30</div>
-        <div class="tl-ico">🎤</div>
-        <div class="tl-main">
-          <div class="tl-titre">Zénith La Villette <span class="tl-flames-inline">🔥🔥</span></div>
-          <div class="tl-lieu">Ken Carson · More Chaos Tour</div>
-        </div>
-        <div class="tl-right">
-          <div class="tl-cap">6 300</div>
-          <div class="tl-cap-l">pax</div>
-        </div>
-        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8942,2.3928);" title="Naviguer avec Waze">🧭</button>
-      </div><div class="tl-row tier2 soon-row" data-ev-idx="-1">
-        <div class="tl-hour">23:00</div>
-        <div class="tl-ico">🎤</div>
-        <div class="tl-main">
-          <div class="tl-titre">La Seine Musicale <span class="tl-flames-inline">🔥🔥</span></div>
-          <div class="tl-lieu">Les Flammes Awards 2026</div>
-        </div>
-        <div class="tl-right">
-          <div class="tl-cap">6 000</div>
-          <div class="tl-cap-l">pax</div>
-        </div>
-        <button class="tl-waze" onclick="event.stopPropagation();openWaze(48.8277,2.2314);" title="Naviguer avec Waze">🧭</button>
-      </div></div></div>
+    <div id="events-timeline"><div class="loading-stub">Chargement…</div></div>
   </section>
 
   <!-- Modal détails (flottant via classList) -->
@@ -3482,7 +3577,7 @@ header{
   <!-- ══ TRAJET — Estimateur course ══ -->
   <section class="tab" id="tab-trajet">
     <div class="trajet-hero">
-      <div class="trhero-title">💶 Estimateur course</div>
+      <div class="trhero-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="vertical-align:-3px;margin-right:6px"><path d="M5 17h14v-6l-2-5H7l-2 5v6zM5 17v2h2v-2M17 17v2h2v-2M9 5V3h6v2"/><circle cx="8.5" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1.5" fill="currentColor" stroke="none"/></svg>Estimateur course</div>
       <div class="trhero-sub">Distance routière réelle · Trafic Paris en live</div>
       <div class="trhero-live" id="trhero-live">
         <span class="tr-live-dot"></span>
@@ -3492,53 +3587,77 @@ header{
 
     <div class="trajet-box">
       <div class="tr-field">
-        <label>📍 Départ</label>
-        <select id="tr-depart">
-          <optgroup label="🎯 Ma position actuelle">
-            <option value="__gps__">📡 Utiliser ma position GPS</option>
-          </optgroup>
-          <optgroup label="🚂 Gares">
-            <option value="nord">Gare du Nord</option>
-            <option value="lyon">Gare de Lyon</option>
-            <option value="montparnasse">Montparnasse</option>
-            <option value="est">Gare de l'Est</option>
-            <option value="austerlitz">Gare d'Austerlitz</option>
-            <option value="bercy">Gare de Bercy</option>
-          </optgroup>
-          <optgroup label="✈ Aéroports">
-            <option value="cdg">Aéroport CDG</option>
-            <option value="orly">Aéroport Orly</option>
-          </optgroup>
-          <optgroup label="🏙 Zones Paris">
-            <option value="opera">Opéra · Louvre · Châtelet</option>
-            <option value="champs">Champs-Élysées · Étoile</option>
-            <option value="eiffel">Tour Eiffel · 7e</option>
-            <option value="marais">Le Marais · Bastille</option>
-            <option value="mont">Montmartre · 18e</option>
-            <option value="latin">Quartier Latin · 5e/6e</option>
-            <option value="defense">La Défense</option>
-          </optgroup>
-        </select>
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:5px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Départ</label>
+
+        <!-- Toggle preset/custom pour le départ -->
+        <div class="tr-mode-toggle">
+          <button class="trmt-from-btn active" data-mode="preset" onclick="switchOriginMode('preset')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:5px"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14a2 2 0 0 0 1.73-3l-2.12-3.67A5 5 0 0 1 18 8V6a6 6 0 0 0-12 0v2a5 5 0 0 1-.61 2.33L3.27 14A2 2 0 0 0 5 17z"/></svg>Lieux / GPS</button>
+          <button class="trmt-from-btn" data-mode="custom" onclick="switchOriginMode('custom')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:5px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Adresse libre</button>
+        </div>
+
+        <!-- Mode 1 : presets + GPS -->
+        <div id="tr-depart-preset">
+          <select id="tr-depart">
+            <optgroup label="Ma position actuelle">
+              <option value="__gps__">Utiliser ma position GPS</option>
+            </optgroup>
+            <optgroup label="Gares">
+              <option value="nord">Gare du Nord</option>
+              <option value="lyon">Gare de Lyon</option>
+              <option value="montparnasse">Montparnasse</option>
+              <option value="est">Gare de l'Est</option>
+              <option value="austerlitz">Gare d'Austerlitz</option>
+              <option value="bercy">Gare de Bercy</option>
+            </optgroup>
+            <optgroup label="Aéroports">
+              <option value="cdg">Aéroport CDG</option>
+              <option value="orly">Aéroport Orly</option>
+            </optgroup>
+            <optgroup label="Zones Paris">
+              <option value="opera">Opéra · Louvre · Châtelet</option>
+              <option value="champs">Champs-Élysées · Étoile</option>
+              <option value="eiffel">Tour Eiffel · 7e</option>
+              <option value="marais">Le Marais · Bastille</option>
+              <option value="mont">Montmartre · 18e</option>
+              <option value="latin">Quartier Latin · 5e/6e</option>
+              <option value="defense">La Défense</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Mode 2 : adresse libre BAN (toute la France) -->
+        <div id="tr-depart-custom" style="display:none">
+          <input type="text" id="tr-from-input" class="tr-custom-input" placeholder="Ex: 25 rue de la Paix, Lyon" autocomplete="off" spellcheck="false">
+          <div id="tr-from-autocomplete" class="tr-autocomplete"></div>
+          <div id="tr-from-selected" class="tr-custom-selected" style="display:none">
+            <div class="tr-cs-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M20 6L9 17l-5-5"/></svg></div>
+            <div class="tr-cs-main">
+              <div class="tr-cs-label" id="tr-from-cs-label">—</div>
+              <div class="tr-cs-context" id="tr-from-cs-context">—</div>
+            </div>
+            <button class="tr-cs-clear" onclick="clearCustomOrigin()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="12" height="12"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+          </div>
+        </div>
       </div>
 
       <div class="tr-field">
-        <label>🎯 Arrivée</label>
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>Arrivée</label>
 
         <!-- Toggle entre destinations prédéfinies et adresse libre -->
         <div class="tr-mode-toggle">
-          <button class="trmt-btn active" data-mode="preset" onclick="switchDestMode('preset')">📌 Lieux prédéfinis</button>
-          <button class="trmt-btn" data-mode="custom" onclick="switchDestMode('custom')">✍ Adresse libre</button>
+          <button class="trmt-btn active" data-mode="preset" onclick="switchDestMode('preset')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:5px"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14a2 2 0 0 0 1.73-3l-2.12-3.67A5 5 0 0 1 18 8V6a6 6 0 0 0-12 0v2a5 5 0 0 1-.61 2.33L3.27 14A2 2 0 0 0 5 17z"/></svg>Lieux prédéfinis</button>
+          <button class="trmt-btn" data-mode="custom" onclick="switchDestMode('custom')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:5px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Adresse libre</button>
         </div>
 
         <!-- Mode 1 : destinations prédéfinies (existant) -->
         <div id="tr-arrivee-preset">
           <select id="tr-arrivee">
-            <optgroup label="✈ Aéroports (forfait)">
+            <optgroup label="Aéroports (forfait)">
               <option value="cdg">Aéroport CDG</option>
               <option value="orly">Aéroport Orly</option>
               <option value="beauvais">Aéroport Beauvais</option>
             </optgroup>
-            <optgroup label="🏙 Paris intra-muros">
+            <optgroup label="Paris intra-muros">
               <option value="opera">Opéra · Louvre · Châtelet</option>
               <option value="champs">Champs-Élysées · Étoile</option>
               <option value="eiffel">Tour Eiffel · Invalides · 7e</option>
@@ -3547,14 +3666,14 @@ header{
               <option value="latin">Quartier Latin · 5e · 6e</option>
               <option value="bercy-q">Bercy · 12e est</option>
             </optgroup>
-            <optgroup label="🏢 Banlieue">
+            <optgroup label="Banlieue">
               <option value="defense">La Défense</option>
               <option value="neuilly">Neuilly-sur-Seine</option>
               <option value="boulogne">Boulogne-Billancourt</option>
               <option value="levallois">Levallois-Perret</option>
               <option value="issy">Issy-les-Moulineaux</option>
             </optgroup>
-            <optgroup label="🎤 Grandes salles">
+            <optgroup label="Grandes salles">
               <option value="bercy_arena">Accor Arena (Bercy)</option>
               <option value="zenith">Zénith La Villette</option>
               <option value="olympia">L'Olympia</option>
@@ -3566,8 +3685,8 @@ header{
               <option value="bourget">Parc Expo Le Bourget</option>
               <option value="stade_france">Stade de France</option>
             </optgroup>
-            <optgroup label="🎭 Théâtres" id="og-theatres"><option value="th_radio_france">Auditorium Radio France · 16e</option><option value="th_bobino">Bobino · 14e</option><option value="th_bouffes_parisiens">Bouffes-Parisiens · 2e</option><option value="th_cabaret_sauvage">Cabaret Sauvage · 19e</option><option value="th_cafe_danse">Café de la Danse · 11e</option><option value="th_cafegare">Café de la Gare · 4e</option><option value="th_blancs">Café-Théâtre des Blancs Manteaux · 4e</option><option value="th_casino">Casino de Paris · 9e</option><option value="th_cirque_hiver">Cirque d'Hiver Bouglione · 11e</option><option value="th_cite_musique">Cité de la Musique · 19e</option><option value="th_comedie_bastille">Comédie Bastille · 11e</option><option value="th_comedie_odeon">Comédie Odéon · 6e</option><option value="th_comedie_francaise">Comédie-Française · 1er</option><option value="th_elysee_mmtre">Élysée Montmartre · 18e</option><option value="th_folies_bergere">Folies Bergère · 9e</option><option value="th_gaite_lyrique">Gaîté Lyrique · 3e</option><option value="th_jamel">Jamel Comedy Club · 10e</option><option value="th_boule_noire">La Boule Noire · 18e</option><option value="th_cigale">La Cigale · 18e</option><option value="th_fleche_or">La Flèche d'Or · 20e</option><option value="th_machine_mr">La Machine du Moulin Rouge · 18e</option><option value="th_maroquinerie">La Maroquinerie · 20e</option><option value="th_bataclan">Le Bataclan · 11e</option><option value="th_grandpv">Le Grand Point-Virgule · 15e</option><option value="th_lucernaire">Le Lucernaire · 6e</option><option value="th_pv">Le Point Virgule · 4e</option><option value="th_rex">Le Rex Club / Grand Rex · 2e</option><option value="th_splendid">Le Splendid · 10e</option><option value="th_trianon">Le Trianon · 18e</option><option value="th_funambules">Les Funambules · 18e</option><option value="th_sarfati">Madame Sarfati Comedy Club · 1er</option><option value="th_new_morning">New Morning · 10e</option><option value="th_opera_bastille">Opéra Bastille · 12e</option><option value="th_opera_comique">Opéra Comique · 2e</option><option value="th_opera_garnier">Opéra Garnier · 9e</option><option value="th_petit_bain">Petit Bain · 13e</option><option value="th_philharmonie">Philharmonie de Paris · 19e</option><option value="th_gaveau">Salle Gaveau · 8e</option><option value="th_13">Théâtre 13 · 13e</option><option value="th_14">Théâtre 14 · 14e</option><option value="th_71">Théâtre 71 · Malakoff</option><option value="th_antoine">Théâtre Antoine · 10e</option><option value="th_comedia">Théâtre Comedia · 10e</option><option value="th_daunou">Théâtre Daunou · 2e</option><option value="th_ambigu">Théâtre de l'Ambigu · 10e</option><option value="th_atelier">Théâtre de l'Atelier · 18e</option><option value="th_odeon">Théâtre de l'Odéon · 6e</option><option value="th_contrescarpe">Théâtre de la Contrescarpe · 5e</option><option value="th_madeleine">Théâtre de la Madeleine · 8e</option><option value="th_michodiere">Théâtre de la Michodière · 2e</option><option value="th_pepiniere">Théâtre de la Pépinière · 2e</option><option value="th_stmartin">Théâtre de la Porte Saint-Martin · 10e</option><option value="th_potiniere">Théâtre de la Potinière · 1er</option><option value="th_renaissance">Théâtre de la Renaissance · 10e</option><option value="th_ville">Théâtre de la Ville · 4e</option><option value="th_champs_elysees">Théâtre des Champs-Élysées · 8e</option><option value="th_2anes">Théâtre des Deux Ânes · 18e</option><option value="th_10h">Théâtre des Dix Heures · 18e</option><option value="th_nouveautes">Théâtre des Nouveautés · 9e</option><option value="th_varietes">Théâtre des Variétés · 2e</option><option value="th_chatelet">Théâtre du Châtelet · 1er</option><option value="th_gymnase">Théâtre du Gymnase · 10e</option><option value="th_palais_royal">Théâtre du Palais-Royal · 1er</option><option value="th_rond_point">Théâtre du Rond-Point · 8e</option><option value="th_edouard7">Théâtre Édouard VII · 9e</option><option value="th_gaite">Théâtre Gaîté Montparnasse · 14e</option><option value="th_marigny">Théâtre Marigny · 8e</option><option value="th_mogador">Théâtre Mogador · 9e</option><option value="th_rive_gauche">Théâtre Rive Gauche · 14e</option><option value="th_stgeorges">Théâtre Saint-Georges · 9e</option><option value="th_tristan">Théâtre Tristan Bernard · 8e</option></optgroup>
-            <optgroup label="🚂 Autres gares">
+            <optgroup label="Théâtres" id="og-theatres"><option value="th_radio_france">Auditorium Radio France · 16e</option><option value="th_bobino">Bobino · 14e</option><option value="th_bouffes_parisiens">Bouffes-Parisiens · 2e</option><option value="th_cabaret_sauvage">Cabaret Sauvage · 19e</option><option value="th_cafe_danse">Café de la Danse · 11e</option><option value="th_cafegare">Café de la Gare · 4e</option><option value="th_blancs">Café-Théâtre des Blancs Manteaux · 4e</option><option value="th_casino">Casino de Paris · 9e</option><option value="th_cirque_hiver">Cirque d'Hiver Bouglione · 11e</option><option value="th_cite_musique">Cité de la Musique · 19e</option><option value="th_comedie_bastille">Comédie Bastille · 11e</option><option value="th_comedie_odeon">Comédie Odéon · 6e</option><option value="th_comedie_francaise">Comédie-Française · 1er</option><option value="th_elysee_mmtre">Élysée Montmartre · 18e</option><option value="th_folies_bergere">Folies Bergère · 9e</option><option value="th_gaite_lyrique">Gaîté Lyrique · 3e</option><option value="th_jamel">Jamel Comedy Club · 10e</option><option value="th_boule_noire">La Boule Noire · 18e</option><option value="th_cigale">La Cigale · 18e</option><option value="th_fleche_or">La Flèche d'Or · 20e</option><option value="th_machine_mr">La Machine du Moulin Rouge · 18e</option><option value="th_maroquinerie">La Maroquinerie · 20e</option><option value="th_bataclan">Le Bataclan · 11e</option><option value="th_grandpv">Le Grand Point-Virgule · 15e</option><option value="th_lucernaire">Le Lucernaire · 6e</option><option value="th_pv">Le Point Virgule · 4e</option><option value="th_rex">Le Rex Club / Grand Rex · 2e</option><option value="th_splendid">Le Splendid · 10e</option><option value="th_trianon">Le Trianon · 18e</option><option value="th_funambules">Les Funambules · 18e</option><option value="th_sarfati">Madame Sarfati Comedy Club · 1er</option><option value="th_new_morning">New Morning · 10e</option><option value="th_opera_bastille">Opéra Bastille · 12e</option><option value="th_opera_comique">Opéra Comique · 2e</option><option value="th_opera_garnier">Opéra Garnier · 9e</option><option value="th_petit_bain">Petit Bain · 13e</option><option value="th_philharmonie">Philharmonie de Paris · 19e</option><option value="th_gaveau">Salle Gaveau · 8e</option><option value="th_13">Théâtre 13 · 13e</option><option value="th_14">Théâtre 14 · 14e</option><option value="th_71">Théâtre 71 · Malakoff</option><option value="th_antoine">Théâtre Antoine · 10e</option><option value="th_comedia">Théâtre Comedia · 10e</option><option value="th_daunou">Théâtre Daunou · 2e</option><option value="th_ambigu">Théâtre de l'Ambigu · 10e</option><option value="th_atelier">Théâtre de l'Atelier · 18e</option><option value="th_odeon">Théâtre de l'Odéon · 6e</option><option value="th_contrescarpe">Théâtre de la Contrescarpe · 5e</option><option value="th_madeleine">Théâtre de la Madeleine · 8e</option><option value="th_michodiere">Théâtre de la Michodière · 2e</option><option value="th_pepiniere">Théâtre de la Pépinière · 2e</option><option value="th_stmartin">Théâtre de la Porte Saint-Martin · 10e</option><option value="th_potiniere">Théâtre de la Potinière · 1er</option><option value="th_renaissance">Théâtre de la Renaissance · 10e</option><option value="th_ville">Théâtre de la Ville · 4e</option><option value="th_champs_elysees">Théâtre des Champs-Élysées · 8e</option><option value="th_2anes">Théâtre des Deux Ânes · 18e</option><option value="th_10h">Théâtre des Dix Heures · 18e</option><option value="th_nouveautes">Théâtre des Nouveautés · 9e</option><option value="th_varietes">Théâtre des Variétés · 2e</option><option value="th_chatelet">Théâtre du Châtelet · 1er</option><option value="th_gymnase">Théâtre du Gymnase · 10e</option><option value="th_palais_royal">Théâtre du Palais-Royal · 1er</option><option value="th_rond_point">Théâtre du Rond-Point · 8e</option><option value="th_edouard7">Théâtre Édouard VII · 9e</option><option value="th_gaite">Théâtre Gaîté Montparnasse · 14e</option><option value="th_marigny">Théâtre Marigny · 8e</option><option value="th_mogador">Théâtre Mogador · 9e</option><option value="th_rive_gauche">Théâtre Rive Gauche · 14e</option><option value="th_stgeorges">Théâtre Saint-Georges · 9e</option><option value="th_tristan">Théâtre Tristan Bernard · 8e</option></optgroup>
+            <optgroup label="Autres gares">
               <option value="g-nord">Gare du Nord</option>
               <option value="g-lyon">Gare de Lyon</option>
               <option value="g-mont">Gare Montparnasse</option>
@@ -3591,9 +3710,9 @@ header{
       </div>
 
       <div class="tr-field">
-        <label>⚡ Tarif appliqué</label>
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13" style="vertical-align:-2px;margin-right:5px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Tarif appliqué</label>
         <div class="tr-segment" id="tr-moment">
-          <button data-v="auto" class="active">🤖 Auto</button>
+          <button data-v="auto" class="active">Auto</button>
           <button data-v="A">A</button>
           <button data-v="B">B</button>
           <button data-v="C">C</button>
@@ -3605,114 +3724,54 @@ header{
       </button>
     </div>
 
-    <div id="tr-resultat" style="display: block;">
-    <div class="tr-result">
-      <div class="tr-main-card ">
-        <div class="tr-badge-top ">
-          💶 Calcul taximètre horokilométrique
-        </div>
-        <div class="tr-price-big">60€</div>
-        <div class="tr-price-range">Fourchette : 57€ — 67€</div>
+    <div id="tr-resultat" style="display:none"></div>
+  </section>
 
-        
-          <div class="tr-compare">
-            <div class="tr-compare-row">
-              <span class="tr-compare-k">🟢 Si trajet 100% fluide</span>
-              <span class="tr-compare-v">54€</span>
-            </div>
-            <div class="tr-compare-row now">
-              <span class="tr-compare-k">🚦 Avec trafic actuel</span>
-              <span class="tr-compare-v">60€ · <b style="color:var(--accent)">+6.26€</b></span>
-            </div>
-          </div>
-        
-
-        <div class="tr-stats-grid">
-          <div class="tr-stat">
-            <div class="tr-stat-k">🛣 Distance</div>
-            <div class="tr-stat-v">30.8 km</div>
-            <div class="tr-stat-extra">TomTom Traffic Live</div>
-          </div>
-          <div class="tr-stat">
-            <div class="tr-stat-k">⏱ Durée <span style="color:var(--green);font-weight:900">● LIVE</span></div>
-            <div class="tr-stat-v ">60 min</div>
-            <div class="tr-stat-extra">Fluide : 39 min · <b style="color:var(--accent)">+12 min</b></div>
-          </div>
-          <div class="tr-stat">
-            <div class="tr-stat-k">🚗 Vitesse moy.</div>
-            <div class="tr-stat-v green">31 km/h</div>
-            <div class="tr-stat-extra">Seuil conjonction 25 km/h</div>
-          </div>
-          <div class="tr-stat">
-            <div class="tr-stat-k">⚡ Tarif B</div>
-            <div class="tr-stat-v">1.64€/km</div>
-            <div class="tr-stat-extra">41.76€/h si marche lente</div>
-          </div>
+  <!-- ══ CA — Chiffre d'affaires (calculette courses) ══ -->
+  <section class="tab" id="tab-ca">
+    <div class="ca-hero">
+      <div class="ca-hero-date" id="ca-date">—</div>
+      <div class="ca-hero-total" id="ca-total">0 €</div>
+      <div class="ca-hero-sub"><span id="ca-count">0</span> courses aujourd'hui</div>
+      <div class="ca-hero-split">
+        <div class="ca-split">
+          <div class="ca-split-k">CB</div>
+          <div class="ca-split-v" id="ca-cb">0 €</div>
         </div>
-      </div>
-
-      <div class="tr-traffic-bar">
-        <div class="tr-tb-head">
-          <span class="tr-tb-label">🚦 Trafic live</span>
-          <span class="tr-tb-status heavy">CHARGÉ · +12 MIN</span>
+        <div class="ca-split">
+          <div class="ca-split-k">CASH</div>
+          <div class="ca-split-v" id="ca-cash">0 €</div>
         </div>
-        <div class="tr-tb-meter">
-          <div class="tr-tb-fill heavy" style="width:70%"></div>
-        </div>
-        <div class="tr-tb-labels">
-          <span>🟢 Fluide</span>
-          <span>🟡 Modéré</span>
-          <span>🟠 Chargé</span>
-          <span>🔴 Saturé</span>
-        </div>
-      </div>
-
-      <div class="tr-tip">
-        <span class="tr-tip-ico">💡</span>
-        <div class="tr-tip-body">Bon rythme · ~15% horaire (feux rouges normaux) · facturation principalement au km</div>
-      </div>
-
-      
-    <div class="tr-breakdown">
-      <div class="tr-bd-hdr">💡 Décomposition taximètre (tronçon par tronçon)</div>
-      <div class="tr-bd-row">
-        <span>Prise en charge</span>
-        <span>3.00€</span>
-      </div>
-      <div class="tr-bd-row">
-        <span>Kilomètres (30.8 km × 1.64€)</span>
-        <span>50.51€</span>
-      </div>
-      
-      <div class="tr-bd-row hot">
-        <span>⚠️ Tarif horaire (9 min sous 25 km/h)</span>
-        <span>+6.26€</span>
-      </div>
-      <div class="tr-bd-row total">
-        <span>TOTAL ESTIMÉ</span>
-        <span>59.78€</span>
       </div>
     </div>
-  
 
-      <div class="tr-details">
-        <div class="tr-info-row"><span class="k">📍 De</span><span class="v">Ma position actuelle</span></div>
-        <div class="tr-info-row"><span class="k">🎯 Vers</span><span class="v">Opéra · Louvre · Châtelet</span></div>
-        <div class="tr-info-row"><span class="k">Zone</span><span class="v">Paris intra-muros</span></div>
+    <!-- Ajout course -->
+    <div class="ca-add-box">
+      <div class="ca-add-title">Ajouter une course</div>
+      <div class="ca-input-row">
+        <input type="number" step="0.5" id="ca-amount" class="ca-amount-input" placeholder="Montant €" inputmode="decimal">
+        <div class="ca-pay-toggle">
+          <button class="ca-pay-btn active" data-pay="cb" onclick="setCaPay('cb')">CB</button>
+          <button class="ca-pay-btn" data-pay="cash" onclick="setCaPay('cash')">Cash</button>
+        </div>
       </div>
-
-      <button class="tr-waze-btn" onclick="openWaze(48.8698, 2.3316)">
-        <span>🧭</span>
-        <span>Démarrer la navigation Waze</span>
+      <input type="text" id="ca-note" class="ca-note-input" placeholder="Note (optionnel : trajet, client…)" maxlength="60">
+      <button class="ca-add-btn" onclick="addCaCourse()">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg></span>
+        <span>Ajouter la course</span>
       </button>
-
-      <div class="tr-disclaimer">
-        <b>Taximètre horokilométrique (tronçon par tronçon)</b> · Le compteur facture en permanence le max entre tarif km (1.64€) et tarif horaire (41.76€/h). Vitesse de conjonction : 25.5 km/h. Sous ce seuil (feux, virages, bouchons), c'est le tarif horaire qui prend le relais.
-         <b>Trafic live TomTom</b> · données en direct.
-        Prix indicatif · le taximètre du véhicule fait foi · tarif préfectoral Paris 2025.
-      </div>
     </div>
-  </div>
+
+    <!-- Historique du jour -->
+    <div class="ca-list-hdr">
+      <span>Courses du jour</span>
+      <button class="ca-reset-btn" onclick="resetCaDay()" title="Réinitialiser la journée">Réinitialiser</button>
+    </div>
+    <div id="ca-list"><div class="loading-stub">Aucune course pour le moment</div></div>
+
+    <!-- Résumé semaine -->
+    <div class="ca-week-hdr">Cette semaine</div>
+    <div id="ca-week"><div class="loading-stub">—</div></div>
   </section>
 
 </main>
@@ -3784,6 +3843,17 @@ header{
       </svg>
     </span>
     <span class="bn-lbl">Trajet</span>
+  </button>
+  <button data-tab="tab-ca" aria-label="Chiffre d'affaires" class="">
+    <span class="bn-ico">
+      <!-- Euro sign + calculette -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"></path>
+        <path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"></path>
+        <path d="M7 8h10M7 8v3h10V8M7 14h3M13 14h1M16 14h1M7 17h3M13 17h1M16 17h1"></path>
+      </svg>
+    </span>
+    <span class="bn-lbl">CA</span>
   </button>
 </nav>
 
@@ -5751,18 +5821,90 @@ function estimerPax(type, heureArrivee, origine, gareId, date){
 ═══════════════════════════════════════════════ */
 /* ═══ ICÔNES SVG PROS ═══ (Lucide-style, stroke 2) */
 const ICO = {
+  // — Navigation & controls —
   close:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></span>',
   nav:    '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></span>',
+  search: '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>',
+  refresh:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></span>',
+  chevron:'<span class="ico ico-12"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>',
+  arrow_right:'<span class="ico ico-12"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>',
+  // — Statuts —
   check:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>',
   warn:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>',
-  moon:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>',
-  platform:'<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16"/><circle cx="8.5" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1" fill="currentColor" stroke="none"/><path d="M8 19l-2 3M16 19l2 3"/></svg></span>',
-  calendar:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>',
   ban:    '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></span>',
+  info:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>',
   livedot:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"><animate attributeName="opacity" values="1;.3;1" dur="1.4s" repeatCount="indefinite"/></circle></svg></span>',
+  // — Temps & calendrier —
   clock:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>',
-  zzz:    '<span class="tp-calm-ico ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h7L4 14h7M14 10h5l-5 5h5"/></svg></span>'
+  calendar:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>',
+  moon:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>',
+  sun:    '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>',
+  hourglass:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.17a2 2 0 0 0-.59-1.41L14 14l2.41-2.41A2 2 0 0 0 17 10.17V6M7 22v-4.17a2 2 0 0 1 .59-1.41L10 14l-2.41-2.41A2 2 0 0 1 7 10.17V6"/></svg></span>',
+  // — Train & transport —
+  platform:'<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="13" rx="2"/><path d="M4 11h16"/><circle cx="8.5" cy="13.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="13.5" r="1" fill="currentColor" stroke="none"/><path d="M8 19l-2 3M16 19l2 3"/></svg></span>',
+  train:  '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16M7 3v2M17 3v2"/><circle cx="8" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="14" r="1" fill="currentColor" stroke="none"/><path d="M6 21l3-3M18 21l-3-3"/></svg></span>',
+  taxi:   '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14v-6l-2-5H7l-2 5v6zM5 17v2h2v-2M17 17v2h2v-2M9 5V3h6v2"/><circle cx="8.5" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1.5" fill="currentColor" stroke="none"/></svg></span>',
+  gps:    '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="10"/><path d="M12 2v2M12 20v2M22 12h-2M4 12H2"/></svg></span>',
+  pin:    '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>',
+  traffic:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><circle cx="12" cy="7" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="17" r="1.5"/></svg></span>',
+  route:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M12 19H8.5a2.5 2.5 0 0 1 0-5h7a2.5 2.5 0 0 0 0-5H12"/></svg></span>',
+  plane:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span>',
+  bag:    '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M8 8V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4"/></svg></span>',
+  // — Jauges & feedback —
+  zzz:    '<span class="tp-calm-ico ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h7L4 14h7M14 10h5l-5 5h5"/></svg></span>',
+  bolt:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>',
+  target: '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></span>',
+  users:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>',
+  trending:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>',
+  chart:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span>',
+  crown:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 22h14"/></svg></span>',
+  bulb:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c1 .8 1.5 2 1.5 3.3h5c0-1.3.5-2.5 1.5-3.3A7 7 0 0 0 12 2z"/></svg></span>',
+  sparkle:'<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3z"/></svg></span>',
+  bar:    '<span class="ico ico-12"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="8" width="4" height="12" rx="1"/><rect x="10" y="4" width="4" height="16" rx="1"/><rect x="16" y="12" width="4" height="8" rx="1"/></svg></span>',
+  install:'<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>',
+  wifi:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>',
+  // — Lieux & catégories (events, théâtres, salons) —
+  stadium:'<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="6"/><path d="M7 12a5 5 0 0 1 10 0"/></svg></span>',
+  music:  '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>',
+  theatre:'<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8a10 10 0 0 1 20 0c0 4-3 8-10 8S2 12 2 8z"/><circle cx="8" cy="9" r=".5" fill="currentColor"/><circle cx="16" cy="9" r=".5" fill="currentColor"/><path d="M9 12s1 2 3 2 3-2 3-2"/></svg></span>',
+  mic:    '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg></span>',
+  ball:   '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2l3 4-3 4-3-4zM12 22l-3-4 3-4 3 4zM2 12l4-3 4 3-4 3zM22 12l-4 3-4-3 4-3z"/></svg></span>',
+  building:'<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></svg></span>',
+  museum: '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h18M4 18h16M5 18V9M9 18V9M15 18V9M19 18V9M2 9h20L12 3 2 9z"/></svg></span>',
+  ticket: '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 0 0 4v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 0 0-4z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span>',
+  party:  '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3L2 22l10.7-3.79M4 3h.01M22 8h.01M15 2h.01M22 20h.01M22 2L12.1 21.9M5 8a3 3 0 0 0 3-3 3 3 0 0 0 3 3 3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></span>',
+  tree:   '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14v7M7 14v7M12 3v18M5 8l7-5 7 5M5 14l7-5 7 5"/></svg></span>',
+  // — Circle indicators —
+  circle_green: '<span class="ico ico-10"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span>',
+  circle_orange:'<span class="ico ico-10"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span>',
+  circle_red:   '<span class="ico ico-10"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span>',
+  square: '<span class="ico ico-10"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></span>',
+  dot:    '<span class="ico ico-8"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg></span>',
+  // — Actions —
+  copy:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></span>',
+  plus:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>',
+  edit:   '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>',
+  share:  '<span class="ico ico-14"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>',
+  mobile: '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>',
+  rocket: '<span class="ico ico-16"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>'
 };
+
+/* ═══ Helper pour mapper catégorie de salle → SVG icône ═══ */
+function venueSvg(cat){
+  if(cat === 'arena')   return ICO.stadium;
+  if(cat === 'sport')   return ICO.ball;
+  if(cat === 'concert') return ICO.music;
+  if(cat === 'theatre') return ICO.theatre;
+  if(cat === 'salon')   return ICO.building;
+  return ICO.pin;
+}
+function eventCatSvg(cat){
+  if(cat === 'sport')   return ICO.ball;
+  if(cat === 'concert') return ICO.music;
+  if(cat === 'salon')   return ICO.building;
+  if(cat === 'theatre') return ICO.theatre;
+  return ICO.ticket;
+}
 
 function niveauFlammes(totalPax){
   if(totalPax < 5)       return { lvl:0, ico:ICO.zzz,      txt:'très calme' };
@@ -6167,97 +6309,65 @@ function buildEurostarTrains(){
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  // Si on a des données live depuis le Worker, les utiliser en priorité
-  if(Object.keys(EUROSTAR_STATUS).length > 0){
-    for(const num in EUROSTAR_STATUS){
-      const info = EUROSTAR_STATUS[num];
-      if(!info.arriveeParis) continue; // Ignore si pas d'heure
-
-      const [h, m] = info.arriveeParis.split(':').map(Number);
-      let arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
-
-      let retard = 0;
-      let supprime = info.status === 'cancelled';
-      let hRT = info.arriveeParis;
-      let hShow = info.arriveeParis;
-      let isDelayed = info.status === 'delayed';
-
-      if(info.status === 'delayed' && info.newTime){
-        const [nh, nm] = info.newTime.split(':').map(Number);
-        const newArrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), nh, nm, 0);
-        retard = Math.max(0, Math.round((newArrDate - arrDate) / 60000));
-        arrDate = newArrDate;
-        hRT = info.newTime;
-        hShow = info.newTime;
-      } else if(info.status === 'delayed'){
-        // Marqué retardé mais sans heure précise → estime +10 min
-        retard = 10;
-        arrDate = new Date(arrDate.getTime() + 10*60*1000);
-        hRT = pad(arrDate.getHours()) + ':' + pad(arrDate.getMinutes());
-        hShow = hRT;
-      }
-
-      const minDiff = Math.round((arrDate - now) / 60000);
-      if(minDiff < -15 || minDiff > 24*60) continue;
-
-      const hArr = arrDate.getHours();
-      const pax = estimerPax('EUROSTAR', hArr, info.origine, 'nord', now);
-
-      trains.push({
-        type: 'EUROSTAR',
-        origine: info.origine,
-        numero: num,
-        hBase: info.arriveeParis,
-        hRT,
-        hShow,
-        passagers: pax,
-        retard,
-        supprime,
-        delayed: isDelayed || retard > 0,
-        live: true,  // données live temps réel
-        min: minDiff,
-        isEurostar: true
-      });
-    }
-    return trains;
+  // ═══ CHANGEMENT MAJEUR ═══
+  // On ne RETOURNE QUE les Eurostar avec données LIVE (confirmées par le scraper).
+  // Avant : fallback sur planning hardcodé → confusion entre live et théorique.
+  // Maintenant : si le scraper ne répond pas → aucun Eurostar affiché (pas de confusion possible).
+  if(Object.keys(EUROSTAR_STATUS).length === 0){
+    return trains; // Aucun live disponible, on n'affiche rien
   }
 
-  // Fallback : si le Worker n'a pas répondu, utiliser le planning hardcodé
-  const addTrains = (schedule, origine) => {
-    for(const entry of schedule){
-      const [h, m] = entry.h.split(':').map(Number);
-      const arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
-      const minDiff = Math.round((arrDate - now) / 60000);
-      if(minDiff < -15 || minDiff > 24*60) continue;
+  for(const num in EUROSTAR_STATUS){
+    const info = EUROSTAR_STATUS[num];
+    if(!info.arriveeParis) continue; // Ignore si pas d'heure
 
-      const dup = trains.find(t => t.hBase === entry.h && t.origine === origine && t.numero === entry.num);
-      if(dup) continue;
+    const [h, m] = info.arriveeParis.split(':').map(Number);
+    let arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
 
-      const hArr = arrDate.getHours();
-      const pax = estimerPax('EUROSTAR', hArr, origine, 'nord', now);
+    let retard = 0;
+    let supprime = info.status === 'cancelled';
+    let hRT = info.arriveeParis;
+    let hShow = info.arriveeParis;
+    let isDelayed = info.status === 'delayed';
 
-      trains.push({
-        type: 'EUROSTAR',
-        origine,
-        numero: entry.num,
-        hBase: entry.h,
-        hRT: entry.h,
-        hShow: entry.h,
-        passagers: pax,
-        retard: 0,
-        supprime: false,
-        delayed: false,
-        live: false,
-        min: minDiff,
-        isEurostar: true
-      });
+    if(info.status === 'delayed' && info.newTime){
+      const [nh, nm] = info.newTime.split(':').map(Number);
+      const newArrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), nh, nm, 0);
+      retard = Math.max(0, Math.round((newArrDate - arrDate) / 60000));
+      arrDate = newArrDate;
+      hRT = info.newTime;
+      hShow = info.newTime;
+    } else if(info.status === 'delayed'){
+      // Marqué retardé mais sans heure précise → estime +10 min
+      retard = 10;
+      arrDate = new Date(arrDate.getTime() + 10*60*1000);
+      hRT = pad(arrDate.getHours()) + ':' + pad(arrDate.getMinutes());
+      hShow = hRT;
     }
-  };
 
-  addTrains(EUROSTAR_SCHEDULE.london,    'Londres St Pancras');
-  addTrains(EUROSTAR_SCHEDULE.bruxelles, 'Bruxelles-Midi');
-  addTrains(EUROSTAR_SCHEDULE.amsterdam, 'Amsterdam Centraal');
+    const minDiff = Math.round((arrDate - now) / 60000);
+    // Filtre : trains passés > 8 min éliminés (cohérent avec le reste de l'app)
+    if(minDiff < -8 || minDiff > 24*60) continue;
 
+    const hArr = arrDate.getHours();
+    const pax = estimerPax('EUROSTAR', hArr, info.origine, 'nord', now);
+
+    trains.push({
+      type: 'EUROSTAR',
+      origine: info.origine,
+      numero: num,
+      hBase: info.arriveeParis,
+      hRT,
+      hShow,
+      passagers: pax,
+      retard,
+      supprime,
+      delayed: isDelayed || retard > 0,
+      live: true,  // TOUS les Eurostar affichés sont maintenant live uniquement
+      min: minDiff,
+      isEurostar: true
+    });
+  }
   return trains;
 }
 
@@ -6604,7 +6714,7 @@ function renderStats(){
   if(!rushNow) return;
 
   if(totalPax === 0){
-    rushNow.innerHTML = '<div class="empty"><span class="ei">😴</span>Pas de rush dans les 25 prochaines minutes</div>';
+    rushNow.innerHTML = `<div class="empty"><span class="ei">${ICO.zzz}</span>Pas de rush dans les 25 prochaines minutes</div>`;
   } else {
     // Seuils ajustés pour fenêtre 25 min (plus courte que 60 min)
     const level = totalPax >= 300 ? '🔥🔥🔥🔥 RUSH MAXIMUM'
@@ -6616,7 +6726,7 @@ function renderStats(){
     let nextHTML = '';
     if(nextBig){
       nextHTML = `<div class="rush-next">
-        <div class="rn-ico">${nextBig.gareIco}</div>
+        <div class="rn-ico">${ICO.train}</div>
         <div class="rn-main">
           <div class="rn-gare">${esc(nextBig.gareNom)}</div>
           <div class="rn-train">${esc(nextBig.type)} · ${esc(nextBig.origine)}</div>
@@ -6626,10 +6736,10 @@ function renderStats(){
     }
 
     rushNow.innerHTML = `<div class="rush-card ${topClass}">
-      <div class="rush-now-title">🔥 Prochaines 25 minutes toutes gares</div>
+      <div class="rush-now-title"><span style="display:inline-flex;align-items:center;gap:7px">🔥 Prochaines 25 minutes toutes gares</span></div>
       <div class="rush-now-big">${totalPax} clients potentiels</div>
       <div class="rush-now-sub">${level} · ${next25.length} trains à venir</div>
-      ${nextHTML ? '<div class="rush-now-title" style="margin-top:14px">🎯 Prochain gros arrivant</div>' + nextHTML : ''}
+      ${nextHTML ? `<div class="rush-now-title" style="margin-top:14px;display:inline-flex;align-items:center;gap:7px">${ICO.target}<span>Prochain gros arrivant</span></div>` + nextHTML : ''}
     </div>`;
   }
 
@@ -6662,7 +6772,7 @@ function renderStats(){
     const pct = Math.round((v / maxVal) * 100);
     const cls = v >= maxVal * 0.66 ? 'hot' : v >= maxVal * 0.33 ? 'warm' : '';
     const curCls = h === nowH ? ' cur' : '';
-    return `<div class="hour-col">
+    return `<div class="hour-col" title="${v} clients">
       <div class="hb ${cls}${curCls}" style="height:${Math.max(3, pct)}%"></div>
       <div class="hh">${pad(h)}h</div>
     </div>`;
@@ -6671,8 +6781,9 @@ function renderStats(){
   const rushHours = document.getElementById('rush-hours');
   if(rushHours){
     rushHours.innerHTML = `<div class="hour-bar">${hoursHTML}</div>
-      <div style="font-size:10px;color:var(--ink3);text-align:center;padding:0 10px">
-        Nombre de clients taxi estimés par heure · <span style="color:var(--accent)">■</span> rush · <span style="color:var(--gold)">■</span> actif
+      <div class="hour-legend">
+        Clients/h estimés · <span class="ico ico-10" style="color:var(--accent)"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></span> rush
+        · <span class="ico ico-10" style="color:var(--gold)"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></span> actif
       </div>`;
   }
 
@@ -6692,11 +6803,11 @@ function renderStats(){
 
   const rankHTML = ranking.map((g, i) => {
     const flames = g.pax >= 180 ? '🔥🔥🔥🔥' : g.pax >= 90 ? '🔥🔥🔥'
-                 : g.pax >= 35 ? '🔥🔥' : g.pax >= 5 ? '🔥' : '💤';
+                 : g.pax >= 35 ? '🔥🔥' : g.pax >= 5 ? '🔥' : ICO.zzz;
     const posCls = i === 0 ? 'p1' : i === 1 ? 'p2' : i === 2 ? 'p3' : '';
     return `<div class="rank-row" onclick="switchTab('tab-now');setTimeout(()=>openDialog('${g.id}'),300)">
       <div class="rk-pos ${posCls}">${i+1}</div>
-      <div class="rk-ico">${g.ico}</div>
+      <div class="rk-ico">${ICO.train}</div>
       <div class="rk-name">${esc(g.nom)}</div>
       <div class="rk-flames">${flames}</div>
       <div class="rk-pax">${g.pax}</div>
@@ -6705,7 +6816,7 @@ function renderStats(){
 
   const rushRanking = document.getElementById('rush-ranking');
   if(rushRanking){
-    rushRanking.innerHTML = rankHTML || '<div class="empty"><span class="ei">📊</span>Données en chargement…</div>';
+    rushRanking.innerHTML = rankHTML || `<div class="empty"><span class="ei">${ICO.chart}</span>Données en chargement…</div>`;
   }
 }
 
@@ -6839,7 +6950,12 @@ const EVENTS = [
   { d:'2026-05-30', fin:'22:30', venue:'defense_arena',  titre:'Damso · BĒYĀH Tour (J3) + Metallica M72',       cat:'concert' },
   { d:'2026-05-31', fin:'22:30', venue:'defense_arena',  titre:'Metallica · M72 Tour (J2)',                     cat:'concert' },
 
-  // ═══ ADIDAS ARENA ═══
+  // ═══ ADIDAS ARENA — basket Paris Basketball + concerts ═══
+  { d:'2026-04-25', fin:'20:00', venue:'adidas_arena',   titre:'Paris Basketball · Betclic Élite (sam 18h)',     cat:'sport' },
+  { d:'2026-05-02', fin:'22:30', venue:'adidas_arena',   titre:'Paris Basketball vs Élan Chalon · Betclic Élite', cat:'sport' },
+  { d:'2026-05-09', fin:'22:00', venue:'adidas_arena',   titre:'Paris Basketball · Betclic Élite (sam 20h)',     cat:'sport' },
+  { d:'2026-05-16', fin:'21:00', venue:'adidas_arena',   titre:'Paris Basketball vs LDLC ASVEL · clash final',   cat:'sport' },
+  { d:'2026-05-19', fin:'22:00', venue:'adidas_arena',   titre:'Paris Basketball · Playoffs Betclic Élite',      cat:'sport' },
   { d:'2026-05-27', fin:'22:30', venue:'adidas_arena',   titre:'Zucchero · World Tour 2026',                    cat:'concert' },
 
   // ═══ STADE DE FRANCE ═══
@@ -6966,8 +7082,191 @@ function switchTab(id){
   }
   if(id === 'tab-theatres') renderTheatres();
   if(id === 'tab-events')   renderEventsTab();
+  if(id === 'tab-ca')       renderCa();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+/* ═══════════════════════════════════════════════
+   CHIFFRE D'AFFAIRES (CA) — Compta journalière taxi
+   Stockage : localStorage clé "tp_ca_v1"
+   Format : { "YYYY-MM-DD": [{amount, pay, note, t}, ...], ... }
+═══════════════════════════════════════════════ */
+const CA_KEY = 'tp_ca_v1';
+let caPayMode = 'cb'; // 'cb' ou 'cash'
+
+function caTodayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function caLoadAll(){
+  try {
+    const raw = localStorage.getItem(CA_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch(_){ return {}; }
+}
+
+function caSaveAll(data){
+  try { localStorage.setItem(CA_KEY, JSON.stringify(data)); }
+  catch(e){ console.error('CA save err:', e); }
+}
+
+function setCaPay(mode){
+  caPayMode = mode;
+  document.querySelectorAll('.ca-pay-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.pay === mode);
+  });
+  if(navigator.vibrate) navigator.vibrate(8);
+}
+
+function addCaCourse(){
+  const amountEl = document.getElementById('ca-amount');
+  const noteEl = document.getElementById('ca-note');
+  const amount = parseFloat(amountEl.value);
+  if(isNaN(amount) || amount <= 0){
+    amountEl.style.borderColor = '#dc2626';
+    amountEl.focus();
+    setTimeout(() => amountEl.style.borderColor = '', 1500);
+    if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+    return;
+  }
+  const note = (noteEl.value || '').trim().substring(0, 60);
+  const all = caLoadAll();
+  const key = caTodayKey();
+  if(!all[key]) all[key] = [];
+  all[key].push({
+    amount: Math.round(amount * 100) / 100,
+    pay: caPayMode,
+    note,
+    t: Date.now()
+  });
+  caSaveAll(all);
+  amountEl.value = '';
+  noteEl.value = '';
+  amountEl.focus();
+  if(navigator.vibrate) navigator.vibrate([8, 30, 12]);
+  renderCa();
+}
+
+function deleteCaCourse(idx){
+  const all = caLoadAll();
+  const key = caTodayKey();
+  if(!all[key]) return;
+  if(!confirm('Supprimer cette course ?')) return;
+  all[key].splice(idx, 1);
+  if(all[key].length === 0) delete all[key];
+  caSaveAll(all);
+  if(navigator.vibrate) navigator.vibrate(15);
+  renderCa();
+}
+
+function resetCaDay(){
+  if(!confirm('Réinitialiser TOUTES les courses du jour ? Cette action est définitive.')) return;
+  const all = caLoadAll();
+  const key = caTodayKey();
+  delete all[key];
+  caSaveAll(all);
+  if(navigator.vibrate) navigator.vibrate([15, 50, 15]);
+  renderCa();
+}
+
+function renderCa(){
+  const all = caLoadAll();
+  const key = caTodayKey();
+  const courses = all[key] || [];
+
+  // Date hero
+  const now = new Date();
+  const dateEl = document.getElementById('ca-date');
+  if(dateEl){
+    dateEl.textContent = `${JOURS_LONG[now.getDay()]} ${now.getDate()} ${MOIS_LONG[now.getMonth()]}`.toUpperCase();
+  }
+
+  // Totaux
+  const totalCB = courses.filter(c => c.pay === 'cb').reduce((s,c) => s + c.amount, 0);
+  const totalCash = courses.filter(c => c.pay === 'cash').reduce((s,c) => s + c.amount, 0);
+  const total = totalCB + totalCash;
+
+  document.getElementById('ca-total').textContent = `${total.toFixed(2).replace('.', ',')} €`;
+  document.getElementById('ca-count').textContent = courses.length;
+  document.getElementById('ca-cb').textContent = `${totalCB.toFixed(2).replace('.', ',')} €`;
+  document.getElementById('ca-cash').textContent = `${totalCash.toFixed(2).replace('.', ',')} €`;
+
+  // Liste détaillée
+  const listEl = document.getElementById('ca-list');
+  if(courses.length === 0){
+    listEl.innerHTML = `<div class="ca-empty">
+      <span class="ca-empty-ico">${ICO.taxi}</span>
+      <div>Aucune course pour le moment<br><span>Ajoute ta première course ci-dessus</span></div>
+    </div>`;
+  } else {
+    // Trier décroissant (plus récent en haut)
+    const sorted = courses.map((c,i) => ({...c, _idx: i})).sort((a,b) => b.t - a.t);
+    listEl.innerHTML = sorted.map(c => {
+      const time = new Date(c.t);
+      const hh = pad(time.getHours()) + ':' + pad(time.getMinutes());
+      const payLbl = c.pay === 'cb' ? 'CB' : 'CASH';
+      return `<div class="ca-course">
+        <div class="ca-course-pay ${c.pay}">${payLbl}</div>
+        <div class="ca-course-main">
+          <div class="ca-course-amt">${c.amount.toFixed(2).replace('.', ',')} €</div>
+          <div class="ca-course-meta">${hh}${c.note ? ' · ' + esc(c.note) : ''}</div>
+        </div>
+        <button class="ca-course-del" onclick="deleteCaCourse(${c._idx})" aria-label="Supprimer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>`;
+    }).join('');
+  }
+
+  // Résumé semaine (7 derniers jours dont aujourd'hui)
+  const weekEl = document.getElementById('ca-week');
+  const weekDays = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const k = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const dayCourses = all[k] || [];
+    const dayTotal = dayCourses.reduce((s,c) => s + c.amount, 0);
+    weekDays.push({
+      d, k,
+      total: dayTotal,
+      count: dayCourses.length,
+      isToday: i === 0
+    });
+  }
+  const weekTotal = weekDays.reduce((s,d) => s + d.total, 0);
+  const maxDay = Math.max(1, ...weekDays.map(d => d.total));
+  const JOURS_COURTS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+  weekEl.innerHTML = `
+    <div class="ca-week-total">
+      <span class="ca-wt-k">Total 7 jours</span>
+      <span class="ca-wt-v">${weekTotal.toFixed(2).replace('.', ',')} €</span>
+    </div>
+    <div class="ca-week-bars">
+      ${weekDays.map(d => {
+        const pct = Math.round((d.total / maxDay) * 100);
+        const cls = d.isToday ? 'today' : '';
+        const lbl = JOURS_COURTS[d.d.getDay()];
+        return `<div class="ca-wcol ${cls}">
+          <div class="ca-wcol-bar"><div class="ca-wcol-fill" style="height:${Math.max(3, pct)}%"></div></div>
+          <div class="ca-wcol-amt">${d.total >= 100 ? Math.round(d.total) : d.total.toFixed(0)}€</div>
+          <div class="ca-wcol-day">${lbl} ${d.d.getDate()}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+// Permettre Enter dans le champ montant pour ajouter
+document.addEventListener('DOMContentLoaded', () => {
+  const amountEl = document.getElementById('ca-amount');
+  if(amountEl){
+    amountEl.addEventListener('keypress', e => {
+      if(e.key === 'Enter') addCaCourse();
+    });
+  }
+});
 
 /* ═══════════════════════════════════════════════
    TIER SYSTEM & BIOS — priorisation chauffeur
@@ -7004,6 +7303,7 @@ const TIPS = {
 // Mini-bios/descriptions pour les events (ajoutées aux events sensibles)
 // Clé = titre simplifié en minuscules, ou ID event dans EVENTS
 const EVENT_BIOS = {
+  // Concerts internationaux
   'charlotte cardin': 'Artiste canadienne pop/soul · tournée après succès du 99 Nights Tour · Accor Arena 1ère fois',
   'tame impala': 'Projet de Kevin Parker · rock psychédélique australien · tournée mondiale 2026',
   'worakls orchestra': 'Producteur électro français · show avec orchestre symphonique · unique en son genre',
@@ -7021,15 +7321,34 @@ const EVENT_BIOS = {
   'jul': 'Rappeur marseillais · roi du streaming FR · 2 Stade de France · clientèle jeunes 15-30',
   'cassius': 'Duo electro French Touch · relance par Boombass après disparition de Zdar',
   'ben mazué': 'Chanteur folk français · album Famille · 3 soirs au Zénith',
+  'zucchero': 'Chanteur rock italien · World Tour 2026 · classique en Europe · public 40-60',
+  'jason derulo': 'R&B/dance américain · tubes mondiaux Talk Dirty, Trumpets · clientèle 20-35',
+  'ken carson': 'Rappeur trap US (Atlanta) · tournée More Chaos · public jeune 16-25',
+  'thylacine': 'Producteur électro français · Roads vol. 3 · ambiance immersive',
+  'goldmen': 'Tribute Jean-Jacques Goldman · public 40-65 nostalgie',
+  'kungs': 'DJ français · house tropicale · This Girl · clientèle jeune adulte',
+  'étienne daho': 'Icône pop française · 40 ans de carrière · 2 soirs Zénith · public 50-70',
+  // Sport — basket Adidas Arena
+  'paris basketball': 'Club résident Adidas Arena (8000 places) · Betclic Élite + EuroLeague · sortie pic 22h-22h30 après match · taxis très demandés Porte de la Chapelle / Saint-Denis / Marais',
+  'lyon-villeurbanne': 'ASVEL · ennemi historique du basket FR · clash final saison régulière · ambiance ultra',
+  'élan chalon': 'Club historique Bourgogne · public mixte · ambiance bon enfant · gros enjeu fin saison',
+  // Sport — autres
   'psg · liverpool': '1/2 finale Ligue des Champions · gros pic de taxis après match (fin ~23h)',
   'psg · nantes': 'Match L1 · sortie ~23h · clients souvent 16e/Neuilly/Défense',
   'stade français': 'Top 14 rugby · ambiance familiale · sortie Porte Saint-Cloud',
-  'foire de paris': '400 000 visiteurs/12 jours · ouvert 10h-19h (22h samedi 9/5) · clientèle grand public',
-  'comic con france': 'Convention pop culture · cosplayers · beaucoup de groupes d\'amis',
-  'eurosatory': 'Salon pro défense/sécurité · professionnels internationaux · clients hôtels 4/5 étoiles',
+  'france vs canada': 'Match international hockey sur glace · Accor Arena · sortie pic 17h',
+  'finales coupe de france handball': 'Finales Coupe de France handball · Accor Arena · public familial',
+  'wwe monday night raw': 'Catch américain WWE · show TV mondial · public familles + jeunes adultes',
+  // Salons / Expos
+  'foire de paris': '400 000 visiteurs/12 jours · ouvert 10h-19h (22h samedi 9/5) · clientèle grand public · pic taxis 18h-19h Porte Versailles',
+  'comic con france': 'Convention pop culture · cosplayers · beaucoup de groupes d\'amis · Villepinte RER B',
+  'eurosatory': 'Salon pro défense/sécurité · 1500 exposants internationaux · clients hôtels 4/5 étoiles · 25 000 pros',
   'festival du livre': 'Grand Palais · éditeurs/auteurs · public premium · nocturne vendredi 23h',
   'rhum fest': 'Parc Floral · 3 jours · public 25-45 · finit 19h',
-  'le roi lion': 'Disney musical · plus longue durée sur Paris · familles avec enfants',
+  'salon naturally': 'Salon bio/cosmétique naturelle · Porte Versailles · public 30-50 majoritairement féminin',
+  'ballet preljocaj': 'Compagnie de danse contemporaine d\'Aix-en-Provence · 4 soirs Seine Musicale · clientèle CSP+',
+  // Théâtre / Opéra / Musical
+  'le roi lion': 'Disney musical · plus longue durée sur Paris · familles avec enfants · Mogador',
   'roméo et juliette': 'Ballet de Rudolf Noureev · chef-d\'œuvre tragique sur musique de Prokofiev · Étoiles de l\'Opéra · 2745 places',
   'rusalka': 'Opéra de Dvořák · conte de fée tchèque sur une sirène · décors magiques · en tchèque surtitré FR',
   'satyagraha': 'Opéra de Philip Glass sur Gandhi · musique minimaliste envoûtante · en sanskrit · production contemporaine',
@@ -7084,7 +7403,7 @@ function renderTheatres(){
       <div class="ra-top"><span class="ra-dot"></span><span>CIBLE PREMIUM</span></div>
       <div class="ra-title">${esc(critical.v.nom)}</div>
       <div class="ra-sub">${esc(critical.titre)} · ${(critical.v.cap || 0).toLocaleString('fr-FR')} pax · ${statusTxt}</div>
-      <div class="ra-cta">⚡ Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</div>
+      <div class="ra-cta">${ICO.bolt}<span>Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</span></div>
     `;
     rushEl.style.display = 'block';
     rushEl.onclick = () => openEvModal(critical);
@@ -7106,7 +7425,7 @@ function renderTheatres(){
   // Timeline groupée par jour, puis triée par tier (décroissant) puis par heure
   const tlEl = document.getElementById('theatres-timeline');
   if(filtered.length === 0){
-    tlEl.innerHTML = '<div class="vempty"><span class="ei">🎭</span>Aucun spectacle sur la période</div>';
+    tlEl.innerHTML = `<div class="vempty"><span class="ei">${ICO.theatre}</span>Aucun spectacle sur la période</div>`;
     return;
   }
 
@@ -7144,7 +7463,7 @@ function renderTheatres(){
 
       html += `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
         <div class="tl-hour">${esc(e.fin)}</div>
-        <div class="tl-ico">🎭</div>
+        <div class="tl-ico">${ICO.theatre}</div>
         <div class="tl-main">
           <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${tierFlames}</span></div>
           <div class="tl-lieu">${esc(e.titre)}</div>
@@ -7153,7 +7472,7 @@ function renderTheatres(){
           <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
           <div class="tl-cap-l">pax</div>
         </div>
-        ${e.v.lat && e.v.lng ? `<button class="tl-waze" onclick="event.stopPropagation();openWaze(${e.v.lat},${e.v.lng});" title="Naviguer avec Waze">🧭</button>` : ''}
+        ${e.v.lat && e.v.lng ? `<button class="tl-waze" onclick="event.stopPropagation();openWaze(${e.v.lat},${e.v.lng});" title="Naviguer avec Waze">${ICO.nav}</button>` : ''}
       </div>`;
     });
 
@@ -7214,7 +7533,7 @@ function renderEventsTab(){
       <div class="ra-top"><span class="ra-dot"></span><span>RUSH MAJEUR</span></div>
       <div class="ra-title">${esc(critical.v.nom)}</div>
       <div class="ra-sub">${esc(critical.titre)} · ${(critical.v.cap||0).toLocaleString('fr-FR')} pax · ${statusTxt}</div>
-      <div class="ra-cta">⚡ Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</div>
+      <div class="ra-cta">${ICO.bolt}<span>Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</span></div>
     `;
     rushEl.style.display = 'block';
     rushEl.onclick = () => openEvModal(critical);
@@ -7243,7 +7562,7 @@ function renderEventsTab(){
 
   const topEl = document.getElementById('ev-top');
   if(top3.length === 0){
-    topEl.innerHTML = '<div class="vempty"><span class="ei">😴</span>Aucun event imminent</div>';
+    topEl.innerHTML = `<div class="vempty"><span class="ei">${ICO.zzz}</span>Aucun event imminent</div>`;
   } else {
     topEl.innerHTML = top3.map((e, i) => {
       const diffMin = Math.round((e.finDate.getTime() - now.getTime()) / 60000);
@@ -7261,13 +7580,13 @@ function renderEventsTab(){
         </div>
         <div class="te-body">
           <div>
-            <div class="te-titre">${CAT_ICO[e.cat] || '🎫'} ${esc(e.v.nom || e.venue)}</div>
+            <div class="te-titre">${CAT_ICO[e.cat] || ICO.ticket} <span>${esc(e.v.nom || e.venue)}</span></div>
             <div class="te-venue">${esc(e.titre)}</div>
           </div>
           <div class="te-meta">
             <span class="te-fin">fin ${esc(e.fin)}</span>
             <span class="te-in">${timeLbl}</span>
-            <span class="te-cap">👥 ${(e.v.cap || 0).toLocaleString('fr-FR')}</span>
+            <span class="te-cap">${ICO.users}<span>${(e.v.cap || 0).toLocaleString('fr-FR')}</span></span>
           </div>
         </div>
       </div>`;
@@ -7291,7 +7610,7 @@ function renderEventsTab(){
 
   const tlEl = document.getElementById('events-timeline');
   if(filtered.length === 0){
-    tlEl.innerHTML = '<div class="vempty"><span class="ei">📅</span>Aucun event sur ce filtre</div>';
+    tlEl.innerHTML = `<div class="vempty"><span class="ei">${ICO.calendar}</span>Aucun event sur ce filtre</div>`;
     return;
   }
 
@@ -7325,7 +7644,7 @@ function renderEventsTab(){
 
       html += `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
         <div class="tl-hour">${esc(e.fin)}</div>
-        <div class="tl-ico">${CAT_ICO[e.cat] || '🎫'}</div>
+        <div class="tl-ico">${CAT_ICO[e.cat] || ICO.ticket}</div>
         <div class="tl-main">
           <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${evFlames}</span></div>
           <div class="tl-lieu">${esc(e.titre)}</div>
@@ -7334,7 +7653,7 @@ function renderEventsTab(){
           <div class="tl-cap">${(e.v.cap || 0).toLocaleString('fr-FR')}</div>
           <div class="tl-cap-l">pax</div>
         </div>
-        ${e.v.lat && e.v.lng ? `<button class="tl-waze" onclick="event.stopPropagation();openWaze(${e.v.lat},${e.v.lng});" title="Naviguer avec Waze">🧭</button>` : ''}
+        ${e.v.lat && e.v.lng ? `<button class="tl-waze" onclick="event.stopPropagation();openWaze(${e.v.lat},${e.v.lng});" title="Naviguer avec Waze">${ICO.nav}</button>` : ''}
       </div>`;
     });
 
@@ -7401,8 +7720,14 @@ function openEvModal(ev){
   const finDate = parseEventFin(ev);
   const diffMin = Math.round((finDate.getTime() - now.getTime()) / 60000);
 
-  const catLbl = { concert:'🎤 Concert', sport:'⚽ Sport',
-                   salon:'🎪 Salon', theatre:'🎭 Théâtre' }[ev.cat] || '🎫 Event';
+  // Labels par catégorie avec SVG
+  const catInfo = {
+    concert: {svg: ICO.music,    lbl:'Concert'},
+    sport:   {svg: ICO.ball,     lbl:'Sport'},
+    salon:   {svg: ICO.building, lbl:'Salon'},
+    theatre: {svg: ICO.theatre,  lbl:'Théâtre'}
+  }[ev.cat] || {svg: ICO.ticket, lbl:'Event'};
+  const catLbl = `${catInfo.svg}<span>${catInfo.lbl}</span>`;
   const timeLbl = diffMin < -15 ? `terminé depuis ${Math.abs(diffMin)} min`
                : diffMin <= 0 ? 'en cours / vient de finir'
                : diffMin < 60 ? `dans ${diffMin} min`
@@ -7411,13 +7736,14 @@ function openEvModal(ev){
 
   const bio = getEventBio(ev);
   const tip = TIPS[ev.venue];
+  const venueSvg = CAT_ICO[v.cat] || ICO.pin;
 
   const content = document.getElementById('ev-modal-content');
   content.innerHTML = `
     <span class="em-cat-badge ${ev.cat}">${catLbl}</span>
     <div class="em-titre">${esc(v.nom || ev.venue)}</div>
     <div class="em-lieu">
-      <span class="em-lieu-ico">${v.ico || '🏛'}</span>
+      <span class="em-lieu-ico">${venueSvg}</span>
       <span>${esc(ev.titre)}</span>
     </div>
     ${v.adr ? `<div class="em-adr">${esc(v.adr)}</div>` : ''}
@@ -7443,12 +7769,12 @@ function openEvModal(ev){
 
     ${v.lat && v.lng ? `
       <button class="em-waze-btn" onclick="openWaze(${v.lat}, ${v.lng}, '${esc((v.nom||'').replace(/'/g,'')).replace(/"/g,'')}')">
-        <span class="em-waze-ico">🧭</span>
+        <span class="em-waze-ico">${ICO.nav}</span>
         <span class="em-waze-main">
           <span class="em-waze-title">Y aller avec Waze</span>
           <span class="em-waze-sub">Navigation GPS · ${esc(v.nom || '')}</span>
         </span>
-        <span class="em-waze-arrow">→</span>
+        <span class="em-waze-arrow">${ICO.arrow_right}</span>
       </button>
     ` : ''}
 
@@ -7459,12 +7785,12 @@ function openEvModal(ev){
 
     ${v.gare ? `
       <div class="em-bio-title">Gare SNCF la plus proche</div>
-      <div class="em-bio">🚂 ${esc(v.gare)}</div>
+      <div class="em-bio"><span style="display:inline-flex;align-items:center;gap:6px">${ICO.train}<span>${esc(v.gare)}</span></span></div>
     ` : ''}
 
     ${tip ? `
       <div class="em-tips">
-        <div class="em-tips-hdr">💡 Conseil chauffeur</div>
+        <div class="em-tips-hdr">${ICO.bulb}<span>Conseil chauffeur</span></div>
         <div class="em-tips-body">${esc(tip)}</div>
       </div>
     ` : ''}
@@ -7578,7 +7904,7 @@ function showInstallModal(){
     `;
   } else if(IS_ANDROID && deferredInstallPrompt){
     content.innerHTML = `
-      <div class="install-platform-title">🤖 Installation Android / Chrome</div>
+      <div class="install-platform-title">Installation Android / Chrome</div>
       <div style="background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center">
         <div style="font-size:13px;color:var(--ink);font-weight:600;line-height:1.5;margin-bottom:4px">
           Un <b style="color:var(--accent)">tap</b> et c'est installé.<br>
@@ -7652,7 +7978,7 @@ function triggerAndroidInstall(){
 const MOIS_FR = ['janv','févr','mars','avr','mai','juin','juil','août','sept','oct','nov','déc'];
 const MOIS_LONG = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const JOURS_LONG = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-const CAT_ICO = { concert:'🎤', sport:'⚽', salon:'🏢', theatre:'🎭', arena:'🏟' };
+const CAT_ICO = { concert:ICO.music, sport:ICO.ball, salon:ICO.building, theatre:ICO.theatre, arena:ICO.stadium };
 
 function parseEventDate(ymd){
   const [y,m,d] = ymd.split('-').map(Number);
@@ -7686,18 +8012,19 @@ function renderEvents(){
   if(!el) return;
 
   if(todayEvents.length === 0){
-    el.innerHTML = '<div class="empty"><span class="ei">📅</span>Aucun événement majeur aujourd\'hui</div>';
+    el.innerHTML = `<div class="empty"><span class="ei">${ICO.calendar}</span>Aucun événement majeur aujourd'hui</div>`;
     return;
   }
 
   el.innerHTML = todayEvents.map(e => {
-    const v = VENUES[e.venue] || { nom:e.venue, adr:'', cap:0, ico:'🎫' };
+    const v = VENUES[e.venue] || { nom:e.venue, adr:'', cap:0, ico:ICO.ticket, cat:'concert' };
+    const catSvg = CAT_ICO[v.cat] || ICO.ticket;
     const impact = v.cap >= 20000 ? '🔥🔥🔥🔥'
                  : v.cap >= 5000  ? '🔥🔥🔥'
                  : v.cap >= 2000  ? '🔥🔥' : '🔥';
     return `<div class="ev-card">
       <div class="ev-top">
-        <div class="ev-ico">${v.ico}</div>
+        <div class="ev-ico">${catSvg}</div>
         <div class="ev-main">
           <div class="ev-titre">${esc(e.titre)}</div>
           <div class="ev-lieu">${esc(v.nom)} · ${esc(v.adr)}</div>
@@ -7708,7 +8035,7 @@ function renderEvents(){
         </div>
       </div>
       <div class="ev-bot">
-        <span class="ev-cap">👥 ${v.cap.toLocaleString('fr-FR')} pax</span>
+        <span class="ev-cap">${ICO.users}<span>${v.cap.toLocaleString('fr-FR')} pax</span></span>
         <span class="ev-impact">${impact} rush sortie</span>
       </div>
     </div>`;
@@ -7717,19 +8044,25 @@ function renderEvents(){
 
 /* ═══════════════════════════════════════════════
    TRAJET — Estimateur course TAXI PARISIEN uniquement
-   Source : arrêté préfectoral Paris (tarifs 2025 en vigueur)
+   Source : arrêté préfectoral Paris · applicable au 21 janvier 2026
    Zone : Paris intra-muros (périph inclus) + zone suburbaine (banlieue rattachée)
 
-   GRILLE OFFICIELLE TAXIS PARISIENS :
-   • Prise en charge : 3,00 € (montant réel préfectoral Paris)
+   GRILLE OFFICIELLE TAXIS PARISIENS 2026 :
+   • Prise en charge : 3,00 €
    • Minimum course : 8,00 €
-   • Tarif A : Paris intra-muros JOUR (lun-sam 10h-17h)          → 1,25 €/km
+   • Tarif A : Paris intra-muros JOUR (lun-sam 10h-17h)
+              → 1,30 €/km · 39,55 €/h
    • Tarif B : Paris nuit (17h-10h) / dim 7h-24h / fériés
-              OU zone suburbaine JOUR (7h-19h lun-sam)            → 1,64 €/km
+              OU zone suburbaine JOUR (7h-19h lun-sam)
+              → 1,66 €/km · 52,56 €/h
    • Tarif C : Paris nuit profonde dim (0h-7h)
-              OU zone suburbaine nuit (19h-7h) / dim / fériés     → 1,79 €/km
+              OU zone suburbaine nuit (19h-7h) / dim / fériés
+              → 1,76 €/km · 43,15 €/h
    • Supplément 5e passager : 5,50 €
-   • Forfaits aéroport directs CDG/Orly ↔ Paris (tous horaires)
+   • Supplément réservation immédiate : 4 € · à l'avance : 7 €
+   • Forfaits aéroport directs CDG/Orly ↔ Paris (25 fév 2025) :
+     - CDG rive droite : 56 € · rive gauche : 65 €
+     - Orly rive droite : 45 € · rive gauche : 36 €
 ═══════════════════════════════════════════════ */
 
 // Quartier/destination → "paris" (intra-muros) ou "banlieue" (suburbaine)
@@ -7785,13 +8118,13 @@ const ZONES = {
  * @param {string} moment - 'A' | 'B' | 'C' (forcé par l'utilisateur)
  */
 function tarifKmParisien(zone, moment){
-  // Moment 'A' = Paris jour semaine 10-17h
-  // Moment 'B' = Paris soir/nuit ou banlieue jour
-  // Moment 'C' = Paris nuit dimanche ou banlieue nuit/dimanche
-  if(moment === 'A') return { tarif:'A', km:1.25, libelle:'Tarif A · Paris jour semaine' };
-  if(moment === 'B') return { tarif:'B', km:1.64, libelle:'Tarif B · Paris nuit/dim ou banlieue jour' };
-  if(moment === 'C') return { tarif:'C', km:1.79, libelle:'Tarif C · Nuit banlieue ou dim profond' };
-  return { tarif:'A', km:1.25, libelle:'Tarif A' };
+  // ═══ TARIFS OFFICIELS 2026 ═══
+  // Source : arrêté préfectoral Paris · applicables à compter du 21 janvier 2026
+  // ATTENTION : le tarif HORAIRE varie aussi selon A/B/C (changement vs 2025)
+  if(moment === 'A') return { tarif:'A', km:1.30, horaire:39.55, libelle:'Tarif A · Paris jour semaine' };
+  if(moment === 'B') return { tarif:'B', km:1.66, horaire:52.56, libelle:'Tarif B · Paris nuit/dim ou banlieue jour' };
+  if(moment === 'C') return { tarif:'C', km:1.76, horaire:43.15, libelle:'Tarif C · Nuit banlieue ou dim profond' };
+  return { tarif:'A', km:1.30, horaire:39.55, libelle:'Tarif A' };
 }
 
 /**
@@ -8196,6 +8529,107 @@ function switchDestMode(mode){
   if(navigator.vibrate) navigator.vibrate(6);
 }
 
+/* Origin mode (départ) — équivalent pour adresse libre au départ */
+function switchOriginMode(mode){
+  document.querySelectorAll('.trmt-from-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+  });
+  document.getElementById('tr-depart-preset').style.display = mode === 'preset' ? '' : 'none';
+  document.getElementById('tr-depart-custom').style.display = mode === 'custom' ? '' : 'none';
+  if(navigator.vibrate) navigator.vibrate(6);
+}
+
+let customOrigin = null;       // { lat, lng, label, context }
+let originAutocompleteDebounce = null;
+
+function initOriginAutocomplete(){
+  const input = document.getElementById('tr-from-input');
+  if(!input) return;
+
+  input.addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    clearTimeout(originAutocompleteDebounce);
+    if(q.length < 3){
+      document.getElementById('tr-from-autocomplete').classList.remove('show');
+      return;
+    }
+    originAutocompleteDebounce = setTimeout(() => fetchOriginAutocomplete(q), 250);
+  });
+
+  document.addEventListener('click', (e) => {
+    if(!e.target.closest('#tr-depart-custom')){
+      document.getElementById('tr-from-autocomplete')?.classList.remove('show');
+    }
+  });
+}
+
+async function fetchOriginAutocomplete(query){
+  const ac = document.getElementById('tr-from-autocomplete');
+  ac.innerHTML = `<div class="tr-ac-loading">${ICO.search}<span style="margin-left:6px">Recherche...</span></div>`;
+  ac.classList.add('show');
+
+  try {
+    // Pas de bias géographique → couvre TOUTE la France
+    const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=8&type=housenumber,street,locality,municipality`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+
+    if(!data.features || data.features.length === 0){
+      ac.innerHTML = '<div class="tr-ac-empty">Aucune adresse trouvée</div>';
+      return;
+    }
+
+    ac.innerHTML = data.features.map((f, i) => {
+      const p = f.properties;
+      const [lng, lat] = f.geometry.coordinates;
+      const ico = p.type === 'housenumber' ? ICO.pin
+                : p.type === 'street'      ? ICO.route
+                : ICO.building;
+      return `<div class="tr-ac-item" data-idx="${i}"
+                   data-lat="${lat}" data-lng="${lng}"
+                   data-label="${esc(p.label || p.name)}"
+                   data-context="${esc(p.context || p.citycode || '')}">
+        <div class="tr-ac-ico">${ico}</div>
+        <div class="tr-ac-main">
+          <div class="tr-ac-label">${esc(p.label || p.name)}</div>
+          <div class="tr-ac-context">${esc(p.context || '')}${p.postcode ? ' · ' + p.postcode : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    ac.querySelectorAll('.tr-ac-item').forEach(item => {
+      item.onclick = () => {
+        const lat = parseFloat(item.dataset.lat);
+        const lng = parseFloat(item.dataset.lng);
+        const label = item.dataset.label;
+        const context = item.dataset.context;
+        selectCustomOrigin(lat, lng, label, context);
+      };
+    });
+  } catch(err){
+    ac.innerHTML = '<div class="tr-ac-empty">Erreur de recherche · vérifie ta connexion</div>';
+  }
+}
+
+function selectCustomOrigin(lat, lng, label, context){
+  customOrigin = { lat, lng, label, context };
+  document.getElementById('tr-from-input').value = '';
+  document.getElementById('tr-from-autocomplete').classList.remove('show');
+  document.getElementById('tr-from-cs-label').textContent = label;
+  document.getElementById('tr-from-cs-context').textContent = context;
+  document.getElementById('tr-from-selected').style.display = 'flex';
+  document.getElementById('tr-from-input').style.display = 'none';
+  if(navigator.vibrate) navigator.vibrate([12, 8, 12]);
+}
+
+function clearCustomOrigin(){
+  customOrigin = null;
+  document.getElementById('tr-from-selected').style.display = 'none';
+  document.getElementById('tr-from-input').style.display = '';
+  document.getElementById('tr-from-input').value = '';
+  document.getElementById('tr-from-input').focus();
+}
+
 function initAutocomplete(){
   const input = document.getElementById('tr-custom-input');
   if(!input) return;
@@ -8224,8 +8658,8 @@ async function fetchAutocomplete(query){
   ac.classList.add('show');
 
   try {
-    // Biais géographique autour de Paris pour prioriser les résultats parisiens
-    const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=6&lat=48.8566&lon=2.3522&type=housenumber,street`;
+    // Pas de bias géographique → couvre TOUTE la France (Lyon, Marseille, etc.)
+    const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=8&type=housenumber,street,locality,municipality`;
     const resp = await fetch(url);
     const data = await resp.json();
 
@@ -8311,12 +8745,26 @@ function requestGpsPosition(){
 }
 
 async function calcTrajet(){
+  const departMode = document.querySelector('.trmt-from-btn.active')?.dataset.mode || 'preset';
   const depart = document.getElementById('tr-depart').value;
   const arriveeMode = document.querySelector('.trmt-btn.active').dataset.mode;
 
   // ═══ Résolution du point de départ ═══
   let fromCoord;
-  if(depart === '__gps__'){
+  if(departMode === 'custom'){
+    if(!customOrigin){
+      document.getElementById('tr-resultat').style.display = 'block';
+      document.getElementById('tr-resultat').innerHTML =
+        `<div class="empty"><span class="ei">${ICO.pin}</span>Saisis une adresse de départ et sélectionne-la dans la liste</div>`;
+      return;
+    }
+    fromCoord = {
+      lat: customOrigin.lat,
+      lng: customOrigin.lng,
+      nom: customOrigin.label,
+      zone: customOrigin.context.includes('Paris') ? 'paris_centre' : 'suburb'
+    };
+  } else if(depart === '__gps__'){
     try {
       document.getElementById('tr-resultat').style.display = 'block';
       document.getElementById('tr-resultat').innerHTML = `<div class="tr-loading">
@@ -8327,7 +8775,7 @@ async function calcTrajet(){
       fromCoord = gpsPosition;
     } catch(err){
       document.getElementById('tr-resultat').innerHTML =
-        `<div class="empty"><span class="ei">📡</span>Impossible d'accéder à ta position GPS<br><span style="font-size:11px;color:var(--ink3)">${esc(String(err))}</span></div>`;
+        `<div class="empty"><span class="ei">${ICO.gps}</span>Impossible d'accéder à ta position GPS<br><span style="font-size:11px;color:var(--ink3)">${esc(String(err))}</span></div>`;
       return;
     }
   } else {
@@ -8340,7 +8788,7 @@ async function calcTrajet(){
     if(!customDestination){
       document.getElementById('tr-resultat').style.display = 'block';
       document.getElementById('tr-resultat').innerHTML =
-        '<div class="empty"><span class="ei">📍</span>Saisis une adresse et sélectionne-la dans la liste</div>';
+        `<div class="empty"><span class="ei">${ICO.pin}</span>Saisis une adresse d'arrivée et sélectionne-la dans la liste</div>`;
       return;
     }
     toCoord = {
@@ -8359,7 +8807,7 @@ async function calcTrajet(){
   res.style.display = 'block';
 
   if(!fromCoord || !toCoord){
-    res.innerHTML = '<div class="empty"><span class="ei">❓</span>Trajet non disponible.</div>';
+    res.innerHTML = `<div class="empty"><span class="ei">${ICO.info}</span>Trajet non disponible.</div>`;
     return;
   }
 
@@ -8407,12 +8855,13 @@ async function calcTrajet(){
 
   const PRISE = 3.00;
   const MIN_COURSE = 8.00;
-  const TARIF_HORAIRE = 41.76;
 
   const isArrivalSuburb = toCoord.zone && !toCoord.zone.includes('paris');
   const zone = isArrivalSuburb ? 'suburb' : 'paris';
   const tarifLettre = momentChoix === 'auto' ? tarifAutoNow(zone) : momentChoix;
   const t = tarifKmParisien(zone, tarifLettre);
+  // ⚠️ Tarifs 2026 : le tarif horaire VARIE selon A/B/C (pas unique comme en 2025)
+  const TARIF_HORAIRE = t.horaire;
   const seuilVitesse = TARIF_HORAIRE / t.km; // vitesse de conjonction en km/h
 
   // Vitesse moyenne réelle du trajet (km/h)
@@ -8464,7 +8913,7 @@ async function calcTrajet(){
   if((arriveeRaw === 'cdg' || arriveeRaw === 'orly') &&
      ['nord','est','lyon','montparnasse','austerlitz','bercy','opera','champs','eiffel','marais','mont','latin','bercy-q'].includes(depart)){
     const riveDroite = ['nord','est','lyon','opera','champs','mont','marais'].includes(depart);
-    const forfait = arriveeRaw === 'cdg' ? (riveDroite ? 56 : 65) : (riveDroite ? 44 : 36);
+    const forfait = arriveeRaw === 'cdg' ? (riveDroite ? 56 : 65) : (riveDroite ? 45 : 36);
     prix = forfait;
     usedForfait = true;
     forfaitInfo = {
@@ -8496,8 +8945,31 @@ async function calcTrajet(){
   } else if(vitesseMoy < 40){
     advice = `Bon rythme · ~${(pctTempsSousSeuil*100).toFixed(0)}% horaire (feux rouges normaux) · facturation principalement au km`;
   } else {
-    advice = `Excellente vitesse · 100% au kilomètre · trajet optimal 🚀`;
+    advice = `Excellente vitesse · 100% au kilomètre · trajet optimal`;
   }
+
+  // ═══ EXPLICATION TARIF APPLIQUÉ (A/B/C) ═══
+  // Clarifie au chauffeur pourquoi c'est ce tarif : horaire + jour + zone
+  const j = now.getDay(); // 0=dim
+  const hNow = now.getHours();
+  const tarifCtx = (() => {
+    if(tarifLettre === 'A'){
+      return `Paris intra-muros · Lun-Sam · 10h-17h`;
+    }
+    if(tarifLettre === 'B'){
+      if(zone === 'paris'){
+        if(j === 0) return `Paris · Dimanche (journée)`;
+        return `Paris intra-muros · Soirée/Nuit 17h-10h`;
+      }
+      return `Banlieue · Lun-Sam · 7h-19h`;
+    }
+    if(tarifLettre === 'C'){
+      if(zone === 'paris') return `Paris · Dimanche 0h-7h`;
+      if(j === 0) return `Banlieue · Dimanche / Férié`;
+      return `Banlieue · Nuit 19h-7h`;
+    }
+    return '';
+  })();
 
   // ═══ FOURCHETTE (incertitude modèle ± erreur trafic live) ═══
   const low  = Math.round(prix * 0.95);
@@ -8505,12 +8977,12 @@ async function calcTrajet(){
 
   const wazeUrl = `openWaze(${toCoord.lat}, ${toCoord.lng})`;
   const liveBadge = hasLiveTraffic
-    ? '<span style="color:var(--green);font-weight:900">● LIVE</span>'
+    ? `<span style="color:var(--green);font-weight:900;display:inline-flex;align-items:center;gap:3px">${ICO.livedot}LIVE</span>`
     : '<span style="color:var(--ink3);font-weight:700">~ Estimation</span>';
 
   const priceBreakdown = usedForfait ? '' : `
     <div class="tr-breakdown">
-      <div class="tr-bd-hdr">💡 Décomposition taximètre (tronçon par tronçon)</div>
+      <div class="tr-bd-hdr">${ICO.bulb}<span>Décomposition taximètre (tronçon par tronçon)</span></div>
       <div class="tr-bd-row">
         <span>Prise en charge</span>
         <span>${PRISE.toFixed(2)}€</span>
@@ -8521,7 +8993,7 @@ async function calcTrajet(){
       </div>
       ${montantHoraire > 0.3 ? `
       <div class="tr-bd-row hot">
-        <span>⚠️ Tarif horaire (${Math.round(minutesHoraire)} min sous ${Math.round(seuilVitesse)} km/h)</span>
+        <span style="display:inline-flex;align-items:center;gap:5px">${ICO.warn}<span>Tarif horaire (${Math.round(minutesHoraire)} min sous ${Math.round(seuilVitesse)} km/h)</span></span>
         <span>+${montantHoraire.toFixed(2)}€</span>
       </div>` : ''}
       <div class="tr-bd-row total">
@@ -8535,19 +9007,34 @@ async function calcTrajet(){
     <div class="tr-result">
       <div class="tr-main-card ${usedForfait?'forfait':''}">
         <div class="tr-badge-top ${usedForfait?'forfait':''}">
-          ${usedForfait ? '✓ Forfait officiel préfectoral' : '💶 Calcul taximètre horokilométrique'}
+          ${usedForfait ? `${ICO.check}<span>Forfait officiel préfectoral</span>` : `${ICO.taxi}<span>Calcul taximètre horokilométrique</span>`}
         </div>
         <div class="tr-price-big">${Math.round(prix)}€</div>
         <div class="tr-price-range">${usedForfait ? `Tarif fixe ${forfaitInfo.aero} · ${forfaitInfo.rive}` : `Fourchette : ${low}€ — ${high}€`}</div>
 
+        ${!usedForfait ? `
+          <div class="tr-tarif-badge tarif-${t.tarif.toLowerCase()}">
+            <div class="ttb-left">
+              <div class="ttb-letter">${t.tarif}</div>
+            </div>
+            <div class="ttb-main">
+              <div class="ttb-title">Tarif ${t.tarif} appliqué</div>
+              <div class="ttb-sub">${tarifCtx}</div>
+            </div>
+            <div class="ttb-right">
+              <div class="ttb-km">${t.km.toFixed(2)}€<span>/km</span></div>
+            </div>
+          </div>
+        ` : ''}
+
         ${!usedForfait && supplementHoraire > 0.5 ? `
           <div class="tr-compare">
             <div class="tr-compare-row">
-              <span class="tr-compare-k">🟢 Si trajet 100% fluide</span>
+              <span class="tr-compare-k"><span class="ico ico-10" style="color:var(--green)"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span><span>Si trajet 100% fluide</span></span>
               <span class="tr-compare-v">${Math.round(prixSansBouchons)}€</span>
             </div>
             <div class="tr-compare-row now">
-              <span class="tr-compare-k">🚦 Avec trafic actuel</span>
+              <span class="tr-compare-k">${ICO.traffic}<span>Avec trafic actuel</span></span>
               <span class="tr-compare-v">${Math.round(prix)}€ · <b style="color:var(--accent)">+${supplementHoraire.toFixed(2)}€</b></span>
             </div>
           </div>
@@ -8555,66 +9042,66 @@ async function calcTrajet(){
 
         <div class="tr-stats-grid">
           <div class="tr-stat">
-            <div class="tr-stat-k">🛣 Distance</div>
+            <div class="tr-stat-k">${ICO.route}<span>Distance</span></div>
             <div class="tr-stat-v">${km} km</div>
             <div class="tr-stat-extra">${sourceLbl}</div>
           </div>
           <div class="tr-stat">
-            <div class="tr-stat-k">⏱ Durée ${liveBadge}</div>
+            <div class="tr-stat-k">${ICO.clock}<span>Durée</span> ${liveBadge}</div>
             <div class="tr-stat-v ${lvl.key==='fluid'?'green':lvl.key==='extreme'?'accent':''}">${liveMin} min</div>
             <div class="tr-stat-extra">${delayMin > 0 ? `Fluide : ${freeFlowMin} min · <b style="color:var(--accent)">+${delayMin} min</b>` : 'Pas de retard trafic'}</div>
           </div>
           <div class="tr-stat">
-            <div class="tr-stat-k">🚗 Vitesse moy.</div>
+            <div class="tr-stat-k">${ICO.taxi}<span>Vitesse moy.</span></div>
             <div class="tr-stat-v ${vitesseMoy < seuilVitesse ? 'accent' : 'green'}">${Math.round(vitesseMoy)} km/h</div>
             <div class="tr-stat-extra">Seuil conjonction ${Math.round(seuilVitesse)} km/h</div>
           </div>
           <div class="tr-stat">
-            <div class="tr-stat-k">⚡ Tarif ${t.tarif}</div>
-            <div class="tr-stat-v">${t.km.toFixed(2)}€/km</div>
-            <div class="tr-stat-extra">${TARIF_HORAIRE.toFixed(2)}€/h si marche lente</div>
+            <div class="tr-stat-k">${ICO.bolt}<span>Tarif horaire</span></div>
+            <div class="tr-stat-v">${TARIF_HORAIRE.toFixed(2)}€/h</div>
+            <div class="tr-stat-extra">Spécifique tarif ${t.tarif}</div>
           </div>
         </div>
       </div>
 
       <div class="tr-traffic-bar">
         <div class="tr-tb-head">
-          <span class="tr-tb-label">🚦 Trafic ${hasLiveTraffic ? 'live' : 'estimé'}</span>
+          <span class="tr-tb-label">${ICO.traffic}<span>Trafic ${hasLiveTraffic ? 'live' : 'estimé'}</span></span>
           <span class="tr-tb-status ${lvl.key}">${lvl.label.toUpperCase()}${delayMin > 0 ? ' · +' + delayMin + ' MIN' : ''}</span>
         </div>
         <div class="tr-tb-meter">
           <div class="tr-tb-fill ${lvl.key}" style="width:${lvl.pct}%"></div>
         </div>
         <div class="tr-tb-labels">
-          <span>🟢 Fluide</span>
-          <span>🟡 Modéré</span>
-          <span>🟠 Chargé</span>
-          <span>🔴 Saturé</span>
+          <span><span class="ico ico-10" style="color:var(--green)"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span> Fluide</span>
+          <span><span class="ico ico-10" style="color:var(--gold)"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span> Modéré</span>
+          <span><span class="ico ico-10" style="color:#d97706"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span> Chargé</span>
+          <span><span class="ico ico-10" style="color:#dc2626"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg></span> Saturé</span>
         </div>
       </div>
 
       <div class="tr-tip">
-        <span class="tr-tip-ico">💡</span>
+        <span class="tr-tip-ico">${ICO.bulb}</span>
         <div class="tr-tip-body">${advice}</div>
       </div>
 
       ${priceBreakdown}
 
       <div class="tr-details">
-        <div class="tr-info-row"><span class="k">📍 De</span><span class="v">${esc(fromCoord.nom || 'Position GPS')}</span></div>
-        <div class="tr-info-row"><span class="k">🎯 Vers</span><span class="v">${esc(toCoord.nom)}</span></div>
+        <div class="tr-info-row"><span class="k">${ICO.pin}<span>De</span></span><span class="v">${esc(fromCoord.nom || 'Position GPS')}</span></div>
+        <div class="tr-info-row"><span class="k">${ICO.target}<span>Vers</span></span><span class="v">${esc(toCoord.nom)}</span></div>
         ${!usedForfait ? `<div class="tr-info-row"><span class="k">Zone</span><span class="v">${zone === 'paris' ? 'Paris intra-muros' : 'Banlieue'}</span></div>` : ''}
       </div>
 
       <button class="tr-waze-btn" onclick="${wazeUrl}">
-        <span>🧭</span>
+        <span>${ICO.nav}</span>
         <span>Démarrer la navigation Waze</span>
       </button>
 
       <div class="tr-disclaimer">
-        <b>Taximètre horokilométrique (tronçon par tronçon)</b> · Le compteur facture en permanence le max entre tarif km (${t.km.toFixed(2)}€) et tarif horaire (${TARIF_HORAIRE}€/h). Vitesse de conjonction : ${seuilVitesse.toFixed(1)} km/h. Sous ce seuil (feux, virages, bouchons), c'est le tarif horaire qui prend le relais.
+        <b>Taximètre horokilométrique (tronçon par tronçon)</b> · Le compteur facture en permanence le max entre tarif km (${t.km.toFixed(2)}€) et tarif horaire (${TARIF_HORAIRE.toFixed(2)}€/h · spécifique au tarif ${t.tarif}). Vitesse de conjonction : ${seuilVitesse.toFixed(1)} km/h. Sous ce seuil (feux, virages, bouchons), c'est le tarif horaire qui prend le relais.
         ${hasLiveTraffic ? ' <b>Trafic live TomTom</b> · données en direct.' : ' <b>Trafic estimé</b> · clé TomTom non configurée.'}
-        Prix indicatif · le taximètre du véhicule fait foi · tarif préfectoral Paris 2025.
+        Prix indicatif · le taximètre du véhicule fait foi · tarifs officiels 2026 (arrêté du 21 janvier 2026).
       </div>
     </div>
   `;
@@ -8886,6 +9373,7 @@ document.addEventListener('visibilitychange', ()=>{
 function boot(){
   initTrajetSegments();
   initAutocomplete();
+  initOriginAutocomplete();
   initTheatresFilters();
   initEventsFilters();
 
