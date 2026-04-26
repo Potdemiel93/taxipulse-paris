@@ -819,6 +819,47 @@ dialog .sheet{
 .tl-row.tier2{border-left-width:4px;border-left-color:var(--gold)}
 .tl-row.tier1{border-left-width:3px}
 
+/* ═══ CATÉGORIES EVENTS — teinte couleur très légère par type ═══
+   Permet au chauffeur d'identifier d'un coup d'œil concert/sport/salon/théâtre.
+   :not() pour respecter la priorité des états dynamiques (now/soon/past). */
+.tl-row.cat-concert:not(.now-row):not(.soon-row):not(.past){
+  border-left-color:#8B5CF6;
+  background:linear-gradient(90deg, rgba(139,92,246,.05) 0%, var(--card) 35%);
+}
+.tl-row.cat-sport:not(.now-row):not(.soon-row):not(.past){
+  border-left-color:#DC2626;
+  background:linear-gradient(90deg, rgba(220,38,38,.05) 0%, var(--card) 35%);
+}
+.tl-row.cat-salon:not(.now-row):not(.soon-row):not(.past){
+  border-left-color:#10B981;
+  background:linear-gradient(90deg, rgba(16,185,129,.05) 0%, var(--card) 35%);
+}
+.tl-row.cat-theatre:not(.now-row):not(.soon-row):not(.past){
+  border-left-color:#F59E0B;
+  background:linear-gradient(90deg, rgba(245,158,11,.04) 0%, var(--card) 35%);
+}
+.tl-row.cat-arena:not(.now-row):not(.soon-row):not(.past){
+  border-left-color:var(--accent);
+  background:linear-gradient(90deg, rgba(255,69,0,.05) 0%, var(--card) 35%);
+}
+
+/* Pastille ronde colorée dans le titre (juste avant le nom) */
+.tl-cat-pill{
+  display:inline-block;width:7px;height:7px;border-radius:50%;
+  margin-right:6px;vertical-align:middle;flex-shrink:0;
+}
+.tl-cat-pill.cat-concert{background:#8B5CF6;box-shadow:0 0 5px rgba(139,92,246,.55)}
+.tl-cat-pill.cat-sport{background:#DC2626;box-shadow:0 0 5px rgba(220,38,38,.55)}
+.tl-cat-pill.cat-salon{background:#10B981;box-shadow:0 0 5px rgba(16,185,129,.55)}
+.tl-cat-pill.cat-theatre{background:#F59E0B;box-shadow:0 0 5px rgba(245,158,11,.55)}
+.tl-cat-pill.cat-arena{background:var(--accent);box-shadow:0 0 5px rgba(255,69,0,.55)}
+
+/* Icône déjà colorée selon catégorie pour reinforcer le signal */
+.tl-row.cat-concert .tl-ico{color:#A78BFA}
+.tl-row.cat-sport .tl-ico{color:#EF4444}
+.tl-row.cat-salon .tl-ico{color:#34D399}
+.tl-row.cat-theatre .tl-ico{color:#FBBF24}
+
 /* Flammes inline dans les titres (remplace les anciens chips S+/A/B) */
 .tl-flames-inline{
   display:inline-block;margin-left:5px;font-size:11px;letter-spacing:-1px;
@@ -6309,17 +6350,92 @@ function buildEurostarTrains(){
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  // ═══ CHANGEMENT MAJEUR ═══
-  // On ne RETOURNE QUE les Eurostar avec données LIVE (confirmées par le scraper).
-  // Avant : fallback sur planning hardcodé → confusion entre live et théorique.
-  // Maintenant : si le scraper ne répond pas → aucun Eurostar affiché (pas de confusion possible).
-  if(Object.keys(EUROSTAR_STATUS).length === 0){
-    return trains; // Aucun live disponible, on n'affiche rien
+  // ═══ NOUVELLE LOGIQUE — ROBUSTE ═══
+  // 1. On part du planning OFFICIEL (EUROSTAR_SCHEDULE) → tous les trains de la journée.
+  // 2. On enrichit avec les données live du scraper (EUROSTAR_STATUS) quand disponibles.
+  // 3. Trains scheduled SANS live data → affichés comme théoriques (live:false).
+  // 4. Trains live SANS schedule → ajoutés en plus (au cas où le scraper trouve un train inconnu).
+  //
+  // Avant : on ne voyait QUE les trains live (5-8 sur 50+) → ratait la majorité.
+  // Maintenant : on voit TOUS les trains schedulés + on enrichit ceux qui sont live.
+
+  // Map des origines pour chaque numéro de train (priorité Amsterdam > Bruxelles > Londres)
+  const scheduleMap = {};
+  EUROSTAR_SCHEDULE.london.forEach(t => {
+    scheduleMap[t.num] = { h: t.h, origine: 'St Pancras International' };
+  });
+  EUROSTAR_SCHEDULE.bruxelles.forEach(t => {
+    scheduleMap[t.num] = { h: t.h, origine: 'Bruxelles-Midi' };
+  });
+  // Amsterdam écrase si même num (les Amsterdam → Paris passent par Bruxelles)
+  EUROSTAR_SCHEDULE.amsterdam.forEach(t => {
+    scheduleMap[t.num] = { h: t.h, origine: 'Amsterdam-Centraal' };
+  });
+
+  const seen = new Set();
+
+  // 1. Itère le planning : pour chaque train scheduled, regarde si on a du live
+  for(const num in scheduleMap){
+    if(seen.has(num)) continue;
+    seen.add(num);
+
+    const sched = scheduleMap[num];
+    const live  = EUROSTAR_STATUS[num] || null;
+
+    // Heure de base = celle du planning
+    const baseTime = (live && live.arriveeParis) ? live.arriveeParis : sched.h;
+    const [h, m] = baseTime.split(':').map(Number);
+    let arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
+
+    let retard = 0;
+    let supprime = live && live.status === 'cancelled';
+    let hRT = baseTime;
+    let hShow = baseTime;
+    let isDelayed = live && live.status === 'delayed';
+
+    if(live && live.status === 'delayed' && live.newTime){
+      const [nh, nm] = live.newTime.split(':').map(Number);
+      const newArrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), nh, nm, 0);
+      retard = Math.max(0, Math.round((newArrDate - arrDate) / 60000));
+      arrDate = newArrDate;
+      hRT = live.newTime;
+      hShow = live.newTime;
+    } else if(live && live.status === 'delayed'){
+      retard = 10;
+      arrDate = new Date(arrDate.getTime() + 10*60*1000);
+      hRT = pad(arrDate.getHours()) + ':' + pad(arrDate.getMinutes());
+      hShow = hRT;
+    }
+
+    const minDiff = Math.round((arrDate - now) / 60000);
+    if(minDiff < -8 || minDiff > 24*60) continue;
+
+    const origine = (live && live.origine) ? live.origine : sched.origine;
+    const hArr = arrDate.getHours();
+    const pax = estimerPax('EUROSTAR', hArr, origine, 'nord', now);
+
+    trains.push({
+      type: 'EUROSTAR',
+      origine,
+      numero: num,
+      hBase: baseTime,
+      hRT,
+      hShow,
+      passagers: pax,
+      retard,
+      supprime,
+      delayed: isDelayed || retard > 0,
+      live: !!live,  // true si le scraper a confirmé le train, false sinon (théorique)
+      min: minDiff,
+      isEurostar: true
+    });
   }
 
+  // 2. Ajoute les trains LIVE qui ne sont PAS dans le planning (cas rare mais sécurisé)
   for(const num in EUROSTAR_STATUS){
+    if(seen.has(num)) continue;
     const info = EUROSTAR_STATUS[num];
-    if(!info.arriveeParis) continue; // Ignore si pas d'heure
+    if(!info.arriveeParis) continue;
 
     const [h, m] = info.arriveeParis.split(':').map(Number);
     let arrDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
@@ -6337,37 +6453,22 @@ function buildEurostarTrains(){
       arrDate = newArrDate;
       hRT = info.newTime;
       hShow = info.newTime;
-    } else if(info.status === 'delayed'){
-      // Marqué retardé mais sans heure précise → estime +10 min
-      retard = 10;
-      arrDate = new Date(arrDate.getTime() + 10*60*1000);
-      hRT = pad(arrDate.getHours()) + ':' + pad(arrDate.getMinutes());
-      hShow = hRT;
     }
 
     const minDiff = Math.round((arrDate - now) / 60000);
-    // Filtre : trains passés > 8 min éliminés (cohérent avec le reste de l'app)
     if(minDiff < -8 || minDiff > 24*60) continue;
 
     const hArr = arrDate.getHours();
     const pax = estimerPax('EUROSTAR', hArr, info.origine, 'nord', now);
 
     trains.push({
-      type: 'EUROSTAR',
-      origine: info.origine,
-      numero: num,
-      hBase: info.arriveeParis,
-      hRT,
-      hShow,
-      passagers: pax,
-      retard,
-      supprime,
-      delayed: isDelayed || retard > 0,
-      live: true,  // TOUS les Eurostar affichés sont maintenant live uniquement
-      min: minDiff,
-      isEurostar: true
+      type: 'EUROSTAR', origine: info.origine, numero: num,
+      hBase: info.arriveeParis, hRT, hShow, passagers: pax,
+      retard, supprime, delayed: isDelayed || retard > 0,
+      live: true, min: minDiff, isEurostar: true
     });
   }
+
   return trains;
 }
 
@@ -6875,7 +6976,55 @@ const VENUES = {
   chatelet:         { nom:'Théâtre du Châtelet',          adr:'1 pl. du Châtelet · 1er',          cap:2010,  ico:'🎭', cat:'theatre', gare:'Gare de Lyon',                lat:48.8577, lng:2.3471 },
   opera_garnier:    { nom:'Opéra Garnier',                adr:'Pl. de l\'Opéra · 9e',             cap:1900,  ico:'🏛', cat:'theatre', gare:'Saint-Lazare / Nord',         lat:48.8719, lng:2.3316 },
   opera_bastille:   { nom:'Opéra Bastille',               adr:'Pl. de la Bastille · 12e',         cap:2745,  ico:'🏛', cat:'theatre', gare:'Gare de Lyon',                lat:48.8523, lng:2.3699 },
-  champs_elysees:   { nom:'Théâtre des Champs-Élysées',   adr:'15 av. Montaigne · 8e',            cap:1905,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8656, lng:2.3040 }
+  champs_elysees:   { nom:'Théâtre des Champs-Élysées',   adr:'15 av. Montaigne · 8e',            cap:1905,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8656, lng:2.3040 },
+
+  // Théâtres nationaux & institutions
+  comedie_francaise:{ nom:'Comédie-Française',           adr:'1 pl. Colette · 1er',              cap:862,   ico:'🏛', cat:'theatre', gare:'Gare de Lyon (M1)',           lat:48.8632, lng:2.3360 },
+  theatre_ville:    { nom:'Théâtre de la Ville',         adr:'2 pl. du Châtelet · 4e',           cap:1000,  ico:'🎭', cat:'theatre', gare:'Gare de Lyon (M1/14)',        lat:48.8576, lng:2.3475 },
+  odeon:            { nom:"Théâtre de l'Odéon",          adr:'Pl. de l\'Odéon · 6e',             cap:1000,  ico:'🏛', cat:'theatre', gare:'Montparnasse (RER B)',        lat:48.8493, lng:2.3382 },
+  chaillot:         { nom:'Théâtre National de Chaillot',adr:'1 pl. du Trocadéro · 16e',         cap:1250,  ico:'🏛', cat:'theatre', gare:'Saint-Lazare',                lat:48.8625, lng:2.2870 },
+  rond_point:       { nom:'Théâtre du Rond-Point',       adr:'2 av. Franklin Roosevelt · 8e',    cap:760,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8676, lng:2.3110 },
+
+  // Boulevard & Grand boulevards
+  theatre_paris:    { nom:'Théâtre de Paris',            adr:'15 rue Blanche · 9e',              cap:1300,  ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8786, lng:2.3322 },
+  porte_stmartin:   { nom:'Théâtre de la Porte St-Martin',adr:'18 bd Saint-Martin · 10e',        cap:1100,  ico:'🎭', cat:'theatre', gare:"Gare de l'Est",               lat:48.8693, lng:2.3589 },
+  varietes:         { nom:'Théâtre des Variétés',        adr:'7 bd Montmartre · 2e',             cap:1052,  ico:'🎭', cat:'theatre', gare:'Gare du Nord',                lat:48.8716, lng:2.3414 },
+  gymnase:          { nom:'Théâtre du Gymnase',          adr:'38 bd Bonne Nouvelle · 10e',       cap:800,   ico:'🎭', cat:'theatre', gare:"Gare de l'Est",               lat:48.8711, lng:2.3499 },
+  michodiere:       { nom:'Théâtre de la Michodière',    adr:'4 bis rue de la Michodière · 2e',  cap:800,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8704, lng:2.3320 },
+  antoine:          { nom:'Théâtre Antoine',             adr:'14 bd de Strasbourg · 10e',        cap:794,   ico:'🎭', cat:'theatre', gare:"Gare de l'Est",               lat:48.8703, lng:2.3551 },
+  bouffes_parisiens:{ nom:'Théâtre des Bouffes-Parisiens',adr:'4 rue Monsigny · 2e',             cap:750,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8696, lng:2.3354 },
+  edouard7:         { nom:'Théâtre Édouard VII',         adr:'10 pl. Édouard VII · 9e',          cap:716,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8709, lng:2.3284 },
+  palais_royal:     { nom:'Théâtre du Palais-Royal',     adr:'38 rue Montpensier · 1er',         cap:750,   ico:'🎭', cat:'theatre', gare:'Gare de Lyon (M1)',           lat:48.8651, lng:2.3370 },
+  madeleine:        { nom:'Théâtre de la Madeleine',     adr:'19 rue de Surène · 8e',            cap:600,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8704, lng:2.3232 },
+  mathurins:        { nom:'Théâtre des Mathurins',       adr:'36 rue des Mathurins · 8e',        cap:380,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8722, lng:2.3236 },
+  nouveautes:       { nom:'Théâtre des Nouveautés',      adr:'24 bd Poissonnière · 9e',          cap:580,   ico:'🎭', cat:'theatre', gare:"Gare de l'Est",               lat:48.8718, lng:2.3447 },
+  renaissance:      { nom:'Théâtre de la Renaissance',   adr:'20 bd Saint-Martin · 10e',         cap:624,   ico:'🎭', cat:'theatre', gare:"Gare de l'Est",               lat:48.8696, lng:2.3613 },
+  pepiniere:        { nom:'Théâtre de la Pépinière',     adr:'7 rue Louis-le-Grand · 2e',        cap:250,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8702, lng:2.3340 },
+  comedie_caumartin:{ nom:'Comédie Caumartin',           adr:'25 rue de Caumartin · 9e',         cap:600,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8728, lng:2.3294 },
+  potiniere:        { nom:'Théâtre de la Potinière',     adr:'7 rue Louis-le-Grand · 2e',        cap:300,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8703, lng:2.3340 },
+  hebertot:         { nom:'Théâtre Hébertot',            adr:'78 bis bd des Batignolles · 17e',  cap:630,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8836, lng:2.3199 },
+  tristan_bernard:  { nom:'Théâtre Tristan Bernard',     adr:'64 rue du Rocher · 8e',            cap:400,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8800, lng:2.3220 },
+
+  // Montparnasse cluster (rue de la Gaîté)
+  th_montparnasse:  { nom:'Théâtre Montparnasse',        adr:'31 rue de la Gaîté · 14e',         cap:715,   ico:'🎭', cat:'theatre', gare:'Montparnasse',                lat:48.8395, lng:2.3239 },
+  bobino:           { nom:'Bobino',                      adr:'14-20 rue de la Gaîté · 14e',      cap:850,   ico:'🎭', cat:'theatre', gare:'Montparnasse',                lat:48.8392, lng:2.3245 },
+  gaite_mp:         { nom:'Gaîté Montparnasse',          adr:'26 rue de la Gaîté · 14e',         cap:400,   ico:'🎭', cat:'theatre', gare:'Montparnasse',                lat:48.8393, lng:2.3242 },
+  rive_gauche:      { nom:'Théâtre Rive Gauche',         adr:'6 rue de la Gaîté · 14e',          cap:410,   ico:'🎭', cat:'theatre', gare:'Montparnasse',                lat:48.8398, lng:2.3251 },
+
+  // Montmartre cluster
+  atelier:          { nom:"Théâtre de l'Atelier",        adr:'1 pl. Charles-Dullin · 18e',       cap:568,   ico:'🎭', cat:'theatre', gare:'Gare du Nord',                lat:48.8838, lng:2.3445 },
+  st_georges:       { nom:'Théâtre Saint-Georges',       adr:'51 rue Saint-Georges · 9e',        cap:470,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8786, lng:2.3373 },
+  deux_anes:        { nom:'Théâtre des Deux Ânes',       adr:'100 bd de Clichy · 18e',           cap:320,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8836, lng:2.3303 },
+
+  // Autres lieux
+  splendid:         { nom:'Le Splendid',                 adr:'48 rue du Fbg Saint-Martin · 10e', cap:600,   ico:'🎭', cat:'theatre', gare:"Gare de l'Est",               lat:48.8702, lng:2.3597 },
+  daunou:           { nom:'Théâtre Daunou',              adr:'7 rue Daunou · 2e',                cap:380,   ico:'🎭', cat:'theatre', gare:'Saint-Lazare',                lat:48.8696, lng:2.3326 },
+  comedie_bastille: { nom:'Comédie Bastille',            adr:'5 rue Nicolas Appert · 11e',       cap:160,   ico:'🎭', cat:'theatre', gare:'Gare de Lyon',                lat:48.8556, lng:2.3725 },
+  lucernaire:       { nom:'Le Lucernaire',               adr:'53 rue N.-D. des Champs · 6e',     cap:300,   ico:'🎭', cat:'theatre', gare:'Montparnasse',                lat:48.8423, lng:2.3257 },
+  point_virgule:    { nom:'Le Grand Point Virgule',      adr:'8 bis rue de l\'Arrivée · 15e',    cap:380,   ico:'🎭', cat:'theatre', gare:'Montparnasse',                lat:48.8420, lng:2.3215 },
+  th_13:            { nom:'Théâtre 13',                  adr:'30 rue du Chevaleret · 13e',       cap:230,   ico:'🎭', cat:'theatre', gare:"Gare d'Austerlitz",           lat:48.8329, lng:2.3744 },
+  opera_comique:    { nom:'Opéra Comique',               adr:'Pl. Boieldieu · 2e',               cap:1255,  ico:'🏛', cat:'theatre', gare:'Saint-Lazare',                lat:48.8705, lng:2.3372 },
+  salle_gaveau:     { nom:'Salle Gaveau',                adr:'45-47 rue La Boétie · 8e',         cap:1020,  ico:'🎻', cat:'concert', gare:'Saint-Lazare',                lat:48.8756, lng:2.3158 }
 };
 
 /* ═══ EVENTS : base 2026 vérifiée (sources au 20/04/2026) ═══
@@ -7269,15 +7418,110 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ═══════════════════════════════════════════════
+   PROGRAMMATION RÉCURRENTE THÉÂTRES
+   Génère les soirées récurrentes (mardi-samedi) pour
+   tous les théâtres parisiens sur 30 jours glissants.
+═══════════════════════════════════════════════ */
+const RECURRING_THEATRE = [
+  // venue, days[0=dim..6=sam], finHHMM, titre, optionalEndDate
+  // === Long runs confirmés 2026 ===
+  { venue:'mogador',          days:[2,3,4,5,6], fin:'22:35', titre:'Le Roi Lion · Disney Musical' },
+  { venue:'marigny',          days:[2,3,4,5,6], fin:'22:30', titre:'Amadeus · pièce de Peter Shaffer' },
+
+  // === Théâtres nationaux ===
+  { venue:'comedie_francaise',days:[0,2,3,4,5,6], fin:'22:30', titre:'Répertoire · Molière, Racine, Marivaux' },
+  { venue:'theatre_ville',    days:[2,3,4,5,6], fin:'22:30', titre:'Création contemporaine · saison 2026' },
+  { venue:'odeon',            days:[2,3,4,5,6], fin:'22:45', titre:'Théâtre de l\'Europe · création' },
+  { venue:'chaillot',         days:[3,4,5,6],   fin:'22:30', titre:'Danse contemporaine · Ballet' },
+  { venue:'rond_point',       days:[2,3,4,5,6], fin:'22:30', titre:'Auteurs vivants · création FR' },
+  { venue:'chatelet',         days:[3,4,5,6],   fin:'22:30', titre:'Opérette · spectacle musical' },
+  { venue:'champs_elysees',   days:[2,4,5,6],   fin:'22:30', titre:'Récital classique · Orchestre' },
+  { venue:'opera_comique',    days:[3,4,5,6],   fin:'22:45', titre:'Opéra-Comique · répertoire' },
+
+  // === Boulevards (Tue-Sat 21h) ===
+  { venue:'theatre_paris',    days:[2,3,4,5,6], fin:'22:30', titre:'Comédie de boulevard' },
+  { venue:'porte_stmartin',   days:[2,3,4,5,6], fin:'22:30', titre:'Grand spectacle Porte Saint-Martin' },
+  { venue:'varietes',         days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Théâtre des Variétés' },
+  { venue:'gymnase',          days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Théâtre du Gymnase' },
+  { venue:'michodiere',       days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Théâtre de la Michodière' },
+  { venue:'antoine',          days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Théâtre Antoine' },
+  { venue:'bouffes_parisiens',days:[2,3,4,5,6], fin:'22:30', titre:'Comédie musicale · Bouffes-Parisiens' },
+  { venue:'edouard7',         days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Théâtre Édouard VII' },
+  { venue:'palais_royal',     days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Palais-Royal' },
+  { venue:'madeleine',        days:[2,3,4,5,6], fin:'22:30', titre:'Pièce · Théâtre de la Madeleine' },
+  { venue:'mathurins',        days:[2,3,4,5,6], fin:'22:30', titre:'Pièce · Théâtre des Mathurins' },
+  { venue:'nouveautes',       days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Nouveautés' },
+  { venue:'renaissance',      days:[2,3,4,5,6], fin:'22:30', titre:'Pièce · Théâtre de la Renaissance' },
+  { venue:'pepiniere',        days:[2,3,4,5,6], fin:'22:15', titre:'Pièce intimiste · Pépinière' },
+  { venue:'comedie_caumartin',days:[2,3,4,5,6], fin:'22:30', titre:'Comédie · Caumartin' },
+  { venue:'hebertot',         days:[2,3,4,5,6], fin:'22:30', titre:'Pièce · Théâtre Hébertot' },
+  { venue:'tristan_bernard',  days:[2,3,4,5,6], fin:'22:30', titre:'Pièce · Tristan Bernard' },
+
+  // === Montparnasse cluster ===
+  { venue:'th_montparnasse',  days:[2,3,4,5,6], fin:'22:30', titre:'Pièce · Théâtre Montparnasse' },
+  { venue:'bobino',           days:[2,3,4,5,6], fin:'22:30', titre:'Spectacle musical · Bobino' },
+  { venue:'gaite_mp',         days:[2,3,4,5,6], fin:'22:15', titre:'Comédie · Gaîté Montparnasse' },
+  { venue:'rive_gauche',      days:[2,3,4,5,6], fin:'22:15', titre:'Pièce · Rive Gauche' },
+
+  // === Montmartre cluster ===
+  { venue:'atelier',          days:[2,3,4,5,6], fin:'22:30', titre:"Pièce · Théâtre de l\'Atelier" },
+  { venue:'st_georges',       days:[2,3,4,5,6], fin:'22:15', titre:'Pièce · Saint-Georges' },
+  { venue:'deux_anes',        days:[2,3,4,5,6], fin:'22:00', titre:'Cabaret politique · Deux Ânes' },
+
+  // === Cafés-théâtres ===
+  { venue:'splendid',         days:[2,3,4,5,6], fin:'22:00', titre:'Café-théâtre · Le Splendid' },
+  { venue:'daunou',           days:[2,3,4,5,6], fin:'22:15', titre:'Pièce · Théâtre Daunou' },
+  { venue:'comedie_bastille', days:[2,3,4,5,6], fin:'22:00', titre:'Café-théâtre · Bastille' },
+  { venue:'lucernaire',       days:[2,3,4,5,6], fin:'22:00', titre:'Pièce · Lucernaire' },
+  { venue:'point_virgule',    days:[2,3,4,5,6], fin:'22:00', titre:'Stand-up · Grand Point Virgule' },
+  { venue:'th_13',            days:[3,4,5,6],   fin:'22:15', titre:'Création · Théâtre 13' },
+  { venue:'salle_gaveau',     days:[2,4,6],     fin:'22:15', titre:'Récital · Salle Gaveau' }
+];
+
+/* IIFE qui injecte les events récurrents dans EVENTS pour les 35 prochains jours.
+   Dédoublonné par clé (venue|date|fin) pour ne jamais écraser un event statique existant. */
+(function expandRecurringTheatre(){
+  const todayD = new Date();
+  todayD.setHours(0,0,0,0);
+  const existing = new Set();
+  EVENTS.forEach(e => existing.add(`${e.venue}|${e.d}|${e.fin}`));
+
+  for(let i=0; i<35; i++){
+    const d = new Date(todayD.getTime() + i*86400000);
+    const ymd = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const dow = d.getDay();
+    RECURRING_THEATRE.forEach(r => {
+      if(!r.days.includes(dow)) return;
+      const key = `${r.venue}|${ymd}|${r.fin}`;
+      if(existing.has(key)) return;
+      EVENTS.push({ d:ymd, fin:r.fin, venue:r.venue, titre:r.titre, cat:'theatre', recurring:true });
+      existing.add(key);
+    });
+  }
+})();
+
+/* ═══════════════════════════════════════════════
    TIER SYSTEM & BIOS — priorisation chauffeur
 ═══════════════════════════════════════════════ */
 
 // Tier 3 = priorité max (S+), 2 = priorité (A), 1 = standard (B)
 const THEATRE_TIERS = {
-  opera_garnier:  3, opera_bastille: 3,
-  champs_elysees: 2, marigny:        2,
-  chatelet:       2, mogador:        2,
-  // tout le reste = tier 1 (défini par défaut dans le code)
+  // Tier 3 = institutions premium (priorité absolue, clientèle CSP+ luxe)
+  opera_garnier:  3, opera_bastille: 3, comedie_francaise: 3,
+  champs_elysees: 3, chatelet:          3, opera_comique:    3,
+
+  // Tier 2 = grandes scènes commerciales / nationales (capacité ≥600 ou nom prestige)
+  marigny:        2, mogador:           2, theatre_paris:    2,
+  porte_stmartin: 2, varietes:          2, gymnase:          2,
+  michodiere:     2, antoine:           2, edouard7:         2,
+  palais_royal:   2, bouffes_parisiens: 2, chaillot:         2,
+  rond_point:     2, theatre_ville:     2, odeon:            2,
+  atelier:        2, th_montparnasse:   2, bobino:           2,
+  madeleine:      2, renaissance:       2, splendid:         2,
+  hebertot:       2, salle_gaveau:      2,
+
+  // Tier 1 = scènes plus intimistes (par défaut pour tous les autres)
+  // tout le reste = tier 1 défini par défaut via `THEATRE_TIERS[venue] || 1`
 };
 
 // Conseils chauffeur spécifiques par lieu
@@ -7297,7 +7541,71 @@ const TIPS = {
   seine_musicale:   'Île Seguin · tram T2 saturé · forte demande taxi',
   porte_versailles: 'Gros flux le week-end · se placer Porte de Versailles M12',
   villepinte:       'RER B direction CDG · clients souvent aéroports ou hôtels',
-  olympia:          'Centre Opéra · clientèle aisée · nombreux hôtels autour'
+  olympia:          'Centre Opéra · clientèle aisée · nombreux hôtels autour',
+
+  // ═══ Théâtres ajoutés ═══
+  comedie_francaise:'Maison de Molière · clientèle CSP+ touristes US/JP · clients souvent 1er/6e/7e/Ritz',
+  theatre_ville:    'Place du Châtelet · public mixte · clients souvent Marais / 11e / Bastille',
+  odeon:            'Place de l\'Odéon · clientèle intello CSP+ · nombreux hôtels Saint-Germain alentour',
+  chaillot:         'Trocadéro · vue Tour Eiffel · clientèle internationale · proximité hôtels luxe 16e',
+  rond_point:       'Champs-Élysées · clientèle aisée · Triangle d\'or · pourboires fréquents',
+  theatre_paris:    'Quartier Pigalle/9e · clientèle famille + touristes · clients fréquents Opéra/Madeleine',
+  porte_stmartin:   'Grands Boulevards · clientèle populaire · sortie 22h30 · clients République/Marais',
+  varietes:         'Boulevard Montmartre · clientèle mixte · clients souvent Pigalle/Opéra/Marais',
+  gymnase:          'Bonne Nouvelle · clientèle plutôt populaire · sortie 22h30 · clients République/Bastille',
+  michodiere:       'Près Opéra · théâtre boulevard · clientèle CSP+ · clients souvent 8e/9e/16e',
+  antoine:          'Boulevard Strasbourg · public mixte · sortie 22h30 · proche Gare de l\'Est',
+  bouffes_parisiens:'Près Opéra · théâtre charmant · public chic · clients souvent 8e/16e',
+  edouard7:         'Place Édouard VII · proche Opéra · clientèle CSP+ · clients souvent 8e/9e',
+  palais_royal:     'Jardin du Palais-Royal · clientèle CSP+ chic · proche Louvre/1er',
+  madeleine:        'Madeleine · clientèle aisée · clients souvent 8e/16e/Trocadéro',
+  mathurins:        'Près Madeleine · clientèle CSP+ · clients fréquents 8e/9e/17e',
+  nouveautes:       'Boulevard Poissonnière · public populaire · sortie 22h30',
+  renaissance:      'Boulevard Saint-Martin · public mixte · clients République/Bastille/Marais',
+  pepiniere:        'Près Opéra · petite salle intimiste · clientèle CSP+',
+  comedie_caumartin:'Caumartin · clientèle business + touristes · clients hôtels 8e/9e',
+  hebertot:         'Batignolles · clientèle CSP+ · clients souvent 17e/8e/Saint-Lazare',
+  tristan_bernard:  'Quartier 8e · public CSP+ · clients fréquents Saint-Lazare/16e',
+  th_montparnasse:  'Rue de la Gaîté · clientèle 14e · proche Gare Montparnasse (clients TGV Sud-Ouest)',
+  bobino:           'Rue de la Gaîté · public familial + jeunes · proche Montparnasse · sortie 22h30',
+  gaite_mp:         'Rue de la Gaîté · public mixte · proche Montparnasse',
+  rive_gauche:      'Rue de la Gaîté · public 14e · proche Montparnasse',
+  atelier:          'Place Charles-Dullin · cœur de Montmartre · public CSP+ jeune · proche Pigalle/Abbesses',
+  st_georges:       'Quartier 9e SoPi · public mixte · clientèle locale + touristes',
+  deux_anes:        'Pigalle · cabaret politique · public 50+ · clients souvent 18e/9e/16e',
+  splendid:         'Faubourg Saint-Martin · café-théâtre · public jeune · clients souvent République',
+  daunou:           'Près Opéra · théâtre intimiste · clientèle CSP+',
+  comedie_bastille: '11e · café-théâtre · public jeune · clients Bastille/Marais',
+  lucernaire:       'Notre-Dame des Champs · public intello · proche Montparnasse',
+  point_virgule:    'Près Montparnasse · stand-up · public jeune · clients TGV Sud-Ouest',
+  th_13:            'Avenue de France · 13e · public local · proche Bibliothèque F. Mitterrand',
+  opera_comique:    'Salle Favart · clientèle CSP+ · proche Opéra · clients souvent 8e/9e',
+  salle_gaveau:     'Boétie · concerts classiques · clientèle aisée · proche Saint-Lazare',
+
+  // ═══ Sport / Concert / Salon — tips chauffeur additionnels ═══
+  rex:              'Le Grand Rex · clientèle jeune · sortie cinéma + concerts · proche Bonne Nouvelle',
+  cigale:           'Pigalle · public concert jeune · clients souvent 18e/Marais/Bastille',
+  bataclan:         'Bd Voltaire · 11e · sortie ~23h30 concert · clients République/Bastille/Nation',
+  trianon:          'Boulevard Rochechouart · 18e · public concert · clients Pigalle/9e',
+  philharmonie:     'Cité Musique · clientèle classique CSP+ · proche RER E/B Pantin',
+  cabaret_sauvage:  'Parc Villette · clientèle jeune · sortie tardive · proche Porte Pantin',
+  cirque_hiver:     'Cirque familial · 11e · proche Filles du Calvaire · clients Marais/Bastille',
+  carreau_temple:   '3e · expos/salons · public CSP+ · clients Marais/République',
+  palais_brongniart:'Place Bourse · 2e · expos pro · clients CSP+ · proche Bourse/Opéra',
+  parc_floral:      'Bois Vincennes · 12e · pic taxis sortie 19h · clients Bastille/Marais/12e',
+  grand_palais:     '8e · grandes expos · clientèle premium · clients Triangle d\'or/16e/8e',
+  pleyel:           'Faubourg Saint-Honoré · concerts classiques · clientèle CSP+ · proche Saint-Lazare',
+  folies_bergere:   'Rue Richer · 9e · clientèle mixte tourisme + locaux · proche Grands Boulevards',
+  elysee_mmtre:     'Boulevard Rochechouart · 18e · public concert · clients Pigalle/9e/Marais',
+  gaite_lyrique:    '3e · public jeune électro/expo numérique · clients Marais/République',
+  new_morning:      'Petites Écuries · 10e · public jazz CSP+ · clients fréquents 9e/Marais',
+  parc_princes:     '47 000 pax · sortie ~23h · clients souvent 16e/Neuilly/Boulogne · saturation post-match',
+  jean_bouin:       '20 000 pax rugby · sortie Porte Saint-Cloud · clients 16e/Boulogne',
+  roland_garros:    '15 000 pax · pic 19h-20h · clientèle internationale CSP+ · clients hôtels 8e/16e',
+  coubertin:        'Stade Coubertin · 4 200 pax · public sport jeune · proche Porte de Saint-Cloud',
+  adidas_arena:     '8 000 pax · Porte Chapelle · clients souvent Marais/9e/Saint-Denis · taxis demandés post-match',
+  bourget:          'Le Bourget · salons aéro · clientèle pro internationale · clients hôtels CDG/8e/16e',
+  villepinte:       'RER B direction CDG · clients souvent aéroports ou hôtels Triangle d\'or'
 };
 
 // Mini-bios/descriptions pour les events (ajoutées aux events sensibles)
@@ -7457,7 +7765,7 @@ function renderTheatres(){
       const isPast = diffMin < -15;
       const tier = THEATRE_TIERS[e.venue] || 1;
       const tierFlames = tier === 3 ? '🔥🔥🔥' : tier === 2 ? '🔥🔥' : '🔥';
-      let cls = `tier${tier}`;
+      let cls = `tier${tier} cat-theatre`;
       if(isNow) cls += ' now-row';
       if(isPast) cls += ' past';
 
@@ -7465,7 +7773,7 @@ function renderTheatres(){
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">${ICO.theatre}</div>
         <div class="tl-main">
-          <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${tierFlames}</span></div>
+          <div class="tl-titre"><span class="tl-cat-pill cat-theatre"></span>${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${tierFlames}</span></div>
           <div class="tl-lieu">${esc(e.titre)}</div>
         </div>
         <div class="tl-right">
@@ -7637,7 +7945,7 @@ function renderEventsTab(){
       const evTier = (e.v.cap || 0) >= 20000 ? 3
                    : (e.v.cap || 0) >= 5000  ? 2 : 1;
       const evFlames = evTier === 3 ? '🔥🔥🔥' : evTier === 2 ? '🔥🔥' : '🔥';
-      let cls = `tier${evTier}`;
+      let cls = `tier${evTier} cat-${e.cat}`;
       if(isPast) cls += ' past';
       else if(isNow) cls += ' now-row';
       else if(isSoon) cls += ' soon-row';
@@ -7646,7 +7954,7 @@ function renderEventsTab(){
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">${CAT_ICO[e.cat] || ICO.ticket}</div>
         <div class="tl-main">
-          <div class="tl-titre">${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${evFlames}</span></div>
+          <div class="tl-titre"><span class="tl-cat-pill cat-${e.cat}"></span>${esc(e.v.nom || e.venue)} <span class="tl-flames-inline">${evFlames}</span></div>
           <div class="tl-lieu">${esc(e.titre)}</div>
         </div>
         <div class="tl-right">
