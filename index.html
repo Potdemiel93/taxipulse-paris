@@ -790,23 +790,44 @@ dialog .sheet{
 .tr-bd-row.total span:last-child{color:var(--accent);font-size:15px}
 
 /* ═══ Tier system — FLAMMES (cohérent avec l'app) ═══ */
+/* ═══ TIER-INFO — carte explicative refonte ═══ */
 .tier-info{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:12px 14px;margin-bottom:14px;
-  font-size:11px;
+  padding:4px 12px;margin-bottom:14px;
+  overflow:hidden;
 }
 .tier-row{
-  display:flex;align-items:center;gap:10px;padding:5px 0;
+  display:flex;align-items:center;gap:12px;padding:10px 4px;
   color:var(--ink2);font-weight:600;
+  position:relative;
 }
-.tier-row+.tier-row{border-top:1px solid var(--line);padding-top:8px;margin-top:3px}
+.tier-row+.tier-row{border-top:1px solid var(--line)}
+.tier-row-3{
+  background:linear-gradient(90deg, rgba(255,69,0,.06) 0%, transparent 80%);
+  margin:0 -12px;padding-left:12px;padding-right:12px;
+}
+.tier-row-2{
+  background:linear-gradient(90deg, rgba(212,175,55,.05) 0%, transparent 80%);
+  margin:0 -12px;padding-left:12px;padding-right:12px;
+}
 .tier-flames{
   display:inline-flex;align-items:center;flex-shrink:0;
-  font-size:13px;letter-spacing:-1px;
-  min-width:48px;
+  font-size:14px;letter-spacing:-1px;
+  min-width:42px;
 }
-.tier-flames.t3{filter:drop-shadow(0 0 4px rgba(255,69,0,.5))}
-.tier-desc{color:var(--ink3);font-weight:600;font-size:10px;margin-left:auto;text-align:right}
+.tier-flames.t3{filter:drop-shadow(0 0 5px rgba(255,69,0,.6));font-size:15px}
+.tier-flames.t2{filter:drop-shadow(0 0 3px rgba(212,175,55,.4))}
+.tier-text{flex:1;min-width:0}
+.tier-names{
+  font-size:12px;font-weight:800;color:var(--ink);
+  letter-spacing:-.2px;line-height:1.2;margin-bottom:2px;
+}
+.tier-row-3 .tier-names{color:var(--accent)}
+.tier-row-2 .tier-names{color:var(--gold)}
+.tier-desc{
+  color:var(--ink3);font-weight:600;font-size:10px;
+  line-height:1.3;letter-spacing:.1px;
+}
 
 /* Timeline row enrichi avec tier + glow subtil */
 .tl-row.tier3{
@@ -818,6 +839,134 @@ dialog .sheet{
 }
 .tl-row.tier2{border-left-width:4px;border-left-color:var(--gold)}
 .tl-row.tier1{border-left-width:3px}
+
+/* ═══════════════════════════════════════════════
+   THÉÂTRES TIMELINE — design hiérarchique scopé
+   Chaque tier a un poids visuel distinct pour
+   communiquer la priorité chauffeur d'un coup d'œil.
+═══════════════════════════════════════════════ */
+
+/* Sous-titre tier (PRIORITÉ ABSOLUE / PREMIUM / AUTRES) */
+.th-tier-hdr{
+  display:flex;align-items:center;gap:10px;
+  margin:14px 4px 8px;
+  font-size:9px;font-weight:900;
+  text-transform:uppercase;letter-spacing:1.6px;
+}
+.th-tier-hdr-line{flex:1;height:1px;background:var(--line)}
+.th-tier-hdr-count{
+  font-family:var(--mono);color:var(--ink3);
+  font-weight:800;font-size:10px;letter-spacing:0;
+}
+.th-tier-hdr.t3{color:var(--accent)}
+.th-tier-hdr.t3 .th-tier-hdr-line{background:linear-gradient(90deg, rgba(255,69,0,.4) 0%, var(--line) 100%)}
+.th-tier-hdr.t2{color:var(--gold)}
+.th-tier-hdr.t2 .th-tier-hdr-line{background:linear-gradient(90deg, rgba(212,175,55,.4) 0%, var(--line) 100%)}
+.th-tier-hdr.t1{color:var(--ink3)}
+
+/* TIER 3 — grosse carte premium avec glow */
+#theatres-timeline .tl-row.tier3{
+  border-left-width:5px;
+  border:1px solid rgba(255,69,0,.22);
+  border-left:5px solid var(--accent);
+  background:linear-gradient(135deg, rgba(255,69,0,.08) 0%, rgba(255,69,0,.02) 50%, var(--card) 100%);
+  padding:14px 16px;
+  margin-bottom:8px;
+  border-radius:14px;
+  position:relative;
+  min-height:70px;
+}
+#theatres-timeline .tl-row.tier3::before{
+  content:'PRIORITÉ ABSOLUE';
+  position:absolute;top:8px;right:14px;
+  font-size:8px;font-weight:900;
+  letter-spacing:1.8px;color:var(--accent);
+  opacity:.6;pointer-events:none;
+}
+#theatres-timeline .tl-row.tier3:hover,
+#theatres-timeline .tl-row.tier3:active{
+  transform:translateY(-1px);
+  box-shadow:0 0 0 1px rgba(255,69,0,.4), 0 8px 28px rgba(255,69,0,.18);
+  border-color:rgba(255,69,0,.5);
+}
+#theatres-timeline .tl-row.tier3 .tl-hour{
+  font-size:16px;color:var(--accent);min-width:54px;
+  font-weight:900;letter-spacing:-.4px;
+}
+#theatres-timeline .tl-row.tier3 .tl-ico{
+  font-size:18px;width:28px;
+  filter:drop-shadow(0 0 4px rgba(255,69,0,.4));
+}
+#theatres-timeline .tl-row.tier3 .tl-titre{
+  font-size:14px;font-weight:900;color:var(--ink);
+  letter-spacing:-.3px;line-height:1.2;margin-bottom:2px;
+}
+#theatres-timeline .tl-row.tier3 .tl-lieu{
+  font-size:11px;color:var(--ink2);font-weight:600;
+}
+#theatres-timeline .tl-row.tier3 .tl-cap{
+  font-size:14px;color:var(--accent);font-weight:900;
+}
+#theatres-timeline .tl-row.tier3 .tl-cap-l{font-size:9px}
+#theatres-timeline .tl-row.tier3 .tl-flames-inline{font-size:13px}
+
+/* TIER 2 — carte gold medium */
+#theatres-timeline .tl-row.tier2{
+  border-left-width:4px;
+  border-left-color:var(--gold);
+  background:linear-gradient(135deg, rgba(212,175,55,.05) 0%, var(--card) 60%);
+  padding:11px 14px;
+  margin-bottom:6px;
+  border-radius:11px;
+  min-height:54px;
+}
+#theatres-timeline .tl-row.tier2:hover{
+  border-color:var(--gold);
+  box-shadow:0 4px 14px rgba(212,175,55,.15);
+}
+#theatres-timeline .tl-row.tier2 .tl-hour{
+  color:var(--gold);font-size:14px;font-weight:800;
+}
+#theatres-timeline .tl-row.tier2 .tl-titre{font-size:13px;font-weight:800}
+#theatres-timeline .tl-row.tier2 .tl-cap{font-size:13px;color:var(--gold);font-weight:800}
+
+/* TIER 1 — ligne compacte, présence discrète */
+#theatres-timeline .tl-row.tier1{
+  border-left-width:2px;
+  border-left-color:var(--ink3);
+  background:transparent;
+  border:none;border-left:2px solid var(--line);
+  padding:7px 10px;
+  margin-bottom:2px;
+  border-radius:6px;
+  min-height:38px;
+}
+#theatres-timeline .tl-row.tier1:hover{
+  background:var(--card2);
+  border-left-color:var(--ink2);
+}
+#theatres-timeline .tl-row.tier1 .tl-hour{
+  font-size:11px;color:var(--ink3);min-width:42px;font-weight:700;
+}
+#theatres-timeline .tl-row.tier1 .tl-ico{font-size:12px;width:18px;opacity:.6}
+#theatres-timeline .tl-row.tier1 .tl-titre{
+  font-size:11px;font-weight:700;color:var(--ink2);
+  letter-spacing:-.05px;
+}
+#theatres-timeline .tl-row.tier1 .tl-lieu{font-size:9px;margin-top:0}
+#theatres-timeline .tl-row.tier1 .tl-cap{font-size:10px;font-weight:700;color:var(--ink3)}
+#theatres-timeline .tl-row.tier1 .tl-cap-l{font-size:7px}
+#theatres-timeline .tl-row.tier1 .tl-flames-inline{display:none}
+#theatres-timeline .tl-row.tier1 .tl-cat-pill{display:none}
+#theatres-timeline .tl-row.tier1 .tl-waze{transform:scale(.85)}
+
+/* HERO theatres : 2 valeurs clés (premium / total) */
+#th-main strong{color:var(--accent);font-weight:900}
+#th-main .vh-sub{
+  font-size:12px;font-weight:700;color:var(--ink3);
+  display:inline-block;margin-left:2px;
+}
+#th-main .vh-sep{color:var(--ink3);margin:0 6px;font-weight:700}
 
 /* ═══ CATÉGORIES EVENTS — teinte couleur très légère par type ═══
    Permet au chauffeur d'identifier d'un coup d'œil concert/sport/salon/théâtre.
@@ -3541,20 +3690,26 @@ header{
     </div>
 
     <div class="tier-info">
-      <div class="tier-row">
+      <div class="tier-row tier-row-3">
         <span class="tier-flames t3">🔥🔥🔥</span>
-        <span>Opéra Garnier · Bastille</span>
-        <span class="tier-desc">clientèle premium · gros pourboires</span>
+        <div class="tier-text">
+          <div class="tier-names">Opéra Bastille · Garnier</div>
+          <div class="tier-desc">Clientèle luxe · pourboires généreux · destinations 8e / 16e / palaces</div>
+        </div>
       </div>
-      <div class="tier-row">
+      <div class="tier-row tier-row-2">
         <span class="tier-flames t2">🔥🔥</span>
-        <span>Champs-Élysées · Marigny · Châtelet · Mogador</span>
-        <span class="tier-desc">quartier huppé</span>
+        <div class="tier-text">
+          <div class="tier-names">Marigny · Champs-Élysées · Châtelet</div>
+          <div class="tier-desc">Quartier huppé · clientèle CSP+ · 8e / Triangle d'or / 16e</div>
+        </div>
       </div>
-      <div class="tier-row">
+      <div class="tier-row tier-row-1">
         <span class="tier-flames t1">🔥</span>
-        <span>Autres théâtres</span>
-        <span class="tier-desc">intérêt moyen</span>
+        <div class="tier-text">
+          <div class="tier-names">Autres théâtres</div>
+          <div class="tier-desc">Clientèle locale ou familiale · courses moyennes</div>
+        </div>
       </div>
     </div>
 
@@ -7506,22 +7661,19 @@ const RECURRING_THEATRE = [
 
 // Tier 3 = priorité max (S+), 2 = priorité (A), 1 = standard (B)
 const THEATRE_TIERS = {
-  // Tier 3 = institutions premium (priorité absolue, clientèle CSP+ luxe)
-  opera_garnier:  3, opera_bastille: 3, comedie_francaise: 3,
-  champs_elysees: 3, chatelet:          3, opera_comique:    3,
+  // ═══ CLASSIFICATION TAXI — par valeur clientèle réelle ═══
+  // Tier 3 = PRIORITÉ ABSOLUE — clientèle premium, pourboires généreux,
+  //          destinations 8e/16e/Triangle d'or, hôtels palaces
+  opera_garnier:  3,
+  opera_bastille: 3,
 
-  // Tier 2 = grandes scènes commerciales / nationales (capacité ≥600 ou nom prestige)
-  marigny:        2, mogador:           2, theatre_paris:    2,
-  porte_stmartin: 2, varietes:          2, gymnase:          2,
-  michodiere:     2, antoine:           2, edouard7:         2,
-  palais_royal:   2, bouffes_parisiens: 2, chaillot:         2,
-  rond_point:     2, theatre_ville:     2, odeon:            2,
-  atelier:        2, th_montparnasse:   2, bobino:           2,
-  madeleine:      2, renaissance:       2, splendid:         2,
-  hebertot:       2, salle_gaveau:      2,
+  // Tier 2 = PREMIUM — quartier huppé, clientèle CSP+, bonnes courses
+  marigny:        2,
+  champs_elysees: 2,
+  chatelet:       2,
 
-  // Tier 1 = scènes plus intimistes (par défaut pour tous les autres)
-  // tout le reste = tier 1 défini par défaut via `THEATRE_TIERS[venue] || 1`
+  // Tier 1 = AUTRES THÉÂTRES — clientèle locale ou familiale, courses moyennes
+  // Tout le reste (Mogador, Comédie-Française, Odéon, etc.) = tier 1 par défaut
 };
 
 // Conseils chauffeur spécifiques par lieu
@@ -7695,20 +7847,25 @@ function renderTheatres(){
     return dd >= 0 && dd <= theatresDayFilter;
   });
 
-  // Rush alert : gros théâtre (tier 3) qui finit bientôt
+  // ═══ RUSH ALERT — uniquement pour tier 3 (Garnier/Bastille) ou tier 2 imminent
   const rushEl = document.getElementById('th-rush-alert');
   const critical = thEvents.find(e => {
     const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
     const tier = THEATRE_TIERS[e.venue] || 1;
-    return diffMin >= -20 && diffMin <= 40 && tier >= 2;
+    // Tier 3 : alerte large (-20 à +60 min). Tier 2 : alerte serrée (-15 à +30)
+    if(tier === 3) return diffMin >= -20 && diffMin <= 60;
+    if(tier === 2) return diffMin >= -15 && diffMin <= 30;
+    return false;
   });
   if(critical){
     const diffMin = Math.round((critical.finDate.getTime() - now.getTime()) / 60000);
-    let statusTxt = diffMin < 0 ? `Fini il y a ${Math.abs(diffMin)} min · rush en cours`
-                 : diffMin <= 10 ? `Se termine dans ${diffMin} min · prépare-toi`
-                 : `Se termine à ${critical.fin} (dans ${diffMin} min)`;
+    const tier = THEATRE_TIERS[critical.venue] || 1;
+    const label = tier === 3 ? 'PRIORITÉ ABSOLUE' : 'CIBLE PREMIUM';
+    const statusTxt = diffMin < 0 ? `Fini il y a ${Math.abs(diffMin)} min · rush en cours`
+                   : diffMin <= 10 ? `Se termine dans ${diffMin} min · fonce`
+                   : `Se termine à ${critical.fin} (dans ${diffMin} min)`;
     rushEl.innerHTML = `
-      <div class="ra-top"><span class="ra-dot"></span><span>CIBLE PREMIUM</span></div>
+      <div class="ra-top"><span class="ra-dot"></span><span>${label}</span></div>
       <div class="ra-title">${esc(critical.v.nom)}</div>
       <div class="ra-sub">${esc(critical.titre)} · ${(critical.v.cap || 0).toLocaleString('fr-FR')} pax · ${statusTxt}</div>
       <div class="ra-cta">${ICO.bolt}<span>Fonce à ${esc(critical.v.nom.split(' ').slice(0,3).join(' '))}</span></div>
@@ -7719,57 +7876,65 @@ function renderTheatres(){
     rushEl.style.display = 'none';
   }
 
-  // Hero
+  // ═══ HERO — premium vs total
   const todayStr = todayYMD();
   const todayEvents = thEvents.filter(e => e.d === todayStr && e.finDate.getTime() >= now.getTime());
+  const premiumCap = todayEvents
+    .filter(e => (THEATRE_TIERS[e.venue] || 1) >= 2)
+    .reduce((s,e) => s + (e.v.cap || 0), 0);
+  const totalCap = todayEvents.reduce((s,e) => s + (e.v.cap || 0), 0);
+
   document.getElementById('th-date').textContent =
     `${JOURS_LONG[now.getDay()]} ${now.getDate()} ${MOIS_LONG[now.getMonth()]}`.toUpperCase();
-  const paxSum = todayEvents.reduce((s,e) => s + (e.v.cap || 0), 0);
-  document.getElementById('th-main').textContent = todayEvents.length > 0
-    ? `${paxSum.toLocaleString('fr-FR')} spectateurs à la sortie ce soir`
-    : 'Aucun théâtre majeur restant ce soir';
+  const heroEl = document.getElementById('th-main');
+  if(todayEvents.length === 0){
+    heroEl.innerHTML = 'Aucun théâtre restant ce soir';
+  } else if(premiumCap === 0){
+    heroEl.innerHTML = `<strong>${totalCap.toLocaleString('fr-FR')}</strong> <span class="vh-sub">spectateurs ce soir</span>`;
+  } else {
+    heroEl.innerHTML = `<strong>${premiumCap.toLocaleString('fr-FR')}</strong> <span class="vh-sub">premium</span><span class="vh-sep">·</span><span class="vh-sub">${totalCap.toLocaleString('fr-FR')} total</span>`;
+  }
   document.getElementById('th-kpi').textContent = todayEvents.length;
 
-  // Timeline groupée par jour, puis triée par tier (décroissant) puis par heure
+  // ═══ TIMELINE — groupé par JOUR puis par TIER
   const tlEl = document.getElementById('theatres-timeline');
   if(filtered.length === 0){
     tlEl.innerHTML = `<div class="vempty"><span class="ei">${ICO.theatre}</span>Aucun spectacle sur la période</div>`;
     return;
   }
 
-  const groups = {};
-  filtered.forEach(e => { (groups[e.d] = groups[e.d] || []).push(e); });
+  // Groupe principal par jour
+  const dayGroups = {};
+  filtered.forEach(e => { (dayGroups[e.d] = dayGroups[e.d] || []).push(e); });
 
   let html = '';
-  Object.keys(groups).sort().forEach(dateKey => {
+  Object.keys(dayGroups).sort().forEach(dateKey => {
     const dt = parseEventDate(dateKey);
     const dd = daysBetween(today0, dt);
     const label = dd === 0 ? "CE SOIR"
                 : dd === 1 ? 'DEMAIN'
                 : `${JOURS_LONG[dt.getDay()].toUpperCase()} ${dt.getDate()} ${MOIS_FR[dt.getMonth()]}`;
 
-    // Tri : par tier décroissant, puis par heure de fin
-    const sorted = groups[dateKey].sort((a,b) => {
-      const tA = THEATRE_TIERS[a.venue] || 1;
-      const tB = THEATRE_TIERS[b.venue] || 1;
-      if(tB !== tA) return tB - tA;
-      return a.finDate - b.finDate;
-    });
+    const dayEvs = dayGroups[dateKey];
+
+    // Sub-groupes par tier
+    const t3 = dayEvs.filter(e => (THEATRE_TIERS[e.venue] || 1) === 3).sort((a,b) => a.finDate - b.finDate);
+    const t2 = dayEvs.filter(e => (THEATRE_TIERS[e.venue] || 1) === 2).sort((a,b) => a.finDate - b.finDate);
+    const t1 = dayEvs.filter(e => (THEATRE_TIERS[e.venue] || 1) === 1).sort((a,b) => a.finDate - b.finDate);
 
     html += `<div class="tl-group">
-      <div class="tl-group-hdr"><span>${label}</span><span class="tl-group-line"></span><span>${sorted.length} spectacle${sorted.length>1?'s':''}</span></div>`;
+      <div class="tl-group-hdr"><span>${label}</span><span class="tl-group-line"></span><span>${dayEvs.length} spectacle${dayEvs.length>1?'s':''}</span></div>`;
 
-    sorted.forEach(e => {
+    // Helper de rendu d'une ligne (paramétrable par tier)
+    const renderRow = (e, tier) => {
       const diffMin = (e.finDate.getTime() - now.getTime()) / 60000;
       const isNow = diffMin >= -15 && diffMin <= 45;
       const isPast = diffMin < -15;
-      const tier = THEATRE_TIERS[e.venue] || 1;
       const tierFlames = tier === 3 ? '🔥🔥🔥' : tier === 2 ? '🔥🔥' : '🔥';
       let cls = `tier${tier} cat-theatre`;
       if(isNow) cls += ' now-row';
       if(isPast) cls += ' past';
-
-      html += `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
+      return `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">${ICO.theatre}</div>
         <div class="tl-main">
@@ -7782,7 +7947,25 @@ function renderTheatres(){
         </div>
         ${e.v.lat && e.v.lng ? `<button class="tl-waze" onclick="event.stopPropagation();openWaze(${e.v.lat},${e.v.lng});" title="Naviguer avec Waze">${ICO.nav}</button>` : ''}
       </div>`;
-    });
+    };
+
+    // === TIER 3 (PRIORITÉ ABSOLUE) ===
+    if(t3.length > 0){
+      html += `<div class="th-tier-hdr t3"><span>🔥🔥🔥 PRIORITÉ ABSOLUE</span><span class="th-tier-hdr-line"></span><span class="th-tier-hdr-count">${t3.length}</span></div>`;
+      t3.forEach(e => { html += renderRow(e, 3); });
+    }
+
+    // === TIER 2 (PREMIUM) ===
+    if(t2.length > 0){
+      html += `<div class="th-tier-hdr t2"><span>🔥🔥 PREMIUM</span><span class="th-tier-hdr-line"></span><span class="th-tier-hdr-count">${t2.length}</span></div>`;
+      t2.forEach(e => { html += renderRow(e, 2); });
+    }
+
+    // === TIER 1 (AUTRES) — compact ===
+    if(t1.length > 0){
+      html += `<div class="th-tier-hdr t1"><span>🔥 AUTRES THÉÂTRES</span><span class="th-tier-hdr-line"></span><span class="th-tier-hdr-count">${t1.length}</span></div>`;
+      t1.forEach(e => { html += renderRow(e, 1); });
+    }
 
     html += `</div>`;
   });
