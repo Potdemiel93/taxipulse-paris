@@ -6881,8 +6881,8 @@ function renderGares(){
     }
 
     const trains   = c.trains || [];
-    // Fenêtre réduite : trains passés > 8 min filtrés (avant: 15 min)
-    const upcoming = trains.filter(t => t.min > -8 && !t.supprime).sort((a,b) => a.hRT.localeCompare(b.hRT));
+    // Fenêtre réduite : trains passés > 8 min filtrés. Sort par min (ordre chronologique réel)
+    const upcoming = trains.filter(t => t.min > -8 && !t.supprime).sort((a,b) => a.min - b.min);
     const next25   = upcoming.filter(t => t.min <= 25 && t.min >= 0);
     const totalPax = next25.reduce((s,t)=>s+t.passagers, 0);
     const totalPax25 = totalPax;
@@ -9645,14 +9645,16 @@ function openDialog(gareId){
     document.getElementById('gd-body').innerHTML  =
       `<div class="empty" style="margin-top:12px"><span class="ei">${ICO.warn}</span>${esc(c&&c.error?c.error:'Aucune donnée')}</div>`;
   } else {
-    const trains      = [...(c.trains||[])].sort((a,b)=>a.hShow.localeCompare(b.hShow));
-    // Trains arrivés dans les 8 dernières minutes seulement (passagers encore en sortie)
-    // Avant: 15 min. Réduit pour éviter la pollution de trains déjà passés.
-    const justArrived = trains.filter(t => t.min < 0 && t.min >= -8 && !t.supprime)
+    // Sort par `min` (minutes from now) — ordre chronologique RÉEL
+    // (avant : sort par hRT string → demain 06:59 venait avant ce soir 21:30 car "06:59"<"21:30")
+    const trains      = [...(c.trains||[])].sort((a,b) => a.min - b.min);
+    // Trains arrivés dans les 5 dernières minutes — passagers encore en sortie
+    // (réduit à 5 min pour limiter clutter ; au-delà, ils ont déjà pris un taxi ou métro)
+    const justArrived = trains.filter(t => t.min < 0 && t.min >= -5 && !t.supprime)
                               .sort((a,b) => b.min - a.min); // du plus récent au plus ancien
-    // Trains à venir (non encore arrivés)
+    // Trains à venir, triés par soonest first (ordre chronologique réel)
     const future      = trains.filter(t => t.min >= 0 && !t.supprime)
-                              .sort((a,b) => a.hRT.localeCompare(b.hRT));
+                              .sort((a,b) => a.min - b.min);
     // Stats : seulement les trains dans les 25 prochaines minutes
     const next25      = future.filter(t => t.min <= 25);
     const totalPax    = next25.reduce((s,t) => s + t.passagers, 0);
@@ -9693,17 +9695,25 @@ function openDialog(gareId){
 
     // Section prochaines arrivées
     if(future.length){
-      body += `<div class="grp-hdr live">${ICO.livedot}<span>Prochaines arrivées</span><div class="grp-line"></div><span class="grp-ct">${future.length}</span></div>`;
-
-      // Détecte si trains demain : min > (minutes restantes dans la journée d'aujourd'hui)
       const now = new Date();
       const minutesUntilMidnight = (24*60) - (now.getHours()*60 + now.getMinutes());
+      // Détection : la liste contient-elle des trains de demain ?
+      const hasTodayTrains    = future.some(t => t.min <= minutesUntilMidnight);
+      const hasTomorrowTrains = future.some(t => t.min >  minutesUntilMidnight);
+      const showDaySeparators = hasTodayTrains && hasTomorrowTrains;
+
+      // Compteur "ce soir" si on a des trains des 2 jours
+      const todayCount = future.filter(t => t.min <= minutesUntilMidnight).length;
+      const subtitle = showDaySeparators ? ` · ${todayCount} ce soir` : '';
+
+      body += `<div class="grp-hdr live">${ICO.livedot}<span>Prochaines arrivées${subtitle}</span><div class="grp-line"></div><span class="grp-ct">${future.length}</span></div>`;
+
       let tomorrowSeparatorInserted = false;
 
       body += future.map((t,i) => {
         let separator = '';
-        // Insère le séparateur AVANT le premier train de demain
-        if(!tomorrowSeparatorInserted && t.min > minutesUntilMidnight){
+        // Insère le séparateur AVANT le premier train de demain (uniquement si pertinent)
+        if(showDaySeparators && !tomorrowSeparatorInserted && t.min > minutesUntilMidnight){
           tomorrowSeparatorInserted = true;
           const demain = new Date(now.getTime() + 24*60*60*1000);
           const joursFR = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
@@ -9712,6 +9722,7 @@ function openDialog(gareId){
           separator = `<div class="day-sep"><span>${ICO.moon}Demain · ${label}</span></div>`;
         }
         const card = renderTC(t, false);
+        // next-train = le premier train (qui est désormais le vrai prochain grâce au sort par min)
         const cardWithId = i===0 ? card.replace('<div class="tc', '<div id="next-train" class="tc') : card;
         return separator + cardWithId;
       }).join('');
