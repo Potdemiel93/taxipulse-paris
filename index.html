@@ -959,29 +959,72 @@ dialog .sheet{
 .aero-courbe-axis span{font-weight:700}
 .aero-courbe-axis span.now{color:var(--accent);font-weight:900}
 
-/* Base arrière */
+/* ═══ BASE ARRIÈRE — IFRAME OFFICIEL ADP ═══
+   Affiche le site infotaxi.parisaeroport.fr (Groupe ADP) en LIVE.
+   Le chauffeur voit EXACTEMENT le même chiffre que sur le site officiel,
+   sans aucune estimation, sans aucun risque d'erreur. Source unique de vérité. */
 .aero-base-card{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
-  padding:14px 16px;
-  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  padding:0;overflow:hidden;
 }
-.aero-base-block{
-  display:flex;flex-direction:column;gap:4px;
+.aero-base-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid var(--line);
+  background:linear-gradient(90deg, rgba(255,69,0,.05) 0%, var(--card) 100%);
 }
-.aero-base-name{
-  font-size:11px;font-weight:800;color:var(--ink2);
-  text-transform:uppercase;letter-spacing:.6px;
+.aero-base-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:800;color:var(--ink);
+  text-transform:uppercase;letter-spacing:.5px;
 }
-.aero-base-time{
-  font-family:var(--mono);font-size:24px;font-weight:900;
-  letter-spacing:-.6px;line-height:1;
+.aero-base-live-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 6px rgba(34,197,94,.6);
+  animation:pulse-live 1.6s ease-in-out infinite;
 }
-.aero-base-time.green{color:var(--green)}
-.aero-base-time.gold{color:var(--gold)}
-.aero-base-time.red{color:var(--red)}
-.aero-base-time.accent{color:var(--accent)}
-.aero-base-unit{font-size:11px;color:var(--ink3);font-weight:700;margin-left:2px}
-.aero-base-sub{font-size:9px;color:var(--ink3);font-weight:600;line-height:1.3;letter-spacing:.1px}
+@keyframes pulse-live{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.3);opacity:.6}
+}
+.aero-base-source{
+  font-size:9px;font-weight:700;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.4px;
+}
+.aero-base-iframe-wrap{
+  position:relative;background:#fff;
+  height:340px;
+  width:100%;
+}
+.aero-base-iframe-wrap iframe{
+  width:100%;height:100%;border:0;display:block;
+  background:#fff;
+}
+.aero-base-actions{
+  display:flex;gap:8px;padding:10px 12px;
+  border-top:1px solid var(--line);
+  background:var(--card2);
+}
+.aero-base-btn{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;
+  color:var(--ink);font-size:11px;font-weight:700;
+  text-decoration:none;cursor:pointer;transition:all .15s;
+}
+.aero-base-btn:active{background:var(--card)}
+.aero-base-btn.primary{
+  background:var(--accent);border-color:var(--accent);color:#fff;
+}
+.aero-base-btn.primary:active{background:#d44e0d}
+.aero-base-btn svg{width:13px;height:13px}
+
+/* Note explicative sur le site officiel */
+.aero-base-note{
+  padding:10px 14px;border-top:1px solid var(--line);
+  background:var(--card2);
+  font-size:10px;color:var(--ink3);font-weight:600;line-height:1.45;
+}
+.aero-base-note strong{color:var(--ink2);font-weight:800}
 
 /* ═══ TIER-INFO — carte explicative refonte ═══ */
 .tier-info{
@@ -6902,24 +6945,28 @@ function strategieAeroport(date){
   const h = date.getHours();
   const paxCDG = paxParHeure('cdg', h, date);
   const paxORY = paxParHeure('orly', h, date);
-  const waitCDG = TAXI_WAIT.cdg.mins ?? estimerWaitBase('cdg', date);
-  const waitORY = TAXI_WAIT.orly.mins ?? estimerWaitBase('orly', date);
 
-  // Score = pax/heure / wait (passagers par minute d'attente)
-  const scoreCDG = paxCDG / Math.max(15, waitCDG);
-  const scoreORY = paxORY / Math.max(15, waitORY);
-
-  const winner = scoreCDG > scoreORY ? 'cdg' : 'orly';
+  // Recommandation basée uniquement sur pax/h (vrai signal métier)
+  // L'attente base arrière est consultée via iframe officiel ADP en bas du tab.
+  const winner = paxCDG > paxORY ? 'cdg' : 'orly';
   const aero = AEROPORTS[winner];
+
+  // Calcule le ratio pour communiquer la force de la recommandation
+  const ratio = winner === 'cdg' ? paxCDG / Math.max(1, paxORY) : paxORY / Math.max(1, paxCDG);
+
   let raison = '';
-  if(scoreCDG > scoreORY * 1.3){
-    raison = `CDG largement supérieur · ${paxCDG.toLocaleString('fr-FR')} pax/h vs ${paxORY.toLocaleString('fr-FR')} à Orly`;
-  } else if(scoreORY > scoreCDG * 1.3){
-    raison = `Orly meilleur ratio · attente ${waitORY} min vs ${waitCDG} min à CDG`;
+  if(ratio > 1.8){
+    raison = winner === 'cdg'
+      ? `Trafic CDG très supérieur · ${paxCDG.toLocaleString('fr-FR')} pax/h vs ${paxORY.toLocaleString('fr-FR')} à Orly`
+      : `Trafic Orly très supérieur · ${paxORY.toLocaleString('fr-FR')} pax/h vs ${paxCDG.toLocaleString('fr-FR')} à CDG`;
+  } else if(ratio > 1.3){
+    raison = winner === 'cdg'
+      ? `CDG plus dense · ${paxCDG.toLocaleString('fr-FR')} vs ${paxORY.toLocaleString('fr-FR')} pax/h à Orly`
+      : `Orly plus dense · ${paxORY.toLocaleString('fr-FR')} vs ${paxCDG.toLocaleString('fr-FR')} pax/h à CDG`;
   } else {
-    raison = `Quasi équivalent · ${paxCDG.toLocaleString('fr-FR')} pax CDG vs ${paxORY.toLocaleString('fr-FR')} Orly`;
+    raison = `Équivalent · ${paxCDG.toLocaleString('fr-FR')} pax CDG vs ${paxORY.toLocaleString('fr-FR')} Orly · vérifie l'attente officielle ci-dessous`;
   }
-  return { winner, aero, paxCDG, paxORY, waitCDG, waitORY, raison };
+  return { winner, aero, paxCDG, paxORY, raison };
 }
 
 /* ═══ STATE ═══ */
@@ -7539,8 +7586,8 @@ async function doRefresh(force=true){
   // On lance en parallèle MAIS on attend la fin avant fetchGare pour Nord.
   const eurostarPromise = scrapeEurostarStatus().catch(() => {});
 
-  // ═══ Fetch base arrière taxi en parallèle (best-effort, peut échouer) ═══
-  fetchTaxiWait().catch(() => {});
+  // Note : la base arrière s'affiche via iframe officiel ADP (infotaxi.parisaeroport.fr)
+  // dans l'onglet Aéro — pas besoin de fetch côté app, le site officiel s'occupe de tout.
 
   // Fetch SNCF des gares non-Nord en parallèle du scrape Eurostar
   const nonNordGares = toFetch.filter(g => g.id !== 'nord');
@@ -8228,7 +8275,7 @@ function renderAero(){
         <span>Recommandation maintenant</span>
       </div>
       <div class="aero-hero-big">Vise <strong>${esc(winnerAero.short)}</strong> · ${strat['pax'+strat.winner.toUpperCase()].toLocaleString('fr-FR')} pax/h</div>
-      <div class="aero-hero-sub">${esc(strat.raison)} · base arrière ~${strat['wait'+strat.winner.toUpperCase()]} min d'attente</div>
+      <div class="aero-hero-sub">${esc(strat.raison)}</div>
     `;
   }
 
@@ -8345,34 +8392,57 @@ function renderAero(){
     </div>`;
   }
 
-  // ═══ BASE ARRIÈRE ═══
+  // ═══ BASE ARRIÈRE — IFRAME LIVE ADP ═══
+  // Source : infotaxi.parisaeroport.fr (Groupe ADP officiel)
+  // Pas d'estimation maison : le chauffeur voit EXACTEMENT les vrais chiffres.
   const baseEl = document.getElementById('aero-base');
-  if(baseEl){
-    const renderBase = (id) => {
-      const liveData = TAXI_WAIT[id];
-      const isLive = liveData.mins !== null && (Date.now() - liveData.ts) < 5*60*1000;
-      const mins = isLive ? liveData.mins : estimerWaitBase(id, now);
-      let cls = 'green';
-      if(mins >= 60) cls = 'red';
-      else if(mins >= 35) cls = 'gold';
-      else if(mins >= 25) cls = 'accent';
-      return { id, mins, cls, isLive };
-    };
-    const cdg = renderBase('cdg');
-    const ory = renderBase('orly');
-
+  if(baseEl && !baseEl.dataset.loaded){
+    baseEl.dataset.loaded = '1';  // Évite de recharger l'iframe à chaque renderAero
     baseEl.innerHTML = `<div class="aero-base-card">
-      <div class="aero-base-block">
-        <span class="aero-base-name">CDG ${cdg.isLive ? '· LIVE' : '· estimé'}</span>
-        <span class="aero-base-time ${cdg.cls}">${cdg.mins}<span class="aero-base-unit">min</span></span>
-        <span class="aero-base-sub">${cdg.mins < 30 ? 'Bonne rotation' : cdg.mins < 50 ? 'Attente moyenne' : 'Forte attente'}</span>
+      <div class="aero-base-header">
+        <div class="aero-base-title">
+          <span class="aero-base-live-dot"></span>
+          <span>Temps d'attente officiel</span>
+        </div>
+        <span class="aero-base-source">Groupe ADP · LIVE</span>
       </div>
-      <div class="aero-base-block">
-        <span class="aero-base-name">Orly ${ory.isLive ? '· LIVE' : '· estimé'}</span>
-        <span class="aero-base-time ${ory.cls}">${ory.mins}<span class="aero-base-unit">min</span></span>
-        <span class="aero-base-sub">${ory.mins < 30 ? 'Bonne rotation' : ory.mins < 50 ? 'Attente moyenne' : 'Forte attente'}</span>
+      <div class="aero-base-iframe-wrap">
+        <iframe
+          src="https://infotaxi.parisaeroport.fr/"
+          title="Temps d'attente base arrière taxis ADP"
+          loading="lazy"
+          referrerpolicy="no-referrer"
+          sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+      <div class="aero-base-actions">
+        <a href="https://infotaxi.parisaeroport.fr/"
+           target="_blank" rel="noopener noreferrer"
+           class="aero-base-btn primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span>Ouvrir en plein écran</span>
+        </a>
+        <button onclick="document.getElementById('aero-base-iframe-reload')?.click()"
+                class="aero-base-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+          <span>Rafraîchir</span>
+        </button>
+      </div>
+      <div class="aero-base-note">
+        <strong>Source :</strong> infotaxi.parisaeroport.fr — site officiel Groupe ADP. Affiche le temps de parcours moyen entre l'entrée en BAT (Base Arrière Taxi) et la sortie ZT/ZPEC. Données mises à jour en continu.
       </div>
     </div>`;
+
+    // Bouton refresh : recharge l'iframe en changeant légèrement l'URL pour bypass cache
+    setTimeout(() => {
+      const reload = document.createElement('button');
+      reload.id = 'aero-base-iframe-reload';
+      reload.style.display = 'none';
+      reload.onclick = () => {
+        const iframe = baseEl.querySelector('iframe');
+        if(iframe) iframe.src = 'https://infotaxi.parisaeroport.fr/?t=' + Date.now();
+      };
+      baseEl.appendChild(reload);
+    }, 100);
   }
 }
 
