@@ -317,7 +317,7 @@ dialog .sheet{
   font-size:9px;font-weight:800;letter-spacing:.5px;color:#fff;
 }
 .b-TGV,.b-INOUI{background:#1e40af}
-.b-OUIGO{background:#e4007c}
+.b-OUIGO,.b-OUIGO_TC{background:#e4007c}
 .b-EURO,.b-EUROSTAR{background:#facc15;color:#1a1a1a}
 .b-THAL,.b-THALYS{background:#7c2d12}
 .b-IC,.b-INTERCITES{background:#374151}
@@ -341,10 +341,14 @@ dialog .sheet{
 .tc-when.soon{color:var(--gold)}.tc-when.now{color:var(--accent)}.tc-when.past{color:var(--ink3)}
 .tc-bot{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap}
 .tc-aff{
-  display:flex;align-items:center;gap:5px;
-  background:var(--bg);border-radius:7px;padding:5px 9px;
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg);border-radius:7px;padding:5px 10px;
 }
 .tc-aff .tc-flames{font-size:14px;line-height:1}
+.tc-aff .tc-pax-num{
+  font-family:var(--mono);font-size:14px;font-weight:900;
+  color:var(--ink);letter-spacing:-.3px;
+}
 .tc-aff .tc-aff-l{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);font-weight:700}
 .st-chip{
   display:inline-flex;align-items:center;gap:4px;
@@ -2819,6 +2823,16 @@ header{
 }
 .dstat .dv.flames-stat .tp-calm-ico{letter-spacing:0}
 
+/* Affichage passagers (chiffre + flammes mini) dans le header dialog gare */
+.dstat .dv .dv-pax-big{
+  font-family:var(--mono);font-size:18px;font-weight:900;
+  color:var(--ink);letter-spacing:-.5px;line-height:1;
+}
+.dstat .dv .dv-flames-mini{
+  font-size:10px;letter-spacing:-.5px;line-height:1;
+  margin-left:4px;opacity:.85;vertical-align:middle;
+}
+
 /* Header améliorer : nom gare plus gros + sub plus soft */
 #gare-dialog .dhdr-name{font-size:24px !important;font-weight:800 !important;letter-spacing:-.8px !important}
 #gare-dialog .dhdr-sub{font-size:10.5px !important;opacity:.72}
@@ -4068,7 +4082,7 @@ header{
       </div>
       <div class="dstats">
         <div class="dstat"><div class="dk">Arrivées 25min</div><div class="dv a" id="gd-up">5</div></div>
-        <div class="dstat"><div class="dk">Demande taxi</div><div class="dv" id="gd-pax"><span style="font-size:18px">🔥🔥🔥🔥</span></div></div>
+        <div class="dstat"><div class="dk">Passagers / 25min</div><div class="dv" id="gd-pax"><span style="font-size:18px">🔥🔥🔥🔥</span></div></div>
         <div class="dstat"><div class="dk">Retards</div><div class="dv y" id="gd-del">2</div></div>
         <div class="dstat"><div class="dk">Supprimés</div><div class="dv r" id="gd-can">0</div></div>
       </div>
@@ -5793,27 +5807,29 @@ function gareIco(g){
 }
 
 const CAPACITE = {
-  // Grande vitesse — valeurs constructeur
-  TGV:       510,   // TGV Duplex/Réseau (510 moyenne)
-  INOUI:     556,   // TGV Océane 2N2 (556 places)
-  OUIGO:     634,   // TGV Ouigo double-étage modifié haute densité
-  EUROSTAR:  900,   // Eurostar e320 Siemens — 400m, 16 voitures, 900 places
-  THALYS:    900,   // Ex-Thalys, désormais opéré sous marque Eurostar (rames e320)
+  // ═══ Grande vitesse — valeurs constructeur 2026 ═══
+  TGV:       510,   // TGV Duplex/Réseau (Sud-Est, Atlantique)
+  INOUI:     556,   // TGV Océane 2N2 (Atlantique 2024+)
+  OUIGO:     634,   // TGV Ouigo Duplex haute densité
+  OUIGO_TC:  600,   // Ouigo Train Classique (Corail rénovée Lyon-Paris/Nantes)
+  EUROSTAR:  900,   // Eurostar e320 Siemens — 16 voitures
+  THALYS:    900,   // Ex-Thalys → Eurostar (rames e320)
   LYRIA:     377,   // TGV Lyria (rames POS/Duplex)
-  ICE:       460,   // ICE 3 Siemens Velaro D (DB)
+  ICE:       460,   // ICE 3 Siemens Velaro D
 
-  // Intercités & trains classiques
-  INTERCITES:540,   // Corail rénovée, rames VU capables de 540 places
+  // ═══ Intercités & trains classiques ═══
+  // Austerlitz / Bercy = Corail rénovée 7-9 voitures, ~380 places
+  // Pas de rame VU "longue" (540) — celles-là sont vendues comme TGV
+  INTERCITES:380,   // Corail rénovée standard
   NIGHTJET:  400,   // Nightjet ÖBB (couchettes/sièges mixtes)
-  NIGHT:     400,
+  NIGHT:     320,   // Intercités de nuit France (Briançon, Latour-de-Carol)
 
-  // TER longue distance (Regio 2N = 500+ places en version 10 caisses)
-  TER:       340,   // Moyenne selon longueur rame (variable 200-500)
+  // ═══ TER longue distance ═══
+  TER:       340,   // Moyenne (Regio 2N : 500, Z 24500 : 250)
 
-  // RER / Transilien (pour calcul théorique — filtré à l'affichage)
+  // ═══ RER / Transilien (filtrés à l'affichage normalement) ═══
   TRANSILIEN:1100,
 
-  // Défaut
   DEF:       400
 };
 
@@ -5822,18 +5838,30 @@ const CAPACITE = {
    Vendredi/dimanche + pointes = beaucoup de TGV en UM (2 rames)
 ═══════════════════════════════════════════════ */
 function coefUM(type, date, heure){
-  // UM principalement sur TGV/INOUI/OUIGO, jamais sur Eurostar, Intercités, TER
+  // UM (rame double) principalement sur TGV/INOUI/OUIGO/Lyria
+  // Jamais sur Eurostar (rame fixe e320), Intercités, TER
   if(!['TGV','INOUI','OUIGO','LYRIA'].includes(type)) return 1.0;
-  const jour = date.getDay();
-  // Vendredi soir 16-21h → ~50% en UM → coef moyen 1.35
-  if(jour === 5 && heure >= 16 && heure <= 21) return 1.35;
-  // Dimanche soir 16-22h → ~60% en UM → coef 1.45
-  if(jour === 0 && heure >= 16 && heure <= 22) return 1.45;
-  // Lundi matin 6-10h → ~40% en UM → coef 1.25
-  if(jour === 1 && heure >= 6 && heure <= 10) return 1.25;
-  // Samedi départ vacances matin → coef 1.20
-  if(jour === 6 && heure >= 7 && heure <= 11) return 1.20;
-  // Jours normaux → rares UM → coef 1.05
+
+  const j = date.getDay();
+  const vacances = isVacancesParis(date);
+  const pont = isPont(date);
+  const veille = isVeilleFerie(date);
+
+  // ═══ Pont/veille de férié : exode parisien massif → UM systématique
+  if((pont || veille) && heure >= 14 && heure <= 21) return 1.50;
+
+  // ═══ Vendredi soir départ weekend (renforcé en vacances)
+  if(j === 5 && heure >= 16 && heure <= 21) return vacances ? 1.45 : 1.35;
+
+  // ═══ Dimanche soir retour weekend (le PIRE)
+  if(j === 0 && heure >= 16 && heure <= 22) return vacances ? 1.55 : 1.45;
+
+  // ═══ Lundi matin business
+  if(j === 1 && heure >= 6 && heure <= 10) return 1.25;
+
+  // ═══ Samedi matin départs vacances
+  if(j === 6 && heure >= 7 && heure <= 11) return vacances ? 1.30 : 1.15;
+
   return 1.05;
 }
 
@@ -5842,34 +5870,108 @@ function coefUM(type, date, heure){
    Basé sur études SNCF publiques (taux moyen 2023-2024)
 ═══════════════════════════════════════════════ */
 const COEF_TYPE = {
+  // Taux de remplissage SNCF 2024 (rapports activité)
   TGV:        0.78,
   INOUI:      0.80,
-  OUIGO:      0.82,
-  EUROSTAR:   0.88,  // Eurostar quasi toujours complet
+  OUIGO:      0.85,  // Low-cost ⇒ remplissage agressif
+  OUIGO_TC:   0.82,
+  EUROSTAR:   0.88,  // Quasi toujours complet
   THALYS:     0.85,
   LYRIA:      0.78,
   ICE:        0.72,
-  INTERCITES: 0.78,
-  NIGHTJET:   0.68,
-  NIGHT:      0.68,
+  INTERCITES: 0.65,  // Plus bas (Limoges/Clermont moins demandé)
+  NIGHTJET:   0.78,  // Trains de nuit complets (peu d'offre)
+  NIGHT:      0.72,
   TER:        0.55,
   TRANSILIEN: 0.55,
   DEF:        0.65
 };
 
 /* ═══════════════════════════════════════════════
-   COEFFICIENT HORAIRE (arrivées à Paris)
+   CALENDRIER FRANÇAIS 2025-2027
+   Jours fériés + vacances Paris (zone C) — facteurs
+   majeurs sur le remplissage des trains.
 ═══════════════════════════════════════════════ */
-function coefHeure(h){
-  if(h >= 0  && h < 5)  return 0.25;
-  if(h >= 5  && h < 7)  return 0.55;
-  if(h >= 7  && h < 10) return 1.00;  // POINTE MATIN
-  if(h >= 10 && h < 12) return 0.70;
-  if(h >= 12 && h < 14) return 0.80;
-  if(h >= 14 && h < 17) return 0.75;
-  if(h >= 17 && h < 20) return 0.95;  // POINTE SOIR
-  if(h >= 20 && h < 23) return 0.65;
-  return 0.40;
+const JOURS_FERIES = new Set([
+  // 2025
+  '2025-01-01','2025-04-21','2025-05-01','2025-05-08','2025-05-29',
+  '2025-06-09','2025-07-14','2025-08-15','2025-11-01','2025-11-11','2025-12-25',
+  // 2026
+  '2026-01-01','2026-04-06','2026-05-01','2026-05-08','2026-05-14',
+  '2026-05-25','2026-07-14','2026-08-15','2026-11-01','2026-11-11','2026-12-25',
+  // 2027
+  '2027-01-01','2027-03-29','2027-05-01','2027-05-06','2027-05-08',
+  '2027-05-17','2027-07-14','2027-08-15','2027-11-01','2027-11-11','2027-12-25'
+]);
+
+// Vacances scolaires Paris (zone C) — début/fin inclus
+const VACANCES_PARIS = [
+  ['2025-02-08','2025-02-23'], ['2025-04-05','2025-04-21'],
+  ['2025-07-05','2025-08-31'], ['2025-10-18','2025-11-02'],
+  ['2025-12-20','2026-01-04'],
+  ['2026-02-07','2026-02-22'], ['2026-04-04','2026-04-19'],
+  ['2026-07-04','2026-08-31'], ['2026-10-17','2026-11-01'],
+  ['2026-12-19','2027-01-03'],
+  ['2027-02-13','2027-02-28'], ['2027-04-10','2027-04-25'],
+  ['2027-07-03','2027-08-31']
+];
+
+function ymdKey(date){
+  return date.getFullYear() + '-' +
+         String(date.getMonth()+1).padStart(2,'0') + '-' +
+         String(date.getDate()).padStart(2,'0');
+}
+function isFerie(date){ return JOURS_FERIES.has(ymdKey(date)); }
+function isVacancesParis(date){
+  const k = ymdKey(date);
+  return VACANCES_PARIS.some(([s,e]) => k >= s && k <= e);
+}
+function isPont(date){
+  const j = date.getDay();
+  const dPlus  = new Date(date.getTime() + 86400000);
+  const dMinus = new Date(date.getTime() - 86400000);
+  if(j === 5 && isFerie(dMinus)) return true;
+  if(j === 1 && isFerie(dPlus))  return true;
+  return false;
+}
+function isVeilleFerie(date){
+  const dPlus = new Date(date.getTime() + 86400000);
+  const j = date.getDay();
+  return isFerie(dPlus) && j >= 1 && j <= 4;
+}
+
+/* ═══════════════════════════════════════════════
+   COEFFICIENT HORAIRE — interpolation continue
+   Au lieu d'escaliers brutaux (saut 30% en 1 min),
+   transition douce calibrée sur courbes SNCF réelles.
+═══════════════════════════════════════════════ */
+function coefHeure(h, m){
+  m = m || 0;
+  const t = h * 60 + m;
+  // Points (minutes depuis minuit, coef remplissage)
+  const pts = [
+    [0,    0.20],
+    [300,  0.25],   // 05:00
+    [420,  0.55],   // 07:00 début rush matin
+    [540,  1.05],   // 09:00 pic matin
+    [600,  0.85],   // 10:00
+    [720,  0.75],   // 12:00 creux
+    [780,  0.85],   // 13:00 mini-pic midi
+    [900,  0.72],   // 15:00 creux PM
+    [1020, 0.92],   // 17:00 début rush soir
+    [1110, 1.05],   // 18:30 pic soir absolu
+    [1200, 0.85],   // 20:00 fin rush
+    [1260, 0.65],   // 21:00 décrue
+    [1380, 0.40],   // 23:00 nuit
+    [1440, 0.20]    // 24:00
+  ];
+  for(let i = 0; i < pts.length - 1; i++){
+    if(t >= pts[i][0] && t <= pts[i+1][0]){
+      const ratio = (t - pts[i][0]) / (pts[i+1][0] - pts[i][0]);
+      return pts[i][1] + ratio * (pts[i+1][1] - pts[i][1]);
+    }
+  }
+  return 0.5;
 }
 
 /* ═══════════════════════════════════════════════
@@ -5971,44 +6073,120 @@ const COEF_GARE = {
 };
 
 /* ═══════════════════════════════════════════════
-   COEFFICIENT JOUR DE SEMAINE
-   Vendredi/dimanche soir = rush retour weekend
+   COEFFICIENT JOUR — modifie le REMPLISSAGE du train
+   Inclut détection fériés/ponts/vacances pour précision
+   maximale. Capé à 1.0 (pas plus que 100% rempli).
 ═══════════════════════════════════════════════ */
 function coefJour(date, heure){
-  const jour = date.getDay(); // 0=dim, 1=lun, ..., 6=sam
-  // Vendredi 17-21h = départ weekend/tourisme
-  if(jour === 5 && heure >= 17 && heure <= 21) return 1.25;
-  // Dimanche 17-22h = retour weekend massif
-  if(jour === 0 && heure >= 17 && heure <= 22) return 1.30;
-  // Lundi matin 6-10h = rush business
-  if(jour === 1 && heure >= 6  && heure <= 10) return 1.15;
-  // Samedi après-midi = loisir, moins de taxi
-  if(jour === 6 && heure >= 13 && heure <= 17) return 0.90;
+  const j = date.getDay();
+  const ferie = isFerie(date);
+  const veille = isVeilleFerie(date);
+  const pont = isPont(date);
+  const vacances = isVacancesParis(date);
+
+  // ═══ Pont (vendredi entre jeudi férié et weekend / lundi entre weekend et mardi férié)
+  if(pont){
+    if(heure >= 14 && heure <= 21) return 1.18; // pic départs
+    if(heure >= 6  && heure <= 12) return 1.10;
+    return 1.05;
+  }
+
+  // ═══ Veille de férié en semaine = effet "vendredi soir"
+  if(veille){
+    if(heure >= 16 && heure <= 21) return 1.15;
+    return 1.05;
+  }
+
+  // ═══ Jour férié = ambiance dimanche
+  if(ferie){
+    if(heure >= 11 && heure <= 14) return 1.00;
+    return 0.92;
+  }
+
+  // ═══ Vendredi vacances = mega exode départs
+  if(j === 5 && vacances && heure >= 14 && heure <= 21) return 1.20;
+  // ═══ Dimanche vacances = mega retour
+  if(j === 0 && vacances && heure >= 15 && heure <= 22) return 1.22;
+  // ═══ Samedi matin vacances = familles
+  if(j === 6 && vacances && heure >= 7 && heure <= 12) return 1.15;
+
+  // ═══ Vendredi soir hors-vacances
+  if(j === 5 && heure >= 17 && heure <= 21) return 1.12;
+  // ═══ Dimanche soir hors-vacances
+  if(j === 0 && heure >= 17 && heure <= 22) return 1.15;
+  // ═══ Lundi matin business
+  if(j === 1 && heure >= 6 && heure <= 10) return 1.08;
+  // ═══ Samedi aprem creux
+  if(j === 6 && heure >= 13 && heure <= 17) return 0.92;
+
   return 1.0;
 }
 
 /* ═══════════════════════════════════════════════
-   CALCUL PRINCIPAL : CLIENTS TAXI POTENTIELS
-   Formule : voyageurs × taux_taxi
-   Prend en compte UM (unité multiple = 2 rames) pour les TGV en rush
+   CALCUL PRINCIPAL : PASSAGERS À LA SORTIE
+   ⚡ PIVOT : on retourne le nombre estimé de passagers
+   qui descendent du train (pas les clients taxi).
+   C'est un chiffre concret que le chauffeur peut vérifier.
+
+   Formule : capacité × coefUM × remplissage_global
+   où remplissage_global = COEF_TYPE × coefHeure × coefJour × coefOrigine
 ═══════════════════════════════════════════════ */
 function estimerPax(type, heureArrivee, origine, gareId, date){
   const d = date || new Date();
-  const capBase    = CAPACITE[type]  || CAPACITE.DEF;
-  // Capacité ajustée pour UM (TGV en rush peuvent être en double)
-  const cap        = capBase * coefUM(type, d, heureArrivee);
-  // Remplissage réel (capé à 95% — un train n'est jamais 100% plein)
-  const remplissage = Math.min(0.95, (COEF_TYPE[type] || COEF_TYPE.DEF) * coefHeure(heureArrivee));
-  const voyageurs  = cap * remplissage;
 
-  // Taux taxi : base × ajustements (capé à 42%)
-  const cTaxi = COEF_TAXI[type] || COEF_TAXI.DEF;
-  const cOrig = coefOrigine(origine);
-  const cGare = COEF_GARE[gareId] || 1.0;
-  const cJour = coefJour(d, heureArrivee);
-  const tauxTaxi = Math.min(0.42, cTaxi * cOrig * cGare * cJour);
+  // 1. Capacité brute
+  const capBase = CAPACITE[type] || CAPACITE.DEF;
 
-  return Math.round(voyageurs * tauxTaxi);
+  // 2. Multiplicateur UM (rame double si rush/vacances/pont)
+  const cap = capBase * coefUM(type, d, heureArrivee);
+
+  // 3. Remplissage global = type × heure × jour × origine
+  // - type     : taux moyen SNCF par catégorie
+  // - heure    : pic matin/soir
+  // - jour     : weekend/férié/vacances
+  // - origine  : long-distance plus rempli que court
+  const cType  = COEF_TYPE[type] || COEF_TYPE.DEF;
+  const cHeure = coefHeure(heureArrivee);
+  const cJour  = coefJour(d, heureArrivee);
+  const cOrig  = coefOrigineRemplissage(origine);
+
+  // Capé à 95% : un train n'est JAMAIS 100% plein (siège vide, descendus en route)
+  const remplissage = Math.min(0.95, cType * cHeure * cJour * cOrig);
+
+  return Math.round(cap * remplissage);
+}
+
+/* Coefficient origine sur le REMPLISSAGE (pas le taxi).
+   Différent de coefOrigine() qui donnait le taux taxi. */
+function coefOrigineRemplissage(origine){
+  const o = (origine || '').toUpperCase();
+
+  // International long courrier = pleins (réservation longtemps à l'avance)
+  if(o.includes('LONDON')||o.includes('LONDRES')||o.includes('PANCRAS')||
+     o.includes('AMSTERDAM')||o.includes('ROTTERDAM')||
+     o.includes('MILAN')||o.includes('MILANO')||
+     o.includes('BARCELONE')||o.includes('BARCELONA')||o.includes('MADRID')||
+     o.includes('BERLIN')||o.includes('VIENNE')||o.includes('WIEN')) return 1.10;
+
+  // International court (Bruxelles, Genève, Cologne) — un peu moins plein
+  if(o.includes('BRUXELLES')||o.includes('BRUSSELS')||
+     o.includes('GENÈVE')||o.includes('GENEVA')||o.includes('CORNAVIN')||
+     o.includes('COLOGNE')||o.includes('KÖLN')||
+     o.includes('LUXEMBOURG')||o.includes('FRANCFORT')||o.includes('FRANKFURT')) return 1.05;
+
+  // Long courrier France = bien plein
+  if(o.includes('MARSEILLE')||o.includes('NICE')||o.includes('CANNES')||
+     o.includes('TOULOUSE')||o.includes('BORDEAUX')||o.includes('MONTPELLIER')||
+     o.includes('PERPIGNAN')||o.includes('BIARRITZ')||o.includes('HENDAYE')||
+     o.includes('BREST')||o.includes('QUIMPER')) return 1.05;
+
+  // Courte distance = moins plein (commuter, abonnés)
+  if(o.includes('LILLE')||o.includes('AMIENS')||o.includes('ROUEN')||
+     o.includes('CHARTRES')||o.includes('DREUX')||o.includes('CREIL')||
+     o.includes('BEAUVAIS')||o.includes('REIMS')||o.includes('TROYES')||
+     o.includes('ORLÉANS')||o.includes('ORLEANS')||o.includes('TOURS')) return 0.92;
+
+  return 1.0;
 }
 
 /* ═══════════════════════════════════════════════
@@ -6103,10 +6281,12 @@ function eventCatSvg(cat){
 }
 
 function niveauFlammes(totalPax){
-  if(totalPax < 5)       return { lvl:0, ico:ICO.zzz,      txt:'très calme' };
-  if(totalPax < 35)      return { lvl:1, ico:'🔥',         txt:'calme'     };
-  if(totalPax < 90)      return { lvl:2, ico:'🔥🔥',       txt:'modéré'    };
-  if(totalPax < 180)     return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'      };
+  // Seuils calibrés sur passagers à la sortie (fenêtre 25 min, somme toutes gares à la sortie)
+  // Référence : 1 TGV plein ≈ 400 pax | 1 Eurostar plein ≈ 800 pax
+  if(totalPax < 50)      return { lvl:0, ico:ICO.zzz,      txt:'très calme' };
+  if(totalPax < 200)     return { lvl:1, ico:'🔥',         txt:'calme'     };
+  if(totalPax < 500)     return { lvl:2, ico:'🔥🔥',       txt:'modéré'    };
+  if(totalPax < 1000)    return { lvl:3, ico:'🔥🔥🔥',     txt:'fort'      };
   return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'rush'      };
 }
 
@@ -6225,12 +6405,19 @@ const TYPES_AUTORISES = {
   // Intercités de nuit (Nice/Cerbère/Foix/Briançon),
   // OUIGO Train Classique (Nantes/Angers/Lyon classique),
   // TER Centre-Val de Loire (Orléans/Tours/Bourges)
-  austerlitz:   ['INTERCITES','OUIGO','NIGHTJET','NIGHT','TER'],
+  // ⚡ Plus de TGV depuis 2024 (déplacés à Montparnasse/Lyon)
+  austerlitz:   ['INTERCITES','OUIGO','OUIGO_TC','NIGHTJET','NIGHT','TER'],
   // Bercy : Intercités (Clermont-Ferrand via Nevers/Moulins/Vichy),
   // OUIGO Train Classique (Lyon via Dijon),
   // TER Bourgogne (Dijon, Laroche) et Centre (Nevers via Montargis)
-  bercy:        ['INTERCITES','OUIGO','TER']
+  bercy:        ['INTERCITES','OUIGO','OUIGO_TC','TER']
 };
+
+/* Convertit le type interne en label affichable (OUIGO_TC → OUIGO) */
+function displayType(type){
+  if(type === 'OUIGO_TC') return 'OUIGO';
+  return type;
+}
 
 function trainType(di, gareId, origine){
   // Construit une chaine complete avec TOUS les champs API + l'origine réelle
@@ -6311,21 +6498,41 @@ function trainType(di, gareId, origine){
     }
   }
 
-  // CORRECTION : si le type détecté n'est pas autorisé dans cette gare, on corrige
+  // CORRECTION cohérence par gare : si type détecté incompatible, on remappe
   if(gareId && TYPES_AUTORISES[gareId]){
     const autorises = TYPES_AUTORISES[gareId];
     if(!autorises.includes(detecte)){
-      // INTERCITES détecté dans Nord/Lyon/Est/Montparnasse → en fait TER ou TGV
-      if(detecte === 'INTERCITES'){
+      // ═══ AUSTERLITZ/BERCY : "TGV"/"INOUI" détectés = en réalité Intercités
+      // (Austerlitz n'a quasi plus de TGV depuis 2024 — Toulouse/Brive sont des Intercités)
+      if((gareId === 'austerlitz' || gareId === 'bercy') &&
+         (detecte === 'TGV' || detecte === 'INOUI' || detecte === 'OUIGO')){
+        // OUIGO Train Classique existe à Austerlitz/Bercy ⇒ on garde
+        if(detecte === 'OUIGO' && (s.includes('OUIGO')||s.includes('TRAIN CLASSIQUE'))){
+          detecte = 'OUIGO_TC';
+        } else if(detecte === 'OUIGO'){
+          detecte = 'OUIGO_TC';  // OUIGO depuis Austerlitz/Bercy = forcément train classique
+        } else {
+          detecte = 'INTERCITES';
+        }
+      }
+      // ═══ NORD/LYON/EST/MONTPARNASSE : Intercités impossible ⇒ TER
+      else if(detecte === 'INTERCITES'){
         if(gareId === 'nord' && (s.includes('LILLE')||s.includes('DUNKERQUE')||s.includes('VALENCIENNES'))) {
           detecte = 'INOUI';
         } else {
           detecte = 'TER';
         }
       }
-      else if(detecte === 'DEF') detecte = 'TER';
+      else if(detecte === 'DEF'){
+        // Fallback DEF par gare : Austerlitz/Bercy = Intercités, autres = TER
+        if(gareId === 'austerlitz' || gareId === 'bercy') detecte = 'INTERCITES';
+        else detecte = 'TER';
+      }
     }
   }
+
+  // ═══ DERNIER GARDE-FOU : DEF résiduel = TER (jamais sortir DEF en prod)
+  if(detecte === 'DEF') detecte = 'TER';
 
   return detecte;
 }
@@ -6929,9 +7136,9 @@ function renderGares(){
       </div>
       <div class="gc-right">
         <div class="flames lvl${flames.lvl}">${flames.ico}</div>
-        <div class="gc-pax60">${totalPax25} <span class="gc-pax60-unit">/25min</span></div>
+        <div class="gc-pax60">${totalPax25.toLocaleString('fr-FR')} <span class="gc-pax60-unit">pax</span></div>
         <div class="aff-label">
-          demande taxi
+          /25min
           <span style="width:13px;height:13px;border-radius:50%;background:#333;color:#666;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer" onclick="event.stopPropagation();openInfo()">i</span>
         </div>
       </div>
@@ -6972,12 +7179,13 @@ function renderStats(){
   if(totalPax === 0){
     rushNow.innerHTML = `<div class="empty"><span class="ei">${ICO.zzz}</span>Pas de rush dans les 25 prochaines minutes</div>`;
   } else {
-    // Seuils ajustés pour fenêtre 25 min (plus courte que 60 min)
-    const level = totalPax >= 300 ? '🔥🔥🔥🔥 RUSH MAXIMUM'
-               : totalPax >= 150 ? '🔥🔥🔥 Forte demande'
-               : totalPax >= 50  ? '🔥🔥 Demande modérée'
+    // Seuils calibrés sur passagers à la sortie (toutes gares, fenêtre 25 min)
+    // Réf : 6 gares × 1-2 trains/25min × 350-800 pax = 2000-9600 pax au pic
+    const level = totalPax >= 4000 ? '🔥🔥🔥🔥 RUSH MAXIMUM'
+               : totalPax >= 2000 ? '🔥🔥🔥 Forte affluence'
+               : totalPax >= 800  ? '🔥🔥 Affluence modérée'
                : '🔥 Calme';
-    const topClass = totalPax >= 150 ? 'top' : '';
+    const topClass = totalPax >= 2000 ? 'top' : '';
 
     let nextHTML = '';
     if(nextBig){
@@ -6993,7 +7201,7 @@ function renderStats(){
 
     rushNow.innerHTML = `<div class="rush-card ${topClass}">
       <div class="rush-now-title"><span style="display:inline-flex;align-items:center;gap:7px">🔥 Prochaines 25 minutes toutes gares</span></div>
-      <div class="rush-now-big">${totalPax} clients potentiels</div>
+      <div class="rush-now-big">${totalPax.toLocaleString('fr-FR')} <span style="font-size:0.55em;color:var(--ink2);font-weight:700;letter-spacing:.5px">passagers à la sortie</span></div>
       <div class="rush-now-sub">${level} · ${next25.length} trains à venir</div>
       ${nextHTML ? `<div class="rush-now-title" style="margin-top:14px;display:inline-flex;align-items:center;gap:7px">${ICO.target}<span>Prochain gros arrivant</span></div>` + nextHTML : ''}
     </div>`;
@@ -9663,7 +9871,8 @@ function openDialog(gareId){
     const cancels     = trains.filter(t => t.supprime).length;
 
     document.getElementById('gd-up').textContent  = next25.length;
-    document.getElementById('gd-pax').innerHTML   = `<span class="flames-stat">${flames.ico}</span>`;
+    // Affichage : flammes + chiffre passagers (info concrète et lisible)
+    document.getElementById('gd-pax').innerHTML   = `<span class="dv-pax-big">${totalPax.toLocaleString('fr-FR')}</span><span class="dv-flames-mini">${flames.ico}</span>`;
     document.getElementById('gd-del').textContent = delays;
     document.getElementById('gd-can').textContent = cancels;
 
@@ -9677,7 +9886,7 @@ function openDialog(gareId){
         const sinceTxt = depuis === 0 ? 'à l\'instant' : depuis + ' min';
         return `<div class="sq-train">
           <div class="sq-orig">
-            <span class="sq-badge b-${t.type}">${esc(t.type)}</span>${esc(t.origine)}
+            <span class="sq-badge b-${t.type}">${esc(displayType(t.type))}</span>${esc(t.origine)}
           </div>
           <div class="sq-time">${esc(t.hShow)}</div>
           <div class="sq-since">${sinceTxt}</div>
@@ -9821,12 +10030,14 @@ function renderTC(t, isPast){
     : t.isEurostar
       ? `${ICO.calendar}planning`
       : '~ théo';
+  // ═══ PASSAGERS À LA SORTIE — chiffre concret, vendeur ═══
+  const paxTxt = t.passagers > 0 ? `~${t.passagers.toLocaleString('fr-FR')}` : '—';
   return `<div class="${cls}">
     <div class="tc-top">
       <div class="tc-info">
         <div class="tc-orig">${esc(t.origine)}</div>
         <div class="tc-meta">
-          <span class="badge ${bCls}">${esc(t.type)}</span>
+          <span class="badge ${bCls}">${esc(displayType(t.type))}</span>
           ${t.numero ? `<span class="tc-num">#${esc(t.numero)}</span>` : ''}
           <span class="tc-rt ${t.live?'live':(t.isEurostar?'est':'base')}">${rtLabel}</span>
         </div>
@@ -9834,7 +10045,11 @@ function renderTC(t, isPast){
       <div class="tc-cd">${heureHtml}<div class="${wCls}">${esc(wTxt)}</div></div>
     </div>
     <div class="tc-bot">
-      <div class="tc-aff"><span class="tc-flames">${tFlame.ico}</span><span class="tc-aff-l">${tFlame.txt}</span></div>
+      <div class="tc-aff">
+        <span class="tc-flames">${tFlame.ico}</span>
+        <span class="tc-pax-num">${paxTxt}</span>
+        <span class="tc-aff-l">pax</span>
+      </div>
       ${stHtml}
     </div>
   </div>`;
