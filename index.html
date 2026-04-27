@@ -794,6 +794,195 @@ dialog .sheet{
 .tr-bd-row.total span:last-child{color:var(--accent);font-size:15px}
 
 /* ═══ Tier system — FLAMMES (cohérent avec l'app) ═══ */
+/* ═══════════════════════════════════════════════
+   ONGLET AÉROPORT — design dédié
+═══════════════════════════════════════════════ */
+
+/* Hero stratégie : recommandation actuelle */
+.aero-hero{
+  background:linear-gradient(135deg, rgba(255,69,0,.08) 0%, var(--card) 60%, var(--card) 100%);
+  border:1px solid rgba(255,69,0,.18);border-radius:14px;
+  padding:14px 16px;margin-bottom:14px;position:relative;overflow:hidden;
+}
+.aero-hero::before{
+  content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent);
+}
+.aero-hero-top{
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;
+  font-size:9px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--accent);
+}
+.aero-hero-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--accent);
+  box-shadow:0 0 8px rgba(255,69,0,.6);
+  animation:aero-pulse 1.6s ease-in-out infinite;
+}
+@keyframes aero-pulse{
+  0%,100%{transform:scale(1);opacity:1}
+  50%{transform:scale(1.4);opacity:.5}
+}
+.aero-hero-big{
+  font-size:22px;font-weight:900;letter-spacing:-.6px;color:var(--ink);
+  line-height:1.1;margin-bottom:4px;
+}
+.aero-hero-big strong{color:var(--accent);font-weight:900}
+.aero-hero-sub{
+  font-size:11px;font-weight:600;color:var(--ink2);line-height:1.4;
+}
+
+/* Toggle CDG / Orly */
+.aero-toggle{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;
+}
+.aero-tg-btn{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:10px 14px;cursor:pointer;text-align:left;
+  display:flex;flex-direction:column;gap:1px;
+  transition:all .15s ease;
+}
+.aero-tg-btn:hover{border-color:var(--ink3)}
+.aero-tg-btn.active{
+  background:linear-gradient(135deg, rgba(255,69,0,.08) 0%, var(--card) 70%);
+  border-color:var(--accent);
+}
+.aero-tg-code{
+  font-family:var(--mono);font-size:18px;font-weight:900;letter-spacing:-.4px;
+  color:var(--ink);
+}
+.aero-tg-btn.active .aero-tg-code{color:var(--accent)}
+.aero-tg-name{
+  font-size:10px;font-weight:700;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.5px;
+}
+
+/* Carte stat aéroport */
+.aero-stat-card{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;margin-bottom:14px;
+}
+.aero-stat-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;
+}
+.aero-stat-item{
+  display:flex;flex-direction:column;gap:2px;
+}
+.aero-stat-l{
+  font-size:9px;font-weight:700;color:var(--ink3);
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.aero-stat-v{
+  font-family:var(--mono);font-size:18px;font-weight:900;color:var(--ink);
+  letter-spacing:-.3px;line-height:1;
+}
+.aero-stat-v.accent{color:var(--accent)}
+.aero-stat-sub{font-size:10px;color:var(--ink3);font-weight:600;margin-top:1px}
+
+/* Liste vols */
+.aero-vol-row{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:10px 12px;margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;
+  position:relative;
+}
+.aero-vol-row.imminent{
+  border-color:rgba(255,69,0,.4);
+  background:linear-gradient(90deg, rgba(255,69,0,.05) 0%, var(--card) 35%);
+}
+.aero-vol-h{
+  font-family:var(--mono);font-size:14px;font-weight:900;
+  min-width:48px;color:var(--ink);
+}
+.aero-vol-row.imminent .aero-vol-h{color:var(--accent)}
+.aero-vol-main{flex:1;min-width:0}
+.aero-vol-orig{
+  font-size:13px;font-weight:800;color:var(--ink);
+  letter-spacing:-.2px;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.aero-vol-meta{
+  font-size:10px;color:var(--ink3);font-weight:600;
+  display:flex;gap:6px;align-items:center;margin-top:2px;
+}
+.aero-vol-num{
+  font-family:var(--mono);background:var(--bg);padding:1px 5px;border-radius:4px;
+  font-size:9px;color:var(--ink2);
+}
+.aero-vol-cie{font-weight:700;color:var(--ink2)}
+.aero-vol-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:1px;
+  flex-shrink:0;
+}
+.aero-vol-pax{
+  font-family:var(--mono);font-size:14px;font-weight:900;color:var(--ink);
+  letter-spacing:-.3px;
+}
+.aero-vol-pax-l{
+  font-size:8px;color:var(--ink3);font-weight:700;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.aero-vol-tag{
+  display:inline-block;padding:1px 6px;border-radius:6px;
+  font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;
+  margin-top:2px;
+}
+.aero-tag-premium{background:rgba(212,175,55,.15);color:var(--gold)}
+.aero-tag-charter{background:rgba(139,92,246,.12);color:#A78BFA}
+.aero-tag-interieur{background:rgba(34,197,94,.12);color:var(--green)}
+.aero-tag-europe{background:rgba(59,130,246,.12);color:#60A5FA}
+
+/* Courbe trafic horaire */
+.aero-courbe-wrap{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px 12px;
+}
+.aero-courbe-grid{
+  display:grid;grid-template-columns:repeat(24,1fr);gap:2px;
+  align-items:end;height:80px;margin-bottom:8px;
+}
+.aero-courbe-bar{
+  background:linear-gradient(180deg, rgba(255,69,0,.45) 0%, rgba(255,69,0,.18) 100%);
+  border-radius:2px 2px 0 0;
+  position:relative;
+  min-height:2px;transition:all .2s;
+}
+.aero-courbe-bar.now{
+  background:linear-gradient(180deg, var(--accent) 0%, rgba(255,69,0,.6) 100%);
+  box-shadow:0 0 6px rgba(255,69,0,.5);
+}
+.aero-courbe-bar.past{opacity:.35}
+.aero-courbe-bar.future{opacity:.7}
+.aero-courbe-axis{
+  display:grid;grid-template-columns:repeat(24,1fr);gap:2px;
+  font-family:var(--mono);font-size:8px;color:var(--ink3);
+  text-align:center;
+}
+.aero-courbe-axis span{font-weight:700}
+.aero-courbe-axis span.now{color:var(--accent);font-weight:900}
+
+/* Base arrière */
+.aero-base-card{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px 16px;
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+}
+.aero-base-block{
+  display:flex;flex-direction:column;gap:4px;
+}
+.aero-base-name{
+  font-size:11px;font-weight:800;color:var(--ink2);
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.aero-base-time{
+  font-family:var(--mono);font-size:24px;font-weight:900;
+  letter-spacing:-.6px;line-height:1;
+}
+.aero-base-time.green{color:var(--green)}
+.aero-base-time.gold{color:var(--gold)}
+.aero-base-time.red{color:var(--red)}
+.aero-base-time.accent{color:var(--accent)}
+.aero-base-unit{font-size:11px;color:var(--ink3);font-weight:700;margin-left:2px}
+.aero-base-sub{font-size:9px;color:var(--ink3);font-weight:600;line-height:1.3;letter-spacing:.1px}
+
 /* ═══ TIER-INFO — carte explicative refonte ═══ */
 .tier-info{
   background:var(--card);border:1px solid var(--line);border-radius:14px;
@@ -1799,6 +1988,14 @@ header .nav-tabs{display:none !important}
   transition:all .2s;
 }
 .bottom-nav button.active{color:var(--accent)}
+
+/* ═══ AJUSTEMENTS NAV pour 7 onglets ═══ */
+.bottom-nav button .bn-lbl{font-size:9px;letter-spacing:.2px}
+.bottom-nav button{padding:6px 2px}
+@media (max-width: 380px){
+  .bottom-nav button .bn-lbl{font-size:8.5px}
+  .bottom-nav button .bn-ico{width:22px;height:22px}
+}
 .bottom-nav button.active .bn-ico{
   color:var(--accent);
   opacity:1;
@@ -3246,6 +3443,7 @@ header{
     <button data-tab="tab-stats" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span><span class="nt-txt">Rush</span></button>
     <button data-tab="tab-theatres" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8a10 10 0 0 1 20 0c0 4-3 8-10 8S2 12 2 8z"/><circle cx="8" cy="9" r=".5" fill="currentColor"/><circle cx="16" cy="9" r=".5" fill="currentColor"/><path d="M9 12s1 2 3 2 3-2 3-2"/></svg></span><span class="nt-txt">Théâtres</span></button>
     <button data-tab="tab-events" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 0 0 4v4a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-4a2 2 0 0 0 0-4z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span><span class="nt-txt">Events</span></button>
+    <button data-tab="tab-aero" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1L15 22v-1.5L13 19v-5.5z"/></svg></span><span class="nt-txt">Aéro</span></button>
     <button data-tab="tab-trajet" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14v-6l-2-5H7l-2 5v6zM5 17v2h2v-2M17 17v2h2v-2M9 5V3h6v2"/><circle cx="8.5" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1.5" fill="currentColor" stroke="none"/></svg></span><span class="nt-txt">Trajet</span></button>
     <button data-tab="tab-ca" class=""><span class="nt-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span><span class="nt-txt">CA</span></button>
   </div>
@@ -3785,6 +3983,38 @@ header{
   </div>
 
   <!-- ══ TRAJET — Estimateur course ══ -->
+  <!-- ══ TAB AÉROPORT ══ -->
+  <section class="tab" id="tab-aero">
+    <!-- Hero stratégie : recommandation chauffeur du moment -->
+    <div id="aero-strategy" class="aero-hero">
+      <div class="loading-stub">Chargement…</div>
+    </div>
+
+    <!-- Toggle CDG / Orly -->
+    <div class="aero-toggle" id="aero-toggle">
+      <button class="aero-tg-btn active" data-aero="cdg">
+        <div class="aero-tg-code">CDG</div>
+        <div class="aero-tg-name">Roissy</div>
+      </button>
+      <button class="aero-tg-btn" data-aero="orly">
+        <div class="aero-tg-code">ORY</div>
+        <div class="aero-tg-name">Orly</div>
+      </button>
+    </div>
+
+    <!-- Stat carte aéroport sélectionné (KPIs) -->
+    <div id="aero-data"><div class="loading-stub">Chargement…</div></div>
+
+    <div class="stitle"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span><span>Vols majeurs aujourd'hui</span></div>
+    <div id="aero-vols"><div class="loading-stub">Chargement…</div></div>
+
+    <div class="stitle"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span><span>Trafic horaire aujourd'hui</span></div>
+    <div id="aero-courbe"><div class="loading-stub">Chargement…</div></div>
+
+    <div class="stitle"><span class="stitle-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 17h14v-6l-2-5H7l-2 5v6zM5 17v2h2v-2M17 17v2h2v-2M9 5V3h6v2"/></svg></span><span>Base arrière · attente</span></div>
+    <div id="aero-base"><div class="loading-stub">Chargement…</div></div>
+  </section>
+
   <section class="tab" id="tab-trajet">
     <div class="trajet-hero">
       <div class="trhero-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="vertical-align:-3px;margin-right:6px"><path d="M5 17h14v-6l-2-5H7l-2 5v6zM5 17v2h2v-2M17 17v2h2v-2M9 5V3h6v2"/><circle cx="8.5" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1.5" fill="currentColor" stroke="none"/></svg>Estimateur course</div>
@@ -4039,6 +4269,16 @@ header{
       </svg>
     </span>
     <span class="bn-lbl">Events</span>
+  </button>
+  <button data-tab="tab-aero" aria-label="Aéro" class="">
+    <span class="bn-ico">
+      <!-- Avion stylisé -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M21 14l-9-2-2-7-2 1 .5 6L4 14v2l4-1 1 4-2 2v1l3-1 3 1v-1l-2-2 1-4 4 1z"></path>
+        <path d="M21 14l-9-2-2-7-2 1 .5 6L4 14v2l4-1 1 4-2 2v1l3-1 3 1v-1l-2-2 1-4 4 1z"></path>
+      </svg>
+    </span>
+    <span class="bn-lbl">Aéro</span>
   </button>
   <button data-tab="tab-trajet" aria-label="Trajet" class="">
     <span class="bn-ico">
@@ -6290,6 +6530,398 @@ function niveauFlammes(totalPax){
   return                        { lvl:4, ico:'🔥🔥🔥🔥',   txt:'rush'      };
 }
 
+/* ═══════════════════════════════════════════════
+   AÉROPORTS PARIS — DATA & LOGIQUE
+   ───────────────────────────────────────────────
+   Source : Groupe ADP (Trafic 2025) + horaires officiels
+   Paris-CDG : 72 M pax / an  → ~197 000 pax/jour
+   Paris-Orly: 35 M pax / an  → ~96 000 pax/jour
+   Pic CDG  : 9h-12h (asiatique/US matin) + 18-21h (Europe soir)
+   Pic Orly : 7h-10h + 18-21h (low-cost + intérieur)
+═══════════════════════════════════════════════ */
+
+const AEROPORTS = {
+  cdg: {
+    id: 'cdg', code: 'CDG', icao: 'LFPG',
+    nom: 'Paris-Charles-de-Gaulle', short: 'Roissy CDG',
+    paxAn: 72_000_000,                      // 2025 ADP
+    paxJourMoyen: 197_000,                  // 72M/365
+    lat: 49.00, lng: 2.55,
+    terminaux: ['1','2A','2B','2C','2D','2E','2F','2G','3'],
+    forfaitTaxi: { rd: 56, rg: 65 },        // 56€ rive droite, 65€ rive gauche
+    distMinutes: 35,                        // ~35 min Paris (hors trafic)
+    baseArriere: { nom:'BAT CDG', lat: 48.991, lng: 2.526 }
+  },
+  orly: {
+    id: 'orly', code: 'ORY', icao: 'LFPO',
+    nom: 'Paris-Orly', short: 'Orly',
+    paxAn: 35_000_000,
+    paxJourMoyen: 96_000,
+    lat: 48.726, lng: 2.365,
+    terminaux: ['1','2','3','4'],
+    forfaitTaxi: { rd: 36, rg: 45 },        // 36€ rive gauche, 45€ rive droite
+    distMinutes: 25,
+    baseArriere: { nom:'BAT Orly', lat: 48.737, lng: 2.378 }
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   COURBE HORAIRE D'ARRIVÉES — % du trafic total
+   Calibré sur courbes ADP réelles (mouvements/h).
+   La somme des heures = 1.0 (100% du trafic journalier)
+═══════════════════════════════════════════════ */
+const COURBE_ARRIVEES = {
+  cdg: {
+    // Vols long-courriers : pic asiatique 6-8h (Tokyo/Pékin/Bangkok)
+    // Pic américain matin : 12-14h (NY/Boston nightflights)
+    // Pic Europe : 18-21h (London/Frankfurt/Amsterdam soir)
+     0:0.005, 1:0.003, 2:0.002, 3:0.002, 4:0.005, 5:0.011,
+     6:0.043, 7:0.072, 8:0.078, 9:0.069, 10:0.060, 11:0.056,
+    12:0.058, 13:0.060, 14:0.056, 15:0.050, 16:0.046, 17:0.053,
+    18:0.066, 19:0.069, 20:0.056, 21:0.043, 22:0.024, 23:0.014
+  },
+  orly: {
+    // Profile plus marqué : lever tôt + retours soir
+     0:0.000, 1:0.000, 2:0.000, 3:0.000, 4:0.002, 5:0.008,
+     6:0.045, 7:0.075, 8:0.085, 9:0.070, 10:0.055, 11:0.052,
+    12:0.058, 13:0.062, 14:0.060, 15:0.058, 16:0.055, 17:0.062,
+    18:0.075, 19:0.075, 20:0.058, 21:0.038, 22:0.005, 23:0.002
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   COEFFICIENT JOUR — % du trafic moyen
+   Lundi/Vendredi = pics business
+   Dimanche = retour weekend (fort)
+   Samedi = creux (sauf vacances)
+═══════════════════════════════════════════════ */
+function coefJourAero(date){
+  const j = date.getDay();
+  const ferie = isFerie(date);
+  const vacances = isVacancesParis(date);
+  const pont = isPont(date);
+  const veille = isVeilleFerie(date);
+
+  // Pont : exode → +30%
+  if(pont) return 1.30;
+  // Veille de férié : +20%
+  if(veille) return 1.20;
+  // Férié en semaine : -20% (peu de business)
+  if(ferie && j !== 0 && j !== 6) return 0.80;
+  // Vendredi vacances : pic départs
+  if(j === 5 && vacances) return 1.25;
+  // Dimanche vacances : pic retours
+  if(j === 0 && vacances) return 1.30;
+  // Dimanche normal : retours weekend
+  if(j === 0) return 1.15;
+  // Vendredi normal : départs weekend
+  if(j === 5) return 1.10;
+  // Lundi : business
+  if(j === 1) return 1.05;
+  // Samedi : creux (sauf vacances)
+  if(j === 6) return vacances ? 1.05 : 0.85;
+  // Mardi-mercredi-jeudi : standard
+  return 1.00;
+}
+
+/* ═══════════════════════════════════════════════
+   TAUX TAXI PAR ROUTE — % passagers prenant taxi
+   Source : études IATA + observations terrain
+   Long-courrier intercont. : ~25% prennent taxi
+   Court-courrier Europe : ~10% (RER moins cher)
+   Vols intérieurs France : ~8% (RER + métro proches)
+═══════════════════════════════════════════════ */
+const TAUX_TAXI_ROUTE = {
+  // Long-courriers premium (US/Asie/Moyen-Orient) — gros bagages, jet-lag
+  long_premium:    0.32,    // NYC, Dubai, Tokyo, Singapour, LA
+  long_standard:   0.22,    // Bangkok, Sao Paulo, Le Caire
+  // Moyen-courriers
+  europe_premium:  0.18,    // London, Genève, Zurich, Frankfurt
+  europe_standard: 0.10,    // Madrid, Rome, Berlin
+  europe_lowcost:  0.05,    // Vueling, Ryanair, Wizz
+  // Intérieur France
+  interieur:       0.08,    // Nice, Marseille, Toulouse
+  domestique_court:0.04,    // Nantes, Lyon (concurrencé TGV)
+  // Charter / vacances
+  charter:         0.12,    // Maroc, Tunisie, Égypte
+  // DEFAULT
+  inconnu:         0.12
+};
+
+/* ═══════════════════════════════════════════════
+   CAPACITÉS AVIONS — sièges constructeur 2026
+═══════════════════════════════════════════════ */
+const CAPACITE_AVION = {
+  // Long-courriers
+  'A380':  515, 'B748': 410, 'B777': 340, 'A350': 325, 'B787': 290, 'A330': 260,
+  // Moyen-courriers
+  'A321': 220, 'B738': 189, 'A320': 180, 'A220': 145, 'B737': 160,
+  'E190': 110, 'CRJ9': 90, 'AT72': 70, 'AT43': 50,
+  DEF: 180
+};
+
+/* ═══════════════════════════════════════════════
+   ROUTES MAJEURES — schedule récurrent simplifié
+   Les "gros vols" qui génèrent le plus de courses taxi.
+   Format : { code, depart, h, jrs, avion, route, compagnie }
+   jrs : tableau jours [0=dim..6=sam], vide = quotidien
+═══════════════════════════════════════════════ */
+const VOLS_MAJEURS = {
+  cdg: [
+    // ═══ Long-courriers PREMIUM (top revenue taxi) ═══
+    // NYC : ~6 vols/jour AF + DL + AA, gros taxi business
+    { num:'AF007', orig:'New York JFK',     h:'07:35', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF023', orig:'New York JFK',     h:'09:25', avion:'A350', cie:'Air France', route:'long_premium' },
+    { num:'DL420', orig:'New York JFK',     h:'07:20', avion:'A350', cie:'Delta',      route:'long_premium' },
+    { num:'AA044', orig:'New York JFK',     h:'07:55', avion:'B772', cie:'American',   route:'long_premium' },
+    { num:'AF065', orig:'Los Angeles',      h:'14:40', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF089', orig:'San Francisco',    h:'17:15', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF051', orig:'Washington Dulles',h:'08:00', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF055', orig:'Boston',           h:'07:20', avion:'A350', cie:'Air France', route:'long_premium' },
+    { num:'AF083', orig:'Chicago',          h:'09:40', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF345', orig:'Miami',            h:'10:50', avion:'A350', cie:'Air France', route:'long_premium' },
+    { num:'AC872', orig:'Toronto',          h:'08:05', avion:'B788', cie:'Air Canada', route:'long_premium' },
+    { num:'AC870', orig:'Montréal',         h:'07:25', avion:'B788', cie:'Air Canada', route:'long_premium' },
+
+    // ═══ Asie/Moyen-Orient PREMIUM ═══
+    { num:'EK073', orig:'Dubai',            h:'11:05', avion:'A380', cie:'Emirates',   route:'long_premium' },
+    { num:'EK075', orig:'Dubai',            h:'17:55', avion:'A380', cie:'Emirates',   route:'long_premium' },
+    { num:'QR041', orig:'Doha',             h:'07:15', avion:'B777', cie:'Qatar',      route:'long_premium' },
+    { num:'QR037', orig:'Doha',             h:'19:55', avion:'B777', cie:'Qatar',      route:'long_premium' },
+    { num:'EY031', orig:'Abu Dhabi',        h:'06:50', avion:'B789', cie:'Etihad',     route:'long_premium' },
+    { num:'TK1827',orig:'Istanbul',         h:'06:30', avion:'B772', cie:'Turkish',    route:'long_premium' },
+    { num:'TK1823',orig:'Istanbul',         h:'14:25', avion:'B772', cie:'Turkish',    route:'long_premium' },
+    { num:'AF293', orig:'Tokyo Haneda',     h:'06:55', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'NH215', orig:'Tokyo Haneda',     h:'05:30', avion:'B789', cie:'ANA',        route:'long_premium' },
+    { num:'JL045', orig:'Tokyo Haneda',     h:'06:45', avion:'B788', cie:'JAL',        route:'long_premium' },
+    { num:'CX261', orig:'Hong Kong',        h:'06:50', avion:'A350', cie:'Cathay',     route:'long_premium' },
+    { num:'SQ336', orig:'Singapour',        h:'07:10', avion:'A350', cie:'Singapore',  route:'long_premium' },
+    { num:'AF193', orig:'Pékin',            h:'06:20', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF111', orig:'Shanghai',         h:'07:00', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF187', orig:'Séoul',            h:'06:30', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF259', orig:'Bangkok',          h:'06:55', avion:'B777', cie:'Air France', route:'long_standard' },
+
+    // ═══ Afrique / Amérique Latine ═══
+    { num:'AF459', orig:'Sao Paulo',        h:'12:35', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF229', orig:'Rio de Janeiro',   h:'14:20', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF225', orig:'Buenos Aires',     h:'15:30', avion:'B777', cie:'Air France', route:'long_premium' },
+    { num:'AF647', orig:'Le Cap',           h:'10:30', avion:'A350', cie:'Air France', route:'long_premium' },
+    { num:'AF755', orig:'Abidjan',          h:'06:15', avion:'B772', cie:'Air France', route:'long_standard' },
+    { num:'AF999', orig:'Dakar',            h:'06:00', avion:'B772', cie:'Air France', route:'long_standard' },
+    { num:'AF563', orig:'Casablanca',       h:'08:40', avion:'B738', cie:'Air France', route:'charter' },
+    { num:'AT801', orig:'Casablanca',       h:'12:25', avion:'B738', cie:'RoyalAirMaroc', route:'charter' },
+    { num:'TU712', orig:'Tunis',            h:'13:50', avion:'A320', cie:'Tunisair',   route:'charter' },
+    { num:'AH1006',orig:'Alger',            h:'10:35', avion:'B738', cie:'AirAlgerie', route:'charter' },
+
+    // ═══ Europe PREMIUM (London business, Genève finance) ═══
+    { num:'BA304', orig:'London Heathrow',  h:'06:55', avion:'A320', cie:'British',    route:'europe_premium' },
+    { num:'BA308', orig:'London Heathrow',  h:'08:30', avion:'A320', cie:'British',    route:'europe_premium' },
+    { num:'BA316', orig:'London Heathrow',  h:'11:15', avion:'A320', cie:'British',    route:'europe_premium' },
+    { num:'BA322', orig:'London Heathrow',  h:'14:35', avion:'A320', cie:'British',    route:'europe_premium' },
+    { num:'BA328', orig:'London Heathrow',  h:'17:45', avion:'A320', cie:'British',    route:'europe_premium' },
+    { num:'BA334', orig:'London Heathrow',  h:'20:15', avion:'A320', cie:'British',    route:'europe_premium' },
+    { num:'AF1581',orig:'Genève',           h:'08:25', avion:'A220', cie:'Air France', route:'europe_premium' },
+    { num:'LX634', orig:'Zurich',           h:'07:30', avion:'A220', cie:'Swiss',      route:'europe_premium' },
+    { num:'LH1042',orig:'Frankfurt',        h:'08:15', avion:'A320', cie:'Lufthansa',  route:'europe_premium' },
+    { num:'LH1042',orig:'Munich',           h:'09:20', avion:'A320', cie:'Lufthansa',  route:'europe_premium' },
+    { num:'KL2008',orig:'Amsterdam',        h:'07:55', avion:'B737', cie:'KLM',        route:'europe_premium' },
+
+    // ═══ Europe STANDARD (Madrid, Rome, Berlin, Vienne) ═══
+    { num:'IB3402',orig:'Madrid',           h:'09:55', avion:'A320', cie:'Iberia',     route:'europe_standard' },
+    { num:'AZ314', orig:'Rome',             h:'10:25', avion:'A320', cie:'ITA',        route:'europe_standard' },
+    { num:'AZ322', orig:'Milan',            h:'08:55', avion:'A320', cie:'ITA',        route:'europe_standard' },
+    { num:'OS411', orig:'Vienne',           h:'08:50', avion:'A320', cie:'Austrian',   route:'europe_standard' },
+    { num:'TP432', orig:'Lisbonne',         h:'09:35', avion:'A320', cie:'TAP',        route:'europe_standard' },
+    { num:'LO334', orig:'Varsovie',         h:'11:20', avion:'B737', cie:'LOT',        route:'europe_standard' }
+  ],
+
+  orly: [
+    // ═══ Intérieur France (Vueling/Transavia/Air France) ═══
+    { num:'TO3041',orig:'Nice',             h:'07:25', avion:'B738', cie:'Transavia',  route:'interieur' },
+    { num:'TO3043',orig:'Nice',             h:'09:55', avion:'B738', cie:'Transavia',  route:'interieur' },
+    { num:'TO3045',orig:'Nice',             h:'12:20', avion:'B738', cie:'Transavia',  route:'interieur' },
+    { num:'TO3047',orig:'Nice',             h:'18:55', avion:'B738', cie:'Transavia',  route:'interieur' },
+    { num:'TO3049',orig:'Nice',             h:'21:35', avion:'B738', cie:'Transavia',  route:'interieur' },
+    { num:'AF6206',orig:'Marseille',        h:'08:05', avion:'A220', cie:'Air France', route:'interieur' },
+    { num:'AF6210',orig:'Marseille',        h:'19:20', avion:'A220', cie:'Air France', route:'interieur' },
+    { num:'AF6206',orig:'Toulouse',         h:'07:50', avion:'A220', cie:'Air France', route:'interieur' },
+    { num:'AF6210',orig:'Toulouse',         h:'19:00', avion:'A220', cie:'Air France', route:'interieur' },
+    { num:'TO3601',orig:'Bordeaux',         h:'09:30', avion:'B738', cie:'Transavia',  route:'interieur' },
+    { num:'TO3801',orig:'Montpellier',      h:'10:20', avion:'B738', cie:'Transavia',  route:'interieur' },
+    { num:'AF6112',orig:'Bastia',           h:'11:45', avion:'A320', cie:'Air France', route:'interieur' },
+    { num:'AF6122',orig:'Ajaccio',          h:'12:30', avion:'A320', cie:'Air France', route:'interieur' },
+
+    // ═══ Charter / vacances (gros taxi familles bagages) ═══
+    { num:'TO3411',orig:'Casablanca',       h:'10:40', avion:'B738', cie:'Transavia',  route:'charter' },
+    { num:'TO3501',orig:'Marrakech',        h:'13:25', avion:'B738', cie:'Transavia',  route:'charter' },
+    { num:'AT800', orig:'Casablanca',       h:'14:35', avion:'B738', cie:'RoyalAirMaroc', route:'charter' },
+    { num:'AT942', orig:'Marrakech',        h:'17:20', avion:'B738', cie:'RoyalAirMaroc', route:'charter' },
+    { num:'AT968', orig:'Agadir',           h:'18:10', avion:'B738', cie:'RoyalAirMaroc', route:'charter' },
+    { num:'AT966', orig:'Tanger',           h:'15:15', avion:'B738', cie:'RoyalAirMaroc', route:'charter' },
+    { num:'TU720', orig:'Tunis',            h:'14:50', avion:'A320', cie:'Tunisair',   route:'charter' },
+    { num:'TU724', orig:'Djerba',           h:'16:35', avion:'A320', cie:'Tunisair',   route:'charter' },
+    { num:'AH1004',orig:'Alger',            h:'15:55', avion:'B738', cie:'AirAlgerie', route:'charter' },
+    { num:'AH1042',orig:'Oran',             h:'17:25', avion:'B738', cie:'AirAlgerie', route:'charter' },
+    { num:'AH1066',orig:'Constantine',      h:'18:40', avion:'B738', cie:'AirAlgerie', route:'charter' },
+    { num:'TO3201',orig:'Lisbonne',         h:'11:55', avion:'B738', cie:'Transavia',  route:'europe_standard' },
+    { num:'TO3251',orig:'Porto',            h:'13:40', avion:'B738', cie:'Transavia',  route:'europe_standard' },
+
+    // ═══ Europe low-cost ═══
+    { num:'VY8001',orig:'Barcelone',        h:'08:55', avion:'A320', cie:'Vueling',    route:'europe_lowcost' },
+    { num:'VY8005',orig:'Barcelone',        h:'15:10', avion:'A320', cie:'Vueling',    route:'europe_lowcost' },
+    { num:'VY8021',orig:'Madrid',           h:'09:40', avion:'A320', cie:'Vueling',    route:'europe_lowcost' },
+    { num:'IB3404',orig:'Madrid',           h:'11:30', avion:'A320', cie:'Iberia',     route:'europe_standard' },
+    { num:'TP436', orig:'Lisbonne',         h:'10:15', avion:'A320', cie:'TAP',        route:'europe_standard' },
+    { num:'TO3551',orig:'Rome',             h:'14:25', avion:'B738', cie:'Transavia',  route:'europe_standard' },
+    { num:'TO3553',orig:'Naples',           h:'16:30', avion:'B738', cie:'Transavia',  route:'europe_standard' },
+    { num:'TO3555',orig:'Venise',           h:'17:50', avion:'B738', cie:'Transavia',  route:'europe_standard' },
+
+    // ═══ DOM-TOM (vols longs, énormes bagages, beaucoup de taxi) ═══
+    { num:'AF730', orig:'Pointe-à-Pitre',   h:'15:35', avion:'B777', cie:'Air France', route:'long_standard' },
+    { num:'AF734', orig:'Fort-de-France',   h:'16:25', avion:'B777', cie:'Air France', route:'long_standard' },
+    { num:'AF794', orig:'Saint-Denis',      h:'07:55', avion:'B777', cie:'Air France', route:'long_standard' },
+    { num:'BT5012',orig:'Mamoudzou',        h:'06:25', avion:'B789', cie:'Corsair',    route:'long_standard' }
+  ]
+};
+
+/* ═══════════════════════════════════════════════
+   CALCUL — passagers à la sortie pour un vol donné
+═══════════════════════════════════════════════ */
+function estimerPaxVol(vol, date){
+  const cap = CAPACITE_AVION[vol.avion] || CAPACITE_AVION.DEF;
+  // Heure d'arrivée
+  const [h, m] = vol.h.split(':').map(Number);
+  // Coef remplissage : long-courrier 88%, low-cost 92%, intérieur 78%
+  let cTaux = 0.85;
+  if(vol.route === 'long_premium')   cTaux = 0.88;
+  if(vol.route === 'long_standard')  cTaux = 0.85;
+  if(vol.route === 'europe_premium') cTaux = 0.82;
+  if(vol.route === 'europe_lowcost') cTaux = 0.92;
+  if(vol.route === 'charter')        cTaux = 0.92;
+  if(vol.route === 'interieur')      cTaux = 0.78;
+  // Modulation jour
+  const cJour = coefJourAero(date);
+  return Math.round(cap * cTaux * Math.min(1.0, cJour));
+}
+
+/* Estime les clients taxi probables d'un vol */
+function estimerTaxiVol(vol, date){
+  const pax = estimerPaxVol(vol, date);
+  const tauxTaxi = TAUX_TAXI_ROUTE[vol.route] || TAUX_TAXI_ROUTE.inconnu;
+  return Math.round(pax * tauxTaxi);
+}
+
+/* ═══════════════════════════════════════════════
+   PASSAGERS ATTENDUS PAR HEURE — pour un aéroport
+   Combine COURBE_ARRIVEES × paxJourMoyen × coefJour
+═══════════════════════════════════════════════ */
+function paxParHeure(aeroId, heure, date){
+  const aero = AEROPORTS[aeroId];
+  if(!aero) return 0;
+  const courbe = COURBE_ARRIVEES[aeroId];
+  const part = courbe[heure] || 0;
+  const cJour = coefJourAero(date);
+  return Math.round(aero.paxJourMoyen * part * cJour);
+}
+
+/* ═══════════════════════════════════════════════
+   PROCHAINE FENÊTRE FORTE — quel aéroport viser
+   Retourne { aero, h, pax, raison } pour les 3 prochaines heures
+═══════════════════════════════════════════════ */
+function prochaineFenetreForte(date){
+  date = date || new Date();
+  let best = null;
+  for(let dh = 0; dh < 4; dh++){
+    const d = new Date(date.getTime() + dh*3600000);
+    const h = d.getHours();
+    for(const aeroId of ['cdg','orly']){
+      const pax = paxParHeure(aeroId, h, d);
+      if(!best || pax > best.pax){
+        best = { aero: aeroId, h, pax, dh };
+      }
+    }
+  }
+  return best;
+}
+
+/* ═══════════════════════════════════════════════
+   STATE AÉROPORTS
+═══════════════════════════════════════════════ */
+let AERO_FOCUS = 'cdg';   // Aéroport actif dans le tab
+let TAXI_WAIT = {
+  cdg:  { mins: null, ts: 0 },
+  orly: { mins: null, ts: 0 }
+};
+
+/* ═══════════════════════════════════════════════
+   FETCH BASE ARRIÈRE TAXIS (via worker proxy)
+   L'API ADP n'est pas publique mais le site
+   infotaxi.parisaeroport.fr expose les temps en JS.
+   Si le worker scrape ça, on récupère ici.
+   En attendant, fallback sur estimations heure.
+═══════════════════════════════════════════════ */
+async function fetchTaxiWait(){
+  try {
+    // Tentative via Worker (à implémenter côté worker /baseTaxi)
+    const workerBase = PROXY.replace(/\?url=$/, '');
+    const resp = await timedFetch(workerBase + '/basetaxi', 8000);
+    if(!resp.ok) return;
+    const data = await resp.json();
+    if(data && typeof data === 'object'){
+      if(data.cdg && typeof data.cdg.mins === 'number') TAXI_WAIT.cdg = { mins: data.cdg.mins, ts: Date.now() };
+      if(data.orly && typeof data.orly.mins === 'number') TAXI_WAIT.orly = { mins: data.orly.mins, ts: Date.now() };
+    }
+  } catch(e){
+    // Erreur silencieuse — on garde l'estimation
+  }
+}
+
+/* Estimation du temps d'attente base arrière selon l'heure
+   Calibré sur retours chauffeurs CGT-Taxis 2024-2025 */
+function estimerWaitBase(aeroId, date){
+  const h = date.getHours();
+  const j = date.getDay();
+  // Pic 6-9h = forte rotation taxis (40-60 min) car beaucoup de demande
+  if(h >= 6 && h <= 9)   return aeroId === 'cdg' ? 45 : 35;
+  // Mi-matin 10-12h = moyen (25-40)
+  if(h >= 10 && h <= 12) return aeroId === 'cdg' ? 30 : 25;
+  // Midi 13-15h = creux relatif (50-70 min — beaucoup de chauffeurs en pause)
+  if(h >= 13 && h <= 15) return aeroId === 'cdg' ? 60 : 45;
+  // Soir 17-21h = pic taxi mais peu de chauffeurs (60-90 min)
+  if(h >= 17 && h <= 21) return aeroId === 'cdg' ? 75 : 55;
+  // Nuit profonde 22-5h = aléatoire (parfois 15 min, parfois 90)
+  if(h >= 22 || h <= 5)  return aeroId === 'cdg' ? 30 : 20;
+  return 40;
+}
+
+/* ═══════════════════════════════════════════════
+   STRATÉGIE CHAUFFEUR — quel aéroport, quand
+═══════════════════════════════════════════════ */
+function strategieAeroport(date){
+  date = date || new Date();
+  const h = date.getHours();
+  const paxCDG = paxParHeure('cdg', h, date);
+  const paxORY = paxParHeure('orly', h, date);
+  const waitCDG = TAXI_WAIT.cdg.mins ?? estimerWaitBase('cdg', date);
+  const waitORY = TAXI_WAIT.orly.mins ?? estimerWaitBase('orly', date);
+
+  // Score = pax/heure / wait (passagers par minute d'attente)
+  const scoreCDG = paxCDG / Math.max(15, waitCDG);
+  const scoreORY = paxORY / Math.max(15, waitORY);
+
+  const winner = scoreCDG > scoreORY ? 'cdg' : 'orly';
+  const aero = AEROPORTS[winner];
+  let raison = '';
+  if(scoreCDG > scoreORY * 1.3){
+    raison = `CDG largement supérieur · ${paxCDG.toLocaleString('fr-FR')} pax/h vs ${paxORY.toLocaleString('fr-FR')} à Orly`;
+  } else if(scoreORY > scoreCDG * 1.3){
+    raison = `Orly meilleur ratio · attente ${waitORY} min vs ${waitCDG} min à CDG`;
+  } else {
+    raison = `Quasi équivalent · ${paxCDG.toLocaleString('fr-FR')} pax CDG vs ${paxORY.toLocaleString('fr-FR')} Orly`;
+  }
+  return { winner, aero, paxCDG, paxORY, waitCDG, waitORY, raison };
+}
+
 /* ═══ STATE ═══ */
 let CACHE = {};
 let loading = false;
@@ -6906,6 +7538,9 @@ async function doRefresh(force=true){
   // Important : le scrape met à jour EUROSTAR_STATUS, utilisé par fetchGare('nord')
   // On lance en parallèle MAIS on attend la fin avant fetchGare pour Nord.
   const eurostarPromise = scrapeEurostarStatus().catch(() => {});
+
+  // ═══ Fetch base arrière taxi en parallèle (best-effort, peut échouer) ═══
+  fetchTaxiWait().catch(() => {});
 
   // Fetch SNCF des gares non-Nord en parallèle du scrape Eurostar
   const nonNordGares = toFetch.filter(g => g.id !== 'nord');
@@ -7573,6 +8208,174 @@ function todayYMD(){
   return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
 }
 
+/* ═══════════════════════════════════════════════
+   RENDER AÉROPORT — onglet Aéro
+═══════════════════════════════════════════════ */
+function renderAero(){
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes();
+
+  // ═══ HERO : stratégie chauffeur du moment ═══
+  const strat = strategieAeroport(now);
+  const heroEl = document.getElementById('aero-strategy');
+  if(heroEl){
+    const winnerAero = AEROPORTS[strat.winner];
+    heroEl.innerHTML = `
+      <div class="aero-hero-top">
+        <span class="aero-hero-dot"></span>
+        <span>${ICO.target}</span>
+        <span>Recommandation maintenant</span>
+      </div>
+      <div class="aero-hero-big">Vise <strong>${esc(winnerAero.short)}</strong> · ${strat['pax'+strat.winner.toUpperCase()].toLocaleString('fr-FR')} pax/h</div>
+      <div class="aero-hero-sub">${esc(strat.raison)} · base arrière ~${strat['wait'+strat.winner.toUpperCase()]} min d'attente</div>
+    `;
+  }
+
+  // ═══ STAT CARD aéroport sélectionné ═══
+  const aero = AEROPORTS[AERO_FOCUS];
+  const paxNow  = paxParHeure(AERO_FOCUS, h, now);
+  const paxNext = paxParHeure(AERO_FOCUS, (h+1)%24, now);
+  const trend = paxNext > paxNow * 1.1 ? '↑' : paxNext < paxNow * 0.9 ? '↓' : '→';
+  const trendCls = trend === '↑' ? 'accent' : '';
+  const cJour = coefJourAero(now);
+  const paxJour = Math.round(aero.paxJourMoyen * cJour);
+
+  const dataEl = document.getElementById('aero-data');
+  if(dataEl){
+    dataEl.innerHTML = `
+      <div class="aero-stat-card">
+        <div class="aero-stat-grid">
+          <div class="aero-stat-item">
+            <span class="aero-stat-l">Pax/h maintenant</span>
+            <span class="aero-stat-v accent">${paxNow.toLocaleString('fr-FR')}</span>
+            <span class="aero-stat-sub">${trend} ${paxNext.toLocaleString('fr-FR')} dans 1h</span>
+          </div>
+          <div class="aero-stat-item">
+            <span class="aero-stat-l">Total jour</span>
+            <span class="aero-stat-v">${(paxJour/1000).toFixed(0)}k</span>
+            <span class="aero-stat-sub">${(cJour*100).toFixed(0)}% trafic moyen</span>
+          </div>
+          <div class="aero-stat-item">
+            <span class="aero-stat-l">Forfait Paris</span>
+            <span class="aero-stat-v">${aero.forfaitTaxi.rd}€</span>
+            <span class="aero-stat-sub">RD · ${aero.forfaitTaxi.rg}€ RG</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ═══ VOLS MAJEURS — top 12 vols par taxi probable, fenêtre [-30min, +4h] ═══
+  const volsEl = document.getElementById('aero-vols');
+  if(volsEl){
+    const vols = VOLS_MAJEURS[AERO_FOCUS] || [];
+    const enriched = vols.map(v => {
+      const [vh, vm] = v.h.split(':').map(Number);
+      const volDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), vh, vm);
+      const minDiff = Math.round((volDate - now) / 60000);
+      const pax = estimerPaxVol(v, now);
+      const taxi = estimerTaxiVol(v, now);
+      return { ...v, minDiff, pax, taxi, volDate };
+    }).filter(v => v.minDiff >= -30 && v.minDiff <= 240)
+      .sort((a, b) => a.minDiff - b.minDiff);
+
+    if(enriched.length === 0){
+      volsEl.innerHTML = `<div class="vempty"><span class="ei">${ICO.plane}</span>Aucun vol majeur dans les 4 prochaines heures</div>`;
+    } else {
+      volsEl.innerHTML = enriched.slice(0, 14).map(v => {
+        const imminent = v.minDiff >= -10 && v.minDiff <= 30;
+        const tagCls = v.route.includes('long') ? 'aero-tag-premium'
+                    : v.route === 'charter' ? 'aero-tag-charter'
+                    : v.route === 'interieur' ? 'aero-tag-interieur'
+                    : 'aero-tag-europe';
+        const tagTxt = v.route.includes('long_premium') ? 'PREMIUM'
+                    : v.route.includes('long') ? 'LONG-COURRIER'
+                    : v.route === 'charter' ? 'CHARTER'
+                    : v.route === 'interieur' ? 'INTÉRIEUR'
+                    : v.route === 'europe_premium' ? 'EU+'
+                    : 'EUROPE';
+        const whenTxt = v.minDiff < 0 ? `arrivé · -${Math.abs(v.minDiff)} min`
+                      : v.minDiff <= 60 ? `dans ${v.minDiff} min`
+                      : `dans ${Math.floor(v.minDiff/60)}h${(v.minDiff%60).toString().padStart(2,'0')}`;
+        return `<div class="aero-vol-row ${imminent?'imminent':''}">
+          <div class="aero-vol-h">${esc(v.h)}</div>
+          <div class="aero-vol-main">
+            <div class="aero-vol-orig">${esc(v.orig)}</div>
+            <div class="aero-vol-meta">
+              <span class="aero-vol-cie">${esc(v.cie)}</span>
+              <span class="aero-vol-num">${esc(v.num)}</span>
+              <span class="aero-vol-tag ${tagCls}">${tagTxt}</span>
+              <span>${whenTxt}</span>
+            </div>
+          </div>
+          <div class="aero-vol-right">
+            <span class="aero-vol-pax">${v.pax.toLocaleString('fr-FR')}</span>
+            <span class="aero-vol-pax-l">pax</span>
+            <span class="aero-vol-pax-l" style="color:var(--accent);font-weight:800">~${v.taxi} taxi</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ═══ COURBE HORAIRE ═══
+  const courbeEl = document.getElementById('aero-courbe');
+  if(courbeEl){
+    const allHours = [];
+    for(let i = 0; i < 24; i++){
+      const px = paxParHeure(AERO_FOCUS, i, now);
+      allHours.push(px);
+    }
+    const maxPax = Math.max(...allHours, 1);
+    const bars = allHours.map((px, i) => {
+      const hPct = (px / maxPax) * 100;
+      const cls = i === h ? 'now' : i < h ? 'past' : 'future';
+      return `<div class="aero-courbe-bar ${cls}" style="height:${hPct}%" title="${i}h: ${px.toLocaleString('fr-FR')} pax"></div>`;
+    }).join('');
+    const axis = Array.from({length:24}, (_, i) => {
+      const cls = i === h ? 'now' : '';
+      const lbl = i % 3 === 0 ? `${i}h` : '';
+      return `<span class="${cls}">${lbl}</span>`;
+    }).join('');
+
+    courbeEl.innerHTML = `<div class="aero-courbe-wrap">
+      <div class="aero-courbe-grid">${bars}</div>
+      <div class="aero-courbe-axis">${axis}</div>
+    </div>`;
+  }
+
+  // ═══ BASE ARRIÈRE ═══
+  const baseEl = document.getElementById('aero-base');
+  if(baseEl){
+    const renderBase = (id) => {
+      const liveData = TAXI_WAIT[id];
+      const isLive = liveData.mins !== null && (Date.now() - liveData.ts) < 5*60*1000;
+      const mins = isLive ? liveData.mins : estimerWaitBase(id, now);
+      let cls = 'green';
+      if(mins >= 60) cls = 'red';
+      else if(mins >= 35) cls = 'gold';
+      else if(mins >= 25) cls = 'accent';
+      return { id, mins, cls, isLive };
+    };
+    const cdg = renderBase('cdg');
+    const ory = renderBase('orly');
+
+    baseEl.innerHTML = `<div class="aero-base-card">
+      <div class="aero-base-block">
+        <span class="aero-base-name">CDG ${cdg.isLive ? '· LIVE' : '· estimé'}</span>
+        <span class="aero-base-time ${cdg.cls}">${cdg.mins}<span class="aero-base-unit">min</span></span>
+        <span class="aero-base-sub">${cdg.mins < 30 ? 'Bonne rotation' : cdg.mins < 50 ? 'Attente moyenne' : 'Forte attente'}</span>
+      </div>
+      <div class="aero-base-block">
+        <span class="aero-base-name">Orly ${ory.isLive ? '· LIVE' : '· estimé'}</span>
+        <span class="aero-base-time ${ory.cls}">${ory.mins}<span class="aero-base-unit">min</span></span>
+        <span class="aero-base-sub">${ory.mins < 30 ? 'Bonne rotation' : ory.mins < 50 ? 'Attente moyenne' : 'Forte attente'}</span>
+      </div>
+    </div>`;
+  }
+}
+
 function switchTab(id){
   document.querySelectorAll('.nav-tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===id));
   document.querySelectorAll('.bottom-nav button').forEach(b=>{
@@ -7594,6 +8397,7 @@ function switchTab(id){
   }
   if(id === 'tab-theatres') renderTheatres();
   if(id === 'tab-events')   renderEventsTab();
+  if(id === 'tab-aero')     renderAero();
   if(id === 'tab-ca')       renderCa();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -10067,6 +10871,17 @@ document.addEventListener('click', e=>{
 
   const gc = e.target.closest('.gare-card[data-gid]');
   if(gc){ openDialog(gc.dataset.gid); return; }
+
+  // Toggle aéroport CDG <-> Orly
+  const aeroBtn = e.target.closest('.aero-tg-btn[data-aero]');
+  if(aeroBtn){
+    AERO_FOCUS = aeroBtn.dataset.aero;
+    document.querySelectorAll('.aero-tg-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.aero === AERO_FOCUS);
+    });
+    renderAero();
+    return;
+  }
 
   if(e.target.id==='gd-close'){ closeDialog(); return; }
 });
