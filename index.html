@@ -8715,9 +8715,130 @@ const RECURRING_THEATRE = [
   { venue:'salle_gaveau',     days:[2,4,6],     fin:'22:15', titre:'Récital · Salle Gaveau' }
 ];
 
-/* IIFE qui injecte les events récurrents dans EVENTS pour les 35 prochains jours.
-   Dédoublonné par clé (venue|date|fin) pour ne jamais écraser un event statique existant. */
-(function expandRecurringTheatre(){
+/* ═══════════════════════════════════════════════════════════════════════
+   GOOGLE SHEET LIVE — events et theatres_recurrents
+   Permet d'ajouter/corriger des events depuis le téléphone sans redéployer.
+   Sheet : TaxiPulse Events Live (publié en CSV public)
+═══════════════════════════════════════════════════════════════════════ */
+const SHEET_EVENTS_CSV     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlb4vVopavpQHDKFkY4Su4HDtUo70FV7vEr7zllndq6-6duSSjDhkuBt9XP51PA3zn4nS9C8RFR8sb/pub?gid=0&single=true&output=csv';
+const SHEET_RECURRING_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlb4vVopavpQHDKFkY4Su4HDtUo70FV7vEr7zllndq6-6duSSjDhkuBt9XP51PA3zn4nS9C8RFR8sb/pub?gid=1678057243&single=true&output=csv';
+
+// Parser CSV minimaliste mais robuste : gère les guillemets, virgules dans les champs
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i = 0; i < text.length; i++){
+    const c = text[i], next = text[i+1];
+    if(inQuotes){
+      if(c === '"' && next === '"'){ field += '"'; i++; }
+      else if(c === '"'){ inQuotes = false; }
+      else { field += c; }
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field = ''; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row = []; field = ''; }
+      else if(c === '\r'){ /* skip */ }
+      else { field += c; }
+    }
+  }
+  if(field !== '' || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length && r.some(x => x !== ''));
+}
+
+// Convertit les rows CSV en tableau d'objets via les en-têtes
+function csvToObjects(text){
+  const rows = parseCSV(text);
+  if(rows.length < 2) return [];
+  const headers = rows[0].map(h => h.trim().toLowerCase());
+  return rows.slice(1).map(r => {
+    const o = {};
+    headers.forEach((h, i) => { o[h] = (r[i] || '').trim(); });
+    return o;
+  });
+}
+
+// Fetch + parse le Sheet "events" et merge dans EVENTS (sans doublons)
+async function loadSheetEvents(){
+  try {
+    const r = await fetch(SHEET_EVENTS_CSV, { cache: 'no-store' });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    const objs = csvToObjects(text);
+
+    const existing = new Set();
+    EVENTS.forEach(e => existing.add(`${e.venue}|${e.d}|${e.fin}`));
+
+    let added = 0;
+    objs.forEach(o => {
+      // Filtre : seulement les events confirmés
+      if((o.confirme || '').toUpperCase() !== 'OUI') return;
+      if(!o.date || !o.heure_fin || !o.venue || !o.titre) return;
+      // Filtre : la venue doit exister dans VENUES
+      if(!VENUES[o.venue]) {
+        console.warn('[Sheet] venue inconnue, ignorée :', o.venue);
+        return;
+      }
+      const key = `${o.venue}|${o.date}|${o.heure_fin}`;
+      if(existing.has(key)) return; // ne jamais écraser un event hardcodé
+      EVENTS.push({
+        d: o.date,
+        fin: o.heure_fin,
+        venue: o.venue,
+        titre: o.titre,
+        cat: (o.cat || 'concert').toLowerCase(),
+        fromSheet: true
+      });
+      existing.add(key);
+      added++;
+    });
+    console.log(`[Sheet] events chargés : ${added} ajoutés (${objs.length} dans le Sheet)`);
+    return added;
+  } catch(err){
+    console.warn('[Sheet] events fetch failed :', err.message);
+    return 0;
+  }
+}
+
+// Fetch + parse le Sheet "theatres_recurrents" et merge dans RECURRING_THEATRE
+async function loadSheetRecurring(){
+  try {
+    const r = await fetch(SHEET_RECURRING_CSV, { cache: 'no-store' });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    const objs = csvToObjects(text);
+
+    let added = 0, replaced = 0;
+    objs.forEach(o => {
+      if((o.actif || '').toUpperCase() !== 'OUI') return;
+      if(!o.venue || !o.jours || !o.heure_fin || !o.titre) return;
+      if(!VENUES[o.venue]) {
+        console.warn('[Sheet] recurring venue inconnue :', o.venue);
+        return;
+      }
+      const days = o.jours.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n >= 0 && n <= 6);
+      if(!days.length) return;
+
+      // Si la venue existe déjà dans RECURRING_THEATRE, on REMPLACE (le Sheet est la source de vérité)
+      const idx = RECURRING_THEATRE.findIndex(r => r.venue === o.venue);
+      const newRow = { venue: o.venue, days: days, fin: o.heure_fin, titre: o.titre };
+      if(idx >= 0){
+        RECURRING_THEATRE[idx] = newRow;
+        replaced++;
+      } else {
+        RECURRING_THEATRE.push(newRow);
+        added++;
+      }
+    });
+    console.log(`[Sheet] récurrents : ${added} ajoutés, ${replaced} remplacés`);
+    return added + replaced;
+  } catch(err){
+    console.warn('[Sheet] recurring fetch failed :', err.message);
+    return 0;
+  }
+}
+
+// Génère les events récurrents théâtres dans EVENTS sur 35 jours glissants
+function expandRecurringTheatre(){
   const todayD = new Date();
   todayD.setHours(0,0,0,0);
   const existing = new Set();
@@ -8735,7 +8856,34 @@ const RECURRING_THEATRE = [
       existing.add(key);
     });
   }
-})();
+}
+
+// Pipeline complet : Sheet → expand → re-render des onglets concernés si déjà visibles
+async function loadAllSheetData(){
+  await Promise.all([
+    loadSheetEvents(),
+    loadSheetRecurring()
+  ]);
+  expandRecurringTheatre();
+
+  // Re-render si l'onglet est déjà visible
+  try {
+    const thTab = document.getElementById('tab-theatres');
+    const evTab = document.getElementById('tab-events');
+    if(thTab && thTab.classList.contains('active') && typeof renderTheatres === 'function') renderTheatres();
+    if(evTab && evTab.classList.contains('active') && typeof renderEventsTab === 'function') renderEventsTab();
+  } catch(e){ /* ignore */ }
+}
+
+// Première expansion au chargement (avec données hardcodées uniquement, immédiat)
+expandRecurringTheatre();
+
+// Puis fetch le Sheet en arrière-plan dès que possible
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', loadAllSheetData);
+} else {
+  loadAllSheetData();
+}
 
 /* ═══════════════════════════════════════════════
    TIER SYSTEM & BIOS — priorisation chauffeur
