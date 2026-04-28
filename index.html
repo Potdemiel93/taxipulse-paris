@@ -4014,6 +4014,7 @@ header{
       <button class="vchip" data-day="30">Mois</button>
     </div>
     <div id="events-timeline"><div class="loading-stub">Chargement…</div></div>
+    <div id="sheet-sync-indicator" style="text-align:center;font-size:11px;color:#888;padding:14px 8px 4px;letter-spacing:.3px">🔄 Données synchronisées à l'instant</div>
   </section>
 
   <!-- Modal détails (flottant via classList) -->
@@ -8465,8 +8466,14 @@ function switchTab(id){
     renderStats();
     renderEvents();
   }
-  if(id === 'tab-theatres') renderTheatres();
-  if(id === 'tab-events')   renderEventsTab();
+  if(id === 'tab-theatres'){
+    renderTheatres();
+    syncSheetIfStale(30 * 1000); // refresh si > 30s depuis dernière sync
+  }
+  if(id === 'tab-events'){
+    renderEventsTab();
+    syncSheetIfStale(30 * 1000);
+  }
   if(id === 'tab-aero')     renderAero();
   if(id === 'tab-ca')       renderCa();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -8859,20 +8866,64 @@ function expandRecurringTheatre(){
 }
 
 // Pipeline complet : Sheet → expand → re-render des onglets concernés si déjà visibles
-async function loadAllSheetData(){
-  await Promise.all([
-    loadSheetEvents(),
-    loadSheetRecurring()
-  ]);
-  expandRecurringTheatre();
+let LAST_SHEET_SYNC = 0;        // timestamp ms de la dernière sync réussie
+let SHEET_SYNC_IN_FLIGHT = false; // évite les double-fetch concurrents
 
-  // Re-render si l'onglet est déjà visible
+async function loadAllSheetData(){
+  if(SHEET_SYNC_IN_FLIGHT) return; // un fetch est déjà en cours, on attend
+  SHEET_SYNC_IN_FLIGHT = true;
   try {
-    const thTab = document.getElementById('tab-theatres');
-    const evTab = document.getElementById('tab-events');
-    if(thTab && thTab.classList.contains('active') && typeof renderTheatres === 'function') renderTheatres();
-    if(evTab && evTab.classList.contains('active') && typeof renderEventsTab === 'function') renderEventsTab();
-  } catch(e){ /* ignore */ }
+    // Avant re-sync : retirer les events déjà chargés depuis le Sheet précédent
+    // (sinon on accumule les doublons à chaque sync)
+    for(let i = EVENTS.length - 1; i >= 0; i--){
+      if(EVENTS[i].fromSheet || EVENTS[i].recurring) EVENTS.splice(i, 1);
+    }
+
+    await Promise.all([
+      loadSheetEvents(),
+      loadSheetRecurring()
+    ]);
+    expandRecurringTheatre();
+    LAST_SHEET_SYNC = Date.now();
+
+    // Re-render si l'onglet est déjà visible
+    try {
+      const thTab = document.getElementById('tab-theatres');
+      const evTab = document.getElementById('tab-events');
+      if(thTab && thTab.classList.contains('active') && typeof renderTheatres === 'function') renderTheatres();
+      if(evTab && evTab.classList.contains('active') && typeof renderEventsTab === 'function') renderEventsTab();
+    } catch(e){ /* ignore */ }
+
+    updateSyncIndicator();
+  } finally {
+    SHEET_SYNC_IN_FLIGHT = false;
+  }
+}
+
+// Re-sync à la demande, avec throttle : ignore si dernière sync < minAge ms
+async function syncSheetIfStale(minAgeMs){
+  const age = Date.now() - LAST_SHEET_SYNC;
+  if(age < minAgeMs) return;
+  await loadAllSheetData();
+}
+
+// Format "il y a X" pour l'indicateur de fraîcheur
+function syncAgeLabel(){
+  if(!LAST_SHEET_SYNC) return 'jamais';
+  const sec = Math.floor((Date.now() - LAST_SHEET_SYNC) / 1000);
+  if(sec < 5) return "à l'instant";
+  if(sec < 60) return `il y a ${sec}s`;
+  const min = Math.floor(sec / 60);
+  if(min < 60) return `il y a ${min} min`;
+  const h = Math.floor(min / 60);
+  return `il y a ${h}h`;
+}
+
+// Met à jour l'indicateur visuel "synchronisé il y a X" dans l'onglet Events
+function updateSyncIndicator(){
+  const el = document.getElementById('sheet-sync-indicator');
+  if(!el) return;
+  el.textContent = '🔄 Données synchronisées ' + syncAgeLabel();
 }
 
 // Première expansion au chargement (avec données hardcodées uniquement, immédiat)
@@ -8884,6 +8935,12 @@ if(document.readyState === 'loading'){
 } else {
   loadAllSheetData();
 }
+
+// Refresh automatique toutes les 5 minutes en arrière-plan
+setInterval(loadAllSheetData, 5 * 60 * 1000);
+
+// Mise à jour du label "il y a X min" toutes les 30 secondes (sans re-fetch)
+setInterval(updateSyncIndicator, 30 * 1000);
 
 /* ═══════════════════════════════════════════════
    TIER SYSTEM & BIOS — priorisation chauffeur
