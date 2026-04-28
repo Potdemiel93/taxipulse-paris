@@ -1432,6 +1432,67 @@ dialog .sheet{
   font-weight:800;color:var(--accent);margin-bottom:5px}
 .em-tips-body{font-size:12px;color:var(--ink);font-weight:600;line-height:1.5}
 
+/* ═══ CROWDSOURCING EVENT — confirmation fin réelle ═══ */
+.em-crowd-block{
+  margin-top:16px;padding:13px;
+  background:linear-gradient(135deg, rgba(255,77,77,.06) 0%, rgba(255,140,0,.04) 100%);
+  border:1px solid rgba(255,77,77,.18);
+  border-radius:13px;
+}
+.em-crowd-live{
+  display:flex;align-items:center;gap:8px;margin-bottom:8px;
+}
+.em-crowd-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#ff3b30;
+  box-shadow:0 0 8px #ff3b30;
+  animation:emCrowdPulse 1.5s ease-in-out infinite;
+}
+@keyframes emCrowdPulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.4;transform:scale(1.4)}
+}
+.em-crowd-live-lbl{
+  font-size:10px;text-transform:uppercase;letter-spacing:1.2px;
+  font-weight:900;color:#ff3b30;
+}
+.em-crowd-confirmed{
+  font-size:14px;font-weight:800;color:var(--ink);margin-bottom:3px;
+}
+.em-crowd-age{
+  font-size:11px;color:var(--ink-dim);font-weight:600;margin-bottom:10px;
+}
+.em-crowd-est{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:600;color:var(--ink-dim);
+  padding:6px 0 10px;
+}
+.em-crowd-est-ico{font-size:14px}
+.em-crowd-actions{
+  display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;
+}
+.em-crowd-btn{
+  flex:1;min-width:140px;
+  border:none;border-radius:11px;padding:10px 12px;
+  font-family:inherit;font-size:12px;font-weight:800;
+  cursor:pointer;transition:transform .1s, opacity .15s;
+}
+.em-crowd-btn:active{transform:scale(.97)}
+.em-crowd-btn-now{
+  background:linear-gradient(135deg, #ff3b30 0%, #ff6b35 100%);
+  color:#fff;
+  box-shadow:0 3px 12px rgba(255,59,48,.3);
+}
+.em-crowd-btn-eta{
+  background:rgba(255,140,0,.15);
+  color:var(--accent);
+  border:1px solid rgba(255,140,0,.3);
+}
+.em-crowd-hint{
+  margin-top:8px;font-size:10.5px;color:var(--ink-dim);
+  font-style:italic;text-align:center;letter-spacing:.2px;
+}
+
 /* ═══ BOUTON WAZE ═══ */
 .em-waze-btn{
   width:100%;background:linear-gradient(135deg, #33CCFF 0%, #05C7F2 100%);
@@ -8248,7 +8309,51 @@ const EVENTS = [
   { d:'2026-04-25', fin:'22:30', venue:'champs_elysees', titre:'Ballet contemporain',                           cat:'theatre' },
   { d:'2026-05-02', fin:'22:30', venue:'champs_elysees', titre:'Musique de chambre',                            cat:'theatre' },
   { d:'2026-04-23', fin:'22:30', venue:'chatelet',       titre:'Comédie musicale',                              cat:'theatre' },
-  { d:'2026-04-26', fin:'22:30', venue:'chatelet',       titre:'Opéra-comique',                                 cat:'theatre' }
+  { d:'2026-04-26', fin:'22:30', venue:'chatelet',       titre:'Opéra-comique',                                 cat:'theatre' },
+
+  // ═══ ROLAND-GARROS 2026 (du 18 mai au 7 juin) ═══
+  // Source : programme prévisionnel officiel rolandgarros.com (vérifié 28/04/2026)
+  // ⚠️ heures de fin estimées. Sport = imprévisible (3 vs 5 sets, prolongations, pluie).
+  // → Le crowdsourcing chauffeur permet de confirmer la fin réelle (badge LIVE).
+  // Capacités : Chatrier 15 225 places (toit rétractable + éclairage night session),
+  //             Suzanne-Lenglen 9 400 (toit rétractable depuis 2024),
+  //             Simonne-Mathieu ~5 000.
+  { d:'2026-05-18', fin:'19:00', venue:'roland_garros', titre:'Qualifications · jour · tous courts',          cat:'sport' },
+  { d:'2026-05-19', fin:'19:00', venue:'roland_garros', titre:'Qualifications · jour · tous courts',          cat:'sport' },
+  { d:'2026-05-20', fin:'19:00', venue:'roland_garros', titre:'Qualifications · jour · tous courts',          cat:'sport' },
+  { d:'2026-05-21', fin:'19:00', venue:'roland_garros', titre:'Qualifications · jour · tous courts',          cat:'sport' },
+  { d:'2026-05-21', fin:'23:00', venue:'roland_garros', titre:'Soirée Gaël & Friends · Monfils · NIGHT Chatrier 20h15', cat:'sport' },
+  { d:'2026-05-22', fin:'19:00', venue:'roland_garros', titre:'Qualifications · jour · tous courts',          cat:'sport' },
+  { d:'2026-05-23', fin:'19:00', venue:'roland_garros', titre:'Journée Yannick Noah · exhibitions · 15k pax', cat:'sport' },
+  { d:'2026-05-24', fin:'19:00', venue:'roland_garros', titre:'1er tour · jour · Chatrier+Lenglen+Mathieu+annexes',     cat:'sport' },
+  { d:'2026-05-24', fin:'23:30', venue:'roland_garros', titre:'1er tour · NIGHT Chatrier 20h15 (1 match unique)',       cat:'sport' },
+  { d:'2026-05-25', fin:'19:00', venue:'roland_garros', titre:'1er tour · jour · Chatrier+Lenglen+Mathieu+annexes',     cat:'sport' },
+  { d:'2026-05-25', fin:'23:30', venue:'roland_garros', titre:'1er tour · NIGHT Chatrier 20h15 (1 match unique)',       cat:'sport' },
+  { d:'2026-05-26', fin:'19:00', venue:'roland_garros', titre:'1er tour · Hommage Nadal · jour · tous courts',          cat:'sport' },
+  { d:'2026-05-26', fin:'23:30', venue:'roland_garros', titre:'Hommage Nadal · NIGHT Chatrier 20h15',                   cat:'sport' },
+  { d:'2026-05-27', fin:'19:00', venue:'roland_garros', titre:'2e tour · jour · Chatrier+Lenglen+Mathieu+annexes',      cat:'sport' },
+  { d:'2026-05-27', fin:'23:30', venue:'roland_garros', titre:'2e tour · NIGHT Chatrier 20h15 (1 match unique)',        cat:'sport' },
+  { d:'2026-05-28', fin:'19:00', venue:'roland_garros', titre:'2e tour · jour · Chatrier+Lenglen+Mathieu+annexes',      cat:'sport' },
+  { d:'2026-05-28', fin:'23:30', venue:'roland_garros', titre:'2e tour · NIGHT Chatrier 20h15 (1 match unique)',        cat:'sport' },
+  { d:'2026-05-29', fin:'19:00', venue:'roland_garros', titre:'3e tour · jour · Chatrier+Lenglen+Mathieu+annexes',      cat:'sport' },
+  { d:'2026-05-29', fin:'23:30', venue:'roland_garros', titre:'3e tour · NIGHT Chatrier 20h15 (1 match unique)',        cat:'sport' },
+  { d:'2026-05-30', fin:'19:00', venue:'roland_garros', titre:'3e tour · jour · Chatrier+Lenglen+Mathieu+annexes',      cat:'sport' },
+  { d:'2026-05-30', fin:'23:30', venue:'roland_garros', titre:'3e tour · NIGHT Chatrier 20h15 (1 match unique)',        cat:'sport' },
+  { d:'2026-05-31', fin:'19:00', venue:'roland_garros', titre:'8e de finale · jour · Chatrier+Lenglen+Mathieu',         cat:'sport' },
+  { d:'2026-05-31', fin:'23:30', venue:'roland_garros', titre:'8e de finale · NIGHT Chatrier 20h15',                    cat:'sport' },
+  { d:'2026-06-01', fin:'19:00', venue:'roland_garros', titre:'8e de finale · jour · Chatrier+Lenglen+Mathieu',         cat:'sport' },
+  { d:'2026-06-01', fin:'23:30', venue:'roland_garros', titre:'8e de finale · NIGHT Chatrier 20h15',                    cat:'sport' },
+  { d:'2026-06-02', fin:'19:00', venue:'roland_garros', titre:'Quarts de finale · jour · Chatrier+Lenglen+Mathieu',     cat:'sport' },
+  { d:'2026-06-02', fin:'23:30', venue:'roland_garros', titre:'Quarts de finale · NIGHT Chatrier 20h15',                cat:'sport' },
+  { d:'2026-06-03', fin:'19:00', venue:'roland_garros', titre:'Quarts de finale · jour · Chatrier+Lenglen+Mathieu',     cat:'sport' },
+  { d:'2026-06-03', fin:'23:30', venue:'roland_garros', titre:'Quarts de finale · NIGHT Chatrier 20h15',                cat:'sport' },
+  { d:'2026-06-04', fin:'19:00', venue:'roland_garros', titre:'Demi-finales Dames · jour · Chatrier 14h+17h',           cat:'sport' },
+  { d:'2026-06-04', fin:'23:30', venue:'roland_garros', titre:'Demi-finales Dames · NIGHT Chatrier 20h15',              cat:'sport' },
+  { d:'2026-06-05', fin:'19:00', venue:'roland_garros', titre:'Demi-finales Messieurs · jour · Chatrier 14h+17h',       cat:'sport' },
+  { d:'2026-06-06', fin:'14:00', venue:'roland_garros', titre:'Finale Double Dames · Chatrier · 11h',                   cat:'sport' },
+  { d:'2026-06-06', fin:'19:30', venue:'roland_garros', titre:'🏆 FINALE DAMES · Chatrier 15h · 15 225 pax',            cat:'sport' },
+  { d:'2026-06-07', fin:'14:00', venue:'roland_garros', titre:'Trophée des Légendes · 11h · annexes',                   cat:'sport' },
+  { d:'2026-06-07', fin:'20:00', venue:'roland_garros', titre:'🏆 FINALE MESSIEURS · Chatrier 15h · 5 sets possibles', cat:'sport' }
 ];
 
 function todayYMD(){
@@ -9491,6 +9596,202 @@ function openWaze(lat, lng, label){
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   CROWDSOURCING FIN D'EVENT — chauffeurs confirment la fin réelle
+   Sport / concert / salon : durée souvent imprévisible (prolongations,
+   3 vs 5 sets, débordements). Un chauffeur sur place peut taper :
+     • "ça vient de finir maintenant"
+     • "ça finit dans X min" (vu de ses yeux)
+   Les autres chauffeurs voient un badge LIVE confirmé + l'heure réelle.
+═══════════════════════════════════════════════════════════════════════ */
+
+const EVENT_CONFIRM_KEY = 'tp_ev_confirms_v1';
+const CONFIRM_VALIDITY_MIN = 90; // une confirmation est valide 90 min
+
+// Génère un ID unique pour un event (compact, lisible)
+function eventId(ev){
+  return `${ev.venue}|${ev.d}|${ev.fin}`;
+}
+
+// Lit toutes les confirmations stockées localement
+function readEventConfirms(){
+  try {
+    const raw = localStorage.getItem(EVENT_CONFIRM_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch(e){ return {}; }
+}
+
+function writeEventConfirms(obj){
+  try { localStorage.setItem(EVENT_CONFIRM_KEY, JSON.stringify(obj)); }
+  catch(e){ /* quota plein, ignore */ }
+}
+
+// Récupère la confirmation valide pour un event (ou null si périmée/absente)
+function getEventConfirm(ev){
+  const all = readEventConfirms();
+  const id = eventId(ev);
+  const c = all[id];
+  if(!c) return null;
+  const ageMin = (Date.now() - c.ts) / 60000;
+  if(ageMin > CONFIRM_VALIDITY_MIN) return null;
+  return c;
+}
+
+// Stocke une confirmation chauffeur ET l'envoie au worker pour partage
+async function pushEventConfirm(ev, finReelle, status){
+  // status : 'finished' = vient de finir | 'eta' = finira dans X min
+  const all = readEventConfirms();
+  const id = eventId(ev);
+  all[id] = {
+    finReelle: finReelle,    // HH:MM
+    status: status,          // 'finished' | 'eta'
+    ts: Date.now(),
+    fromMe: true
+  };
+  writeEventConfirms(all);
+
+  // Envoie au worker (best-effort, no-op si offline ou worker pas configuré)
+  try {
+    if(typeof PROXY !== 'undefined' && PROXY){
+      const base = PROXY.replace(/\?.*$/, '');
+      await fetch(base + '/event/confirm', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          eventId: id,
+          finReelle: finReelle,
+          status: status,
+          ts: Date.now()
+        })
+      }).catch(()=>{}); // silencieux
+    }
+  } catch(e){ /* ignore */ }
+}
+
+// Récupère la confirmation crowd depuis le worker (autres chauffeurs)
+async function fetchEventConfirmFromWorker(ev){
+  try {
+    if(typeof PROXY === 'undefined' || !PROXY) return null;
+    const base = PROXY.replace(/\?.*$/, '');
+    const id = eventId(ev);
+    const r = await fetch(base + '/event/confirm?eventId=' + encodeURIComponent(id));
+    if(!r.ok) return null;
+    const data = await r.json();
+    if(!data.ok || !data.finReelle) return null;
+    const ageMin = (Date.now() - (data.ts || 0)) / 60000;
+    if(ageMin > CONFIRM_VALIDITY_MIN) return null;
+    return data;
+  } catch(e){ return null; }
+}
+
+// Génère la section "fin live" pour le modal event
+function renderEventCrowdSection(ev, diffMin){
+  const confirm = getEventConfirm(ev);
+  const isFinished = diffMin < -120; // event fini il y a > 2h, plus pertinent
+
+  if(isFinished) return ''; // pas de crowdsourcing pour events vraiment passés
+
+  let html = `<div class="em-crowd-block">`;
+
+  if(confirm){
+    // Une confirmation existe → affiche le badge LIVE
+    const ageMin = Math.round((Date.now() - confirm.ts) / 60000);
+    const ageLbl = ageMin < 1 ? "à l'instant"
+                  : ageMin < 60 ? `il y a ${ageMin} min`
+                  : `il y a ${Math.floor(ageMin/60)}h`;
+    const lblTxt = confirm.status === 'finished'
+      ? `Confirmé fini à ${confirm.finReelle}`
+      : `Fin confirmée vers ${confirm.finReelle}`;
+    html += `
+      <div class="em-crowd-live">
+        <span class="em-crowd-dot"></span>
+        <span class="em-crowd-live-lbl">🔴 LIVE chauffeur</span>
+      </div>
+      <div class="em-crowd-confirmed">${esc(lblTxt)}</div>
+      <div class="em-crowd-age">Confirmé ${ageLbl}${confirm.fromMe ? ' (par toi)' : ''}</div>
+    `;
+  } else {
+    html += `
+      <div class="em-crowd-est">
+        <span class="em-crowd-est-ico">⏱</span>
+        <span>Fin estimée ${esc(ev.fin)} · sport imprévisible (sets / prolongations)</span>
+      </div>
+    `;
+  }
+
+  // Boutons : seulement si event proche (entre -30 min et +180 min de la fin estimée)
+  if(diffMin >= -30 && diffMin <= 180){
+    html += `
+      <div class="em-crowd-actions">
+        <button class="em-crowd-btn em-crowd-btn-now" onclick="confirmEventEnded('${esc(eventId(ev)).replace(/'/g,"\\'")}', '${esc(ev.venue)}', '${esc(ev.d)}', '${esc(ev.fin)}', this)">
+          🏁 Vient de finir (maintenant)
+        </button>
+        <button class="em-crowd-btn em-crowd-btn-eta" onclick="promptEventEta('${esc(eventId(ev)).replace(/'/g,"\\'")}', '${esc(ev.venue)}', '${esc(ev.d)}', '${esc(ev.fin)}', this)">
+          ⏱ Va finir dans...
+        </button>
+      </div>
+      <div class="em-crowd-hint">Tu es sur place ? Aide tes confrères à savoir quand foncer.</div>
+    `;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// Action : "Vient de finir maintenant"
+async function confirmEventEnded(id, venue, dayStr, finStr, btn){
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const ev = { venue, d: dayStr, fin: finStr };
+  await pushEventConfirm(ev, `${hh}:${mm}`, 'finished');
+  if(btn){
+    btn.textContent = '✓ Merci, partagé aux confrères';
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+  }
+  if(navigator.vibrate) navigator.vibrate([20, 30, 20]);
+  // Re-render le modal après 600ms
+  setTimeout(() => {
+    const modal = document.getElementById('ev-modal');
+    if(modal && modal.classList.contains('open')){
+      // Retrouve l'event et re-render
+      const found = EVENTS.find(e => eventId(e) === id);
+      if(found) openEvModal(found);
+    }
+  }, 600);
+}
+
+// Action : "Va finir dans X min" — prompt simple
+function promptEventEta(id, venue, dayStr, finStr, btn){
+  const minutes = prompt('Dans combien de minutes ça va finir ?\n(estimation à vue d\'œil — ex: 15)');
+  if(!minutes) return;
+  const m = parseInt(minutes, 10);
+  if(isNaN(m) || m < 0 || m > 240){
+    alert('Donne un nombre entre 0 et 240');
+    return;
+  }
+  const fin = new Date(Date.now() + m * 60000);
+  const hh = String(fin.getHours()).padStart(2,'0');
+  const mm = String(fin.getMinutes()).padStart(2,'0');
+  const ev = { venue, d: dayStr, fin: finStr };
+  pushEventConfirm(ev, `${hh}:${mm}`, 'eta').then(() => {
+    if(btn){
+      btn.textContent = '✓ Merci, partagé';
+      btn.disabled = true;
+      btn.style.opacity = '0.6';
+    }
+    if(navigator.vibrate) navigator.vibrate([20, 30, 20]);
+    setTimeout(() => {
+      const modal = document.getElementById('ev-modal');
+      if(modal && modal.classList.contains('open')){
+        const found = EVENTS.find(e => eventId(e) === id);
+        if(found) openEvModal(found);
+      }
+    }, 600);
+  });
+}
+
 function openEvModal(ev){
   if(!ev) return;
   const v = VENUES[ev.venue] || {};
@@ -9572,10 +9873,38 @@ function openEvModal(ev){
         <div class="em-tips-body">${esc(tip)}</div>
       </div>
     ` : ''}
+
+    ${(ev.cat === 'sport' || ev.cat === 'concert' || ev.cat === 'salon') ? renderEventCrowdSection(ev, diffMin) : ''}
   `;
 
   document.getElementById('ev-modal').classList.add('show');
   if(navigator.vibrate) navigator.vibrate(12);
+
+  // Fetch async les confirmations des autres chauffeurs (worker)
+  // Si un autre chauffeur a confirmé fin/eta < 90 min, on stocke en local et on re-render
+  if(ev.cat === 'sport' || ev.cat === 'concert' || ev.cat === 'salon'){
+    fetchEventConfirmFromWorker(ev).then(workerConfirm => {
+      if(!workerConfirm) return;
+      const local = getEventConfirm(ev);
+      // Garde la plus récente entre local (fromMe) et worker (autres chauffeurs)
+      if(local && local.ts >= workerConfirm.ts) return;
+      // Stocke le confirm worker en local pour cohérence d'affichage
+      const all = readEventConfirms();
+      all[eventId(ev)] = {
+        finReelle: workerConfirm.finReelle,
+        status: workerConfirm.status,
+        ts: workerConfirm.ts,
+        fromMe: false
+      };
+      writeEventConfirms(all);
+      // Re-render si modal toujours ouvert
+      const modal = document.getElementById('ev-modal');
+      if(modal && modal.classList.contains('show')){
+        const found = EVENTS.find(e => eventId(e) === eventId(ev));
+        if(found) openEvModal(found);
+      }
+    });
+  }
 }
 
 function closeEvModal(){
@@ -9763,6 +10092,18 @@ function parseEventDate(ymd){
   return new Date(y, m-1, d);
 }
 function parseEventFin(ev){
+  // Si une confirmation crowd existe (et est valide), elle prime sur la fin estimée
+  // → calcul de timing plus précis sur la timeline pour les events confirmés
+  try {
+    if(typeof getEventConfirm === 'function'){
+      const conf = getEventConfirm(ev);
+      if(conf && conf.finReelle){
+        const [y,m,d] = ev.d.split('-').map(Number);
+        const [h,mn] = conf.finReelle.split(':').map(Number);
+        if(!isNaN(h) && !isNaN(mn)) return new Date(y, m-1, d, h, mn);
+      }
+    }
+  } catch(e){ /* fallback estimé */ }
   const [y,m,d] = ev.d.split('-').map(Number);
   const [h,mn] = ev.fin.split(':').map(Number);
   return new Date(y, m-1, d, h, mn);

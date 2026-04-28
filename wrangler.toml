@@ -1,0 +1,8 @@
+name = "taxipulse-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+account_id = "00f0deafc674ef380e2e2963a8b0dda8"
+
+[[kv_namespaces]]
+binding = "TAXI_KV"
+id = "587f2f1a5db3407ca9d3b7623abdf054"
