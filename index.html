@@ -9613,6 +9613,72 @@ function eventId(ev){
   return `${ev.venue}|${ev.d}|${ev.fin}`;
 }
 
+/* ───────────────────────────────────────────────────────────────────
+   ANTI-FRAUDE : driverId persistant + géoloc + finTs
+   ─────────────────────────────────────────────────────────────────── */
+
+const DRIVER_ID_KEY = 'tp_driver_id_v1';
+
+// UUID v4 generation pour identifier le chauffeur de manière persistante
+function getDriverId(){
+  try {
+    let id = localStorage.getItem(DRIVER_ID_KEY);
+    if(id && id.length >= 16) return id;
+    // Génère un UUID v4-like
+    if(crypto && crypto.randomUUID){
+      id = crypto.randomUUID();
+    } else {
+      id = 'drv_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 12);
+    }
+    localStorage.setItem(DRIVER_ID_KEY, id);
+    return id;
+  } catch(e){
+    return 'drv_fallback_' + Date.now();
+  }
+}
+
+// Récupère la position GPS du chauffeur (timeout 6s)
+function getDriverLocation(){
+  return new Promise((resolve) => {
+    if(!navigator.geolocation){
+      resolve({ ok:false, reason:'no_geoloc_api' });
+      return;
+    }
+    const timeoutId = setTimeout(() => resolve({ ok:false, reason:'timeout' }), 6000);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        clearTimeout(timeoutId);
+        resolve({
+          ok: true,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy
+        });
+      },
+      (err) => {
+        clearTimeout(timeoutId);
+        resolve({ ok:false, reason: 'denied_or_error', code: err.code });
+      },
+      { enableHighAccuracy: false, timeout: 5500, maximumAge: 60000 }
+    );
+  });
+}
+
+// Convertit ev.d (ISO YYYY-MM-DD) + ev.fin (HH:MM) en timestamp ms
+function getEventFinTs(ev){
+  try {
+    if(!ev || !ev.fin) return null;
+    if(ev.d && /^\d{4}-\d{2}-\d{2}$/.test(ev.d)){
+      return new Date(ev.d + 'T' + ev.fin + ':00').getTime();
+    }
+    // Fallback : aujourd'hui
+    const [h, m] = ev.fin.split(':').map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d.getTime();
+  } catch(e){ return null; }
+}
+
 // Lit toutes les confirmations stockées localement
 function readEventConfirms(){
   try {
@@ -9638,79 +9704,181 @@ function getEventConfirm(ev){
 }
 
 // Stocke une confirmation chauffeur ET l'envoie au worker pour partage
+// status : 'finished' | 'eta' | 'not_finished'
+// finReelle : 'HH:MM' (requis sauf pour not_finished)
+// Retourne { ok, reason?, consolidated?, distM? }
 async function pushEventConfirm(ev, finReelle, status){
-  // status : 'finished' = vient de finir | 'eta' = finira dans X min
   const all = readEventConfirms();
   const id = eventId(ev);
+  // Stockage local (pour cohérence UI immédiate, "votre vote")
   all[id] = {
-    finReelle: finReelle,    // HH:MM
-    status: status,          // 'finished' | 'eta'
+    finReelle: finReelle,
+    status: status,
     ts: Date.now(),
     fromMe: true
   };
   writeEventConfirms(all);
 
-  // Envoie au worker (best-effort, no-op si offline ou worker pas configuré)
+  // Récupère venue lat/lng
+  const v = (typeof VENUES !== 'undefined' && VENUES[ev.venue]) ? VENUES[ev.venue] : {};
+  const venueLat = v.lat || null;
+  const venueLng = v.lng || null;
+
+  // Demande la géoloc (best-effort, on continue même si refusée)
+  const loc = await getDriverLocation();
+  const driverId = getDriverId();
+  const finTs = getEventFinTs(ev);
+
+  // Envoie au worker avec tous les signaux anti-fraude
   try {
-    if(typeof PROXY !== 'undefined' && PROXY){
-      const base = PROXY.replace(/\?.*$/, '');
-      await fetch(base + '/event/confirm', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          eventId: id,
-          finReelle: finReelle,
-          status: status,
-          ts: Date.now()
-        })
-      }).catch(()=>{}); // silencieux
+    if(typeof PROXY === 'undefined' || !PROXY){
+      return { ok: true, local_only: true, reason: 'no_proxy' };
     }
-  } catch(e){ /* ignore */ }
+    const base = PROXY.replace(/\?.*$/, '');
+    const payload = {
+      eventId: id,
+      finReelle: finReelle,
+      status: status,
+      ts: Date.now(),
+      driverId: driverId,
+      finTs: finTs
+    };
+    if(loc.ok){
+      payload.lat = loc.lat;
+      payload.lng = loc.lng;
+    }
+    if(venueLat && venueLng){
+      payload.venueLat = venueLat;
+      payload.venueLng = venueLng;
+    }
+    const r = await fetch(base + '/event/confirm', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const data = await r.json();
+    return data;
+  } catch(e){
+    return { ok: true, local_only: true, reason: 'network_error' };
+  }
 }
 
 // Récupère la confirmation crowd depuis le worker (autres chauffeurs)
+// Nouveau format : { ok, found, consolidated:{confirmed, autoFinished, vetoActive, finReelle, etaReelle, counts, quorum} }
 async function fetchEventConfirmFromWorker(ev){
   try {
     if(typeof PROXY === 'undefined' || !PROXY) return null;
     const base = PROXY.replace(/\?.*$/, '');
     const id = eventId(ev);
-    const r = await fetch(base + '/event/confirm?eventId=' + encodeURIComponent(id));
+    const finTs = getEventFinTs(ev);
+    const url = base + '/event/confirm?eventId=' + encodeURIComponent(id)
+              + (finTs ? '&finTs=' + finTs : '');
+    const r = await fetch(url);
     if(!r.ok) return null;
     const data = await r.json();
-    if(!data.ok || !data.finReelle) return null;
-    const ageMin = (Date.now() - (data.ts || 0)) / 60000;
-    if(ageMin > CONFIRM_VALIDITY_MIN) return null;
-    return data;
+    if(!data.ok) return null;
+    // Si rien dans KV mais auto-fallback côté client
+    const c = data.consolidated || {};
+    if(!data.found && !c.confirmed && !c.autoFinished){
+      return null;
+    }
+    // Renvoie un format unifié
+    return {
+      consolidated: c,
+      finReelle: data.finReelle || c.finReelle || c.etaReelle || null,
+      status: data.status || (c.confirmed ? 'finished' : (c.etaReelle ? 'eta' : null)),
+      ts: data.ts || Date.now(),
+      flagged: data.flagged || false
+    };
   } catch(e){ return null; }
 }
 
+// Cache en mémoire des derniers consolidated par eventId (pour affichage UI temps réel)
+const WORKER_CONFIRMS_CACHE = {};
+
 // Génère la section "fin live" pour le modal event
 function renderEventCrowdSection(ev, diffMin){
-  const confirm = getEventConfirm(ev);
-  const isFinished = diffMin < -120; // event fini il y a > 2h, plus pertinent
+  const localConfirm = getEventConfirm(ev);
+  const id = eventId(ev);
+  const workerData = WORKER_CONFIRMS_CACHE[id] || null;
+  const consolidated = workerData ? workerData.consolidated : null;
+  const isFinished = diffMin < -120; // event fini il y a > 2h
 
-  if(isFinished) return ''; // pas de crowdsourcing pour events vraiment passés
+  if(isFinished) return '';
 
   let html = `<div class="em-crowd-block">`;
 
-  if(confirm){
-    // Une confirmation existe → affiche le badge LIVE
-    const ageMin = Math.round((Date.now() - confirm.ts) / 60000);
-    const ageLbl = ageMin < 1 ? "à l'instant"
-                  : ageMin < 60 ? `il y a ${ageMin} min`
-                  : `il y a ${Math.floor(ageMin/60)}h`;
-    const lblTxt = confirm.status === 'finished'
-      ? `Confirmé fini à ${confirm.finReelle}`
-      : `Fin confirmée vers ${confirm.finReelle}`;
+  // Cas 1 : Event auto-considéré fini (now > fin + 15min) → c'est terminé
+  if(consolidated && consolidated.autoFinished && !consolidated.confirmed){
+    html += `
+      <div class="em-crowd-confirmed" style="background:#f0f9ff;border-left:3px solid #0284c7">
+        ⏱ Fin probable (heure théorique dépassée +15min)
+      </div>
+      <div class="em-crowd-age">Aucun chauffeur n'a encore confirmé sur place</div>
+    `;
+  }
+  // Cas 2 : Confirmation officielle (quorum atteint, pas de veto)
+  else if(consolidated && consolidated.confirmed){
+    const finRl = consolidated.finReelle;
+    const cnt = consolidated.counts.finished;
     html += `
       <div class="em-crowd-live">
         <span class="em-crowd-dot"></span>
-        <span class="em-crowd-live-lbl">🔴 LIVE chauffeur</span>
+        <span class="em-crowd-live-lbl">🟢 CONFIRMÉ FINI</span>
+      </div>
+      <div class="em-crowd-confirmed">Fin confirmée à ${esc(finRl)}</div>
+      <div class="em-crowd-age">Validé par ${cnt} chauffeur${cnt>1?'s':''} sur place</div>
+    `;
+    if(consolidated.flagged){
+      html += `<div class="em-crowd-age" style="color:#d97706">⚠️ Activité suspecte détectée</div>`;
+    }
+  }
+  // Cas 3 : Veto actif (au moins 2 chauffeurs disent "pas encore fini")
+  else if(consolidated && consolidated.vetoActive){
+    html += `
+      <div class="em-crowd-confirmed" style="background:#fef3c7;border-left:3px solid #d97706">
+        ⚠️ Pas encore fini (signalé par ${consolidated.counts.not_finished} chauffeur${consolidated.counts.not_finished>1?'s':''} sur place)
+      </div>
+      <div class="em-crowd-age">Heure théorique : ${esc(ev.fin)}</div>
+    `;
+  }
+  // Cas 4 : Au moins 1 vote 'finished' mais quorum pas atteint → "en attente"
+  else if(consolidated && consolidated.counts.finished >= 1 && !consolidated.confirmed){
+    html += `
+      <div class="em-crowd-confirmed" style="background:#fef9c3;border-left:3px solid #ca8a04">
+        🟡 ${consolidated.counts.finished}/${consolidated.quorum} chauffeur${consolidated.counts.finished>1?'s':''} signale${consolidated.counts.finished>1?'nt':''} la fin
+      </div>
+      <div class="em-crowd-age">En attente de confirmation par un autre chauffeur sur place</div>
+    `;
+  }
+  // Cas 5 : Vote ETA crowd (estimation)
+  else if(consolidated && consolidated.etaReelle){
+    html += `
+      <div class="em-crowd-confirmed" style="background:#eff6ff;border-left:3px solid #3b82f6">
+        ⏱ Fin estimée à ${esc(consolidated.etaReelle)} (signalé par chauffeur)
+      </div>
+    `;
+  }
+  // Cas 6 : Mon vote local seul (worker pas encore répondu)
+  else if(localConfirm){
+    const ageMin = Math.round((Date.now() - localConfirm.ts) / 60000);
+    const ageLbl = ageMin < 1 ? "à l'instant" : `il y a ${ageMin} min`;
+    const lblTxt = localConfirm.status === 'finished'
+      ? `Tu as signalé fini à ${localConfirm.finReelle}`
+      : localConfirm.status === 'eta'
+      ? `Tu as estimé fini vers ${localConfirm.finReelle}`
+      : `Tu as signalé : pas encore fini`;
+    html += `
+      <div class="em-crowd-live">
+        <span class="em-crowd-dot"></span>
+        <span class="em-crowd-live-lbl">🔵 EN ATTENTE</span>
       </div>
       <div class="em-crowd-confirmed">${esc(lblTxt)}</div>
-      <div class="em-crowd-age">Confirmé ${ageLbl}${confirm.fromMe ? ' (par toi)' : ''}</div>
+      <div class="em-crowd-age">${ageLbl} · validation requise par 1 autre chauffeur</div>
     `;
-  } else {
+  }
+  // Cas 7 : Aucune info
+  else {
     html += `
       <div class="em-crowd-est">
         <span class="em-crowd-est-ico">⏱</span>
@@ -9719,18 +9887,30 @@ function renderEventCrowdSection(ev, diffMin){
     `;
   }
 
-  // Boutons : seulement si event proche (entre -30 min et +180 min de la fin estimée)
-  if(diffMin >= -30 && diffMin <= 180){
+  // Boutons : seulement si event proche (entre -30 min et +90 min de la fin estimée)
+  // Et pas déjà confirmé fini
+  const inWindow = diffMin >= -30 && diffMin <= 90;
+  const alreadyConfirmed = consolidated && consolidated.confirmed;
+  if(inWindow && !alreadyConfirmed){
+    const idEsc = esc(id).replace(/'/g,"\\'");
+    const venueEsc = esc(ev.venue).replace(/'/g,"\\'");
+    const dEsc = esc(ev.d).replace(/'/g,"\\'");
+    const finEsc = esc(ev.fin).replace(/'/g,"\\'");
     html += `
       <div class="em-crowd-actions">
-        <button class="em-crowd-btn em-crowd-btn-now" onclick="confirmEventEnded('${esc(eventId(ev)).replace(/'/g,"\\'")}', '${esc(ev.venue)}', '${esc(ev.d)}', '${esc(ev.fin)}', this)">
-          🏁 Vient de finir (maintenant)
+        <button class="em-crowd-btn em-crowd-btn-now" onclick="confirmEventEnded('${idEsc}', '${venueEsc}', '${dEsc}', '${finEsc}', this)">
+          🏁 Vient de finir
         </button>
-        <button class="em-crowd-btn em-crowd-btn-eta" onclick="promptEventEta('${esc(eventId(ev)).replace(/'/g,"\\'")}', '${esc(ev.venue)}', '${esc(ev.d)}', '${esc(ev.fin)}', this)">
-          ⏱ Va finir dans...
+        <button class="em-crowd-btn em-crowd-btn-eta" onclick="reportEventNotFinished('${idEsc}', '${venueEsc}', '${dEsc}', '${finEsc}', this)">
+          ⏳ Pas encore fini
         </button>
       </div>
-      <div class="em-crowd-hint">Tu es sur place ? Aide tes confrères à savoir quand foncer.</div>
+      <div class="em-crowd-actions" style="margin-top:6px">
+        <button class="em-crowd-btn em-crowd-btn-eta" style="flex:1" onclick="promptEventEta('${idEsc}', '${venueEsc}', '${dEsc}', '${finEsc}', this)">
+          ⏱ Va finir dans... (estimation)
+        </button>
+      </div>
+      <div class="em-crowd-hint">Géoloc requise · validation par 2 chauffeurs sur place (anti-fraude)</div>
     `;
   }
 
@@ -9744,22 +9924,95 @@ async function confirmEventEnded(id, venue, dayStr, finStr, btn){
   const hh = String(now.getHours()).padStart(2,'0');
   const mm = String(now.getMinutes()).padStart(2,'0');
   const ev = { venue, d: dayStr, fin: finStr };
-  await pushEventConfirm(ev, `${hh}:${mm}`, 'finished');
   if(btn){
-    btn.textContent = '✓ Merci, partagé aux confrères';
+    btn.textContent = '⏳ Validation en cours...';
     btn.disabled = true;
-    btn.style.opacity = '0.6';
   }
+  const result = await pushEventConfirm(ev, `${hh}:${mm}`, 'finished');
   if(navigator.vibrate) navigator.vibrate([20, 30, 20]);
-  // Re-render le modal après 600ms
+
+  // Gestion erreurs serveur (anti-fraude)
+  if(result && result.ok === false){
+    if(result.reason === 'too_far_from_venue'){
+      if(btn){
+        btn.textContent = `❌ Trop loin (${result.distM}m)`;
+        btn.style.background = '#fee2e2';
+        btn.style.color = '#991b1b';
+      }
+      alert(`Tu es à ${result.distM}m du venue. Pour signaler la fin, tu dois être à moins de ${result.maxM}m sur place. (Anti-fraude)`);
+      return;
+    }
+    if(result.reason === 'out_of_window'){
+      if(btn){
+        btn.textContent = '❌ Hors fenêtre temporelle';
+        btn.style.background = '#fee2e2';
+      }
+      alert('Vote impossible : signale uniquement entre 30 min avant et 90 min après l\'heure théorique.');
+      return;
+    }
+    if(btn){ btn.textContent = '❌ Erreur, réessaie'; }
+    return;
+  }
+
+  // Stocke consolidated en cache pour re-render
+  if(result && result.consolidated){
+    WORKER_CONFIRMS_CACHE[id] = { consolidated: result.consolidated, ts: Date.now() };
+  }
+
+  if(btn){
+    if(result && result.consolidated && result.consolidated.confirmed){
+      btn.textContent = '✅ Confirmé fini (quorum atteint)';
+    } else {
+      btn.textContent = '✓ Vote enregistré · attente d\'1 autre chauffeur';
+    }
+    btn.style.opacity = '0.7';
+  }
+
   setTimeout(() => {
     const modal = document.getElementById('ev-modal');
-    if(modal && modal.classList.contains('open')){
-      // Retrouve l'event et re-render
+    if(modal && modal.classList.contains('show')){
       const found = EVENTS.find(e => eventId(e) === id);
       if(found) openEvModal(found);
     }
-  }, 600);
+  }, 800);
+}
+
+// Action : "Pas encore fini" — veto démocratique
+async function reportEventNotFinished(id, venue, dayStr, finStr, btn){
+  const ev = { venue, d: dayStr, fin: finStr };
+  if(btn){
+    btn.textContent = '⏳ Envoi...';
+    btn.disabled = true;
+  }
+  const result = await pushEventConfirm(ev, finStr, 'not_finished');
+  if(navigator.vibrate) navigator.vibrate(15);
+
+  if(result && result.ok === false){
+    if(result.reason === 'too_far_from_venue'){
+      if(btn){ btn.textContent = `❌ Trop loin (${result.distM}m)`; }
+      alert(`Tu dois être à moins de ${result.maxM}m du venue (anti-fraude). Toi : ${result.distM}m.`);
+      return;
+    }
+    if(result.reason === 'out_of_window'){
+      if(btn){ btn.textContent = '❌ Hors fenêtre'; }
+      return;
+    }
+    if(btn){ btn.textContent = '❌ Erreur'; }
+    return;
+  }
+
+  if(result && result.consolidated){
+    WORKER_CONFIRMS_CACHE[id] = { consolidated: result.consolidated, ts: Date.now() };
+  }
+  if(btn){ btn.textContent = '✓ Signalé "pas encore fini"'; btn.style.opacity = '0.7'; }
+
+  setTimeout(() => {
+    const modal = document.getElementById('ev-modal');
+    if(modal && modal.classList.contains('show')){
+      const found = EVENTS.find(e => eventId(e) === id);
+      if(found) openEvModal(found);
+    }
+  }, 800);
 }
 
 // Action : "Va finir dans X min" — prompt simple
@@ -9775,20 +10028,31 @@ function promptEventEta(id, venue, dayStr, finStr, btn){
   const hh = String(fin.getHours()).padStart(2,'0');
   const mm = String(fin.getMinutes()).padStart(2,'0');
   const ev = { venue, d: dayStr, fin: finStr };
-  pushEventConfirm(ev, `${hh}:${mm}`, 'eta').then(() => {
+  pushEventConfirm(ev, `${hh}:${mm}`, 'eta').then((result) => {
+    if(result && result.ok === false){
+      if(result.reason === 'too_far_from_venue' && btn){
+        btn.textContent = `❌ Trop loin (${result.distM}m)`;
+        return;
+      }
+      if(btn){ btn.textContent = '❌ Erreur'; }
+      return;
+    }
+    if(result && result.consolidated){
+      WORKER_CONFIRMS_CACHE[id] = { consolidated: result.consolidated, ts: Date.now() };
+    }
     if(btn){
-      btn.textContent = '✓ Merci, partagé';
+      btn.textContent = '✓ Estimation partagée';
       btn.disabled = true;
       btn.style.opacity = '0.6';
     }
     if(navigator.vibrate) navigator.vibrate([20, 30, 20]);
     setTimeout(() => {
       const modal = document.getElementById('ev-modal');
-      if(modal && modal.classList.contains('open')){
+      if(modal && modal.classList.contains('show')){
         const found = EVENTS.find(e => eventId(e) === id);
         if(found) openEvModal(found);
       }
-    }, 600);
+    }, 800);
   });
 }
 
@@ -9881,26 +10145,34 @@ function openEvModal(ev){
   if(navigator.vibrate) navigator.vibrate(12);
 
   // Fetch async les confirmations des autres chauffeurs (worker)
-  // Si un autre chauffeur a confirmé fin/eta < 90 min, on stocke en local et on re-render
+  // Si un autre chauffeur a confirmé fin/eta < 90 min, on stocke en cache et on re-render
   if(ev.cat === 'sport' || ev.cat === 'concert' || ev.cat === 'salon'){
     fetchEventConfirmFromWorker(ev).then(workerConfirm => {
       if(!workerConfirm) return;
-      const local = getEventConfirm(ev);
-      // Garde la plus récente entre local (fromMe) et worker (autres chauffeurs)
-      if(local && local.ts >= workerConfirm.ts) return;
-      // Stocke le confirm worker en local pour cohérence d'affichage
-      const all = readEventConfirms();
-      all[eventId(ev)] = {
-        finReelle: workerConfirm.finReelle,
-        status: workerConfirm.status,
-        ts: workerConfirm.ts,
-        fromMe: false
+      // Stocke en cache mémoire pour que renderEventCrowdSection l'utilise
+      const id = eventId(ev);
+      WORKER_CONFIRMS_CACHE[id] = {
+        consolidated: workerConfirm.consolidated,
+        ts: Date.now()
       };
-      writeEventConfirms(all);
+      // Aussi en local pour rétrocompat
+      if(workerConfirm.finReelle){
+        const local = getEventConfirm(ev);
+        if(!local || local.ts < workerConfirm.ts){
+          const all = readEventConfirms();
+          all[id] = {
+            finReelle: workerConfirm.finReelle,
+            status: workerConfirm.status,
+            ts: workerConfirm.ts,
+            fromMe: false
+          };
+          writeEventConfirms(all);
+        }
+      }
       // Re-render si modal toujours ouvert
       const modal = document.getElementById('ev-modal');
       if(modal && modal.classList.contains('show')){
-        const found = EVENTS.find(e => eventId(e) === eventId(ev));
+        const found = EVENTS.find(e => eventId(e) === id);
         if(found) openEvModal(found);
       }
     });

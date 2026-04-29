@@ -461,72 +461,256 @@ async function getCrowdWait(aero) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  EVENT CONFIRM : crowdsourcing fin reelle event (sport, concert)
+//  EVENT CONFIRM v2 : multi-vote + geoloc + quorum + anti-fraud
 //  Storage KV : key = "evconfirm:" + eventId
-//  Validite : 90 min apres ts (apres on considere obsolete)
+//  Format : { eventId, votes:[{driverId, ipHash, ts, finReelle, status, lat, lng, distM}], finalized:{...} }
+//  Validite : 90 min
 // ═══════════════════════════════════════════════════════════════════
 
-const EVENT_CONFIRM_TTL_SEC = 90 * 60;  // 90 min
-const EVENT_CONFIRM_DEDUP_SEC = 10 * 60; // meme IP : 10 min entre deux confirms
+const EVENT_CONFIRM_TTL_SEC = 90 * 60;          // 90 min
+const VOTE_DEDUP_SEC = 5 * 60;                  // 1 vote / 5 min par driverId
+const QUORUM_FINISHED = 2;                      // votes 'finished' requis
+const QUORUM_VETO = 2;                          // votes 'not_finished' qui bloquent
+const MAX_VENUE_DIST_M = 800;                   // 800m du venue max
+const MAX_DRIVERS_PER_IP = 3;                   // soft flag si 1 IP a >3 driverIds
+const VOTE_WINDOW_BEFORE_MIN = 30;              // vote possible 30min avant fin theorique
+const VOTE_WINDOW_AFTER_MIN = 90;               // vote possible 90min apres fin theorique
+
+// Calcul distance Haversine (en metres)
+function haversineM(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat/2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLng/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Parse "HH:MM" + jour ISO -> timestamp ms (Europe/Paris assume UTC+1/+2 par defaut local Cloudflare)
+// On utilise une heuristique : si dayStr fourni, on le combine, sinon on prend aujourd'hui.
+function parseFinTimestamp(dayStr, finStr) {
+  try {
+    if (!finStr || !/^\d{2}:\d{2}$/.test(finStr)) return null;
+    const [h, m] = finStr.split(':').map(Number);
+    let d;
+    if (dayStr && /^\d{4}-\d{2}-\d{2}$/.test(dayStr)) {
+      d = new Date(dayStr + 'T' + finStr + ':00');
+    } else {
+      d = new Date();
+      d.setHours(h, m, 0, 0);
+    }
+    return d.getTime();
+  } catch (e) { return null; }
+}
+
+// Calcule le statut consolide a partir des votes
+function consolidateVotes(votes, finTs) {
+  const now = Date.now();
+  // Garde uniquement votes <90min
+  const valid = votes.filter(v => (now - v.ts) < EVENT_CONFIRM_TTL_SEC * 1000);
+
+  const finishedVotes = valid.filter(v => v.status === 'finished');
+  const notFinishedVotes = valid.filter(v => v.status === 'not_finished');
+  const etaVotes = valid.filter(v => v.status === 'eta');
+
+  // Veto : si on a >=2 'not_finished' recents (<15min), on rejette les 'finished'
+  const recentVeto = notFinishedVotes.filter(v => (now - v.ts) < 15 * 60 * 1000);
+  const vetoActive = recentVeto.length >= QUORUM_VETO;
+
+  // Confirmation : >=2 votes 'finished' uniques (par driverId) + pas de veto
+  const uniqueDrivers = new Set(finishedVotes.map(v => v.driverId));
+  const confirmed = uniqueDrivers.size >= QUORUM_FINISHED && !vetoActive;
+
+  // Auto-fallback : si finTs connu et now > finTs + 15min, on considere fini
+  const autoFinished = finTs && (now > finTs + 15 * 60 * 1000);
+
+  // Calcule finReelle consolide : mediane des finReelle des votes 'finished'
+  let finReelle = null;
+  if (finishedVotes.length) {
+    const times = finishedVotes
+      .map(v => {
+        const [h, m] = v.finReelle.split(':').map(Number);
+        return h * 60 + m;
+      })
+      .sort((a, b) => a - b);
+    const mid = Math.floor(times.length / 2);
+    const medMin = times.length % 2
+      ? times[mid]
+      : Math.round((times[mid - 1] + times[mid]) / 2);
+    finReelle = String(Math.floor(medMin / 60)).padStart(2, '0') + ':' +
+                String(medMin % 60).padStart(2, '0');
+  }
+
+  // ETA mediane des votes 'eta' recents
+  let etaReelle = null;
+  if (etaVotes.length && !confirmed) {
+    const times = etaVotes
+      .filter(v => (now - v.ts) < 30 * 60 * 1000)
+      .map(v => {
+        const [h, m] = v.finReelle.split(':').map(Number);
+        return h * 60 + m;
+      })
+      .sort((a, b) => a - b);
+    if (times.length) {
+      const mid = Math.floor(times.length / 2);
+      const medMin = times.length % 2 ? times[mid] : Math.round((times[mid-1] + times[mid]) / 2);
+      etaReelle = String(Math.floor(medMin / 60)).padStart(2, '0') + ':' +
+                  String(medMin % 60).padStart(2, '0');
+    }
+  }
+
+  return {
+    confirmed,
+    autoFinished,
+    vetoActive,
+    finReelle,
+    etaReelle,
+    counts: {
+      finished: uniqueDrivers.size,
+      not_finished: new Set(notFinishedVotes.map(v => v.driverId)).size,
+      eta: new Set(etaVotes.map(v => v.driverId)).size,
+      total: valid.length
+    },
+    quorum: QUORUM_FINISHED
+  };
+}
 
 async function storeEventConfirm(body, request) {
   if (!hasKV()) return { ok: false, reason: 'kv_not_configured' };
   if (!body || !body.eventId) return { ok: false, reason: 'missing_eventId' };
-  if (!body.finReelle || !/^\d{2}:\d{2}$/.test(body.finReelle)) {
-    return { ok: false, reason: 'invalid_finReelle', expected: 'HH:MM' };
+
+  const status = ['finished', 'eta', 'not_finished'].indexOf(body.status) >= 0
+    ? body.status : 'finished';
+
+  // finReelle requis sauf pour not_finished
+  if (status !== 'not_finished') {
+    if (!body.finReelle || !/^\d{2}:\d{2}$/.test(body.finReelle)) {
+      return { ok: false, reason: 'invalid_finReelle', expected: 'HH:MM' };
+    }
   }
-  const status = body.status === 'finished' ? 'finished' : 'eta';
+
+  // driverId requis (cote frontend on en genere un en localStorage)
+  if (!body.driverId || typeof body.driverId !== 'string' || body.driverId.length < 8) {
+    return { ok: false, reason: 'missing_driverId' };
+  }
 
   const ip = getClientIP(request);
   const ipHash = await hashIP(ip);
   const key = 'evconfirm:' + body.eventId;
-
-  // Lit existant
-  let existing = null;
-  try { existing = await TAXI_KV.get(key, { type: 'json' }); } catch (e) { existing = null; }
-
   const now = Date.now();
 
-  // Dedup : si meme IP a confirme < 10 min, on rejette
-  if (existing && existing.ipHash === ipHash && (now - existing.ts) < EVENT_CONFIRM_DEDUP_SEC * 1000) {
-    return { ok: true, deduped: true, message: 'already confirmed recently' };
+  // Lit existant
+  let record = null;
+  try { record = await TAXI_KV.get(key, { type: 'json' }); } catch (e) { record = null; }
+  if (!record || !Array.isArray(record.votes)) {
+    record = { eventId: body.eventId, votes: [] };
   }
 
-  // Strategie : si event a > 1 confirmation, on garde la mediane des derniers temps
-  // Pour simplicite v1 : on garde la plus RECENTE (last-write-wins). 
-  // Optimisation future possible : agreger plusieurs confirms dans un array.
-  const record = {
-    eventId: body.eventId,
-    finReelle: body.finReelle,
-    status: status,
-    ts: now,
-    ipHash: ipHash
-  };
+  // Prune votes >90min
+  record.votes = record.votes.filter(v => (now - v.ts) < EVENT_CONFIRM_TTL_SEC * 1000);
+
+  // Anti-spam : meme driverId < 5min ?
+  const recentSame = record.votes.find(v =>
+    v.driverId === body.driverId && (now - v.ts) < VOTE_DEDUP_SEC * 1000
+  );
+  if (recentSame) {
+    // Update plutot que rejeter (chauffeur veut corriger son vote)
+    recentSame.status = status;
+    recentSame.finReelle = body.finReelle || recentSame.finReelle;
+    recentSame.ts = now;
+  } else {
+    // Geoloc : verifie distance si fournie
+    let distM = null;
+    if (typeof body.lat === 'number' && typeof body.lng === 'number' &&
+        typeof body.venueLat === 'number' && typeof body.venueLng === 'number') {
+      distM = Math.round(haversineM(body.lat, body.lng, body.venueLat, body.venueLng));
+      if (distM > MAX_VENUE_DIST_M) {
+        return {
+          ok: false,
+          reason: 'too_far_from_venue',
+          distM: distM,
+          maxM: MAX_VENUE_DIST_M,
+          message: 'Tu dois etre a moins de ' + MAX_VENUE_DIST_M + 'm du venue'
+        };
+      }
+    }
+
+    // Fenetre temporelle : si finTs connu, verifie qu'on est dans [-30min, +90min]
+    if (typeof body.finTs === 'number' && body.finTs > 0) {
+      const minWindow = body.finTs - VOTE_WINDOW_BEFORE_MIN * 60 * 1000;
+      const maxWindow = body.finTs + VOTE_WINDOW_AFTER_MIN * 60 * 1000;
+      if (now < minWindow || now > maxWindow) {
+        return {
+          ok: false,
+          reason: 'out_of_window',
+          message: 'Vote hors fenetre temporelle (-30min / +90min de la fin theorique)'
+        };
+      }
+    }
+
+    record.votes.push({
+      driverId: body.driverId,
+      ipHash: ipHash,
+      ts: now,
+      finReelle: body.finReelle || null,
+      status: status,
+      lat: typeof body.lat === 'number' ? body.lat : null,
+      lng: typeof body.lng === 'number' ? body.lng : null,
+      distM: distM
+    });
+  }
+
+  // Detection abuse : meme IP avec >MAX_DRIVERS_PER_IP driverIds differents
+  const driversByIp = {};
+  for (const v of record.votes) {
+    if (!driversByIp[v.ipHash]) driversByIp[v.ipHash] = new Set();
+    driversByIp[v.ipHash].add(v.driverId);
+  }
+  const flaggedIps = Object.keys(driversByIp).filter(h => driversByIp[h].size > MAX_DRIVERS_PER_IP);
+  if (flaggedIps.length) {
+    record.flagged = true;
+    record.flaggedIps = flaggedIps;
+  }
+
+  // Sauvegarde
   try {
     await TAXI_KV.put(key, JSON.stringify(record), { expirationTtl: EVENT_CONFIRM_TTL_SEC });
   } catch (e) {
     return { ok: false, reason: 'kv_put_failed', message: e.message };
   }
 
-  return { ok: true, eventId: body.eventId, finReelle: body.finReelle, status: status };
+  // Consolide et retourne
+  const consolidated = consolidateVotes(record.votes, body.finTs || null);
+  return {
+    ok: true,
+    eventId: body.eventId,
+    yourVote: { status: status, finReelle: body.finReelle || null },
+    consolidated: consolidated,
+    flagged: record.flagged || false
+  };
 }
 
-async function getEventConfirmFromKV(eventId) {
+async function getEventConfirmFromKV(eventId, finTs) {
   if (!hasKV()) return { ok: false, reason: 'kv_not_configured' };
   const key = 'evconfirm:' + eventId;
   try {
     const rec = await TAXI_KV.get(key, { type: 'json' });
-    if (!rec) return { ok: true, found: false };
-    const ageMs = Date.now() - rec.ts;
-    if (ageMs > EVENT_CONFIRM_TTL_SEC * 1000) return { ok: true, found: false, expired: true };
+    if (!rec || !Array.isArray(rec.votes)) {
+      return { ok: true, found: false, consolidated: { confirmed: false, autoFinished: false, counts: { finished: 0, not_finished: 0, eta: 0, total: 0 }, quorum: QUORUM_FINISHED } };
+    }
+    const consolidated = consolidateVotes(rec.votes, finTs || null);
     return {
       ok: true,
       found: true,
       eventId: rec.eventId,
-      finReelle: rec.finReelle,
-      status: rec.status,
-      ts: rec.ts,
-      ageSec: Math.round(ageMs / 1000)
+      consolidated: consolidated,
+      flagged: rec.flagged || false,
+      // Pour backward compat avec ancien frontend
+      finReelle: consolidated.finReelle || consolidated.etaReelle,
+      status: consolidated.confirmed ? 'finished' : (consolidated.etaReelle ? 'eta' : null),
+      ts: rec.votes.length ? Math.max(...rec.votes.map(v => v.ts)) : 0
     };
   } catch (e) {
     return { ok: false, reason: 'kv_read_failed', message: e.message };
@@ -741,12 +925,14 @@ async function handleRequest(request) {
           headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
         });
       }
-      const result = await getEventConfirmFromKV(eid);
+      const finTsParam = url.searchParams.get('finTs');
+      const finTs = finTsParam ? parseInt(finTsParam, 10) : null;
+      const result = await getEventConfirmFromKV(eid, finTs);
       return new Response(JSON.stringify(result), {
         status: 200,
         headers: Object.assign({}, CORS_HEADERS, {
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=30'
+          'Cache-Control': 'public, max-age=15'
         })
       });
     }
