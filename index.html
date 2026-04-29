@@ -9229,8 +9229,8 @@ function renderTheatres(){
 
   // Tous les events théâtre
   const thEvents = EVENTS
+    .map((e, i) => ({ ...e, _origIdx: i, finDate: parseEventFin(e), v: VENUES[e.venue] || {} }))
     .filter(e => e.cat === 'theatre')
-    .map(e => ({ ...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {} }))
     .sort((a,b) => a.finDate - b.finDate);
 
   // Filtre par jour
@@ -9326,7 +9326,7 @@ function renderTheatres(){
       let cls = `tier${tier} cat-theatre`;
       if(isNow) cls += ' now-row';
       if(isPast) cls += ' past';
-      return `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
+      return `<div class="tl-row ${cls}" data-ev-idx="${e._origIdx}">
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">${ICO.theatre}</div>
         <div class="tl-main">
@@ -9397,8 +9397,8 @@ function renderEventsTab(){
 
   // Tous sauf théâtres
   const allEv = EVENTS
+    .map((e, i) => ({ ...e, _origIdx: i, finDate: parseEventFin(e), v: VENUES[e.venue] || {} }))
     .filter(e => e.cat !== 'theatre')
-    .map(e => ({ ...e, finDate: parseEventFin(e), v: VENUES[e.venue] || {} }))
     .sort((a,b) => a.finDate - b.finDate);
 
   // Rush alert : gros event (≥2000 pax) dans ±40 min
@@ -9456,7 +9456,7 @@ function renderEventsTab(){
                     : diffMin === 0 ? 'maintenant'
                     : diffMin < 60 ? `dans ${diffMin}min`
                     : `dans ${Math.floor(diffMin/60)}h${String(diffMin%60).padStart(2,'0')}`;
-      return `<div class="top-ev ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
+      return `<div class="top-ev ${cls}" data-ev-idx="${e._origIdx}">
         <div class="te-rank">
           <div class="te-rank-n">${i+1}</div>
           <div class="te-rank-l">cible</div>
@@ -9525,7 +9525,7 @@ function renderEventsTab(){
       else if(isNow) cls += ' now-row';
       else if(isSoon) cls += ' soon-row';
 
-      html += `<div class="tl-row ${cls}" data-ev-idx="${EVENTS.indexOf(e)}">
+      html += `<div class="tl-row ${cls}" data-ev-idx="${e._origIdx}">
         <div class="tl-hour">${esc(e.fin)}</div>
         <div class="tl-ico">${CAT_ICO[e.cat] || ICO.ticket}</div>
         <div class="tl-main">
