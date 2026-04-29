@@ -10196,12 +10196,46 @@ document.addEventListener('keydown', (e) => {
 ═══════════════════════════════════════════════ */
 let deferredInstallPrompt = null;
 
-// Enregistrement Service Worker (requis pour PWA install Android)
+// Enregistrement Service Worker (cache offline + auto-update transparent)
+// Stratégie : on register le SW, on check toutes les 60s s'il y a une nouvelle version,
+// et si oui on l'active immédiatement et on reload silencieusement.
+// → Les chauffeurs reçoivent les updates sans rien faire.
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => {
-      console.log('SW register failed:', err);
-    });
+    navigator.serviceWorker.register('./sw.js')
+      .then(registration => {
+        console.log('[SW] enregistré, scope:', registration.scope);
+
+        // 1) Check une nouvelle version toutes les 60s
+        setInterval(() => {
+          registration.update().catch(() => {});
+        }, 60 * 1000);
+
+        // 2) Quand une nouvelle version est trouvée et installée → active immédiatement
+        registration.addEventListener('updatefound', () => {
+          const newSW = registration.installing;
+          if(!newSW) return;
+          newSW.addEventListener('statechange', () => {
+            if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+              // Une nouvelle version est prête + il y a déjà un SW actif
+              // → on lui demande de prendre le relais immédiatement
+              console.log('[SW] nouvelle version disponible, activation...');
+              newSW.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        });
+
+        // 3) Quand le SW change de contrôleur → reload silencieux pour appliquer
+        // (déclenché par skipWaiting + clients.claim côté SW)
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if(refreshing) return;
+          refreshing = true;
+          console.log('[SW] mise à jour appliquée, reload...');
+          window.location.reload();
+        });
+      })
+      .catch(err => console.log('[SW] register failed:', err));
   });
 }
 
