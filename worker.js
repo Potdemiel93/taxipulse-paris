@@ -938,6 +938,90 @@ async function handleRequest(request) {
     }
   }
 
+  // ─── SCRAPE HEBDO : routes admin pour le scraper ───
+  // GET /scrape/run             -> Lance le scrape manuellement
+  // GET /scrape/news            -> Liste des nouveautés détectées
+  // GET /scrape/news?weeks=4    -> Nouveautés des N dernières semaines
+  // GET /scrape/health          -> État de santé du scraper
+  // POST /scrape/test-email     -> Envoie un email de test
+  if (path === '/scrape/run') {
+    const result = await runScrapeAll(null);
+    return new Response(JSON.stringify(result, null, 2), {
+      status: 200,
+      headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+    });
+  }
+
+  if (path === '/scrape/news') {
+    if (!hasKV()) {
+      return new Response(JSON.stringify({ ok: false, reason: 'kv_not_configured' }), {
+        status: 500,
+        headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+      });
+    }
+    const weeks = parseInt(url.searchParams.get('weeks') || '1', 10);
+    const since = Date.now() - weeks * 7 * 24 * 3600 * 1000;
+
+    // Liste les clés scrape:news:* récentes
+    const allNews = [];
+    try {
+      const list = await TAXI_KV.list({ prefix: 'scrape:news:' });
+      for (const k of list.keys) {
+        const rec = await TAXI_KV.get(k.name, { type: 'json' });
+        if (!rec) continue;
+        if (rec.ts && rec.ts >= since) {
+          allNews.push(rec);
+        }
+      }
+    } catch (e) {
+      return new Response(JSON.stringify({ ok: false, error: e.message }), {
+        status: 500,
+        headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+      });
+    }
+
+    return new Response(JSON.stringify({ ok: true, weeks, since: new Date(since).toISOString(), records: allNews }, null, 2), {
+      status: 200,
+      headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+    });
+  }
+
+  if (path === '/scrape/health') {
+    if (!hasKV()) {
+      return new Response(JSON.stringify({ ok: false, reason: 'kv_not_configured' }), {
+        status: 500,
+        headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+      });
+    }
+    let health = null;
+    try {
+      health = await TAXI_KV.get('scrape:health', { type: 'json' });
+    } catch (e) { health = null; }
+    return new Response(JSON.stringify({ ok: true, health: health || { last_run: null, message: 'never_run' } }, null, 2), {
+      status: 200,
+      headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+    });
+  }
+
+  if (path === '/scrape/test-email' && request.method === 'POST') {
+    const fakeResult = {
+      duration_ms: 5234,
+      news_count: 3,
+      removed_count: 1,
+      venues_ok: ['stade_france', 'bercy_arena', 'olympia'],
+      venues_ko: [{ venue: 'porte_versailles', error: 'HTTP 403 - Cloudflare bot block' }],
+      news_sample: [
+        { titre: 'TEST Concert nouveau', date: '2026-12-01', venue: 'olympia', venue_name: 'L\'Olympia' },
+        { titre: 'TEST Salon nouveau', date: '2026-11-15', venue: 'porte_versailles', venue_name: 'Porte de Versailles' }
+      ]
+    };
+    const r = await sendScrapeRecapEmail(null, fakeResult);
+    return new Response(JSON.stringify(r, null, 2), {
+      status: r.ok ? 200 : 500,
+      headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+    });
+  }
+
   // ─── PROXY SNCF (catch-all) ───
   const target = url.searchParams.get('url');
   if (!target) {
@@ -967,6 +1051,448 @@ async function handleRequest(request) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  PHASE B : SCRAPER HEBDO + EMAIL ALERT (Resend API)
+// ═══════════════════════════════════════════════════════════════════
+//
+//  Routes :
+//    GET  /scrape/run            -> Lance le scrape de tous les lieux (manuel)
+//    GET  /scrape/news           -> Voir les nouveautés détectées cette semaine
+//    GET  /scrape/news?weeks=4   -> Voir les nouveautés des 4 dernières semaines
+//    POST /scrape/test-email     -> Test l'envoi d'email (debug)
+//
+//  Cron Trigger Cloudflare (à configurer dans wrangler.toml) :
+//    [triggers]
+//    crons = ["0 6 * * 1"]   # tous les lundis à 6h UTC
+//
+//  Storage KV :
+//    scrape:state:<venue>      -> snapshot derniers events scrapés (pour détecter nouveautés)
+//    scrape:news:<YYYY-MM-DD>  -> liste des nouveautés détectées ce lundi-là
+//    scrape:health             -> état de santé du scraper (date dernier run, sites KO)
+//    scrape:lastrun            -> timestamp dernier run
+//
+//  Secrets requis (à configurer avec `wrangler secret put`) :
+//    RESEND_API_KEY            -> token Resend pour envoi email
+//    ADMIN_EMAIL               -> ton email perso pour recevoir les récaps
+
+const SCRAPE_VENUES = [
+  {
+    id: 'stade_france',
+    name: 'Stade de France',
+    url: 'https://www.stadefrance.com/fr/billetteries',
+    selector_keywords: ['concert', 'match', '2026'],
+    venue_lat: 48.9244,
+    venue_lng: 2.3601
+  },
+  {
+    id: 'bercy_arena',
+    name: 'Accor Arena (Bercy)',
+    url: 'https://www.accorarena.com/fr/agenda',
+    selector_keywords: ['concert', '2026'],
+    venue_lat: 48.8386,
+    venue_lng: 2.3786
+  },
+  {
+    id: 'defense_arena',
+    name: 'Paris La Défense Arena',
+    url: 'https://www.parisladefense-arena.com/billetterie/',
+    selector_keywords: ['concert', '2026'],
+    venue_lat: 48.8957,
+    venue_lng: 2.2294
+  },
+  {
+    id: 'adidas_arena',
+    name: 'Adidas Arena',
+    url: 'https://www.adidasarena.com/programmation',
+    selector_keywords: ['concert', '2026'],
+    venue_lat: 48.8979,
+    venue_lng: 2.3617
+  },
+  {
+    id: 'olympia',
+    name: 'L\'Olympia',
+    url: 'https://www.olympiahall.com/agenda/',
+    selector_keywords: ['concert', '2026'],
+    venue_lat: 48.8703,
+    venue_lng: 2.3290
+  },
+  {
+    id: 'zenith',
+    name: 'Zénith Paris',
+    url: 'https://le-zenith.com/program',
+    selector_keywords: ['concert', '2026'],
+    venue_lat: 48.8911,
+    venue_lng: 2.3934
+  },
+  {
+    id: 'seine_musicale',
+    name: 'La Seine Musicale',
+    url: 'https://www.laseinemusicale.com/programmation/',
+    selector_keywords: ['concert', '2026'],
+    venue_lat: 48.8264,
+    venue_lng: 2.2298
+  },
+  {
+    id: 'porte_versailles',
+    name: 'Paris Expo Porte de Versailles',
+    url: 'https://www.viparis.com/nos-lieux/paris-expo-porte-de-versailles/agenda',
+    selector_keywords: ['salon', 'expo', '2026'],
+    venue_lat: 48.8316,
+    venue_lng: 2.2879
+  },
+  {
+    id: 'villepinte',
+    name: 'Paris Nord Villepinte',
+    url: 'https://www.viparis.com/nos-lieux/paris-nord-villepinte/agenda',
+    selector_keywords: ['salon', 'expo', '2026'],
+    venue_lat: 48.9750,
+    venue_lng: 2.5167
+  }
+];
+
+const SCRAPE_HISTORY_TTL_SEC = 90 * 24 * 3600;  // garde 90 jours d'historique news
+
+// Hash simple pour identifier un event (titre + date)
+function hashEvent(ev) {
+  const str = (ev.titre || '') + '|' + (ev.date || '') + '|' + (ev.venue || '');
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h).toString(36);
+}
+
+// Parse les dates en français : "12 juin 2026", "samedi 18 juillet", etc.
+const FR_MONTHS = {
+  janvier: '01', janv: '01', février: '02', fevrier: '02', févr: '02', fevr: '02',
+  mars: '03', avril: '04', avr: '04', mai: '05', juin: '06', juillet: '07', juil: '07',
+  août: '08', aout: '08', septembre: '09', sept: '09', octobre: '10', oct: '10',
+  novembre: '11', nov: '11', décembre: '12', decembre: '12', déc: '12', dec: '12'
+};
+
+function parseFrenchDate(text, defaultYear = 2026) {
+  if (!text) return null;
+  // Match patterns : "12 juin 2026", "12 juin", "12/06/2026", "12-06-2026", "2026-06-12"
+  const cleaned = text.toLowerCase().replace(/[\s,]+/g, ' ').trim();
+
+  // ISO format
+  let m = cleaned.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+
+  // DD/MM/YYYY ou DD-MM-YYYY
+  m = cleaned.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+
+  // "12 juin 2026" ou "12 juin"
+  m = cleaned.match(/(\d{1,2})\s+([a-zéûôçèà]+)\.?\s*(\d{4})?/i);
+  if (m) {
+    const day = m[1].padStart(2, '0');
+    const monthName = m[2].replace('.', '');
+    const month = FR_MONTHS[monthName];
+    const year = m[3] || String(defaultYear);
+    if (month) return `${year}-${month}-${day}`;
+  }
+
+  return null;
+}
+
+// Parse une heure : "20h00", "20:00", "21h"
+function parseFrenchHour(text) {
+  if (!text) return null;
+  const m = text.match(/(\d{1,2})\s*[h:](\d{0,2})/);
+  if (m) {
+    const h = m[1].padStart(2, '0');
+    const min = (m[2] || '00').padStart(2, '0');
+    return `${h}:${min}`;
+  }
+  return null;
+}
+
+// Scrape un site via Browserless (si disponible) ou direct fetch
+async function scrapeVenue(venue, env) {
+  try {
+    // Tentative directe d'abord (plus rapide)
+    const r = await fetch(venue.url, {
+      headers: { 'User-Agent': UA, 'Accept-Language': 'fr-FR,fr;q=0.9' },
+      cf: { cacheTtl: 0 }
+    });
+
+    if (!r.ok) {
+      return { venue: venue.id, ok: false, error: `HTTP ${r.status}`, events: [] };
+    }
+
+    const html = await r.text();
+    const text = stripHTML(html);
+
+    // Extraction basique : on cherche des patterns "JJ mois AAAA" suivis (ou précédés) d'un titre
+    const events = extractEventsFromHTML(html, venue);
+
+    return {
+      venue: venue.id,
+      venue_name: venue.name,
+      ok: true,
+      events: events,
+      htmlLength: html.length,
+      textLength: text.length
+    };
+  } catch (e) {
+    return { venue: venue.id, ok: false, error: e.message, events: [] };
+  }
+}
+
+// Extraction heuristique d'events depuis HTML (regex multi-pattern)
+function extractEventsFromHTML(html, venue) {
+  const events = [];
+  const text = stripHTML(html);
+
+  // Pattern 1 : "Vendredi 12 juin 2026" ou "12 juin 2026" suivi d'un titre court
+  const pat1 = /([a-zéè]+\s+)?(\d{1,2})\s+(janvier|janv|février|fevrier|févr|fevr|mars|avril|avr|mai|juin|juillet|juil|août|aout|septembre|sept|octobre|oct|novembre|nov|décembre|decembre|déc|dec)\s*\.?\s*(\d{4})?/gi;
+
+  let match;
+  let lastEnd = 0;
+  const seen = new Set();
+
+  while ((match = pat1.exec(text)) !== null) {
+    const day = match[2].padStart(2, '0');
+    const monthName = match[3].toLowerCase().replace('.', '');
+    const month = FR_MONTHS[monthName];
+    const year = match[4] || '2026';
+
+    if (!month) continue;
+    const dateStr = `${year}-${month}-${day}`;
+
+    // Skip dates dans le passé (avant aujourd'hui)
+    const evDate = new Date(dateStr);
+    const now = new Date();
+    if (isNaN(evDate.getTime()) || evDate < new Date(now.getTime() - 24*3600*1000)) continue;
+
+    // Récupère un peu de contexte avant et après pour deviner le titre
+    const ctx = text.substring(Math.max(0, match.index - 100), Math.min(text.length, match.index + 200));
+    const title = guessTitle(ctx, match.index - Math.max(0, match.index - 100));
+
+    if (!title || title.length < 3) continue;
+
+    const evHash = hashEvent({ titre: title, date: dateStr, venue: venue.id });
+    if (seen.has(evHash)) continue;
+    seen.add(evHash);
+
+    events.push({
+      date: dateStr,
+      titre: title.substring(0, 100),
+      venue: venue.id,
+      venue_name: venue.name,
+      source: new URL(venue.url).hostname
+    });
+
+    // Limite à 50 events par venue (pour éviter explosion)
+    if (events.length >= 50) break;
+  }
+
+  return events;
+}
+
+function guessTitle(ctx, datePos) {
+  // Essaie d'extraire un titre court avant ou après la date
+  const before = ctx.substring(0, datePos).split(/[.!?·•|]/).pop().trim();
+  const after = ctx.substring(datePos).replace(/^[^a-zA-Z]+/, '').split(/[.!?·•|]/)[0].trim();
+
+  // Préfère après si plus court et a l'air d'un titre
+  if (after.length > 5 && after.length < 80 && /[A-Z]/.test(after)) return after;
+  if (before.length > 5 && before.length < 80) return before;
+  return after.substring(0, 80) || before.substring(0, 80);
+}
+
+// Compare ancien snapshot avec nouveaux events scrapés -> détecte nouveautés
+function diffEvents(oldEvents, newEvents) {
+  const oldHashes = new Set((oldEvents || []).map(e => hashEvent(e)));
+  const news = [];
+  const removed = [];
+
+  for (const ne of newEvents) {
+    if (!oldHashes.has(hashEvent(ne))) {
+      news.push(ne);
+    }
+  }
+
+  const newHashes = new Set(newEvents.map(e => hashEvent(e)));
+  for (const oe of (oldEvents || [])) {
+    if (!newHashes.has(hashEvent(oe))) {
+      removed.push(oe);
+    }
+  }
+
+  return { news, removed };
+}
+
+// Run le scrape complet (tous les lieux)
+async function runScrapeAll(env) {
+  if (!hasKV()) return { ok: false, reason: 'kv_not_configured' };
+
+  const startTs = Date.now();
+  const results = [];
+  const allNews = [];
+  const allRemoved = [];
+
+  for (const venue of SCRAPE_VENUES) {
+    const scraped = await scrapeVenue(venue, env);
+    results.push(scraped);
+
+    if (!scraped.ok) continue;
+
+    // Lit ancien snapshot
+    let oldSnap = null;
+    try {
+      oldSnap = await TAXI_KV.get('scrape:state:' + venue.id, { type: 'json' });
+    } catch (e) { oldSnap = null; }
+
+    // Diff
+    const oldEvents = (oldSnap && Array.isArray(oldSnap.events)) ? oldSnap.events : [];
+    const { news, removed } = diffEvents(oldEvents, scraped.events);
+
+    // Écrit nouveau snapshot
+    await TAXI_KV.put('scrape:state:' + venue.id, JSON.stringify({
+      venue: venue.id,
+      events: scraped.events,
+      ts: Date.now()
+    }), { expirationTtl: SCRAPE_HISTORY_TTL_SEC });
+
+    allNews.push(...news);
+    allRemoved.push(...removed);
+  }
+
+  // Stocke le delta sous une clé datée
+  const today = new Date().toISOString().slice(0, 10);  // YYYY-MM-DD
+  const newsRecord = {
+    date: today,
+    ts: Date.now(),
+    news: allNews,
+    removed: allRemoved,
+    venues_ok: results.filter(r => r.ok).map(r => r.venue),
+    venues_ko: results.filter(r => !r.ok).map(r => ({ venue: r.venue, error: r.error }))
+  };
+  await TAXI_KV.put('scrape:news:' + today, JSON.stringify(newsRecord), {
+    expirationTtl: SCRAPE_HISTORY_TTL_SEC
+  });
+
+  // Met à jour la santé
+  const health = {
+    last_run: Date.now(),
+    last_run_iso: new Date().toISOString(),
+    duration_ms: Date.now() - startTs,
+    venues_ok: newsRecord.venues_ok,
+    venues_ko: newsRecord.venues_ko,
+    news_count: allNews.length,
+    removed_count: allRemoved.length
+  };
+  await TAXI_KV.put('scrape:health', JSON.stringify(health));
+  await TAXI_KV.put('scrape:lastrun', String(Date.now()));
+
+  return { ok: true, ...health, news_sample: allNews.slice(0, 5) };
+}
+
+// Envoie l'email récap via Resend API
+async function sendScrapeRecapEmail(env, scrapeResult) {
+  const apiKey = (typeof env !== 'undefined' && env.RESEND_API_KEY) || (typeof RESEND_API_KEY !== 'undefined' ? RESEND_API_KEY : null);
+  const adminEmail = (typeof env !== 'undefined' && env.ADMIN_EMAIL) || (typeof ADMIN_EMAIL !== 'undefined' ? ADMIN_EMAIL : null);
+
+  if (!apiKey || !adminEmail) {
+    return { ok: false, reason: 'missing_resend_config', missing: !apiKey ? 'RESEND_API_KEY' : 'ADMIN_EMAIL' };
+  }
+
+  const status = scrapeResult.venues_ko.length > 0 ? '⚠️ Avec problèmes' : '✅ OK';
+  const subject = `[TaxiPulse] Scrape hebdo ${status} — ${scrapeResult.news_count} nouveautés`;
+
+  // Construction HTML email
+  let newsSection = '';
+  if (scrapeResult.news_count > 0) {
+    newsSection = '<h2>🆕 Nouveaux events détectés (' + scrapeResult.news_count + ')</h2><ul>';
+    for (const n of (scrapeResult.news_sample || []).slice(0, 20)) {
+      newsSection += `<li><strong>${escapeHtml(n.titre)}</strong> — ${n.date} @ ${escapeHtml(n.venue_name || n.venue)}</li>`;
+    }
+    newsSection += '</ul>';
+    if (scrapeResult.news_count > 20) {
+      newsSection += `<p>...et ${scrapeResult.news_count - 20} autres. Voir <a href="https://taxipulse-proxy.boughida-sofiane.workers.dev/scrape/news">/scrape/news</a></p>`;
+    }
+  } else {
+    newsSection = '<p>Aucune nouveauté cette semaine.</p>';
+  }
+
+  let kosSection = '';
+  if (scrapeResult.venues_ko && scrapeResult.venues_ko.length > 0) {
+    kosSection = '<h2>⚠️ Sites en erreur</h2><ul>';
+    for (const k of scrapeResult.venues_ko) {
+      kosSection += `<li><strong>${escapeHtml(k.venue)}</strong> : ${escapeHtml(k.error || 'erreur inconnue')}</li>`;
+    }
+    kosSection += '</ul><p>Si un site est en erreur 3 semaines de suite, son scraper est probablement à mettre à jour.</p>';
+  }
+
+  const html = `<!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: auto; padding: 20px;">
+    <h1 style="color: #ea580c;">🚖 TaxiPulse — Scrape hebdo</h1>
+    <p style="color: #6b7280;">${new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+    <div style="background: #f9fafb; padding: 16px; border-radius: 8px;">
+      <p><strong>Sites OK :</strong> ${scrapeResult.venues_ok.length}/${SCRAPE_VENUES.length}</p>
+      <p><strong>Nouveautés détectées :</strong> ${scrapeResult.news_count}</p>
+      <p><strong>Durée :</strong> ${Math.round(scrapeResult.duration_ms / 1000)}s</p>
+    </div>
+    ${newsSection}
+    ${kosSection}
+    <hr style="margin: 24px 0;">
+    <p style="color: #6b7280; font-size: 12px;">Email auto envoyé par le worker Cloudflare TaxiPulse. Pour valider/rejeter les nouveautés, ouvre le Sheet Google "events".</p>
+  </body></html>`;
+
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'TaxiPulse <onboarding@resend.dev>',
+        to: [adminEmail],
+        subject: subject,
+        html: html
+      })
+    });
+    const data = await r.json();
+    return { ok: r.ok, status: r.status, response: data };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  CRON HANDLER : exécuté automatiquement par Cloudflare le lundi 6h UTC
+// ═══════════════════════════════════════════════════════════════════
+async function handleScheduled(event, env) {
+  console.log('[CRON] Lancement scrape hebdo...');
+  const result = await runScrapeAll(env);
+  console.log('[CRON] Scrape terminé :', JSON.stringify(result).substring(0, 500));
+
+  // Envoie email récap
+  const emailResult = await sendScrapeRecapEmail(env, result);
+  console.log('[CRON] Email :', JSON.stringify(emailResult).substring(0, 300));
+
+  return result;
+}
+
+
+
 addEventListener('fetch', function(event) {
   event.respondWith(handleRequest(event.request));
+});
+
+addEventListener('scheduled', function(event) {
+  event.waitUntil(handleScheduled(event, null));
 });

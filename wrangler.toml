@@ -6,3 +6,7 @@ account_id = "00f0deafc674ef380e2e2963a8b0dda8"
 [[kv_namespaces]]
 binding = "TAXI_KV"
 id = "587f2f1a5db3407ca9d3b7623abdf054"
+
+# Cron Trigger : scrape hebdomadaire tous les lundis à 6h UTC (= 7h Paris été / 8h hiver)
+[triggers]
+crons = ["0 6 * * 1"]
