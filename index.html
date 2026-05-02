@@ -6642,11 +6642,20 @@ function coefOrigineRemplissage(origine){
      o.includes('PERPIGNAN')||o.includes('BIARRITZ')||o.includes('HENDAYE')||
      o.includes('BREST')||o.includes('QUIMPER')) return 1.05;
 
+  // Normandie depuis Saint-Lazare = bien rempli (axe touristique + business Caen/Le Havre)
+  if(o.includes('CAEN')||o.includes('CHERBOURG')||o.includes('LE HAVRE')||
+     o.includes('ROUEN')||o.includes('TROUVILLE')||o.includes('DEAUVILLE')||
+     o.includes('GRANVILLE')||o.includes('DIEPPE')||o.includes('LISIEUX')) return 1.0;
+
   // Courte distance = moins plein (commuter, abonnés)
   if(o.includes('LILLE')||o.includes('AMIENS')||o.includes('ROUEN')||
      o.includes('CHARTRES')||o.includes('DREUX')||o.includes('CREIL')||
      o.includes('BEAUVAIS')||o.includes('REIMS')||o.includes('TROYES')||
      o.includes('ORLÉANS')||o.includes('ORLEANS')||o.includes('TOURS')) return 0.92;
+
+  // Transilien J/L (Mantes/Versailles/Saint-Nom) = très commuter, moins rempli sauf rush
+  if(o.includes('MANTES')||o.includes('VERSAILLES')||o.includes('SAINT-NOM')||
+     o.includes('CONFLANS')||o.includes('POISSY')||o.includes('VERNON')) return 0.85;
 
   return 1.0;
 }
@@ -7268,7 +7277,15 @@ const TYPES_AUTORISES = {
   // Bercy : Intercités (Clermont-Ferrand via Nevers/Moulins/Vichy),
   // OUIGO Train Classique (Lyon via Dijon),
   // TER Bourgogne (Dijon, Laroche) et Centre (Nevers via Montargis)
-  bercy:        ['INTERCITES','OUIGO','OUIGO_TC','TER']
+  bercy:        ['INTERCITES','OUIGO','OUIGO_TC','TER'],
+  // Saint-Lazare : TER Normandie (Caen/Cherbourg/Le Havre/Rouen/Trouville/Granville/Dieppe),
+  // Transilien J & L (Mantes/Versailles/Saint-Nom-la-Bretèche)
+  // — JAMAIS de TGV (Normandie n'a pas de LGV), JAMAIS d'Intercités
+  saint_lazare: ['TER','TRANSILIEN'],
+  // CDG 2 TGV : TGV INOUI (Lille/Lyon/Marseille/Bordeaux/Nantes/Rennes/Strasbourg/Brest),
+  // OUIGO, Eurostar (Bruxelles via interconnexion)
+  // — Pas de TER, pas d'Intercités (gare LGV uniquement, pas de réseau classique)
+  cdg_tgv:      ['INOUI','TGV','OUIGO','EUROSTAR']
 };
 
 /* Convertit le type interne en label affichable (OUIGO_TC → OUIGO) */
@@ -7310,6 +7327,31 @@ function trainType(di, gareId, origine){
        s.includes('LAUSANNE')||s.includes('ZÜRICH')||s.includes('ZURICH')||
        s.includes('BÂLE')||s.includes('BASEL')||s.includes('BERNE')||s.includes('BERN')){
       return 'LYRIA';
+    }
+  }
+
+  // ⚡ PRIORITÉ ABSOLUE : À Saint-Lazare, tout est TER ou Transilien (pas de TGV/Intercités possible)
+  if(gareId === 'saint_lazare'){
+    // Transilien J & L (Mantes, Versailles, Saint-Nom, Conflans, Poissy)
+    if(s.includes('MANTES')||s.includes('VERSAILLES')||s.includes('SAINT-NOM')||
+       s.includes('CONFLANS')||s.includes('POISSY')||s.includes('CERGY')||
+       s.includes('NANTERRE')||s.includes('GISORS')){
+      return 'TRANSILIEN';
+    }
+    // Tout le reste (Normandie) = TER
+    if(s.includes('CAEN')||s.includes('CHERBOURG')||s.includes('LE HAVRE')||
+       s.includes('ROUEN')||s.includes('TROUVILLE')||s.includes('DEAUVILLE')||
+       s.includes('GRANVILLE')||s.includes('DIEPPE')||s.includes('LISIEUX')||
+       s.includes('VERNON')||s.includes('EVREUX')||s.includes('SERQUIGNY')){
+      return 'TER';
+    }
+  }
+
+  // ⚡ PRIORITÉ ABSOLUE : À CDG TGV, destinations Bruxelles = Eurostar (interconnexion)
+  if(gareId === 'cdg_tgv'){
+    if(s.includes('BRUXELLES')||s.includes('BRUSSELS')||s.includes('BRUSSEL')||
+       s.includes('AMSTERDAM')||s.includes('MIDI')){
+      return 'EUROSTAR';
     }
   }
 
@@ -7373,6 +7415,16 @@ function trainType(di, gareId, origine){
           detecte = 'INTERCITES';
         }
       }
+      // ═══ SAINT-LAZARE : aucun TGV/Intercités possible ⇒ tout devient TER
+      // (Normandie est uniquement TER, pas de LGV)
+      else if(gareId === 'saint_lazare'){
+        detecte = 'TER';
+      }
+      // ═══ CDG TGV : pas de TER/Intercités (gare LGV pure) ⇒ remonter en INOUI
+      // Tout train arrivant à CDG TGV est forcément un train à grande vitesse
+      else if(gareId === 'cdg_tgv'){
+        if(detecte === 'TER' || detecte === 'INTERCITES') detecte = 'INOUI';
+      }
       // ═══ NORD/LYON/EST/MONTPARNASSE : Intercités impossible ⇒ TER
       else if(detecte === 'INTERCITES'){
         if(gareId === 'nord' && (s.includes('LILLE')||s.includes('DUNKERQUE')||s.includes('VALENCIENNES'))) {
@@ -7382,8 +7434,9 @@ function trainType(di, gareId, origine){
         }
       }
       else if(detecte === 'DEF'){
-        // Fallback DEF par gare : Austerlitz/Bercy = Intercités, autres = TER
+        // Fallback DEF par gare : Austerlitz/Bercy = Intercités, CDG TGV = INOUI, autres = TER
         if(gareId === 'austerlitz' || gareId === 'bercy') detecte = 'INTERCITES';
+        else if(gareId === 'cdg_tgv') detecte = 'INOUI';
         else detecte = 'TER';
       }
     }
