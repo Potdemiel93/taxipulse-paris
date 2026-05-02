@@ -322,6 +322,8 @@ dialog .sheet{
 .b-THAL,.b-THALYS{background:#7c2d12}
 .b-IC,.b-INTERCITES{background:#374151}
 .b-TER{background:#047857}
+.b-NOMAD{background:linear-gradient(135deg,#0EA5E9 0%,#0369A1 100%)} /* Bleu Normandie - identité visuelle Nomad Train */
+.b-FRECCIAROSSA{background:linear-gradient(135deg,#C8102E 0%,#8B0000 100%)} /* Rouge Italie - identité Trenitalia Frecciarossa */
 .b-LYRIA{background:#dc2626}
 .b-ICE{background:#6b21a8}
 .b-NIGHT,.b-NIGHTJET{background:#1e1b4b}
@@ -5883,7 +5885,7 @@ const GARES = [
   { id:'austerlitz',   nom:"Gare d'Austerlitz",    sub:'Intercités Sud-Ouest · Trains de nuit',    ico:'🌙', metro:'M5/10 · RER C',    sid:'stop_area:SNCF:87547000', lat:48.8424, lng:2.3654 },
   { id:'bercy',        nom:'Gare de Bercy',        sub:'Intercités Clermont-Fd · OUIGO classique', ico:'🎪', metro:'M6/14',            sid:'stop_area:SNCF:87686667', lat:48.8397, lng:2.3822 },
   { id:'saint_lazare', nom:'Saint-Lazare',         sub:'Normandie · TER · Transilien J/L',         ico:'⚓', metro:'M3/12/13/14 · RER E', sid:'stop_area:SNCF:87384008', lat:48.8763, lng:2.3252 },
-  { id:'cdg_tgv',      nom:'CDG 2 TGV',            sub:'TGV Lille · Lyon · Marseille · Eurostar',  ico:'✈️', metro:'RER B · CDGVal',     sid:'stop_area:SNCF:87271494', lat:49.0036, lng:2.5709 },
+  { id:'cdg_tgv',      nom:'CDG 2 TGV',            sub:'TGV INOUI · OUIGO · Lyria Suisse',         ico:'✈️', metro:'RER B · CDGVal',     sid:'stop_area:SNCF:87271494', lat:49.0036, lng:2.5709 },
 ];
 
 /* ═══════════════════════════════════════════════
@@ -6278,6 +6280,7 @@ const CAPACITE = {
   THALYS:    900,   // Ex-Thalys → Eurostar (rames e320)
   LYRIA:     377,   // TGV Lyria (rames POS/Duplex)
   ICE:       460,   // ICE 3 Siemens Velaro D
+  FRECCIAROSSA: 462, // Frecciarossa 1000 Trenitalia (ETR 400) — 8 voitures, 462 places
 
   // ═══ Intercités & trains classiques ═══
   // Austerlitz / Bercy = Corail rénovée 7-9 voitures, ~380 places
@@ -6288,6 +6291,7 @@ const CAPACITE = {
 
   // ═══ TER longue distance ═══
   TER:       340,   // Moyenne (Regio 2N : 500, Z 24500 : 250)
+  NOMAD:     380,   // Train Nomad (TER Normandie) — rames Omneo Premium 2N (Caen, Cherbourg, Le Havre)
 
   // ═══ RER / Transilien (filtrés à l'affichage normalement) ═══
   TRANSILIEN:1100,
@@ -6341,10 +6345,12 @@ const COEF_TYPE = {
   THALYS:     0.85,
   LYRIA:      0.78,
   ICE:        0.72,
+  FRECCIAROSSA: 0.82,  // Trenitalia bien rempli (ouvert tarifs agressifs concurrence SNCF)
   INTERCITES: 0.65,  // Plus bas (Limoges/Clermont moins demandé)
   NIGHTJET:   0.78,  // Trains de nuit complets (peu d'offre)
   NIGHT:      0.72,
   TER:        0.55,
+  NOMAD:      0.70,  // Trains Krono+ Nomad bien remplis (axe Paris-Normandie touristique + business)
   TRANSILIEN: 0.55,
   DEF:        0.65
 };
@@ -7250,42 +7256,47 @@ function navHour(s){
    Sources vérifiées : SNCF Connect, Wikipedia, SNCF TER, Lyria
 ═══════════════════════════════════════════════ */
 const TYPES_AUTORISES = {
-  // Gare du Nord : Eurostar (Londres/Bruxelles/Amsterdam), TGV INOUI (Lille/Dunkerque/Calais),
-  // OUIGO (rare), TER HDF (Amiens/Beauvais/Laon/Cambrai/Compiègne/Saint-Quentin)
-  // — JAMAIS d'Intercités
-  nord:         ['EUROSTAR','INOUI','TGV','OUIGO','TER'],
-  // Gare de Lyon : TGV Sud-Est (Lyon/Marseille/Nice/Montpellier/Perpignan),
-  // Lyria (Genève/Lausanne/Zurich/Bâle), TGV INOUI Italie (Milan/Turin) + Espagne (Barcelone),
-  // OUIGO, TER Bourgogne/Centre (Laroche-Migennes, Montargis)
-  // — PAS d'Intercités (partent de Bercy)
-  lyon:         ['INOUI','TGV','OUIGO','LYRIA','TER'],
-  // Montparnasse : TGV Atlantique (Rennes/Brest/Bordeaux/Toulouse/Nantes),
+  // Gare du Nord : Eurostar (Londres/Bruxelles/Amsterdam/Cologne), TGV INOUI (Lille/Dunkerque/Calais),
+  // OUIGO (Lille/Arras/Douai/Dunkerque/Tourcoing), OUIGO Train Classique (Bruxelles/Mons via Creil),
+  // TER HDF (Amiens/Beauvais/Laon/Cambrai/Compiègne/Saint-Quentin/Maubeuge)
+  // — JAMAIS d'Intercités, JAMAIS de TGV générique (toujours marketé INOUI)
+  nord:         ['EUROSTAR','INOUI','OUIGO','OUIGO_TC','TER'],
+  // Gare de Lyon : TGV INOUI Sud-Est (Lyon/Marseille/Nice/Montpellier/Perpignan/Italie/Espagne),
+  // FRECCIAROSSA Trenitalia (Lyon/Milan/Turin/Marseille - 14 AR/jour Paris-Lyon en 2026),
+  // Lyria (Genève/Lausanne/Zurich/Bâle), OUIGO,
+  // TER Bourgogne/Centre (Laroche-Migennes, Montargis)
+  // — PAS d'Intercités (partent de Bercy), PAS de TGV générique
+  lyon:         ['INOUI','OUIGO','LYRIA','FRECCIAROSSA','TER'],
+  // Montparnasse : TGV INOUI Atlantique (Rennes/Brest/Bordeaux/Toulouse/Nantes),
   // OUIGO, TER Normandie/Centre (Le Mans, Chartres, Granville)
-  // — PAS d'Intercités
-  montparnasse: ['INOUI','TGV','OUIGO','TER'],
-  // Gare de l'Est : TGV Est (Strasbourg/Metz/Nancy/Reims/Mulhouse),
+  // — PAS d'Intercités, PAS de TGV générique
+  montparnasse: ['INOUI','OUIGO','TER'],
+  // Gare de l'Est : TGV INOUI Est (Strasbourg/Metz/Nancy/Reims/Mulhouse),
   // ICE/DB SNCF coopération (Francfort/Stuttgart/Munich/Karlsruhe/Mannheim),
-  // Nightjet ÖBB (Berlin/Vienne), OUIGO, TER Grand Est
-  // — PAS d'Intercités
-  est:          ['INOUI','TGV','OUIGO','ICE','NIGHTJET','NIGHT','TER'],
+  // Nightjet ÖBB (Berlin/Vienne), OUIGO (Strasbourg via Champagne-Ardenne TGV depuis 2026),
+  // TER Grand Est
+  // — PAS d'Intercités, PAS de TGV générique
+  est:          ['INOUI','OUIGO','ICE','NIGHTJET','NIGHT','TER'],
   // Austerlitz : Intercités (Limoges/Brive/Toulouse/Cahors),
   // Intercités de nuit (Nice/Cerbère/Foix/Briançon),
-  // OUIGO Train Classique (Nantes/Angers/Lyon classique),
+  // OUIGO Train Classique (Nantes/Angers/Lyon classique - PAS de OUIGO grande vitesse),
+  // OUIGO grande vitesse Bordeaux à partir d'avril 2026 (3 AR/sem)
   // TER Centre-Val de Loire (Orléans/Tours/Bourges)
-  // ⚡ Plus de TGV depuis 2024 (déplacés à Montparnasse/Lyon)
+  // ⚡ Plus de TGV INOUI depuis 2024 (déplacés à Montparnasse/Lyon)
   austerlitz:   ['INTERCITES','OUIGO','OUIGO_TC','NIGHTJET','NIGHT','TER'],
   // Bercy : Intercités (Clermont-Ferrand via Nevers/Moulins/Vichy),
-  // OUIGO Train Classique (Lyon via Dijon),
+  // OUIGO Train Classique uniquement (Lyon classique via Dijon - PAS de OUIGO grande vitesse),
   // TER Bourgogne (Dijon, Laroche) et Centre (Nevers via Montargis)
-  bercy:        ['INTERCITES','OUIGO','OUIGO_TC','TER'],
-  // Saint-Lazare : TER Normandie (Caen/Cherbourg/Le Havre/Rouen/Trouville/Granville/Dieppe),
+  bercy:        ['INTERCITES','OUIGO_TC','TER'],
+  // Saint-Lazare : NOMAD Train (Caen/Cherbourg/Le Havre/Rouen/Trouville/Granville/Dieppe),
+  // TER (lignes courtes Hauts-de-France si applicable),
   // Transilien J & L (Mantes/Versailles/Saint-Nom-la-Bretèche)
-  // — JAMAIS de TGV (Normandie n'a pas de LGV), JAMAIS d'Intercités
-  saint_lazare: ['TER','TRANSILIEN'],
-  // CDG 2 TGV : TGV INOUI (Lille/Lyon/Marseille/Bordeaux/Nantes/Rennes/Strasbourg/Brest),
-  // OUIGO, Eurostar (Bruxelles via interconnexion)
+  // — JAMAIS de TGV (Normandie n'a pas de LGV), JAMAIS d'Intercités (basculés en NOMAD depuis 2020)
+  saint_lazare: ['NOMAD','TER','TRANSILIEN'],
+  // CDG 2 TGV : TGV INOUI majoritaire (Lille/Lyon/Marseille/Bordeaux/Nantes/Rennes/Strasbourg/Brest),
+  // OUIGO (Tourcoing notamment), TGV Lyria (rares liaisons Suisse), Eurostar (rares Bruxelles/Amsterdam)
   // — Pas de TER, pas d'Intercités (gare LGV uniquement, pas de réseau classique)
-  cdg_tgv:      ['INOUI','TGV','OUIGO','EUROSTAR']
+  cdg_tgv:      ['INOUI','OUIGO','LYRIA','EUROSTAR']
 };
 
 /* Convertit le type interne en label affichable (OUIGO_TC → OUIGO) */
@@ -7303,7 +7314,13 @@ function trainType(di, gareId, origine){
   if(gareId === 'nord'){
     if(s.includes('LONDON')||s.includes('LONDRES')||s.includes('PANCRAS')||s.includes('ST PANCRAS')||
        s.includes('BRUXELLES')||s.includes('BRUSSELS')||s.includes('BRUSSEL')||
-       s.includes('AMSTERDAM')||s.includes('ROTTERDAM')||s.includes('ANVERS')||s.includes('ANTWERP')){
+       s.includes('AMSTERDAM')||s.includes('ROTTERDAM')||s.includes('ANVERS')||s.includes('ANTWERP')||
+       s.includes('COLOGNE')||s.includes('KÖLN')||s.includes('KOLN')){
+      // Exception : OUIGO Train Classique vers Bruxelles via Creil/Aulnoye-Aymeries (depuis 2024)
+      // Distinct de l'Eurostar (rame TGV Eurostar e320) car c'est une rame Corail classique
+      if(s.includes('OUIGO') && (s.includes('CREIL')||s.includes('AULNOYE')||s.includes('MONS')||s.includes('TRAIN CLASSIQUE'))){
+        return 'OUIGO_TC';
+      }
       return 'EUROSTAR';
     }
   }
@@ -7321,8 +7338,14 @@ function trainType(di, gareId, origine){
     }
   }
 
-  // ⚡ PRIORITÉ ABSOLUE : À Gare de Lyon, Suisse = Lyria
+  // ⚡ PRIORITÉ ABSOLUE : À Gare de Lyon, Suisse = Lyria, Italie = Frecciarossa (Trenitalia)
   if(gareId === 'lyon'){
+    // Frecciarossa : opérateur italien Trenitalia (Lyon/Milan/Turin/Marseille)
+    // Détection par marque explicite uniquement (les destinations Lyon/Milan sont aussi desservies par INOUI)
+    if(s.includes('FRECCIAROSSA')||s.includes('FRECCIA')||s.includes('TRENITALIA')){
+      return 'FRECCIAROSSA';
+    }
+    // Lyria : Suisse (Genève, Lausanne, Zurich, Bâle, Berne)
     if(s.includes('GENÈVE')||s.includes('GENEVA')||s.includes('CORNAVIN')||
        s.includes('LAUSANNE')||s.includes('ZÜRICH')||s.includes('ZURICH')||
        s.includes('BÂLE')||s.includes('BASEL')||s.includes('BERNE')||s.includes('BERN')){
@@ -7330,29 +7353,47 @@ function trainType(di, gareId, origine){
     }
   }
 
-  // ⚡ PRIORITÉ ABSOLUE : À Saint-Lazare, tout est TER ou Transilien (pas de TGV/Intercités possible)
+  // ⚡ PRIORITÉ ABSOLUE : À Saint-Lazare, distinction NOMAD (Normandie) / TRANSILIEN (banlieue) / TER
   if(gareId === 'saint_lazare'){
-    // Transilien J & L (Mantes, Versailles, Saint-Nom, Conflans, Poissy)
+    // Transilien J & L (Mantes, Versailles, Saint-Nom, Conflans, Poissy, Cergy, Nanterre, Gisors)
     if(s.includes('MANTES')||s.includes('VERSAILLES')||s.includes('SAINT-NOM')||
        s.includes('CONFLANS')||s.includes('POISSY')||s.includes('CERGY')||
        s.includes('NANTERRE')||s.includes('GISORS')){
       return 'TRANSILIEN';
     }
-    // Tout le reste (Normandie) = TER
+    // NOMAD Train (TER Normandie) — destinations principales du réseau Krono+
     if(s.includes('CAEN')||s.includes('CHERBOURG')||s.includes('LE HAVRE')||
        s.includes('ROUEN')||s.includes('TROUVILLE')||s.includes('DEAUVILLE')||
        s.includes('GRANVILLE')||s.includes('DIEPPE')||s.includes('LISIEUX')||
-       s.includes('VERNON')||s.includes('EVREUX')||s.includes('SERQUIGNY')){
-      return 'TER';
+       s.includes('VERNON')||s.includes('EVREUX')||s.includes('ÉVREUX')||
+       s.includes('SERQUIGNY')||s.includes('BERNAY')||s.includes('YVETOT')||
+       s.includes('FÉCAMP')||s.includes('FECAMP')||s.includes('HARFLEUR')||
+       s.includes('HONFLEUR')||s.includes('NOMAD')||s.includes('OMNEO')||
+       s.includes('CABOURG')||s.includes('OUISTREHAM')||s.includes('SAINT-LÔ')||
+       s.includes('SAINT-LO')||s.includes('PONTORSON')||s.includes('MONT-SAINT-MICHEL')){
+      return 'NOMAD';
     }
   }
 
-  // ⚡ PRIORITÉ ABSOLUE : À CDG TGV, destinations Bruxelles = Eurostar (interconnexion)
+  // ⚡ PRIORITÉ ABSOLUE : À CDG TGV, distinction des marques (gare LGV pure)
   if(gareId === 'cdg_tgv'){
+    // Eurostar : Bruxelles, Amsterdam (rares liaisons via interconnexion)
     if(s.includes('BRUXELLES')||s.includes('BRUSSELS')||s.includes('BRUSSEL')||
        s.includes('AMSTERDAM')||s.includes('MIDI')){
       return 'EUROSTAR';
     }
+    // Lyria : Suisse (Genève, Lausanne, Zurich, Bâle)
+    if(s.includes('GENÈVE')||s.includes('GENEVA')||s.includes('CORNAVIN')||
+       s.includes('LAUSANNE')||s.includes('ZÜRICH')||s.includes('ZURICH')||
+       s.includes('BÂLE')||s.includes('BASEL')||s.includes('LYRIA')){
+      return 'LYRIA';
+    }
+    // OUIGO clairement marqué
+    if(s.includes('OUIGO')){
+      return 'OUIGO';
+    }
+    // Tout le reste à CDG TGV est forcément un INOUI (jamais TGV générique seul)
+    // On laisse la détection standard mais on remap TGV → INOUI plus bas dans la correction
   }
 
   let detecte = 'DEF';
@@ -7360,6 +7401,7 @@ function trainType(di, gareId, origine){
   // Détection explicite par nom de marque
   if(s.includes('EUROSTAR'))                 detecte = 'EUROSTAR';
   else if(s.includes('THALYS'))              detecte = 'EUROSTAR'; // Thalys devenu Eurostar en 2024
+  else if(s.includes('FRECCIAROSSA')||s.includes('FRECCIA')||s.includes('TRENITALIA')) detecte = 'FRECCIAROSSA';
   else if(s.includes('LYRIA'))               detecte = 'LYRIA';
   else if(s.includes('NIGHTJET')||s.includes('NIGHT JET')) detecte = 'NIGHTJET';
   else if(s.includes('DB SNCF')||s.includes('ICE')||s.includes('RAILJET')) detecte = 'ICE';
@@ -7415,15 +7457,31 @@ function trainType(di, gareId, origine){
           detecte = 'INTERCITES';
         }
       }
-      // ═══ SAINT-LAZARE : aucun TGV/Intercités possible ⇒ tout devient TER
-      // (Normandie est uniquement TER, pas de LGV)
-      else if(gareId === 'saint_lazare'){
-        detecte = 'TER';
+      // ═══ TGV générique sur les grandes gares Nord/Lyon/Montparnasse/Est/CDG → INOUI
+      // Toutes ces gares marketent leur TGV en TGV INOUI (depuis 2017)
+      else if(detecte === 'TGV' &&
+              (gareId === 'nord' || gareId === 'lyon' || gareId === 'montparnasse' ||
+               gareId === 'est'  || gareId === 'cdg_tgv')){
+        detecte = 'INOUI';
       }
-      // ═══ CDG TGV : pas de TER/Intercités (gare LGV pure) ⇒ remonter en INOUI
-      // Tout train arrivant à CDG TGV est forcément un train à grande vitesse
+      // ═══ SAINT-LAZARE : aucun TGV/Intercités possible
+      // Tout train Normandie incompatible → NOMAD, sinon TER (Transilien gardé séparément)
+      else if(gareId === 'saint_lazare'){
+        if(s.includes('CAEN')||s.includes('CHERBOURG')||s.includes('LE HAVRE')||
+           s.includes('ROUEN')||s.includes('TROUVILLE')||s.includes('DEAUVILLE')||
+           s.includes('GRANVILLE')||s.includes('DIEPPE')||s.includes('LISIEUX')||
+           s.includes('VERNON')||s.includes('EVREUX')||s.includes('ÉVREUX')||
+           s.includes('SERQUIGNY')||s.includes('BERNAY')||s.includes('YVETOT')||
+           s.includes('FÉCAMP')||s.includes('FECAMP')){
+          detecte = 'NOMAD';
+        } else {
+          detecte = 'TER';
+        }
+      }
+      // ═══ CDG TGV : pas de TER/Intercités/TGV générique (gare LGV pure)
+      // Tout train arrivant à CDG TGV est un INOUI (à défaut d'autre marque détectée)
       else if(gareId === 'cdg_tgv'){
-        if(detecte === 'TER' || detecte === 'INTERCITES') detecte = 'INOUI';
+        if(detecte === 'TER' || detecte === 'INTERCITES' || detecte === 'TGV') detecte = 'INOUI';
       }
       // ═══ NORD/LYON/EST/MONTPARNASSE : Intercités impossible ⇒ TER
       else if(detecte === 'INTERCITES'){
@@ -7434,9 +7492,11 @@ function trainType(di, gareId, origine){
         }
       }
       else if(detecte === 'DEF'){
-        // Fallback DEF par gare : Austerlitz/Bercy = Intercités, CDG TGV = INOUI, autres = TER
+        // Fallback DEF par gare : Austerlitz/Bercy = Intercités, CDG TGV = INOUI,
+        // Saint-Lazare = NOMAD (axe principal Normandie), autres = TER
         if(gareId === 'austerlitz' || gareId === 'bercy') detecte = 'INTERCITES';
         else if(gareId === 'cdg_tgv') detecte = 'INOUI';
+        else if(gareId === 'saint_lazare') detecte = 'NOMAD';
         else detecte = 'TER';
       }
     }
