@@ -1,0 +1,32 @@
+venue,venue_name,titre,jours,heure_debut,heure_fin,cat,source,periode_debut,periode_fin,notes
+comedie_francaise,Comedie-Francaise Salle Richelieu,Repertoire classique alterne,Mar-Sam,20:30,23:00,theatre,comedie-francaise.fr,2026-01-01,2026-12-31,"Pieces de Moliere, Racine, Marivaux saison 2025-2026 puis 2026-2027"
+comedie_francaise,Comedie-Francaise Salle Richelieu,Matinee dimanche,Dim,14:00,16:30,theatre,comedie-francaise.fr,2026-01-01,2026-12-31,Matinee dominicale theatre classique
+chatelet,Theatre du Chatelet,Productions musicales et opera,Lun-Sam,20:00,22:30,theatre,chatelet.com,2026-01-01,2026-12-31,Programmation lyrique et musicale variable
+mogador,Theatre Mogador,Comedie musicale Stage Entertainment,Mar-Sam,20:00,22:30,theatre,stage-entertainment.fr,2026-01-01,2026-07-31,"Saison comedie musicale (Mamma Mia, Roi Lion ou autre - verifier prog)"
+mogador,Theatre Mogador,Matinee weekend,Sam-Dim,15:00,17:30,theatre,stage-entertainment.fr,2026-01-01,2026-07-31,Matinee weekend
+mogador,Theatre Mogador,Comedie musicale rentree,Mar-Dim,20:00,22:30,theatre,stage-entertainment.fr,2026-09-01,2026-12-31,Saison automne-hiver
+marigny,Theatre Marigny,Spectacles musicaux et comedies,Mar-Sam,20:00,22:30,theatre,theatremarigny.fr,2026-01-01,2026-12-31,Programmation eclectique
+folies_bergere,Folies Bergere,Cabaret et variete,Mar-Sam,20:00,22:30,theatre,foliesbergere.com,2026-01-01,2026-12-31,Programmation variete musicale
+bobino,Bobino,One-man-shows et concerts,Mar-Sam,20:30,22:30,theatre,bobino.fr,2026-01-01,2026-12-31,Humour et concerts intimistes
+comedie_paris,Comedie de Paris,Comedies et boulevards,Mar-Sam,21:00,23:00,theatre,comediedeparis.com,2026-01-01,2026-12-31,Comedies populaires
+theatre_antoine,Theatre Antoine,Pieces et comedies,Mar-Sam,21:00,23:00,theatre,theatre-antoine.com,2026-01-01,2026-12-31,Theatre prive
+theatre_champs_elysees,Theatre des Champs-Elysees,Concerts et opera,Mar-Sam,20:00,22:30,theatre,theatrechampselysees.fr,2026-01-01,2026-12-31,Programmation classique et lyrique
+rond_point,Theatre du Rond-Point,Pieces contemporaines,Mar-Sam,20:30,22:30,theatre,theatredurondpoint.fr,2026-01-01,2026-12-31,Theatre contemporain
+opera_garnier,Opera Garnier,Opera et ballet,Lun-Sam,19:30,22:30,opera,operadeparis.fr,2026-01-01,2026-12-31,Programmation Opera de Paris saison 2025-2026 et 2026-2027
+opera_garnier,Opera Garnier,Matinee dimanche,Dim,14:30,17:30,opera,operadeparis.fr,2026-01-01,2026-12-31,Matinee dimanche
+opera_bastille,Opera Bastille,Opera grandes productions,Lun-Sam,19:30,22:30,opera,operadeparis.fr,2026-01-01,2026-12-31,Productions majeures Opera Paris
+opera_bastille,Opera Bastille,Matinee dimanche,Dim,14:30,17:30,opera,operadeparis.fr,2026-01-01,2026-12-31,Matinee dimanche
+moulin_rouge,Moulin Rouge,Feerie - revue cabaret,Lun-Dim,21:00,23:00,cabaret,moulinrouge.fr,2026-01-01,2026-12-31,Cabaret tous les soirs revue Feerie
+moulin_rouge,Moulin Rouge,Diner spectacle 19h,Lun-Dim,19:00,21:00,cabaret,moulinrouge.fr,2026-01-01,2026-12-31,Premier service avec diner tous les soirs
+lido2,Lido 2 Paris,Spectacle cabaret nouveau,Mar-Dim,20:00,22:30,cabaret,lido2paris.com,2026-01-01,2026-12-31,Lido transforme - spectacles theatres et music-hall
+crazy_horse,Crazy Horse Paris,Spectacle cabaret art nu,Lun-Dim,20:30,22:00,cabaret,lecrazyhorseparis.com,2026-01-01,2026-12-31,Cabaret de luxe tous les soirs
+crazy_horse,Crazy Horse Paris,Spectacle 23h,Ven-Sam,22:45,00:15,cabaret,lecrazyhorseparis.com,2026-01-01,2026-12-31,Deuxieme show vendredi-samedi
+paradis_latin,Paradis Latin,Cabaret diner-spectacle,Mer-Lun,20:00,22:30,cabaret,paradislatin.com,2026-01-01,2026-12-31,Cabaret 6 soirs sur 7 (ferme mardi)
+nouvelle_eve,La Nouvelle Eve,Cabaret revue,Mar-Sam,20:30,22:30,cabaret,lanouvelleeve.com,2026-01-01,2026-12-31,Cabaret historique
+jamel_comedy_club,Jamel Comedy Club,Stand-up plateau,Jeu-Sam,20:30,22:30,humour,jamelcomedyclub.fr,2026-01-01,2026-12-31,Plateau humoristes emergents
+edouard_vii,Theatre Edouard VII,Pieces et comedies,Mar-Sam,21:00,23:00,theatre,theatreedouardvii.com,2026-01-01,2026-12-31,Theatre prive
+madeleine,Theatre de la Madeleine,Pieces et comedies,Mar-Sam,21:00,23:00,theatre,theatredelamadeleine.com,2026-01-01,2026-12-31,Theatre prive
+theatre_paris,Theatre de Paris,Comedies et boulevards,Mar-Sam,20:30,22:30,theatre,theatredeparis.com,2026-01-01,2026-12-31,Theatre prive comedies
+theatre_michel,Theatre Michel,Boulevard et comedies,Mar-Sam,20:30,22:30,theatre,theatre-michel.fr,2026-01-01,2026-12-31,Theatre prive
+chaillot,Theatre National de Chaillot,Danse contemporaine,Mar-Sam,20:00,22:00,danse,theatre-chaillot.fr,2026-01-01,2026-12-31,Programmation danse
+comedie_champs_elysees,Comedie des Champs-Elysees,Comedies,Mar-Sam,20:30,22:30,theatre,comediedeschampselysees.com,2026-01-01,2026-12-31,Theatre prive

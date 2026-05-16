@@ -1,5 +1,5 @@
 /**
- * TaxiPulse Cloudflare Worker — V5 FINAL (FUSIONNE)
+ * TaxiPulse Cloudflare Worker — V6 (V5 + Ticketmaster)
  *
  * Endpoints :
  *   GET  /eurostar              -> scrape Eurostar (cache 120s)
@@ -8,11 +8,18 @@
  *   GET  /basetaxi?aero=cdg|orly        -> attente taxi LIVE (Browserless, cache 90s)
  *   POST /basetaxi/report               -> observation chauffeur (KV, dedup 25 min)
  *   GET  /basetaxi/crowd?aero=cdg|orly  -> mediane observations recentes
+ *   POST /event/confirm                 -> vote fin reelle event (multi-vote + geoloc)
+ *   GET  /event/confirm?eventId=...     -> consolidated votes
+ *   GET  /events/health                 -> stats fraicheur Sheet
+ *   GET  /events/checklist              -> liste liens a verifier
+ *   POST /events/test-email             -> envoie email de test
+ *   POST /events/run-recap              -> force envoi recap hebdo
+ *   GET  /events/ticketmaster           -> events Ticketmaster Paris (cache 6h)  [NEW V6]
  *   GET  /?url=...              -> proxy SNCF (fallback, catch-all)
  *
  * Bindings requis dans wrangler.toml :
  *   - kv_namespaces : TAXI_KV (pour basetaxi)
- *   - secrets       : BROWSERLESS_TOKEN (pour /basetaxi LIVE)
+ *   - secrets       : BROWSERLESS_TOKEN, RESEND_API_KEY, ADMIN_EMAIL, TICKETMASTER_KEY
  */
 
 const CORS_HEADERS = {
@@ -34,8 +41,44 @@ const EUROSTAR_CACHE_TTL = 120 * 1000;
 const EUROSTAR_URLS = [
   { src: 'Londres St Pancras',  url: 'https://www.eurostar.com/fr-fr/voyage/horaires/7015400/8727100/londres-st-pancras-intl/paris-gare-du-nord' },
   { src: 'Bruxelles-Midi',      url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8814001/8727100/bruxelles-midi/paris-gare-du-nord' },
-  { src: 'Amsterdam Centraal',  url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8400058/8727100/amsterdam-centraal/paris-gare-du-nord' }
+  { src: 'Amsterdam Centraal',  url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8400058/8727100/amsterdam-centraal/paris-gare-du-nord' },
+  { src: 'Cologne Hbf',         url: 'https://www.eurostar.com/fr-fr/voyage/horaires/8015458/8727100/cologne-hbf/paris-gare-du-nord' }
 ];
+
+// Mapping origine textuelle (depuis le HTML Eurostar) -> nom canonique
+const ORIGIN_NORMALIZE = {
+  'londres':       'Londres St Pancras',
+  'london':        'Londres St Pancras',
+  'st pancras':    'Londres St Pancras',
+  'bruxelles':     'Bruxelles-Midi',
+  'brussels':      'Bruxelles-Midi',
+  'midi':          'Bruxelles-Midi',
+  'amsterdam':     'Amsterdam Centraal',
+  'centraal':      'Amsterdam Centraal',
+  'cologne':       'Cologne Hbf',
+  'koln':          'Cologne Hbf',
+  'köln':          'Cologne Hbf',
+  'rotterdam':     'Rotterdam Centraal',
+  'lille':         'Lille Europe',
+  'antwerp':       'Anvers-Central',
+  'anvers':        'Anvers-Central',
+  'liege':         'Liege-Guillemins',
+  'aachen':        'Aix-la-Chapelle',
+  'dusseldorf':    'Dusseldorf Hbf',
+  'düsseldorf':    'Dusseldorf Hbf',
+  'essen':         'Essen Hbf',
+  'duisburg':      'Duisburg Hbf',
+  'dortmund':      'Dortmund Hbf'
+};
+
+function normalizeOrigin(rawText) {
+  if (!rawText) return null;
+  const lower = rawText.toLowerCase().trim();
+  for (const key in ORIGIN_NORMALIZE) {
+    if (lower.indexOf(key) >= 0) return ORIGIN_NORMALIZE[key];
+  }
+  return null;
+}
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
 
@@ -46,10 +89,10 @@ const BASETAXI_URLS = {
   orly: 'https://infotaxi.parisaeroport.fr/orly'
 };
 
-const BASETAXI_CACHE_TTL_SEC      = 90;       // cache LIVE 90s
-const REPORT_DEDUP_WINDOW_SEC     = 25 * 60;  // dedup IP : 25 min
-const REPORTS_KEEP_WINDOW_SEC     = 30 * 60;  // garde reports : 30 min
-const CROWD_VALIDITY_WINDOW_SEC   = 25 * 60;  // mediane : observations < 25 min
+const BASETAXI_CACHE_TTL_SEC      = 90;
+const REPORT_DEDUP_WINDOW_SEC     = 25 * 60;
+const REPORTS_KEEP_WINDOW_SEC     = 30 * 60;
+const CROWD_VALIDITY_WINDOW_SEC   = 25 * 60;
 
 function decodeEntities(s) {
   return s
@@ -77,13 +120,174 @@ function stripHTML(html) {
   ).replace(/\s+/g, ' ').trim();
 }
 
+// ═══════════════════════════════════════════════════════════════════
+//  EUROSTAR : PARSING JSON-FIRST
+// ═══════════════════════════════════════════════════════════════════
+
+function parseISODateTimeToHM(s) {
+  if (!s || typeof s !== 'string') return null;
+  const m = s.match(/(\d{2}):(\d{2}):/);
+  return m ? (m[1] + ':' + m[2]) : null;
+}
+
+function extractServiceObjects(html) {
+  const services = [];
+  const trainNumberRegex = /"trainNumber":"(\d{4})"/g;
+  let match;
+  const seenStarts = new Set();
+
+  while ((match = trainNumberRegex.exec(html)) !== null) {
+    const anchorPos = match.index;
+    let depth = 0;
+    let serviceStart = -1;
+    for (let i = anchorPos; i >= 0; i--) {
+      const c = html[i];
+      if (c === '}') depth++;
+      else if (c === '{') {
+        if (depth === 0) {
+          serviceStart = i;
+          break;
+        } else {
+          depth--;
+        }
+      }
+    }
+
+    if (serviceStart < 0) continue;
+
+    depth = 0;
+    let parentStart = -1;
+    for (let i = serviceStart - 1; i >= 0; i--) {
+      const c = html[i];
+      if (c === '}') depth++;
+      else if (c === '{') {
+        if (depth === 0) {
+          parentStart = i;
+          break;
+        } else {
+          depth--;
+        }
+      }
+    }
+
+    if (parentStart < 0 || seenStarts.has(parentStart)) continue;
+    seenStarts.add(parentStart);
+
+    depth = 0;
+    let parentEnd = -1;
+    for (let i = parentStart; i < html.length; i++) {
+      const c = html[i];
+      if (c === '{') depth++;
+      else if (c === '}') {
+        depth--;
+        if (depth === 0) {
+          parentEnd = i + 1;
+          break;
+        }
+      }
+    }
+
+    if (parentEnd < 0) continue;
+
+    const objStr = html.substring(parentStart, parentEnd);
+
+    if (objStr.indexOf('"trainNumber":"' + match[1] + '"') < 0) continue;
+    if (objStr.indexOf('"origin"') < 0 || objStr.indexOf('"destination"') < 0) continue;
+
+    services.push({ json: objStr, trainNumber: match[1] });
+  }
+
+  return services;
+}
+
+function parseServiceJSON(serviceStr) {
+  try {
+    const obj = JSON.parse(serviceStr);
+
+    const carrier = obj.model && obj.model.carrier ? obj.model.carrier : '';
+    const trainNumber = obj.model && obj.model.trainNumber ? obj.model.trainNumber : '';
+    if (!carrier || !trainNumber) return null;
+
+    const num = carrier.toUpperCase() + trainNumber;
+
+    const origin = obj.origin || {};
+    const originStation = origin.station || {};
+    const originName = (originStation.name && (originStation.name.fr || originStation.name.en)) || null;
+    const originUic = originStation.uic || null;
+
+    const dest = obj.destination || {};
+    const destStation = dest.station || {};
+    const destUic = destStation.uic || null;
+    if (destUic !== '8727100') return null;
+
+    const departTheo = parseISODateTimeToHM(origin.model && origin.model.scheduledDepartureDateTime);
+    const arriveeTheo = parseISODateTimeToHM(dest.model && dest.model.scheduledArrivalDateTime);
+    const arriveeReelle = parseISODateTimeToHM(dest.model && dest.model.expectedArrivalDateTime);
+
+    const isCancelled = (obj.model && obj.model.isCancelled) ||
+                        (origin.model && origin.model.isCancelled) ||
+                        (dest.model && dest.model.isCancelled);
+    const arrivalStatus = (dest.model && dest.model.arrivalStatus) || '';
+
+    let status = 'ok';
+    if (isCancelled || arrivalStatus === 'CANCELLED') {
+      status = 'cancelled';
+    } else if (arrivalStatus === 'DELAYED' || (arriveeReelle && arriveeReelle !== arriveeTheo)) {
+      status = 'delayed';
+    } else if (arrivalStatus === 'ARRIVED') {
+      status = 'arrived';
+    }
+
+    const newTime = (status === 'delayed' && arriveeReelle) ? arriveeReelle : null;
+
+    let delayMinutes = null;
+    const destNews = dest.news;
+    if (Array.isArray(destNews) && destNews.length > 0) {
+      for (const n of destNews) {
+        if (n && n.ssnRelation && typeof n.ssnRelation.arrivalDelay === 'number' && n.ssnRelation.arrivalDelay > 0) {
+          delayMinutes = n.ssnRelation.arrivalDelay;
+          break;
+        }
+      }
+    }
+
+    return {
+      num: num,
+      train: {
+        status: status,
+        newTime: newTime,
+        arriveeParis: arriveeTheo,
+        departOrigine: departTheo,
+        origine: normalizeOrigin(originName) || originName || 'Inconnue',
+        originUic: originUic,
+        delayMinutes: delayMinutes
+      }
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
 function parseHTML(html, src) {
   const trains = {};
 
-  // Strip HTML pour avoir du texte pur
-  const text = stripHTML(html);
+  try {
+    const services = extractServiceObjects(html);
+    for (const svc of services) {
+      const parsed = parseServiceJSON(svc.json);
+      if (!parsed) continue;
+      const existing = trains[parsed.num];
+      if (!existing ||
+          (existing.status === 'ok' && parsed.train.status !== 'ok') ||
+          (existing.status === 'delayed' && parsed.train.status === 'cancelled')) {
+        trains[parsed.num] = parsed.train;
+      }
+    }
+  } catch (e) { /* fallback */ }
 
-  // Normalise accents -> ASCII pour robustesse max (evite probleme V8 sur [ée])
+  if (Object.keys(trains).length > 0) return trains;
+
+  const text = stripHTML(html);
   const textNorm = text
     .replace(/[éèêë]/g, 'e')
     .replace(/[àâä]/g, 'a')
@@ -92,26 +296,20 @@ function parseHTML(html, src) {
     .replace(/[ùûü]/g, 'u')
     .replace(/[ç]/g, 'c');
 
-  // Regex riche: numero + statut INLINE optionnel + origine + destination + heure depart + heure arrivee
-  // Format Eurostar: "train ... ER 9304 Bruxelles-Midi Paris Gare du Nord 07:00 08:38"
-  //                  "train ... ES 9422 - Retarde Bruxelles-Midi Paris Gare du Nord 10:13 11:42"
-  const richRegex = /train[\s:.\-]*(ES|ER)\s*(\d{4})\s*([-\-]\s*(Retarde|Train\s+annule|Cancelled|Delayed|Annule))?\s+[A-Z][A-Za-z\-\s']+?\s+Paris\s+Gare\s+du\s+Nord\s+(\d{2}):(\d{2})\s+(\d{2}):(\d{2})/gi;
+  const richRegex = /train[\s:.\-]*(ES|ER)\s*(\d{4})\s*([-\-]\s*(Retarde|Train\s+annule|Cancelled|Delayed|Annule))?\s+([A-Z][A-Za-z\-\s']+?)\s+Paris\s+Gare\s+du\s+Nord\s+(\d{2}):(\d{2})\s+(\d{2}):(\d{2})/gi;
 
   let m;
   while ((m = richRegex.exec(textNorm)) !== null) {
     const num = m[1].toUpperCase() + m[2];
     const statusTxt = (m[4] || '').toLowerCase();
-    const departH = m[5] + ':' + m[6];  // heure depart (Bruxelles/Londres/Amsterdam)
-    const arriveeH = m[7] + ':' + m[8]; // heure arrivee Paris Nord theorique
+    const originRaw = m[5];
+    const departH = m[6] + ':' + m[7];
+    const arriveeH = m[8] + ':' + m[9];
 
     let status = 'ok';
-    if (statusTxt.indexOf('annul') >= 0 || statusTxt.indexOf('cancel') >= 0) {
-      status = 'cancelled';
-    } else if (statusTxt.indexOf('retard') >= 0 || statusTxt.indexOf('delay') >= 0) {
-      status = 'delayed';
-    }
+    if (statusTxt.indexOf('annul') >= 0 || statusTxt.indexOf('cancel') >= 0) status = 'cancelled';
+    else if (statusTxt.indexOf('retard') >= 0 || statusTxt.indexOf('delay') >= 0) status = 'delayed';
 
-    // Pour retards: chercher "Env. HH:MM" dans 1500 chars apres (heure reelle arrivee)
     let newTime = null;
     if (status === 'delayed') {
       const snippet = textNorm.substring(m.index, m.index + 1500);
@@ -121,17 +319,19 @@ function parseHTML(html, src) {
       if (last) newTime = last[1] + ':' + last[2];
     }
 
+    const originNormalized = normalizeOrigin(originRaw) || src;
     const existing = trains[num];
-    // Priorise le statut le plus grave trouve
     if (!existing ||
         (existing.status === 'ok' && status !== 'ok') ||
         (existing.status === 'delayed' && status === 'cancelled')) {
       trains[num] = {
         status: status,
         newTime: newTime,
-        arriveeParis: arriveeH,  // heure arrivee theorique Paris Nord
-        departOrigine: departH,  // heure depart origine
-        origine: src
+        arriveeParis: arriveeH,
+        departOrigine: departH,
+        origine: originNormalized,
+        originUic: null,
+        delayMinutes: null
       };
     }
   }
@@ -175,9 +375,40 @@ async function scrapeEurostar(debug) {
     diag: debug ? [] : undefined
   };
 
+  const ORIGIN_PRIORITY = {
+    'Cologne Hbf':         100,
+    'Amsterdam Centraal':   90,
+    'Rotterdam Centraal':   85,
+    'Anvers-Central':       80,
+    'Bruxelles-Midi':       50,
+    'Liege-Guillemins':     45,
+    'Lille Europe':         40,
+    'Londres St Pancras':  100
+  };
+  function originScore(name) {
+    return ORIGIN_PRIORITY[name] || 30;
+  }
+
   const promises = EUROSTAR_URLS.map(async function(item) {
     const r = await fetchOne(item.url, item.src);
-    for (const k in r.trains) result.trains[k] = r.trains[k];
+    for (const k in r.trains) {
+      const incoming = r.trains[k];
+      const existing = result.trains[k];
+      if (!existing) {
+        result.trains[k] = incoming;
+      } else {
+        const sIncoming = originScore(incoming.origine);
+        const sExisting = originScore(existing.origine);
+        if (sIncoming > sExisting) {
+          result.trains[k] = incoming;
+        } else if (sIncoming === sExisting) {
+          const order = { ok: 0, arrived: 1, delayed: 2, cancelled: 3 };
+          if ((order[incoming.status] || 0) > (order[existing.status] || 0)) {
+            result.trains[k] = incoming;
+          }
+        }
+      }
+    }
     if (debug) result.diag.push(r.diag);
   });
 
@@ -193,7 +424,6 @@ async function scrapeEurostar(debug) {
 //  BASETAXI : 3 NIVEAUX LIVE / CROWD / ESTIM
 // ═══════════════════════════════════════════════════════════════════
 
-// Helpers KV avec fallback gracieux si TAXI_KV pas configure
 function hasKV() {
   try {
     return typeof TAXI_KV !== 'undefined' && TAXI_KV !== null;
@@ -210,10 +440,15 @@ function hasBrowserless() {
   }
 }
 
-// Parse le HTML rendu par Browserless pour extraire le temps d'attente
-// Strategie : on cherche un nombre suivi de "min" ou "minute" dans un contexte plausible
-// Le site infotaxi affiche en gros des cartes par terminal. On prend la valeur max
-// (le pire des terminaux) pour etre conservateur cote chauffeur.
+// ═══ TICKETMASTER : check if key configured ═══
+function hasTicketmaster() {
+  try {
+    return typeof TICKETMASTER_KEY !== 'undefined' && TICKETMASTER_KEY && TICKETMASTER_KEY.length > 10;
+  } catch (e) {
+    return false;
+  }
+}
+
 function parseBaseTaxiHTML(html) {
   if (!html || html.length < 100) {
     return { wait_min: null, error: 'html_too_short', candidates: [] };
@@ -229,18 +464,15 @@ function parseBaseTaxiHTML(html) {
 
   const candidates = [];
 
-  // Pattern 1 : "XX min" ou "XX minutes"
   const re1 = /(\d{1,3})\s*(?:min(?:utes?)?)\b/g;
   let m;
   while ((m = re1.exec(textNorm)) !== null) {
     const n = parseInt(m[1], 10);
-    // Filtre valeurs absurdes : attente taxi entre 0 et 240 min raisonnable
     if (n >= 0 && n <= 240) {
       candidates.push({ value: n, idx: m.index, ctx: textNorm.substr(Math.max(0, m.index - 30), 60) });
     }
   }
 
-  // Pattern 2 : "attente : XX" ou "temps : XX"
   const re2 = /(?:attente|temps|wait)[\s:]*(\d{1,3})/g;
   while ((m = re2.exec(textNorm)) !== null) {
     const n = parseInt(m[1], 10);
@@ -253,30 +485,23 @@ function parseBaseTaxiHTML(html) {
     return { wait_min: null, error: 'no_match', candidates: [] };
   }
 
-  // Si on a des "strong" matches (avec mot-cle attente/temps), on les privilegie
   const strong = candidates.filter(c => c.strong);
   const pool = strong.length ? strong : candidates;
-
-  // Prend le max (conservateur : pire terminal)
   const max = pool.reduce((a, b) => b.value > a.value ? b : a, pool[0]);
 
-  return {
-    wait_min: max.value,
-    candidates: candidates.slice(0, 10)  // garde 10 max pour debug
-  };
+  return { wait_min: max.value, candidates: candidates.slice(0, 10) };
 }
 
 async function fetchBaseTaxiLive(aero) {
   const cacheKey = 'basetaxi_live_' + aero;
 
-  // Lecture cache KV
   if (hasKV()) {
     try {
       const cached = await TAXI_KV.get(cacheKey, { type: 'json' });
       if (cached && cached.ts && (Date.now() - cached.ts) < BASETAXI_CACHE_TTL_SEC * 1000) {
         return Object.assign({ cached: true }, cached);
       }
-    } catch (e) { /* fallthrough */ }
+    } catch (e) {}
   }
 
   if (!hasBrowserless()) {
@@ -292,7 +517,6 @@ async function fetchBaseTaxiLive(aero) {
     return { ok: false, reason: 'invalid_aero', message: 'aero must be cdg or orly' };
   }
 
-  // Appel Browserless.io /content (renvoie HTML rendu apres JS)
   let html = '';
   try {
     const resp = await fetch('https://chrome.browserless.io/content?token=' + BROWSERLESS_TOKEN, {
@@ -301,7 +525,7 @@ async function fetchBaseTaxiLive(aero) {
       body: JSON.stringify({
         url: targetUrl,
         gotoOptions: { waitUntil: 'networkidle2', timeout: 25000 },
-        waitFor: 2500  // attendre 2.5s pour rendu JS
+        waitFor: 2500
       })
     });
     if (!resp.ok) {
@@ -332,17 +556,15 @@ async function fetchBaseTaxiLive(aero) {
     source: 'browserless+infotaxi'
   };
 
-  // Stocke dans KV
   if (hasKV()) {
     try {
       await TAXI_KV.put(cacheKey, JSON.stringify(result), { expirationTtl: BASETAXI_CACHE_TTL_SEC + 30 });
-    } catch (e) { /* ignore */ }
+    } catch (e) {}
   }
 
   return result;
 }
 
-// Extrait IP client (pour dedup reports)
 function getClientIP(request) {
   return request.headers.get('cf-connecting-ip') ||
          request.headers.get('x-forwarded-for') ||
@@ -363,21 +585,18 @@ async function reportTaxiWait(aero, mins, request) {
   }
 
   const ip = getClientIP(request);
-  const ipHash = await hashIP(ip);  // pour pas stocker IP en clair
+  const ipHash = await hashIP(ip);
   const key = 'basetaxi_reports_' + aero;
 
   let reports = [];
   try {
     const stored = await TAXI_KV.get(key, { type: 'json' });
     if (Array.isArray(stored)) reports = stored;
-  } catch (e) { /* fresh list */ }
+  } catch (e) {}
 
   const now = Date.now();
-
-  // Prune older than REPORTS_KEEP_WINDOW
   reports = reports.filter(r => (now - r.ts) < REPORTS_KEEP_WINDOW_SEC * 1000);
 
-  // Dedup: si meme IP < 25 min, on update au lieu d'ajouter
   const existingIdx = reports.findIndex(r =>
     r.ipHash === ipHash && (now - r.ts) < REPORT_DEDUP_WINDOW_SEC * 1000
   );
@@ -418,28 +637,21 @@ async function hashIP(ip) {
 }
 
 async function getCrowdWait(aero) {
-  if (!hasKV()) {
-    return { ok: false, reason: 'kv_not_configured' };
-  }
-  if (!BASETAXI_URLS[aero]) {
-    return { ok: false, reason: 'invalid_aero' };
-  }
+  if (!hasKV()) return { ok: false, reason: 'kv_not_configured' };
+  if (!BASETAXI_URLS[aero]) return { ok: false, reason: 'invalid_aero' };
 
   const key = 'basetaxi_reports_' + aero;
   let reports = [];
   try {
     const stored = await TAXI_KV.get(key, { type: 'json' });
     if (Array.isArray(stored)) reports = stored;
-  } catch (e) { /* empty */ }
+  } catch (e) {}
 
   const now = Date.now();
   const valid = reports.filter(r => (now - r.ts) < CROWD_VALIDITY_WINDOW_SEC * 1000);
 
-  if (!valid.length) {
-    return { ok: true, aero: aero, wait_min: null, count: 0 };
-  }
+  if (!valid.length) return { ok: true, aero: aero, wait_min: null, count: 0 };
 
-  // Mediane
   const sorted = valid.map(r => r.mins).sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   const median = sorted.length % 2
@@ -461,22 +673,18 @@ async function getCrowdWait(aero) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  EVENT CONFIRM v2 : multi-vote + geoloc + quorum + anti-fraud
-//  Storage KV : key = "evconfirm:" + eventId
-//  Format : { eventId, votes:[{driverId, ipHash, ts, finReelle, status, lat, lng, distM}], finalized:{...} }
-//  Validite : 90 min
+//  EVENT CONFIRM v2
 // ═══════════════════════════════════════════════════════════════════
 
-const EVENT_CONFIRM_TTL_SEC = 90 * 60;          // 90 min
-const VOTE_DEDUP_SEC = 5 * 60;                  // 1 vote / 5 min par driverId
-const QUORUM_FINISHED = 2;                      // votes 'finished' requis
-const QUORUM_VETO = 2;                          // votes 'not_finished' qui bloquent
-const MAX_VENUE_DIST_M = 800;                   // 800m du venue max
-const MAX_DRIVERS_PER_IP = 3;                   // soft flag si 1 IP a >3 driverIds
-const VOTE_WINDOW_BEFORE_MIN = 30;              // vote possible 30min avant fin theorique
-const VOTE_WINDOW_AFTER_MIN = 90;               // vote possible 90min apres fin theorique
+const EVENT_CONFIRM_TTL_SEC = 90 * 60;
+const VOTE_DEDUP_SEC = 5 * 60;
+const QUORUM_FINISHED = 2;
+const QUORUM_VETO = 2;
+const MAX_VENUE_DIST_M = 800;
+const MAX_DRIVERS_PER_IP = 3;
+const VOTE_WINDOW_BEFORE_MIN = 30;
+const VOTE_WINDOW_AFTER_MIN = 90;
 
-// Calcul distance Haversine (en metres)
 function haversineM(lat1, lng1, lat2, lng2) {
   const R = 6371000;
   const toRad = d => d * Math.PI / 180;
@@ -488,8 +696,6 @@ function haversineM(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// Parse "HH:MM" + jour ISO -> timestamp ms (Europe/Paris assume UTC+1/+2 par defaut local Cloudflare)
-// On utilise une heuristique : si dayStr fourni, on le combine, sinon on prend aujourd'hui.
 function parseFinTimestamp(dayStr, finStr) {
   try {
     if (!finStr || !/^\d{2}:\d{2}$/.test(finStr)) return null;
@@ -505,28 +711,22 @@ function parseFinTimestamp(dayStr, finStr) {
   } catch (e) { return null; }
 }
 
-// Calcule le statut consolide a partir des votes
 function consolidateVotes(votes, finTs) {
   const now = Date.now();
-  // Garde uniquement votes <90min
   const valid = votes.filter(v => (now - v.ts) < EVENT_CONFIRM_TTL_SEC * 1000);
 
   const finishedVotes = valid.filter(v => v.status === 'finished');
   const notFinishedVotes = valid.filter(v => v.status === 'not_finished');
   const etaVotes = valid.filter(v => v.status === 'eta');
 
-  // Veto : si on a >=2 'not_finished' recents (<15min), on rejette les 'finished'
   const recentVeto = notFinishedVotes.filter(v => (now - v.ts) < 15 * 60 * 1000);
   const vetoActive = recentVeto.length >= QUORUM_VETO;
 
-  // Confirmation : >=2 votes 'finished' uniques (par driverId) + pas de veto
   const uniqueDrivers = new Set(finishedVotes.map(v => v.driverId));
   const confirmed = uniqueDrivers.size >= QUORUM_FINISHED && !vetoActive;
 
-  // Auto-fallback : si finTs connu et now > finTs + 15min, on considere fini
   const autoFinished = finTs && (now > finTs + 15 * 60 * 1000);
 
-  // Calcule finReelle consolide : mediane des finReelle des votes 'finished'
   let finReelle = null;
   if (finishedVotes.length) {
     const times = finishedVotes
@@ -543,7 +743,6 @@ function consolidateVotes(votes, finTs) {
                 String(medMin % 60).padStart(2, '0');
   }
 
-  // ETA mediane des votes 'eta' recents
   let etaReelle = null;
   if (etaVotes.length && !confirmed) {
     const times = etaVotes
@@ -584,14 +783,12 @@ async function storeEventConfirm(body, request) {
   const status = ['finished', 'eta', 'not_finished'].indexOf(body.status) >= 0
     ? body.status : 'finished';
 
-  // finReelle requis sauf pour not_finished
   if (status !== 'not_finished') {
     if (!body.finReelle || !/^\d{2}:\d{2}$/.test(body.finReelle)) {
       return { ok: false, reason: 'invalid_finReelle', expected: 'HH:MM' };
     }
   }
 
-  // driverId requis (cote frontend on en genere un en localStorage)
   if (!body.driverId || typeof body.driverId !== 'string' || body.driverId.length < 8) {
     return { ok: false, reason: 'missing_driverId' };
   }
@@ -601,27 +798,22 @@ async function storeEventConfirm(body, request) {
   const key = 'evconfirm:' + body.eventId;
   const now = Date.now();
 
-  // Lit existant
   let record = null;
   try { record = await TAXI_KV.get(key, { type: 'json' }); } catch (e) { record = null; }
   if (!record || !Array.isArray(record.votes)) {
     record = { eventId: body.eventId, votes: [] };
   }
 
-  // Prune votes >90min
   record.votes = record.votes.filter(v => (now - v.ts) < EVENT_CONFIRM_TTL_SEC * 1000);
 
-  // Anti-spam : meme driverId < 5min ?
   const recentSame = record.votes.find(v =>
     v.driverId === body.driverId && (now - v.ts) < VOTE_DEDUP_SEC * 1000
   );
   if (recentSame) {
-    // Update plutot que rejeter (chauffeur veut corriger son vote)
     recentSame.status = status;
     recentSame.finReelle = body.finReelle || recentSame.finReelle;
     recentSame.ts = now;
   } else {
-    // Geoloc : verifie distance si fournie
     let distM = null;
     if (typeof body.lat === 'number' && typeof body.lng === 'number' &&
         typeof body.venueLat === 'number' && typeof body.venueLng === 'number') {
@@ -637,7 +829,6 @@ async function storeEventConfirm(body, request) {
       }
     }
 
-    // Fenetre temporelle : si finTs connu, verifie qu'on est dans [-30min, +90min]
     if (typeof body.finTs === 'number' && body.finTs > 0) {
       const minWindow = body.finTs - VOTE_WINDOW_BEFORE_MIN * 60 * 1000;
       const maxWindow = body.finTs + VOTE_WINDOW_AFTER_MIN * 60 * 1000;
@@ -662,7 +853,6 @@ async function storeEventConfirm(body, request) {
     });
   }
 
-  // Detection abuse : meme IP avec >MAX_DRIVERS_PER_IP driverIds differents
   const driversByIp = {};
   for (const v of record.votes) {
     if (!driversByIp[v.ipHash]) driversByIp[v.ipHash] = new Set();
@@ -674,14 +864,12 @@ async function storeEventConfirm(body, request) {
     record.flaggedIps = flaggedIps;
   }
 
-  // Sauvegarde
   try {
     await TAXI_KV.put(key, JSON.stringify(record), { expirationTtl: EVENT_CONFIRM_TTL_SEC });
   } catch (e) {
     return { ok: false, reason: 'kv_put_failed', message: e.message };
   }
 
-  // Consolide et retourne
   const consolidated = consolidateVotes(record.votes, body.finTs || null);
   return {
     ok: true,
@@ -707,7 +895,6 @@ async function getEventConfirmFromKV(eventId, finTs) {
       eventId: rec.eventId,
       consolidated: consolidated,
       flagged: rec.flagged || false,
-      // Pour backward compat avec ancien frontend
       finReelle: consolidated.finReelle || consolidated.etaReelle,
       status: consolidated.confirmed ? 'finished' : (consolidated.etaReelle ? 'eta' : null),
       ts: rec.votes.length ? Math.max(...rec.votes.map(v => v.ts)) : 0
@@ -715,6 +902,213 @@ async function getEventConfirmFromKV(eventId, finTs) {
   } catch (e) {
     return { ok: false, reason: 'kv_read_failed', message: e.message };
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  TICKETMASTER : events Paris (cache 6h KV) — V6 NEW
+// ═══════════════════════════════════════════════════════════════════
+
+// Mapping venue Ticketmaster -> code venue TaxiPulse (matching par nom)
+function mapVenueCodeTM(venue) {
+  if (!venue) return null;
+  // Normalise: minuscule + retire accents (gere 'Défense' / 'D??fense' / 'defense')
+  const raw = (venue.name || '').toLowerCase();
+  const name = raw
+    .replace(/[éèêë]/g, 'e')
+    .replace(/[àâä]/g, 'a')
+    .replace(/[îï]/g, 'i')
+    .replace(/[ôö]/g, 'o')
+    .replace(/[ùûü]/g, 'u')
+    .replace(/[ç]/g, 'c')
+    .replace(/\?\?/g, 'e');  // encoding casse: D??fense -> Defense
+
+  if (name.indexOf('accor arena') >= 0 || name.indexOf('bercy arena') >= 0 || name.indexOf('palais omnisports') >= 0) return 'bercy_arena';
+  if (name.indexOf('defense arena') >= 0 || name.indexOf('paris la defense') >= 0) return 'defense_arena';
+  if (name.indexOf('adidas arena') >= 0) return 'adidas_arena';
+  if (name.indexOf('stade de france') >= 0) return 'stade_france';
+  if (name.indexOf('parc des princes') >= 0) return 'parc_princes';
+  if (name.indexOf('zenith') >= 0) return 'zenith';
+  if (name.indexOf('olympia') >= 0) return 'olympia';
+  if (name.indexOf('bataclan') >= 0) return 'bataclan';
+  if (name.indexOf('seine musicale') >= 0) return 'seine_musicale';
+  if (name.indexOf('philharmonie') >= 0) return 'philharmonie';
+  if (name.indexOf('cigale') >= 0) return 'cigale';
+  if (name.indexOf('trianon') >= 0) return 'trianon';
+  if (name.indexOf('salle pleyel') >= 0) return 'salle_pleyel';
+  if (name.indexOf('grand rex') >= 0) return 'grand_rex';
+  if (name.indexOf('casino de paris') >= 0) return 'casino_paris';
+  if (name.indexOf('elysee montmartre') >= 0) return 'elysee_montmartre';
+  return null;
+}
+
+// Duree concert estimee selon venue (minutes)
+const DUREE_CONCERT_TM = {
+  bercy_arena:    150,
+  defense_arena:  150,
+  adidas_arena:   150,
+  stade_france:   180,
+  parc_princes:   180,
+  zenith:         150,
+  olympia:        120,
+  bataclan:       120,
+  seine_musicale: 120,
+  philharmonie:   120,
+  cigale:         120,
+  trianon:        120,
+  salle_pleyel:   120,
+  grand_rex:      150,
+  casino_paris:   120,
+  elysee_montmartre: 120
+};
+
+function addMinutesTM(hhmm, mins) {
+  const parts = hhmm.split(':').map(Number);
+  const total = parts[0] * 60 + parts[1] + mins;
+  const newH = Math.floor(total / 60) % 24;
+  const newM = total % 60;
+  return String(newH).padStart(2, '0') + ':' + String(newM).padStart(2, '0');
+}
+
+function mapTmEvent(e) {
+  const venue = e._embedded && e._embedded.venues && e._embedded.venues[0];
+  const venueCode = mapVenueCodeTM(venue);
+  if (!venueCode) return null;
+
+  const startDate = e.dates && e.dates.start && e.dates.start.localDate;
+  if (!startDate) return null;
+
+  const startTimeRaw = (e.dates && e.dates.start && e.dates.start.localTime) || '20:00:00';
+  const heureDebut = startTimeRaw.substring(0, 5);
+
+  const dureeMin = DUREE_CONCERT_TM[venueCode] || 150;
+  const heureFin = addMinutesTM(heureDebut, dureeMin);
+
+  const titre = (e.name || '').trim();
+  const hasOfficialTime = !!(e.dates && e.dates.start && e.dates.start.localTime);
+
+  return {
+    date: startDate,
+    heure_debut: heureDebut,
+    heure_fin: heureFin,
+    venue: venueCode,
+    titre: titre,
+    cat: 'concert',
+    source: 'ticketmaster',
+    confirme: hasOfficialTime ? 'OUI' : 'APPROX',
+    notes: 'tm_id:' + e.id,
+    url: e.url || null,
+    venue_name: (venue && venue.name) || null,
+    status: (e.dates && e.dates.status && e.dates.status.code) || null
+  };
+}
+
+async function fetchTicketmasterEvents(startDate, endDate, bypassCache) {
+  const cacheKey = 'tm:events:' + startDate + ':' + endDate;
+
+  // 1) Cache KV
+  if (!bypassCache && hasKV()) {
+    try {
+      const cached = await TAXI_KV.get(cacheKey, { type: 'json' });
+      if (cached) {
+        return Object.assign({ source: 'cache' }, cached);
+      }
+    } catch (e) {}
+  }
+
+  if (!hasTicketmaster()) {
+    return {
+      ok: false,
+      error: 'TICKETMASTER_KEY not configured',
+      message: 'Run: npx wrangler secret put TICKETMASTER_KEY'
+    };
+  }
+
+  // 2) Pagination Ticketmaster (max 200/page, max 5 pages = 1000 events)
+  const allEvents = [];
+  let page = 0;
+  let totalPages = 1;
+  const MAX_PAGES = 5;
+
+  try {
+    while (page < totalPages && page < MAX_PAGES) {
+      const params = new URLSearchParams();
+      params.set('apikey', TICKETMASTER_KEY);
+      params.set('countryCode', 'FR');
+      // Pas de filtre city : Ticketmaster ne gere pas city multi-valeurs.
+      // On filtre nous-meme via mapVenueCodeTM (renvoie null pour venues hors radar)
+      params.set('classificationName', 'Music');
+      params.set('startDateTime', startDate + 'T00:00:00Z');
+      params.set('endDateTime', endDate + 'T23:59:59Z');
+      params.set('size', '200');
+      params.set('page', String(page));
+      // Pas de locale : 'fr-fr' fait rejeter l'API (DIS1008).
+      // Les events FR sont indexes en en-us par defaut.
+      // sort=date,asc concatene a la main : URLSearchParams encode la virgule en %2C
+      // ce que Ticketmaster rejette (DIS1016 BAD_REQUEST)
+      const tmUrl = 'https://app.ticketmaster.com/discovery/v2/events.json?' + params.toString() + '&sort=date,asc';
+      const resp = await fetch(tmUrl);
+
+      if (!resp.ok) {
+        const errBody = await resp.text();
+        return {
+          ok: false,
+          error: 'Ticketmaster API failed',
+          status: resp.status,
+          body: errBody.substring(0, 500)
+        };
+      }
+
+      const data = await resp.json();
+      const pageEvents = (data._embedded && data._embedded.events) || [];
+      allEvents.push(...pageEvents);
+
+      totalPages = (data.page && data.page.totalPages) || 1;
+      page++;
+
+      // Rate limit : 5 req/sec, on attend 250ms entre pages
+      if (page < totalPages && page < MAX_PAGES) {
+        await new Promise(r => setTimeout(r, 250));
+      }
+    }
+  } catch (err) {
+    return { ok: false, error: 'Fetch failed', message: err.message };
+  }
+
+  // 3) Mapping + filtrage venues parisiennes connues
+  const mapped = allEvents.map(mapTmEvent).filter(Boolean);
+
+  // 4) Dedup par date+venue+titre
+  const seen = new Set();
+  const events = mapped.filter(e => {
+    const key = e.date + ':' + e.venue + ':' + e.titre;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // 5) Stats
+  const byVenue = {};
+  events.forEach(e => { byVenue[e.venue] = (byVenue[e.venue] || 0) + 1; });
+
+  const result = {
+    ok: true,
+    events: events,
+    count: events.length,
+    raw_count: allEvents.length,
+    pages_fetched: page,
+    by_venue: byVenue,
+    range: { start: startDate, end: endDate },
+    fetched_at: new Date().toISOString()
+  };
+
+  // 6) Cache 6h
+  if (hasKV()) {
+    try {
+      await TAXI_KV.put(cacheKey, JSON.stringify(result), { expirationTtl: 21600 });
+    } catch (e) {}
+  }
+
+  return Object.assign({ source: 'fresh' }, result);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -764,7 +1158,6 @@ async function handleRequest(request) {
   }
 
   // ─── ROUTE (TomTom + OSRM) ───
-  // Usage: /route?from=LAT,LNG&to=LAT,LNG
   if (path === '/route' || path === '/route/') {
     const from = url.searchParams.get('from');
     const to   = url.searchParams.get('to');
@@ -784,7 +1177,6 @@ async function handleRequest(request) {
       });
     }
 
-    // TomTom d'abord (trafic live)
     if (TOMTOM_KEY && TOMTOM_KEY !== 'YOUR_TOMTOM_KEY_HERE') {
       try {
         const ttUrl = `https://api.tomtom.com/routing/1/calculateRoute/${fLat},${fLng}:${tLat},${tLng}/json`
@@ -814,10 +1206,9 @@ async function handleRequest(request) {
             });
           }
         }
-      } catch (err) { /* fallback OSRM */ }
+      } catch (err) {}
     }
 
-    // Fallback OSRM
     try {
       const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${fLng},${fLat};${tLng},${tLat}?overview=false&steps=false`;
       const resp = await fetch(osrmUrl);
@@ -867,7 +1258,7 @@ async function handleRequest(request) {
     }
   }
 
-  // ─── BASETAXI : CROWD (mediane observations) ───
+  // ─── BASETAXI : CROWD ───
   if (path === '/basetaxi/crowd') {
     const aero = (url.searchParams.get('aero') || '').toLowerCase();
     const result = await getCrowdWait(aero);
@@ -880,7 +1271,7 @@ async function handleRequest(request) {
     });
   }
 
-  // ─── BASETAXI : LIVE (Browserless scrape) ───
+  // ─── BASETAXI : LIVE ───
   if (path === '/basetaxi' || path === '/basetaxi/') {
     const aero = (url.searchParams.get('aero') || '').toLowerCase();
     if (!BASETAXI_URLS[aero]) {
@@ -899,9 +1290,7 @@ async function handleRequest(request) {
     });
   }
 
-  // ─── EVENT CONFIRM : crowdsourcing fin reelle event ───
-  // POST /event/confirm  body { eventId, finReelle, status, ts }
-  // GET  /event/confirm?eventId=<id>
+  // ─── EVENT CONFIRM ───
   if (path === '/event/confirm' || path === '/event/confirm/') {
     if (request.method === 'POST') {
       try {
@@ -938,11 +1327,26 @@ async function handleRequest(request) {
     }
   }
 
-  // ─── EVENT FRESHNESS : alertes hebdo de fraicheur du Sheet ───
-  // GET /events/health          -> Combien d'events à venir, alertes par venue
-  // GET /events/checklist       -> Liste des liens à vérifier chaque semaine
-  // POST /events/test-email     -> Envoie un email de test
-  // POST /events/run-recap      -> Lance le récap manuellement (simule le cron)
+  // ─── TICKETMASTER : events Paris (V6 NEW) ───
+  // GET /events/ticketmaster?start=2026-05-01&end=2026-12-31&fresh=1
+  if (path === '/events/ticketmaster' || path === '/events/ticketmaster/') {
+    const today = new Date();
+    const startDate = url.searchParams.get('start') || today.toISOString().split('T')[0];
+    const defaultEnd = new Date(today.getTime() + 365 * 86400000);
+    const endDate = url.searchParams.get('end') || defaultEnd.toISOString().split('T')[0];
+    const bypassCache = url.searchParams.get('fresh') === '1';
+
+    const result = await fetchTicketmasterEvents(startDate, endDate, bypassCache);
+    return new Response(JSON.stringify(result), {
+      status: result.ok === false ? 500 : 200,
+      headers: Object.assign({}, CORS_HEADERS, {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300'
+      })
+    });
+  }
+
+  // ─── EVENT FRESHNESS ───
   if (path === '/events/health' || path === '/events/checklist') {
     const result = await analyzeEventsFreshness();
     return new Response(JSON.stringify(result, null, 2), {
@@ -967,6 +1371,25 @@ async function handleRequest(request) {
       status: 200,
       headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
     });
+  }
+
+  // ─── EVENTS AGGREGATOR (V7 NEW) — multi-sources QFAP Mairie ───
+  // GET /events/aggregate?dry=1  -> n'envoie pas d'email
+  // GET /events/aggregate        -> envoie l'email récap
+  if (path === '/events/aggregate' || path === '/events/aggregate/') {
+    try {
+      const dryRun = url.searchParams.get('dry') === '1';
+      const result = await handleAggregateEvents(dryRun);
+      return new Response(JSON.stringify(result, null, 2), {
+        status: 200,
+        headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({ ok: false, error: err.message }, null, 2), {
+        status: 500,
+        headers: Object.assign({}, CORS_HEADERS, { 'Content-Type': 'application/json' })
+      });
+    }
   }
 
   // ─── PROXY SNCF (catch-all) ───
@@ -1000,29 +1423,402 @@ async function handleRequest(request) {
 
 
 // ═══════════════════════════════════════════════════════════════════
+//  EVENTS AGGREGATOR V7 — Source QFAP Mairie de Paris (sans clé)
+//  Cron quotidien -> détection nouveaux events + email récap
+// ═══════════════════════════════════════════════════════════════════
+
+const QFAP_VENUE_MAPPING = {
+  // Sport
+  "stade jean bouin": "jean_bouin",
+  "stade jean-bouin": "jean_bouin",
+  "jean bouin": "jean_bouin",
+  "jean-bouin": "jean_bouin",
+  "stade charlety": "charlety",
+  "stade charléty": "charlety",
+  "stade sébastien charléty": "charlety",
+  "charléty": "charlety",
+  "parc des princes": "parc_princes",
+  "stade de france": "stade_france",
+  "roland-garros": "roland_garros",
+  "roland garros": "roland_garros",
+  "stade roland-garros": "roland_garros",
+  "hippodrome de vincennes": "vincennes",
+  "hippodrome paris-longchamp": "longchamp",
+  "hippodrome de longchamp": "longchamp",
+  "hippodrome d'auteuil": "auteuil",
+  // Concerts / salles
+  "le bataclan": "bataclan",
+  "bataclan": "bataclan",
+  "olympia": "olympia",
+  "l'olympia": "olympia",
+  "zénith de paris": "zenith",
+  "zenith de paris": "zenith",
+  "le zénith": "zenith",
+  "accor arena": "bercy_arena",
+  "accor arena bercy": "bercy_arena",
+  "bercy arena": "bercy_arena",
+  "adidas arena": "adidas_arena",
+  "paris la défense arena": "defense_arena",
+  "la défense arena": "defense_arena",
+  "la seine musicale": "seine_musicale",
+  "salle pleyel": "salle_pleyel",
+  "philharmonie de paris": "philharmonie",
+  "le trianon": "trianon",
+  "la cigale": "cigale",
+  "le cabaret sauvage": "cabaret_sauvage",
+  "le grand rex": "grand_rex",
+  // Théâtres / Opéras
+  "opéra bastille": "opera_bastille",
+  "opera bastille": "opera_bastille",
+  "opéra garnier": "opera_garnier",
+  "palais garnier": "opera_garnier",
+  "comédie-française": "comedie_francaise",
+  "théâtre du châtelet": "chatelet",
+  "théâtre des champs-élysées": "champs_elysees",
+  "théâtre mogador": "mogador",
+  "théâtre marigny": "marigny",
+  // Salons / Expos
+  "grand palais": "grand_palais",
+  "petit palais": "petit_palais",
+  "paris expo porte de versailles": "porte_versailles",
+  "porte de versailles": "porte_versailles",
+  "parc des expositions de villepinte": "villepinte",
+  "paris-le bourget": "le_bourget",
+  // Plein air
+  "domaine national de saint-cloud": "saint_cloud"
+};
+
+function qfapDetectVenue(rawVenue) {
+  if (!rawVenue) return null;
+  const v = String(rawVenue).toLowerCase().trim();
+  if (QFAP_VENUE_MAPPING[v]) return QFAP_VENUE_MAPPING[v];
+  for (const key in QFAP_VENUE_MAPPING) {
+    if (v.indexOf(key) !== -1) return QFAP_VENUE_MAPPING[key];
+  }
+  return null;
+}
+
+// Catégorie par défaut selon la venue (si rien détecté dans titre/tags)
+const VENUE_DEFAULT_CAT = {
+  // Sport
+  "jean_bouin": "sport",
+  "charlety": "sport",
+  "parc_princes": "sport",
+  "stade_france": "sport",
+  "roland_garros": "sport",
+  "vincennes": "course",
+  "longchamp": "course",
+  "auteuil": "course",
+  // Musique classique / opéra
+  "philharmonie": "concert",
+  "salle_pleyel": "concert",
+  "opera_bastille": "opera",
+  "opera_garnier": "opera",
+  "champs_elysees": "concert",
+  "seine_musicale": "concert",
+  // Salles concerts / spectacles
+  "bataclan": "concert",
+  "olympia": "concert",
+  "zenith": "concert",
+  "bercy_arena": "concert",
+  "adidas_arena": "concert",
+  "defense_arena": "concert",
+  "trianon": "concert",
+  "cigale": "concert",
+  "cabaret_sauvage": "concert",
+  "grand_rex": "spectacle",
+  // Théâtres
+  "comedie_francaise": "theatre",
+  "chatelet": "theatre",
+  "mogador": "spectacle",
+  "marigny": "theatre",
+  // Expos/Salons
+  "grand_palais": "exposition",
+  "petit_palais": "exposition",
+  "porte_versailles": "salon",
+  "villepinte": "salon",
+  "le_bourget": "salon",
+  // Plein air
+  "saint_cloud": "festival"
+};
+
+function qfapDetectCategory(title, venue, rawTags) {
+  const t = (title || "").toLowerCase();
+  const tags = (Array.isArray(rawTags) ? rawTags : []).map(function(x) { return String(x || "").toLowerCase(); }).join(" ");
+  const all = t + " " + tags + " " + (venue || "");
+
+  // 1) Sport (très spécifique d'abord)
+  if (/\b(match|ligue 1|ligue 2|champion|coupe de france|coupe d'europe|psg|paris fc|paris-fc|stade français|stade-francais|top 14|pro d2|champion's cup|rugby|handball|hand|basket|nba|euroleague|volleyball)\b/.test(all)) return "sport";
+  if (/\b(course|grand prix|hippodrome|prix d'amérique|trot|galop|steeple|marathon|10 km|trail|ekiden|triathlon|cyclisme)\b/.test(all)) return "course";
+
+  // 2) Musique - genres précis
+  if (/\b(opéra|opera|récital|recital|cantate|symphonie|symphonique|orchestre|philharmonique|requiem|messe|oratorio)\b/.test(all)) return "opera";
+  if (/\b(concert|live|tour|tournée|tourne|festival musical|musique|gig|showcase|fanfare|jazz|rock|pop|rap|hip-hop|électro|electro|techno|house|reggae|metal|punk|folk|blues|classique|baroque|chorale|chœur)\b/.test(all)) return "concert";
+
+  // 3) Spectacle vivant
+  if (/\b(ballet|chorégraphi|chorégraphe|danse|danseur|hip hop|krump|breaking|flamenco)\b/.test(all)) return "danse";
+  if (/\b(théâtre|theatre|piece|comédie|tragédie|monologue|dramaturgi|mise en scène)\b/.test(all)) return "theatre";
+  if (/\b(humour|stand[- ]?up|one[- ]?man[- ]?show|one[- ]?woman[- ]?show|sketch|impro|improvisation)\b/.test(all)) return "humour";
+  if (/\b(cirque|magie|magicien|mentaliste|illusion|cabaret|burlesque)\b/.test(all)) return "spectacle";
+
+  // 4) Cinéma
+  if (/\b(film|cinéma|cinema|projection|avant[- ]première|festival cinéma|courts? métrages?)\b/.test(all)) return "cinema";
+
+  // 5) Expos / culture
+  if (/\b(exposition|expo|vernissage|rétrospective|musée|museum|galerie|installation|sculpture|peinture|photographie|nuit blanche)\b/.test(all)) return "exposition";
+
+  // 6) Salons / Foires
+  if (/\b(salon|foire|congrès|congres|convention|fipa|sial|maison & objet|expo internationale)\b/.test(all)) return "salon";
+
+  // 7) Conférences
+  if (/\b(conférence|conference|colloque|talk|table ronde|symposium|débat|masterclass|workshop|atelier)\b/.test(all)) return "conference";
+
+  // 8) Vie publique
+  if (/\b(manifestation|défilé|parade|hommage|cérémonie)\b/.test(all)) return "manifestation";
+
+  // 9) Fallback : catégorie par défaut selon la venue
+  if (venue && VENUE_DEFAULT_CAT[venue]) return VENUE_DEFAULT_CAT[venue];
+
+  return "autre";
+}
+
+async function fetchQueFaireAParis(daysAhead) {
+  daysAhead = daysAhead || 60;
+  const today = new Date().toISOString().split("T")[0];
+  const future = new Date(Date.now() + daysAhead * 86400000).toISOString().split("T")[0];
+  const limit = 100;
+  let offset = 0;
+  let all = [];
+
+  for (let page = 0; page < 5; page++) {
+    const where = encodeURIComponent('date_start >= "' + today + '" AND date_start <= "' + future + '"');
+    const orderBy = encodeURIComponent("date_start ASC");
+    const apiUrl = 'https://opendata.paris.fr/api/explore/v2.1/catalog/datasets/que-faire-a-paris-/records?limit=' + limit + '&offset=' + offset + '&where=' + where + '&order_by=' + orderBy;
+
+    try {
+      const r = await fetch(apiUrl, {
+        headers: { "User-Agent": "TaxiPulse/1.0 (+https://taxipulse.fr)" },
+        cf: { cacheTtl: 1800 }
+      });
+      if (!r.ok) {
+        console.error('[QFAP] HTTP ' + r.status);
+        break;
+      }
+      const data = await r.json();
+      const results = data.results || [];
+      if (results.length === 0) break;
+
+      for (let i = 0; i < results.length; i++) {
+        const e = results[i];
+        const venue = qfapDetectVenue(e.address_name);
+        if (!venue) continue;
+
+        const dateStart = String(e.date_start || "").split("T")[0];
+        const dateEnd = String(e.date_end || "").split("T")[0];
+        const tStart = String(e.date_start || "").split("T")[1];
+        const timeStart = tStart ? tStart.slice(0, 5) : "20:00";
+        const tEnd = String(e.date_end || "").split("T")[1];
+        const timeEnd = tEnd ? tEnd.slice(0, 5) : "";
+
+        all.push({
+          source: "qfap",
+          source_id: e.id || "",
+          source_url: e.url || "",
+          date: dateStart,
+          date_end: dateEnd,
+          heure_debut: timeStart,
+          heure_fin: timeEnd,
+          venue: venue,
+          venue_raw: e.address_name || "",
+          titre: String(e.title || "").trim().slice(0, 120),
+          cat: qfapDetectCategory(e.title, venue, e.tags || []),
+          confirme: "OUI",
+          notes: "QFAP Mairie auto"
+        });
+      }
+
+      if (results.length < limit) break;
+      offset += limit;
+    } catch (err) {
+      console.error('[QFAP] error:', err.message);
+      break;
+    }
+  }
+  return all;
+}
+
+function dedupAggregatedEvents(events) {
+  const seen = {};
+  const out = [];
+  for (let i = 0; i < events.length; i++) {
+    const e = events[i];
+    const key = e.date + "|" + e.venue + "|" + (e.titre || "").toLowerCase().slice(0, 15).replace(/\s/g, "");
+    if (seen[key]) continue;
+    seen[key] = true;
+    out.push(e);
+  }
+  return out;
+}
+
+async function compareWithMasterSheet(newEvents) {
+  // On compare avec le CSV publié (même source que analyzeEventsFreshness)
+  let masterRaw = null;
+  try {
+    const r = await fetch(SHEET_EVENTS_CSV_URL, { cf: { cacheTtl: 60 } });
+    if (r.ok) masterRaw = await r.text();
+  } catch (e) {
+    masterRaw = null;
+  }
+
+  if (!masterRaw) return { news: newEvents, changes: [], master_lines: 0 };
+
+  const lines = masterRaw.split(/\r?\n/).slice(1);
+  const masterKeys = {};
+  for (let i = 0; i < lines.length; i++) {
+    const parts = lines[i].split(",");
+    if (parts.length < 5) continue;
+    const date = parts[0];
+    const h_deb = parts[1];
+    const venue = parts[3];
+    const titre = parts[4];
+    if (!date || !venue) continue;
+    const key = date + "|" + venue + "|" + (titre || "").toLowerCase().slice(0, 15).replace(/\s/g, "");
+    masterKeys[key] = { date: date, h_deb: h_deb, venue: venue, titre: titre };
+  }
+
+  const news = [];
+  const changes = [];
+  for (let i = 0; i < newEvents.length; i++) {
+    const e = newEvents[i];
+    const key = e.date + "|" + e.venue + "|" + (e.titre || "").toLowerCase().slice(0, 15).replace(/\s/g, "");
+    if (!masterKeys[key]) {
+      news.push(e);
+    } else {
+      const old = masterKeys[key];
+      if (old.h_deb !== e.heure_debut && e.heure_debut !== "20:00") {
+        changes.push({ event: e, old_time: old.h_deb, new_time: e.heure_debut });
+      }
+    }
+  }
+  return { news: news, changes: changes, master_lines: lines.length };
+}
+
+async function sendAggregatorRecap(diff, totalFetched) {
+  const news = diff.news;
+  const changes = diff.changes;
+  if (news.length === 0 && changes.length === 0) {
+    return { sent: false, reason: "rien à signaler" };
+  }
+
+  let apiKey = null;
+  let adminEmail = null;
+  try {
+    apiKey = (typeof RESEND_API_KEY !== 'undefined') ? RESEND_API_KEY : null;
+    adminEmail = (typeof ADMIN_EMAIL !== 'undefined') ? ADMIN_EMAIL : null;
+  } catch (e) {
+    apiKey = null;
+    adminEmail = null;
+  }
+
+  if (!apiKey || !adminEmail) {
+    return { sent: false, reason: "config manquante (RESEND_API_KEY ou ADMIN_EMAIL)" };
+  }
+
+  const newsRows = news.slice(0, 50).map(function(e) {
+    return '<tr style="border-top:1px solid #ddd;">'
+      + '<td style="padding:6px 8px;">' + escapeHtml(e.date) + '</td>'
+      + '<td style="padding:6px 8px;">' + escapeHtml(e.heure_debut) + '</td>'
+      + '<td style="padding:6px 8px;">' + escapeHtml(e.venue) + '</td>'
+      + '<td style="padding:6px 8px;">' + escapeHtml(e.titre) + '</td>'
+      + '<td style="padding:6px 8px;">' + escapeHtml(e.cat) + '</td>'
+      + '</tr>';
+  }).join("");
+
+  const changesRows = changes.map(function(c) {
+    return '<li><b>' + escapeHtml(c.event.date) + ' ' + escapeHtml(c.event.venue) + '</b> : ' + escapeHtml(c.old_time) + ' → ' + escapeHtml(c.new_time) + ' — ' + escapeHtml(c.event.titre) + '</li>';
+  }).join("");
+
+  const html = '<!DOCTYPE html><html><body style="font-family:-apple-system,sans-serif;max-width:680px;margin:0 auto;padding:20px;">'
+    + '<h2 style="color:#ea580c;">🤖 TaxiPulse — Aggregator quotidien</h2>'
+    + '<p style="color:#6b7280;font-size:13px;">' + new Date().toISOString().slice(0, 16).replace("T", " ") + ' UTC<br>'
+    + totalFetched + ' events QFAP scannés, ' + news.length + ' nouveaux, ' + changes.length + ' changements.</p>'
+    + (news.length > 0 ? '<h3>🆕 Nouveaux events détectés (' + news.length + ')</h3>'
+        + '<table style="border-collapse:collapse;font-size:13px;width:100%;">'
+        + '<tr style="background:#f3f4f6;"><th style="padding:6px 8px;text-align:left;">Date</th><th style="padding:6px 8px;text-align:left;">Heure</th><th style="padding:6px 8px;text-align:left;">Venue</th><th style="padding:6px 8px;text-align:left;">Titre</th><th style="padding:6px 8px;text-align:left;">Cat</th></tr>'
+        + newsRows
+        + '</table>' : '')
+    + (changes.length > 0 ? '<h3>⚠️ Changements horaires (' + changes.length + ')</h3><ul>' + changesRows + '</ul>' : '')
+    + '<hr><p style="font-size:11px;color:#9ca3af;">Source : Que Faire à Paris (Mairie). Action : valider et coller dans le Sheet master.</p>'
+    + '</body></html>';
+
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": "Bearer " + apiKey,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: "TaxiPulse Aggregator <noreply@taxipulse.fr>",
+        to: adminEmail,
+        subject: "🤖 TaxiPulse Aggregator : " + news.length + " new + " + changes.length + " chgmts",
+        html: html
+      })
+    });
+    return { sent: r.ok, count: news.length + changes.length, status: r.status };
+  } catch (err) {
+    return { sent: false, error: err.message };
+  }
+}
+
+async function handleAggregateEvents(dryRun) {
+  const events = await fetchQueFaireAParis(60);
+  const validated = dedupAggregatedEvents(events);
+  const diff = await compareWithMasterSheet(validated);
+
+  // Stocker dernier résultat dans KV (si dispo)
+  try {
+    if (typeof TAXI_KV !== 'undefined' && TAXI_KV !== null) {
+      await TAXI_KV.put(
+        'events_aggregator_last_run',
+        JSON.stringify({
+          ts: Date.now(),
+          total_fetched: events.length,
+          after_dedup: validated.length,
+          news: diff.news.length,
+          changes: diff.changes.length,
+          master_lines: diff.master_lines
+        }),
+        { expirationTtl: 86400 * 7 }
+      );
+    }
+  } catch (e) {}
+
+  let mailResult = { sent: false, reason: "dry run" };
+  if (!dryRun) {
+    mailResult = await sendAggregatorRecap(diff, events.length);
+  }
+
+  return {
+    ok: true,
+    total_fetched: events.length,
+    after_dedup: validated.length,
+    news: diff.news.length,
+    changes: diff.changes.length,
+    master_lines: diff.master_lines,
+    preview_news: diff.news.slice(0, 10),
+    preview_changes: diff.changes.slice(0, 5),
+    mail: mailResult
+  };
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
 //  PHASE B v2 : ALERTE FRAÎCHEUR DU SHEET + RÉCAP HEBDO PAR EMAIL
 // ═══════════════════════════════════════════════════════════════════
-//
-//  Objectif : au lieu de scraper les sites officiels (fragile + charabia),
-//  on lit le Google Sheet existant et on alerte si les events à venir
-//  diminuent dangereusement. L'email contient une checklist de liens
-//  à vérifier manuellement (5-10 min/semaine pour Sofiane).
-//
-//  Routes :
-//    GET  /events/health       -> Stats fraîcheur events à venir
-//    POST /events/test-email   -> Envoie email de test
-//    POST /events/run-recap    -> Force l'envoi du récap hebdo
-//
-//  Cron : tous les lundis 6h UTC (configuré dans wrangler.toml)
-//
-//  Secrets requis :
-//    RESEND_API_KEY            -> token Resend
-//    ADMIN_EMAIL               -> email où envoyer le récap
 
-// URL du Sheet Google publiquement publié en CSV (même URL que dans index.html)
 const SHEET_EVENTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlb4vVopavpQHDKFkY4Su4HDtUo70FV7vEr7zllndq6-6duSSjDhkuBt9XP51PA3zn4nS9C8RFR8sb/pub?gid=0&single=true&output=csv';
 
-// Liste des venues à surveiller, avec lien vers leur page programmation
 const MONITORED_VENUES = [
   { id: 'stade_france',     name: 'Stade de France',           url: 'https://www.stadefrance.com/fr/billetteries' },
   { id: 'bercy_arena',      name: 'Accor Arena (Bercy)',       url: 'https://www.accorarena.com/fr/agenda' },
@@ -1042,13 +1838,11 @@ const MONITORED_VENUES = [
   { id: 'parc_princes',     name: 'Parc des Princes',          url: 'https://www.psg.fr/billetterie' }
 ];
 
-// Parse un CSV en array d'objets {col1: val1, col2: val2, ...}
 function parseCSV(text) {
   if (!text || typeof text !== 'string') return [];
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return [];
 
-  // Parse les headers
   const headers = parseCSVLine(lines[0]);
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
@@ -1082,7 +1876,61 @@ function parseCSVLine(line) {
   return result;
 }
 
-// Lit le Sheet et retourne les events à venir, groupés par venue
+// Compare events Ticketmaster avec le Sheet existant.
+// Retourne uniquement les events Ticketmaster qui ne sont PAS deja dans le Sheet.
+// Match par (date + venue + titre normalise) car les tm_id ne sont pas dans le Sheet.
+async function findNewTicketmasterEvents() {
+  const today = new Date();
+  const start = today.toISOString().split('T')[0];
+  const end = new Date(today.getTime() + 365 * 86400000).toISOString().split('T')[0];
+  const tmResult = await fetchTicketmasterEvents(start, end, false);
+
+  if (!tmResult.events || !tmResult.events.length) {
+    return { ok: true, new_events: [], total_tm: 0, message: tmResult.error || 'No events from TM' };
+  }
+
+  let csvText = '';
+  try {
+    const r = await fetch(SHEET_EVENTS_CSV_URL, { cf: { cacheTtl: 0 } });
+    if (!r.ok) return { ok: false, error: 'Sheet HTTP ' + r.status };
+    csvText = await r.text();
+  } catch (e) {
+    return { ok: false, error: 'Sheet fetch failed: ' + e.message };
+  }
+
+  const sheetRows = parseCSV(csvText);
+
+  function normTitle(t) {
+    return (t || '').toLowerCase()
+      .replace(/[éèêë]/g, 'e').replace(/[àâä]/g, 'a').replace(/[îï]/g, 'i').replace(/[ôö]/g, 'o')
+      .replace(/[^a-z0-9]/g, '');
+  }
+
+  const sheetKeys = new Set();
+  for (const row of sheetRows) {
+    if (!row.date || !row.venue || !row.titre) continue;
+    const key = row.date + '|' + row.venue.toLowerCase().trim() + '|' + normTitle(row.titre);
+    sheetKeys.add(key);
+  }
+
+  const newEvents = [];
+  for (const ev of tmResult.events) {
+    const key = ev.date + '|' + ev.venue + '|' + normTitle(ev.titre);
+    if (!sheetKeys.has(key)) {
+      newEvents.push(ev);
+    }
+  }
+
+  return {
+    ok: true,
+    total_tm: tmResult.events.length,
+    total_sheet_rows: sheetRows.length,
+    new_events: newEvents,
+    new_count: newEvents.length
+  };
+}
+
+
 async function analyzeEventsFreshness() {
   let csvText = '';
   try {
@@ -1099,7 +1947,6 @@ async function analyzeEventsFreshness() {
   const now = Date.now();
   const todayStr = new Date(now).toISOString().slice(0, 10);
 
-  // Filtre events à venir + confirme=OUI
   const upcoming = rows.filter(r => {
     if (!r.date || !/^\d{4}-\d{2}-\d{2}$/.test(r.date)) return false;
     if (r.date < todayStr) return false;
@@ -1107,7 +1954,6 @@ async function analyzeEventsFreshness() {
     return conf === 'OUI' || conf === 'YES' || conf === 'TRUE' || conf === '1';
   });
 
-  // Compte par venue, sur 4 fenêtres temporelles
   const stats = {};
   for (const venue of MONITORED_VENUES) {
     stats[venue.id] = {
@@ -1122,7 +1968,6 @@ async function analyzeEventsFreshness() {
       first_date: null
     };
   }
-  // Bucket "autres venues" pour les events qui ne matchent aucune venue connue
   stats['_other'] = { venue_name: 'Autres venues', url: null, total: 0, next_30d: 0, next_60d: 0, next_90d: 0, beyond_90d: 0, latest_date: null, first_date: null };
 
   for (const row of upcoming) {
@@ -1141,7 +1986,6 @@ async function analyzeEventsFreshness() {
     if (!bucket.latest_date || row.date > bucket.latest_date) bucket.latest_date = row.date;
   }
 
-  // Détecte alertes : venue sans aucun event à <60j ou avec moins de 3 events totaux
   const alerts = [];
   for (const venue of MONITORED_VENUES) {
     const s = stats[venue.id];
@@ -1154,7 +1998,6 @@ async function analyzeEventsFreshness() {
     }
   }
 
-  // Total upcoming
   const totalUpcoming = upcoming.length;
   const upcomingNext30 = upcoming.filter(r => {
     const d = new Date(r.date);
@@ -1178,9 +2021,7 @@ async function analyzeEventsFreshness() {
   };
 }
 
-// Envoie l'email récap hebdo via Resend
 async function sendFreshnessRecapEmail(analysis) {
-  // Cloudflare Service Workers (legacy) : globalThis.RESEND_API_KEY est accessible si défini comme var/secret
   let apiKey = null;
   let adminEmail = null;
   try {
@@ -1202,13 +2043,22 @@ async function sendFreshnessRecapEmail(analysis) {
     return { ok: false, reason: 'no_analysis', message: 'analyzeEventsFreshness failed: ' + (analysis ? analysis.error : 'unknown') };
   }
 
+  // Fetch nouveaux events Ticketmaster (silencieux si erreur)
+  let tmDiff = null;
+  try {
+    tmDiff = await findNewTicketmasterEvents();
+  } catch (e) {
+    tmDiff = { ok: false, error: e.message };
+  }
+
   const dateStr = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const status = analysis.alert_levels.critical > 0 ? '🔴 ALERTE'
                : analysis.alert_levels.warning > 0 ? '🟡 ATTENTION'
                : '✅ OK';
-  const subject = `[TaxiPulse] ${status} — ${analysis.upcoming_total} events, ${analysis.alerts.length} alertes`;
+  const tmNew = (tmDiff && tmDiff.ok) ? tmDiff.new_count : 0;
+  const tmSuffix = tmNew > 0 ? `, ${tmNew} new TM` : '';
+  const subject = `[TaxiPulse] ${status} — ${analysis.upcoming_total} events, ${analysis.alerts.length} alertes${tmSuffix}`;
 
-  // Construction HTML
   let html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:640px;margin:0 auto;padding:20px;color:#1f2937;background:#f9fafb;">
     <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
       <h1 style="color:#ea580c;margin-top:0;font-size:24px;">🚖 TaxiPulse — Récap hebdo</h1>
@@ -1222,7 +2072,6 @@ async function sendFreshnessRecapEmail(analysis) {
         </div>
       </div>`;
 
-  // Section alertes
   if (analysis.alerts.length > 0) {
     html += `<h2 style="color:#dc2626;font-size:18px;margin-top:24px;">⚠️ Lieux à checker en priorité</h2>
       <p style="color:#6b7280;font-size:14px;">Clique sur les liens ci-dessous, scrolle leur page programmation, et ajoute les nouveaux events dans ton Google Sheet.</p>
@@ -1239,7 +2088,31 @@ async function sendFreshnessRecapEmail(analysis) {
     html += '</ul>';
   }
 
-  // Section détail par venue
+  // Section Ticketmaster : nouveaux events a ajouter au Sheet
+  if (tmDiff && tmDiff.ok && tmDiff.new_count > 0) {
+    html += `<h2 style="color:#7c3aed;font-size:18px;margin-top:24px;">🎫 ${tmDiff.new_count} nouveau${tmDiff.new_count > 1 ? 'x' : ''} event${tmDiff.new_count > 1 ? 's' : ''} Ticketmaster a ajouter au Sheet</h2>
+      <p style="color:#6b7280;font-size:14px;">Detectes via l'API Ticketmaster, pas encore dans ton Google Sheet. Verifie les heures sur le site officiel puis copie-colle dans ton Sheet.</p>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <thead><tr style="background:#f3f4f6;text-align:left;">
+          <th style="padding:8px;">Date</th>
+          <th style="padding:8px;">Heure</th>
+          <th style="padding:8px;">Venue</th>
+          <th style="padding:8px;">Titre</th>
+          <th style="padding:8px;">Source</th>
+        </tr></thead><tbody>`;
+    for (const ev of tmDiff.new_events) {
+      html += `<tr style="border-top:1px solid #e5e7eb;">
+        <td style="padding:8px;">${escapeHtml(ev.date)}</td>
+        <td style="padding:8px;">${escapeHtml(ev.heure_debut)} - ${escapeHtml(ev.heure_fin)}</td>
+        <td style="padding:8px;"><code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">${escapeHtml(ev.venue)}</code></td>
+        <td style="padding:8px;font-weight:500;">${escapeHtml(ev.titre)}</td>
+        <td style="padding:8px;"><a href="${escapeHtml(ev.url || '#')}" style="color:#7c3aed;font-size:12px;">→ TM</a></td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    html += `<p style="color:#9ca3af;font-size:12px;margin-top:8px;font-style:italic;">⚠️ Heures marquees APPROX : Ticketmaster ne fournit pas toujours l'heure officielle. Verifie sur le site venue.</p>`;
+  }
+
   html += `<h2 style="font-size:18px;margin-top:24px;">📊 État de fraîcheur par venue</h2>
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead><tr style="background:#f3f4f6;text-align:left;">
@@ -1263,7 +2136,6 @@ async function sendFreshnessRecapEmail(analysis) {
   }
   html += '</tbody></table>';
 
-  // Footer + lien Sheet
   html += `<hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb;">
     <p style="color:#6b7280;font-size:12px;line-height:1.5;">
       Email auto envoyé chaque lundi par le worker Cloudflare TaxiPulse.<br>
@@ -1293,7 +2165,7 @@ async function sendFreshnessRecapEmail(analysis) {
       ok: r.ok,
       status: r.status,
       response: data,
-      sent_to: adminEmail.replace(/(.{2}).+(@.+)/, '$1***$2'),  // partiellement masqué pour logs
+      sent_to: adminEmail.replace(/(.{2}).+(@.+)/, '$1***$2'),
       subject: subject
     };
   } catch (e) {
@@ -1312,17 +2184,36 @@ function escapeHtml(s) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  CRON HANDLER : exécuté automatiquement par Cloudflare le lundi 6h UTC
+//  CRON HANDLER
+//  - "0 5 * * *"  (daily 5h UTC = 6/7h Paris) -> aggregator QFAP
+//  - "0 6 * * 1"  (lundi 6h UTC)               -> récap fraîcheur Sheet
 // ═══════════════════════════════════════════════════════════════════
 async function handleScheduled(event, env) {
-  console.log('[CRON] Récap hebdo : analyse Sheet...');
+  const cron = event && event.cron ? event.cron : '';
+  console.log('[CRON] Triggered:', cron);
+
+  // Cron quotidien -> aggregator events
+  if (cron === '0 5 * * *') {
+    console.log('[CRON daily] Aggregator QFAP...');
+    try {
+      const result = await handleAggregateEvents(false);
+      console.log('[CRON daily] Aggregator result:', JSON.stringify(result).substring(0, 400));
+      return { type: 'aggregator', result: result };
+    } catch (err) {
+      console.error('[CRON daily] Error:', err.message);
+      return { type: 'aggregator', error: err.message };
+    }
+  }
+
+  // Cron hebdo (lundi) -> récap fraîcheur Sheet existant
+  console.log('[CRON weekly] Récap hebdo : analyse Sheet...');
   const analysis = await analyzeEventsFreshness();
-  console.log('[CRON] Analyse :', JSON.stringify(analysis).substring(0, 500));
+  console.log('[CRON weekly] Analyse :', JSON.stringify(analysis).substring(0, 500));
 
   const emailResult = await sendFreshnessRecapEmail(analysis);
-  console.log('[CRON] Email :', JSON.stringify(emailResult).substring(0, 300));
+  console.log('[CRON weekly] Email :', JSON.stringify(emailResult).substring(0, 300));
 
-  return { analysis, emailResult };
+  return { type: 'weekly', analysis: analysis, emailResult: emailResult };
 }
 
 
