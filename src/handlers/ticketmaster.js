@@ -213,19 +213,3 @@ export async function handleTicketmaster(url, env) {
 }
 
 // ─── Handler HTTP : GET /events/ticketmaster ───
-export async function handleTicketmaster(url, env) {
-  const today = new Date();
-  const startDate = url.searchParams.get('start') || today.toISOString().split('T')[0];
-  const defaultEnd = new Date(today.getTime() + 365 * 86400000);
-  const endDate = url.searchParams.get('end') || defaultEnd.toISOString().split('T')[0];
-  const bypassCache = url.searchParams.get('fresh') === '1';
-
-  const result = await fetchTicketmasterEvents(startDate, endDate, bypassCache, env);
-  return new Response(JSON.stringify(result), {
-    status: result.ok === false ? 500 : 200,
-    headers: Object.assign({}, CORS_HEADERS, {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300'
-    })
-  });
-}
