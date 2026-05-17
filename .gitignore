@@ -6,3 +6,16 @@ node_modules/
 *.log
 .wrangler/
 dist/
+
+# Scratch / backups manuels
+tmp/
+backups/
+*.bak
+
+# Configs IDE perso (ne pas polluer le repo)
+.vscode/
+.idea/
+
+# Snapshots data manuels
+*.kv-snapshot.json
+*-snapshot.json
