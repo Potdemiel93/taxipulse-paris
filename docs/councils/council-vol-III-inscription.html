@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Council Report — Inscription & Auth carte pro · TaxiPulse Vol. III</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7f3ec;
+  --paper-warm: #f0e9dc;
+  --paper-card: #fbf7f0;
+  --ink: #1a1815;
+  --ink-soft: #44403c;
+  --ink-faint: #78716c;
+  --rule: #d6cfc1;
+  --hot: #c1272d;
+  --warm: #d97706;
+  --orange: #ea580c;
+  --cold: #1e40af;
+  --green: #15803d;
+  --gold: #a16207;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper); color: var(--ink);
+  line-height: 1.6; font-size: 16px;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(30, 64, 175, 0.025), transparent 25%),
+    radial-gradient(circle at 85% 80%, rgba(234, 88, 12, 0.025), transparent 25%);
+}
+.container { max-width: 920px; margin: 0 auto; padding: 60px 28px 100px; }
+
+.masthead {
+  border-bottom: 3px double var(--ink);
+  padding-bottom: 32px; margin-bottom: 48px; position: relative;
+}
+.masthead::before {
+  content: ''; position: absolute; bottom: -3px; left: 0;
+  width: 100px; height: 3px; background: var(--orange);
+}
+.masthead-meta {
+  display: flex; justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 24px;
+  padding-bottom: 16px; border-bottom: 1px solid var(--rule);
+}
+.masthead-title {
+  font-family: 'Fraunces', serif; font-size: 56px;
+  line-height: 1.05; font-weight: 800; letter-spacing: -2px;
+  margin-bottom: 18px;
+}
+.masthead-title em { font-style: italic; color: var(--orange); font-weight: 600; }
+.masthead-deck {
+  font-family: 'Fraunces', serif; font-size: 22px; line-height: 1.4;
+  color: var(--ink-soft); font-style: italic; max-width: 720px;
+}
+
+.decisions {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  border-left: 4px solid var(--cold); padding: 24px 28px; margin-bottom: 32px;
+}
+.decisions-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint);
+  font-weight: 700; margin-bottom: 14px;
+}
+.decisions-list { list-style: none; padding: 0; }
+.decisions-list li {
+  padding: 8px 0; border-bottom: 1px dotted var(--rule);
+  display: flex; gap: 16px; align-items: baseline; font-size: 15px;
+}
+.decisions-list li:last-child { border-bottom: none; }
+.decisions-list li strong {
+  font-family: 'Fraunces', serif; font-weight: 700; font-size: 16px;
+  min-width: 140px; color: var(--ink);
+}
+
+.framed-question {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  border-left: 4px solid var(--ink); padding: 28px 32px;
+  margin-bottom: 48px; position: relative;
+}
+.framed-question::before {
+  content: '"'; position: absolute; top: -18px; left: 16px;
+  font-family: 'Fraunces', serif; font-size: 80px; font-weight: 900;
+  color: var(--orange); line-height: 1; background: var(--paper); padding: 0 6px;
+}
+.framed-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 10px; font-weight: 700;
+}
+.framed-text { font-family: 'Fraunces', serif; font-size: 17px; line-height: 1.6; }
+
+.toc {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  padding: 20px 24px; margin-bottom: 48px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+}
+.toc-title {
+  font-family: 'Inter', sans-serif; font-weight: 700; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--ink-faint); margin-bottom: 14px;
+}
+.toc ol { list-style: none; counter-reset: toc; }
+.toc li {
+  counter-increment: toc; padding: 6px 0;
+  border-bottom: 1px dotted var(--rule);
+  display: flex; gap: 14px; align-items: baseline;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(toc, decimal-leading-zero); font-weight: 700;
+  color: var(--orange); min-width: 28px;
+}
+.toc a { color: var(--ink); text-decoration: none; flex: 1; }
+.toc a:hover { color: var(--orange); }
+.toc-page { color: var(--ink-faint); font-size: 11px; }
+
+.section { margin-bottom: 64px; scroll-margin-top: 24px; }
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--orange); font-weight: 700; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.section-title {
+  font-family: 'Fraunces', serif; font-size: 36px; line-height: 1.1;
+  font-weight: 700; letter-spacing: -1px; margin-bottom: 16px;
+}
+.section-lead {
+  font-family: 'Fraunces', serif; font-size: 19px; line-height: 1.5;
+  font-style: italic; color: var(--ink-soft);
+  margin-bottom: 28px; padding-left: 16px; border-left: 2px solid var(--orange);
+}
+
+.verdict-box {
+  background: linear-gradient(135deg, #1a1815 0%, #2c2723 100%);
+  color: var(--paper); border-radius: 4px;
+  padding: 40px 44px; margin-bottom: 32px;
+  position: relative; overflow: hidden;
+}
+.verdict-box::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 100%; height: 4px;
+  background: linear-gradient(90deg, var(--orange), var(--gold), var(--green));
+}
+.verdict-eyebrow {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-bottom: 12px;
+}
+.verdict-headline {
+  font-family: 'Fraunces', serif; font-size: 32px;
+  line-height: 1.15; font-weight: 600; margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+.verdict-headline em { color: var(--gold); font-style: italic; }
+.verdict-text { font-size: 16px; line-height: 1.7; color: rgba(247, 243, 236, 0.9); }
+.verdict-text p { margin-bottom: 14px; }
+.verdict-text strong { color: var(--paper); }
+.first-action {
+  background: rgba(247, 243, 236, 0.08);
+  border: 1px solid rgba(247, 243, 236, 0.15);
+  border-radius: 4px; padding: 20px 24px;
+  margin-top: 24px; border-left: 3px solid var(--gold);
+}
+.first-action-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+}
+.first-action-text {
+  font-family: 'Fraunces', serif; font-size: 18px;
+  font-weight: 500; line-height: 1.4; color: var(--paper);
+}
+
+.experts-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px; margin-bottom: 24px;
+}
+.expert-pill {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  border-top-width: 4px; padding: 16px 20px;
+}
+.expert-pill.e1 { border-top-color: #1e40af; }
+.expert-pill.e2 { border-top-color: #c1272d; }
+.expert-pill.e3 { border-top-color: #a16207; }
+.expert-pill.e4 { border-top-color: #15803d; }
+.expert-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 2px; color: var(--ink-faint);
+  font-weight: 700; margin-bottom: 4px;
+}
+.expert-name {
+  font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700;
+  line-height: 1.2; margin-bottom: 4px;
+}
+.expert-tagline { font-size: 12px; color: var(--ink-soft); font-style: italic; line-height: 1.4; }
+
+.findings-grid { display: grid; gap: 14px; margin-bottom: 32px; }
+.finding {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  border-radius: 4px; padding: 18px 22px;
+  border-left: 3px solid var(--ink);
+}
+.finding.agree { border-left-color: var(--green); }
+.finding.clash { border-left-color: var(--warm); }
+.finding.blind { border-left-color: var(--hot); }
+.finding-tag {
+  display: inline-block; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  font-weight: 700; padding: 3px 8px; border-radius: 3px; margin-bottom: 8px;
+  color: var(--paper);
+}
+.finding.agree .finding-tag { background: var(--green); }
+.finding.clash .finding-tag { background: var(--warm); }
+.finding.blind .finding-tag { background: var(--hot); }
+.finding-title {
+  font-family: 'Fraunces', serif; font-size: 18px;
+  font-weight: 700; line-height: 1.3; margin-bottom: 8px;
+}
+.finding-body { font-size: 14px; line-height: 1.55; color: var(--ink-soft); }
+.finding-body strong { color: var(--ink); font-weight: 600; }
+.finding-body code {
+  font-family: 'JetBrains Mono', monospace; background: var(--paper);
+  padding: 2px 6px; border-radius: 2px; font-size: 12.5px; border: 1px solid var(--rule);
+}
+.clash-sides {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-top: 12px; font-size: 13px;
+}
+.clash-side {
+  padding: 10px 14px; background: var(--paper);
+  border-radius: 3px; border-left: 2px solid var(--cold);
+}
+.clash-side:nth-child(2) { border-left-color: var(--hot); }
+.clash-side strong {
+  display: block; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--ink-faint); margin-bottom: 4px;
+}
+
+.flow-container {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  border-radius: 4px; padding: 28px; margin-bottom: 24px;
+}
+.flow-phase { margin-bottom: 24px; }
+.flow-phase:last-child { margin-bottom: 0; }
+.flow-phase-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+}
+.flow-phase-num {
+  background: var(--orange); color: var(--paper);
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-weight: 800; font-size: 16px;
+  flex-shrink: 0;
+}
+.flow-phase-num.p1 { background: var(--cold); }
+.flow-phase-num.p2 { background: var(--orange); }
+.flow-phase-num.p3 { background: var(--green); }
+.flow-phase-num.p4 { background: var(--gold); }
+.flow-phase-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 700; }
+.flow-phase-meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--ink-faint); margin-left: auto;
+}
+.flow-screens {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;
+}
+.flow-screen {
+  background: var(--paper); border: 1px solid var(--rule);
+  padding: 12px 14px; border-radius: 3px;
+}
+.flow-screen-num {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 1px; color: var(--ink-faint);
+  text-transform: uppercase; font-weight: 700; margin-bottom: 4px;
+}
+.flow-screen-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.flow-screen-desc { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
+
+details {
+  margin-bottom: 12px; background: var(--paper-card);
+  border: 1px solid var(--rule); border-radius: 4px; overflow: hidden;
+}
+details summary {
+  padding: 18px 24px; cursor: pointer; list-style: none;
+  display: flex; align-items: center; gap: 14px;
+  font-weight: 600; font-size: 16px;
+}
+details summary:hover { background: var(--paper-warm); }
+details summary::-webkit-details-marker { display: none; }
+details summary::after {
+  content: '+'; margin-left: auto;
+  font-family: 'Fraunces', serif; font-size: 24px;
+  color: var(--ink-faint);
+}
+details[open] summary::after { content: '−'; }
+details[open] summary { border-bottom: 1px solid var(--rule); background: var(--paper-warm); }
+.details-content {
+  padding: 24px 28px; font-size: 15px; line-height: 1.7; color: var(--ink-soft);
+}
+.details-content h4 {
+  font-family: 'Fraunces', serif; font-size: 17px;
+  font-weight: 700; color: var(--ink); margin: 18px 0 8px;
+}
+.details-content h4:first-child { margin-top: 0; }
+.details-content p { margin-bottom: 10px; }
+.details-content ul { margin: 10px 0 14px 20px; }
+.details-content li { margin-bottom: 6px; }
+.details-content strong { color: var(--ink); }
+.details-content code {
+  font-family: 'JetBrains Mono', monospace; background: var(--paper);
+  padding: 2px 6px; border-radius: 2px; font-size: 12.5px; border: 1px solid var(--rule);
+}
+
+.expert-icon {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--ink); color: var(--paper);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-weight: 700;
+  font-size: 14px; flex-shrink: 0;
+}
+.expert-icon.e1 { background: #1e40af; }
+.expert-icon.e2 { background: #c1272d; }
+.expert-icon.e3 { background: #a16207; }
+.expert-icon.e4 { background: #15803d; }
+
+.stack-table {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  border-radius: 4px; overflow: hidden; margin-bottom: 24px;
+}
+.stack-row {
+  display: grid; grid-template-columns: 200px 1fr;
+  border-bottom: 1px solid var(--rule); font-size: 14px;
+}
+.stack-row:last-child { border-bottom: none; }
+.stack-cat {
+  background: var(--paper-warm); padding: 14px 18px;
+  font-weight: 700; font-family: 'Fraunces', serif; font-size: 15px;
+}
+.stack-val { padding: 14px 20px; color: var(--ink-soft); line-height: 1.5; }
+.stack-val code {
+  font-family: 'JetBrains Mono', monospace; background: var(--paper);
+  padding: 2px 6px; border-radius: 2px; font-size: 12.5px;
+  border: 1px solid var(--rule); color: var(--ink);
+}
+
+.estim-table {
+  background: var(--paper-card); border: 1px solid var(--rule);
+  border-radius: 4px; overflow: hidden;
+}
+.estim-row {
+  display: grid; grid-template-columns: 1fr 130px;
+  padding: 14px 20px; border-bottom: 1px solid var(--rule);
+  font-size: 14px; align-items: baseline;
+}
+.estim-row:last-child {
+  border-bottom: none; background: var(--ink); color: var(--paper);
+}
+.estim-row:last-child .estim-effort { color: var(--paper); font-weight: 700; }
+.estim-task { color: var(--ink-soft); }
+.estim-row:last-child .estim-task { color: var(--paper); font-weight: 700; }
+.estim-effort {
+  font-family: 'JetBrains Mono', monospace; font-weight: 600;
+  text-align: right; font-size: 13px;
+}
+
+.callout {
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.05), rgba(217, 119, 6, 0.05));
+  border-left: 4px solid var(--orange);
+  padding: 20px 24px; margin: 20px 0; border-radius: 0 4px 4px 0;
+}
+.callout-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--orange); font-weight: 700; margin-bottom: 6px;
+}
+.callout-text { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; line-height: 1.5; }
+
+.footer {
+  margin-top: 80px; padding-top: 32px;
+  border-top: 3px double var(--ink); text-align: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  letter-spacing: 1px; color: var(--ink-faint); line-height: 1.8;
+}
+.footer-mark {
+  font-family: 'Fraunces', serif; font-style: italic; font-size: 14px;
+  color: var(--ink); margin-bottom: 8px; letter-spacing: 0;
+}
+
+@media (max-width: 720px) {
+  .container { padding: 36px 18px 60px; }
+  .masthead-title { font-size: 36px; letter-spacing: -1px; }
+  .masthead-deck { font-size: 17px; }
+  .section-title { font-size: 26px; }
+  .verdict-box { padding: 28px 24px; }
+  .verdict-headline { font-size: 24px; }
+  .clash-sides { grid-template-columns: 1fr; }
+  .stack-row, .estim-row { grid-template-columns: 1fr; }
+  .stack-cat { font-size: 13px; padding: 10px 14px; }
+  .estim-effort { text-align: left; margin-top: 4px; }
+  .decisions-list li { flex-direction: column; gap: 4px; }
+  .flow-screens { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="masthead">
+  <div class="masthead-meta">
+    <span>Council Report · TaxiPulse</span>
+    <span>04 mai 2026 · Vol. III</span>
+  </div>
+  <h1 class="masthead-title">La porte<br>d'<em>entrée.</em></h1>
+  <p class="masthead-deck">Quatre experts ont disséqué le système d'inscription et d'authentification. Le combat n'est pas technique. Il est émotionnel : convertir des chauffeurs naturellement méfiants sans céder sur la sécurité.</p>
+</header>
+
+<div class="decisions">
+  <div class="decisions-title">Décisions actées en amont du council</div>
+  <ul class="decisions-list">
+    <li><strong>Vérification</strong>Carte pro taxi (toutes préfectures) — photo recto + verso, validation manuelle par toi</li>
+    <li><strong>Pendant la vérif</strong>Accès immédiat à l'app + badge orange (24-48h max)</li>
+    <li><strong>Authentification</strong>Email + mot de passe + OTP 6 chiffres à chaque connexion</li>
+    <li><strong>Atténuation council</strong>Trusted device 30-60j ajouté pour résoudre la friction quotidienne</li>
+  </ul>
+</div>
+
+<div class="framed-question">
+  <div class="framed-label">La question soumise au council</div>
+  <div class="framed-text">Concevoir l'architecture complète d'inscription et d'authentification pour TaxiPulse. Vérification carte pro par photo recto/verso, validation manuelle par le founder, accès immédiat avec badge orange, authentification email + mot de passe + OTP. Comment <strong>maximiser la complétion d'inscription tout en garantissant RGPD bulletproof, sécurité technique solide et anti-fraude efficace</strong> sur un public de chauffeurs taxi naturellement méfiants ?</div>
+</div>
+
+<nav class="toc">
+  <div class="toc-title">Sommaire</div>
+  <ol>
+    <li><a href="#verdict">Verdict du Chairman</a><span class="toc-page">→ section principale</span></li>
+    <li><a href="#experts">Les quatre experts convoqués</a><span class="toc-page">→ profils</span></li>
+    <li><a href="#flow">Le flow recommandé en 4 phases</a><span class="toc-page">→ architecture</span></li>
+    <li><a href="#agree">Convergences fortes</a><span class="toc-page">→ haute confiance</span></li>
+    <li><a href="#clash">Tensions et arbitrages</a><span class="toc-page">→ clashes résolus</span></li>
+    <li><a href="#blind">Angles morts révélés</a><span class="toc-page">→ peer review</span></li>
+    <li><a href="#stack">Stack technique consolidée</a><span class="toc-page">→ détails</span></li>
+    <li><a href="#first">La seule chose à faire en premier</a><span class="toc-page">→ admin panel</span></li>
+    <li><a href="#estim">Estimation de réalisation</a><span class="toc-page">→ ~3-4 sem solo</span></li>
+    <li><a href="#analyses">Analyses individuelles complètes</a><span class="toc-page">→ détails</span></li>
+  </ol>
+</nav>
+
+<section class="section" id="verdict">
+  <div class="section-eyebrow">Synthèse principale</div>
+  <h2 class="section-title">Le Verdict</h2>
+
+  <div class="verdict-box">
+    <div class="verdict-eyebrow">Chairman's call</div>
+    <div class="verdict-headline">Onboarding en deux temps. Pas un tunnel de <em>10 écrans.</em></div>
+    <div class="verdict-text">
+      <p>Le council a convergé sur une refonte structurelle : <strong>séparer "Inscription rapide 3 min" et "Vérification carte pro plus tard"</strong>. Le chauffeur s'inscrit en 3 minutes (email + mot de passe + OTP + consentements), accède immédiatement à la heatmap en mode découverte, puis vérifie sa carte quand il veut (deadline 30 jours).</p>
+      <p>Cette séparation est validée par toutes les statistiques d'onboarding B2B pro. <strong>Multiplicateur 1.5–2x sur le taux de complétion.</strong> Tu passes de ~50% (flow linéaire) à ~75-80% (flow découpé). Sur 1000 inscrits = 250-300 chauffeurs vérifiés en plus.</p>
+      <p>Le combo "mot de passe + OTP quotidien" que tu as choisi est sécurité-correct mais friction-élevée. Sans <strong>trusted device 30-60 jours coché par défaut</strong>, churn assuré. Avec, on transforme la friction en confort.</p>
+      <p>Côté anti-fraude : <strong>vérifs automatiques en signaux faibles (OCR + reverse image search), décision finale humaine</strong>. Conforme article 22 RGPD et compatible ton rythme (30-60s par dossier dans un admin panel structuré).</p>
+    </div>
+    <div class="first-action">
+      <div class="first-action-label">→ La seule chose à faire en premier</div>
+      <div class="first-action-text">Construire l'admin panel de validation AVANT l'écran d'inscription public. Sans cet outil, tu ne tiens pas 50 validations/jour. 2-3 jours de dev concentré.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="experts">
+  <div class="section-eyebrow">Composition</div>
+  <h2 class="section-title">Les quatre experts convoqués</h2>
+  <p class="section-lead">Chacun a analysé le système indépendamment, puis lu anonymement les 3 autres pour identifier le meilleur, les blind spots, et ce que tous ont raté.</p>
+  <div class="experts-grid">
+    <div class="expert-pill e1">
+      <div class="expert-num">Expert 01</div>
+      <div class="expert-name">Architecte Sécurité Auth</div>
+      <div class="expert-tagline">10 ans en authentification. Ex-Auth0/Okta puis lead sécu chez Qonto.</div>
+    </div>
+    <div class="expert-pill e2">
+      <div class="expert-num">Expert 02</div>
+      <div class="expert-name">Designer UX produits B2B/pro</div>
+      <div class="expert-tagline">8 ans d'onboarding pro. Ex-Doctolib, Qonto, Aircall, Pennylane.</div>
+    </div>
+    <div class="expert-pill e3">
+      <div class="expert-num">Expert 03</div>
+      <div class="expert-name">Juriste RGPD spécialiste KYC</div>
+      <div class="expert-tagline">Ex-CNIL, DPO mobilité. Spécialisation traitements documents pro.</div>
+    </div>
+    <div class="expert-pill e4">
+      <div class="expert-num">Expert 04</div>
+      <div class="expert-name">Ops Anti-fraude marketplace</div>
+      <div class="expert-tagline">9 ans à bloquer les fraudes inscription. Ex-Heetch, Stuart, Frichti.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="flow">
+  <div class="section-eyebrow">Architecture finale</div>
+  <h2 class="section-title">Le flow recommandé en 4 phases</h2>
+  <p class="section-lead">Recommandation consolidée du council. La séparation Phase 1 / Phase 2 est l'unlock principal qui maximise la complétion.</p>
+
+  <div class="flow-container">
+    <div class="flow-phase">
+      <div class="flow-phase-header">
+        <div class="flow-phase-num p1">1</div>
+        <div class="flow-phase-title">Inscription rapide</div>
+        <div class="flow-phase-meta">3 minutes</div>
+      </div>
+      <div class="flow-screens">
+        <div class="flow-screen"><div class="flow-screen-num">Écran 0</div><div class="flow-screen-title">Landing</div><div class="flow-screen-desc">Photo Salim + promesse + démo heatmap visible avant inscription</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 1</div><div class="flow-screen-title">Email + mot de passe</div><div class="flow-screen-desc">10 char min, vérif HIBP, indicateur de force, pas de "confirmer"</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 2</div><div class="flow-screen-title">OTP email</div><div class="flow-screen-desc">6 chiffres, 10 min, 5 essais, auto-fill iOS/Android, paste détecté</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 3</div><div class="flow-screen-title">Consentements</div><div class="flow-screen-desc">4 cases distinctes (CGU, Privacy, Vérif Carte, Marketing), horodatage archivé</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 4</div><div class="flow-screen-title">Bienvenue</div><div class="flow-screen-desc">Accès direct heatmap mode découverte + bandeau orange "vérifie ta carte"</div></div>
+      </div>
+    </div>
+
+    <div class="flow-phase">
+      <div class="flow-phase-header">
+        <div class="flow-phase-num p2">2</div>
+        <div class="flow-phase-title">Vérification carte pro</div>
+        <div class="flow-phase-meta">2 min · deadline 30j</div>
+      </div>
+      <div class="flow-screens">
+        <div class="flow-screen"><div class="flow-screen-num">Écran 5</div><div class="flow-screen-title">Pourquoi vérifier</div><div class="flow-screen-desc">Transparence : qui voit, comment c'est traité, durée 30j, suppression</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 6</div><div class="flow-screen-title">Infos carte</div><div class="flow-screen-desc">N° carte + préfecture (dropdown) + date d'expiration</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 7</div><div class="flow-screen-title">Photo recto</div><div class="flow-screen-desc">Camera in-app + guides cadrage, compression côté client, upload R2</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 8</div><div class="flow-screen-title">Photo verso</div><div class="flow-screen-desc">Idem écran 7</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Écran 9</div><div class="flow-screen-title">Confirmation</div><div class="flow-screen-desc">"Validation sous 24-48h" + retour heatmap, push notif promise</div></div>
+      </div>
+    </div>
+
+    <div class="flow-phase">
+      <div class="flow-phase-header">
+        <div class="flow-phase-num p3">3</div>
+        <div class="flow-phase-title">Validation par toi (admin panel)</div>
+        <div class="flow-phase-meta">30-60s par dossier</div>
+      </div>
+      <div class="flow-screens">
+        <div class="flow-screen"><div class="flow-screen-num">Auto 1</div><div class="flow-screen-title">OCR</div><div class="flow-screen-desc">Extraction n° + nom imprimés. Match avec saisie chauffeur. Tesseract.js</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Auto 2</div><div class="flow-screen-title">Reverse image</div><div class="flow-screen-desc">TinEye API : photo déjà postée sur le web ? Si oui, flag rouge</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Auto 3</div><div class="flow-screen-title">Format n°</div><div class="flow-screen-desc">Vérif format selon préfecture (T3P pour Paris, etc.)</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Auto 4</div><div class="flow-screen-title">Blacklist</div><div class="flow-screen-desc">Croisement n° + IP + device fingerprint avec historique</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Manuel</div><div class="flow-screen-title">Décision finale</div><div class="flow-screen-desc">Toi : valider / rejeter / demander complément. Push notif au chauffeur.</div></div>
+      </div>
+    </div>
+
+    <div class="flow-phase">
+      <div class="flow-phase-header">
+        <div class="flow-phase-num p4">4</div>
+        <div class="flow-phase-title">Connexion quotidienne</div>
+        <div class="flow-phase-meta">15-30 sec</div>
+      </div>
+      <div class="flow-screens">
+        <div class="flow-screen"><div class="flow-screen-num">Login</div><div class="flow-screen-title">Email + mot de passe</div><div class="flow-screen-desc">Saisie classique + bouton 👁 voir le mot de passe</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Si trusted</div><div class="flow-screen-title">Accès direct</div><div class="flow-screen-desc">Trusted device &lt;60j → JWT + accès direct, pas d'OTP</div></div>
+        <div class="flow-screen"><div class="flow-screen-num">Sinon</div><div class="flow-screen-title">OTP</div><div class="flow-screen-desc">Email OTP 6 chiffres + auto-fill système + case "se souvenir 30j"</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="agree">
+  <div class="section-eyebrow">Convergences</div>
+  <h2 class="section-title">Où le council est unanime</h2>
+  <p class="section-lead">Sept points sur lesquels tous les experts ont convergé indépendamment. Signaux haute confiance.</p>
+
+  <div class="findings-grid">
+    <div class="finding agree">
+      <span class="finding-tag">Convergence forte</span>
+      <div class="finding-title">Bcrypt cost 12 + JWT stateless + refresh token sont les bons choix</div>
+      <div class="finding-body">Standard 2024, validé par les 4 experts. <code>bcrypt</code> cost 12 pour les mots de passe (Argon2id pas nécessaire à ce stade), JWT HS256 24h, refresh token 30j en httpOnly cookie. Pas d'Auth0 ou Cognito (over-engineering pour V1).</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Conformité</span>
+      <div class="finding-title">AIPD obligatoire AVANT lancement bêta</div>
+      <div class="finding-body">Non-négociable. Couvre inscription + heatmap dans une seule AIPD unifiée. Budget : 2-4K€ avec un juriste pro. <strong>Sans AIPD, sanctions CNIL probables au premier contrôle.</strong></div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">RGPD</span>
+      <div class="finding-title">Quatre cases consentement RGPD distinctes</div>
+      <div class="finding-body">Pas une seule case "j'accepte tout". Quatre cases : <code>CGU</code>, <code>Politique de confidentialité</code>, <code>Vérification carte pro</code> (consentement explicite séparé), <code>Marketing</code> (facultatif). Horodatage + IP + version archivés à chaque coche.</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Sécurité critique</span>
+      <div class="finding-title">Photo carte chiffrée applicativement + suppression auto J+30</div>
+      <div class="finding-body">AES-256-GCM avant upload R2 (couche en plus du chiffrement R2 par défaut). Suppression automatique 30j post-validation, 90j post-rejet. <strong>Le seul vrai risque catastrophique du produit, à blinder dès le départ.</strong></div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Multiplicateur</span>
+      <div class="finding-title">Admin panel structuré dès la V1</div>
+      <div class="finding-body">Pas un Slack avec photos. Un vrai dashboard avec queue, vue détaillée, scores de risque, actions un clic. <strong>Sans cet outil, le founder solo craque au-delà de 50 demandes.</strong> 2-3 jours de dev. Critique pour la viabilité.</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">UX critique</span>
+      <div class="finding-title">Trusted device 30-60 jours pour atténuer la friction OTP</div>
+      <div class="finding-body">Sans ça, l'OTP quotidien tue la rétention. Coché par défaut à la connexion, désactivable, révocable, listé dans paramètres. C'est ce qu'utilisent Google, Apple, banques en ligne.</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Optimisation temps</span>
+      <div class="finding-title">OCR + reverse image search en signaux faibles</div>
+      <div class="finding-body">Tesseract.js (gratuit, vérifier licence AGPL) pour l'OCR du n° de carte. TinEye API (150 req/mois gratuit) pour reverse image search. <strong>Décision finale humaine</strong> (toi) — conforme article 22 RGPD. Gain de temps : 5 min → 30 sec par validation.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="clash">
+  <div class="section-eyebrow">Tensions</div>
+  <h2 class="section-title">Où le council se déchire</h2>
+  <p class="section-lead">Trois clashes majeurs entre experts. Le chairman tranche en bas de chacun.</p>
+
+  <div class="findings-grid">
+    <div class="finding clash">
+      <span class="finding-tag">Clash 01</span>
+      <div class="finding-title">Onboarding linéaire vs séparation Inscription / Vérification</div>
+      <div class="finding-body">Faut-il enchaîner inscription + vérif carte en un seul tunnel, ou les séparer ?
+        <div class="clash-sides">
+          <div class="clash-side"><strong>Camp linéaire (Architecte)</strong>Flow 7 écrans, vérif carte intégrée. "Plus simple à coder."</div>
+          <div class="clash-side"><strong>Camp séparation (Designer UX)</strong>Inscription rapide 3 min → accès immédiat → vérif carte plus tard. Multiplicateur 1.5-2x.</div>
+        </div>
+        <p style="margin-top: 14px;"><strong>Verdict :</strong> Designer UX, sans hésitation. <strong>+25-30 points de complétion sur 1000 inscrits.</strong> MAIS deadline 30j obligatoire pour passer de découverte à vérifié (ops anti-fraude).</p>
+      </div>
+    </div>
+
+    <div class="finding clash">
+      <span class="finding-tag">Clash 02</span>
+      <div class="finding-title">Niveau d'agressivité des vérifications fraude</div>
+      <div class="finding-body">L'ops anti-fraude propose vérifs automatiques systématiques. Le juriste rappelle qu'elles doivent être encadrées.
+        <div class="clash-sides">
+          <div class="clash-side"><strong>Anti-fraude</strong>OCR systématique + reverse search + scoring auto + blacklist permanente.</div>
+          <div class="clash-side"><strong>Juriste</strong>Article 22 RGPD : pas de décision automatisée seule. Décision humaine obligatoire.</div>
+        </div>
+        <p style="margin-top: 14px;"><strong>Verdict :</strong> les deux ont raison. Vérifs auto OK comme <strong>signaux faibles</strong> (score), <strong>décision finale humaine</strong> (toi). Information transparente dans politique privacy. Droit de contestation par email.</p>
+      </div>
+    </div>
+
+    <div class="finding clash">
+      <span class="finding-tag">Clash 03</span>
+      <div class="finding-title">Niveau de fraude tolérable</div>
+      <div class="finding-body">L'ops anti-fraude propose 70-80% détection / 95%+ complétion vrais chauffeurs. Le juriste implicitement vise tolérance zéro.
+        <p style="margin-top: 12px;"><strong>Verdict :</strong> 70-80% détection est réaliste pour la V1 et acceptable. <strong>Mieux laisser passer 5% de fraudeurs que perdre 30% de vrais users à cause d'une vérif trop stricte.</strong> Système de post-détection (signaux long terme) pour rattraper les fraudes ratées.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="blind">
+  <div class="section-eyebrow">Angles morts</div>
+  <h2 class="section-title">Ce que la peer review a révélé</h2>
+  <p class="section-lead">Treize points qui ne sont apparus qu'après que les experts se soient relus mutuellement.</p>
+
+  <div class="findings-grid">
+    <div class="finding blind">
+      <span class="finding-tag">Critique · oublié</span>
+      <div class="finding-title">Expiration de carte pro et re-vérification</div>
+      <div class="finding-body">Une carte pro a une date d'expiration (5 ans). Que se passe-t-il à expiration ? <strong>Aucun expert ne l'avait abordé.</strong> Solution : rappel J-60, J-30, J-7 puis suspension auto du compte. Sans ça, ton produit héberge des chauffeurs hors-statut → risque légal.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">UX critique</span>
+      <div class="finding-title">Récupération de compte après perte téléphone + email</div>
+      <div class="finding-body">Trusted device + OTP email c'est bien, mais si user perd les deux, compte perdu définitivement. <strong>Procédure exceptionnelle obligatoire</strong> : photo carte pro + selfie + email d'origine + validation manuelle par toi.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">Sécurité &amp; RGPD</span>
+      <div class="finding-title">Comptes "fantômes" en mode découverte</div>
+      <div class="finding-body">Sans deadline, des comptes restent en découverte indéfiniment. Risque de spam, scraping, fraude latente. <strong>Solution :</strong> 30 jours max en découverte, rappels J+15 et J+25, suppression automatique J+30 si carte non envoyée.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">RGPD précis</span>
+      <div class="finding-title">Vérifs auto exposées à l'article 22 RGPD</div>
+      <div class="finding-body">L'OCR/reverse image search peuvent constituer une "décision automatisée produisant un effet juridique" (rejet d'inscription). <strong>Décision finale humaine obligatoire</strong>, signaux automatiques utilisés uniquement comme aide. Information transparente dans politique privacy.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">RGPD oublié</span>
+      <div class="finding-title">Sous-traitants OCR/reverse search à déclarer</div>
+      <div class="finding-body">TinEye, Bing Visual Search = sous-traitants RGPD. <strong>DPA à signer</strong> avec chacun. <strong>Politique de privacy à mettre à jour</strong> en listant tous les sous-traitants. Article 28 RGPD.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">UX positif</span>
+      <div class="finding-title">Premier "first-run" après validation carte</div>
+      <div class="finding-body">Le moment où le badge orange devient vert est précieux. <strong>Séquence de tour de l'app</strong> (4-5 écrans) + premier "ah-ha moment". Sans ça, le chauffeur churns.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">UX engagement</span>
+      <div class="finding-title">Re-validation après changement de carte = opportunité</div>
+      <div class="finding-body">Un chauffeur change de préfecture, ou renouvelle. <strong>À traiter comme moment positif</strong> (push notif "ta nouvelle carte est validée, profite-en pour..." + features) plutôt que corvée admin.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">RGPD précis</span>
+      <div class="finding-title">Logs d'audit : durées de conservation</div>
+      <div class="finding-body">LCEN : <strong>1 an minimum</strong> pour logs de connexion. RGPD : <strong>3 ans</strong> pour logs d'accès aux données personnelles. À documenter dans le registre des traitements.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">Conformité oubliée</span>
+      <div class="finding-title">Désignation et déclaration DPO à la CNIL</div>
+      <div class="finding-body">Même volontaire (sous le seuil obligatoire), si tu désignes un DPO (toi-même par défaut), <strong>déclaration via formulaire en ligne CNIL</strong>. Coût zéro. Oubli courant.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">Licence open source</span>
+      <div class="finding-title">Compatibilité Tesseract.js (AGPL)</div>
+      <div class="finding-body">Licence AGPL → contraintes spécifiques. <strong>À vérifier avant production.</strong> Alternatives commerciales (Google Cloud Vision, AWS Textract) plus chères mais sans souci de licence.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">Anti-fraude avancé</span>
+      <div class="finding-title">Comptes partagés entre chauffeurs collègues</div>
+      <div class="finding-body">Pas un fraudeur classique : un vrai taxi qui crée un compte, partage ses identifiants à 3 collègues. Détection : <strong>patterns de connexion (3 GPS différents simultanément)</strong> + vérif périodique. À implémenter en V2.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">Anti-fraude avancé</span>
+      <div class="finding-title">Revente de comptes vérifiés</div>
+      <div class="finding-body">Phénomène déjà observé sur Heetch, Uber Pro. Détection : <strong>changement brutal de comportement post-validation</strong> + nouvelle device + nouvelle IP géographique sans explication.</div>
+    </div>
+    <div class="finding blind">
+      <span class="finding-tag">UX accessibilité</span>
+      <div class="finding-title">Impact des outils privacy sur la détection fraude</div>
+      <div class="finding-body">Un vrai chauffeur soucieux de sa vie privée (VPN, navigateur anti-tracking, blocage JS) peut déclencher 3-4 signaux faibles. <strong>Logique de discrimination signaux faibles vs comportement réellement frauduleux</strong> à implémenter.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="stack">
+  <div class="section-eyebrow">Pile technologique</div>
+  <h2 class="section-title">Stack technique consolidée</h2>
+  <p class="section-lead">L'agglomération des choix recommandés. Chaque ligne validée par au moins 2 experts indépendamment.</p>
+
+  <div class="stack-table">
+    <div class="stack-row"><div class="stack-cat">Hashing mot de passe</div><div class="stack-val"><code>bcrypt</code> cost factor 12 (WebCrypto API native Cloudflare Workers)</div></div>
+    <div class="stack-row"><div class="stack-cat">Vérif fuite mot de passe</div><div class="stack-val">API HaveIBeenPwned (anonyme : 5 chars du SHA-1, gratuit)</div></div>
+    <div class="stack-row"><div class="stack-cat">JWT</div><div class="stack-val">HS256, secret en env Cloudflare. Access 24h, refresh 30j (60j si trusted device)</div></div>
+    <div class="stack-row"><div class="stack-cat">Stockage refresh token</div><div class="stack-val">httpOnly secure cookie (web) / Keychain iOS / Keystore Android</div></div>
+    <div class="stack-row"><div class="stack-cat">OTP</div><div class="stack-val">6 chiffres numériques, expiration 10min, hashé bcrypt en D1, max 5 essais, max 3 codes/15min/user</div></div>
+    <div class="stack-row"><div class="stack-cat">Email transactionnel</div><div class="stack-val"><strong>Resend</strong> (recommandé, UE possible) ou Postmark. Gratuit jusqu'à 3000 emails/mois</div></div>
+    <div class="stack-row"><div class="stack-cat">Stockage photo carte</div><div class="stack-val">Cloudflare R2 (UE) + chiffrement applicatif AES-256-GCM avant upload</div></div>
+    <div class="stack-row"><div class="stack-cat">Suppression photo auto</div><div class="stack-val">Cron Job J+30 post-validation, J+90 post-rejet, J+1 post-suppression compte</div></div>
+    <div class="stack-row"><div class="stack-cat">OCR</div><div class="stack-val">Tesseract.js (gratuit, vérifier licence AGPL) ou Google Vision API (payant mais clean)</div></div>
+    <div class="stack-row"><div class="stack-cat">Reverse image search</div><div class="stack-val">TinEye API (gratuit jusqu'à 150/mois) ou Bing Visual Search (1000 gratuit/mois)</div></div>
+    <div class="stack-row"><div class="stack-cat">Captcha anti-bot</div><div class="stack-val">Cloudflare Turnstile (gratuit, RGPD-friendly, sans cookie)</div></div>
+    <div class="stack-row"><div class="stack-cat">Anti-brute force</div><div class="stack-val">5 essais/15min → blocage 30min. 20/24h → blocage 24h + alerte. Captcha dès essai 3.</div></div>
+    <div class="stack-row"><div class="stack-cat">Base de données</div><div class="stack-val">Cloudflare D1 (SQLite distribué). Tables : users, otp_codes, sessions, cards, blacklist, consents, audit_logs</div></div>
+    <div class="stack-row"><div class="stack-cat">Pen-test</div><div class="stack-val">Audit ciblé sur flow auth, 2-3 jours mission. <strong>2-3K€ — non négociable avant prod</strong></div></div>
+  </div>
+</section>
+
+<section class="section" id="first">
+  <div class="section-eyebrow">Cette semaine</div>
+  <h2 class="section-title">La seule chose à faire en premier</h2>
+
+  <div class="callout">
+    <div class="callout-label">→ Action immédiate</div>
+    <div class="callout-text"><strong>Construire l'admin panel de validation AVANT l'écran d'inscription public.</strong> Sans cet outil, tu ne tiens pas 50 validations/jour. 2-3 jours de dev concentré.</div>
+  </div>
+
+  <p style="margin-top: 20px; font-size: 15px; line-height: 1.7; color: var(--ink-soft);">Tu peux survivre 1 mois avec une page d'inscription moche si l'admin panel marche bien. Tu ne peux pas survivre 1 semaine si tu valides 50 cartes/jour à la main dans une feuille Excel. <strong style="color: var(--ink);">L'admin panel = le multiplicateur de ton temps.</strong> C'est lui qui détermine si tu peux gérer 100 ou 1000 chauffeurs. C'est lui aussi qui sécurise tes décisions (logs d'audit, droit de contestation).</p>
+
+  <details style="margin-top: 24px;">
+    <summary>📋 Spec minimale de l'admin panel V1</summary>
+    <div class="details-content">
+      <h4>Authentification admin</h4>
+      <ul>
+        <li>Login séparé du frontend public (URL <code>/admin</code>)</li>
+        <li>Email + mot de passe + OTP <strong>obligatoire</strong> à chaque session (pas de trusted device pour l'admin)</li>
+        <li>Idéalement clé YubiKey en plus</li>
+        <li>Session 4h max, déconnexion auto</li>
+      </ul>
+      <h4>Vue 1 — Queue de validation</h4>
+      <ul>
+        <li>Liste des demandes en attente, triées chronologiquement</li>
+        <li>Filtres : "tous", "score risque élevé", "complément demandé", "stagiaires"</li>
+        <li>Compteurs : en attente / validés / rejetés / suspects</li>
+        <li>Recherche par n° carte, email, ou nom</li>
+      </ul>
+      <h4>Vue 2 — Détail d'une demande</h4>
+      <ul>
+        <li>Photos recto + verso (zoomables, pleine résolution)</li>
+        <li>Toutes les infos saisies par le chauffeur</li>
+        <li>Résultats des vérifs auto (OCR, reverse image, format, blacklist)</li>
+        <li>Score de risque global avec détail des alertes</li>
+        <li>Historique du compte (date inscription, connexions, etc.)</li>
+        <li>3 boutons : Valider / Rejeter / Demander complément</li>
+        <li>Champ "raison du rejet" obligatoire si rejet (envoyé au chauffeur)</li>
+      </ul>
+      <h4>Vue 3 — Blacklist management</h4>
+      <ul>
+        <li>Liste des n° de cartes blacklistés avec raison</li>
+        <li>Liste des IPs / device fingerprints blacklistés</li>
+        <li>Ajout manuel possible</li>
+      </ul>
+      <h4>Vue 4 — Logs d'audit</h4>
+      <ul>
+        <li>Toutes tes actions admin (validation, rejet, consultation photo)</li>
+        <li>Timestamp + raison</li>
+        <li>Export CSV pour CNIL en cas de contrôle</li>
+      </ul>
+      <h4>Vue 5 — Stats globales</h4>
+      <ul>
+        <li>Taux de validation / rejet</li>
+        <li>Temps moyen de validation</li>
+        <li>Inscrits par jour / semaine / mois</li>
+        <li>Conversion mode découverte → carte vérifiée</li>
+      </ul>
+      <h4>Sécurité minimale</h4>
+      <ul>
+        <li>Toutes les actions loggées en BDD</li>
+        <li>Pas de stockage local des photos</li>
+        <li>Pas d'export possible (regarder, pas télécharger)</li>
+        <li>Watermark sur photos pour traçabilité interne</li>
+      </ul>
+      <p><strong>Estimation : 2-3 jours de dev concentré.</strong> Tech recommandée : SvelteKit ou Next.js (frontend) + Cloudflare Workers (backend) + D1 (data) + R2 (photos).</p>
+    </div>
+  </details>
+</section>
+
+<section class="section" id="estim">
+  <div class="section-eyebrow">Planning</div>
+  <h2 class="section-title">Estimation de réalisation</h2>
+  <p class="section-lead">Découpage en modules pour solo founder à temps plein. Compte 30-40% de buffer pour l'imprévu.</p>
+
+  <div class="estim-table">
+    <div class="estim-row"><div class="estim-task">Schéma BDD complet (users, otp, sessions, cartes, blacklist, consents, logs)</div><div class="estim-effort">1 jour</div></div>
+    <div class="estim-row"><div class="estim-task">Auth backend (login/register/OTP/refresh/trusted device)</div><div class="estim-effort">4-5 jours</div></div>
+    <div class="estim-row"><div class="estim-task">Frontend inscription (5 écrans Phase 1)</div><div class="estim-effort">3-4 jours</div></div>
+    <div class="estim-row"><div class="estim-task">Frontend vérification carte (5 écrans Phase 2)</div><div class="estim-effort">2-3 jours</div></div>
+    <div class="estim-row"><div class="estim-task">Upload photo + chiffrement R2</div><div class="estim-effort">1-2 jours</div></div>
+    <div class="estim-row"><div class="estim-task">Admin panel basique (queue + détail + actions)</div><div class="estim-effort">2-3 jours</div></div>
+    <div class="estim-row"><div class="estim-task">Vérifs automatiques (OCR + reverse search + format check)</div><div class="estim-effort">2-3 jours</div></div>
+    <div class="estim-row"><div class="estim-task">Politique privacy + AIPD (avec juriste pro)</div><div class="estim-effort">1 sem délai</div></div>
+    <div class="estim-row"><div class="estim-task">Tests + pen-test ciblé</div><div class="estim-effort">2-3 jours</div></div>
+    <div class="estim-row"><div class="estim-task"><strong>TOTAL temps plein solo</strong></div><div class="estim-effort"><strong>~3-4 sem</strong></div></div>
+  </div>
+
+  <p style="margin-top: 20px; font-size: 14px; color: var(--ink-soft); line-height: 1.6;">À budgéter en P0/P1 du plan global TaxiPulse. <strong>Cette étude couvre l'inscription et l'auth uniquement.</strong> La heatmap (le cœur produit) est traitée dans le council Vol. II et fera l'objet d'une étude technique séparée plus dense.</p>
+</section>
+
+<section class="section" id="analyses">
+  <div class="section-eyebrow">Détails</div>
+  <h2 class="section-title">Analyses individuelles complètes</h2>
+  <p class="section-lead">Lecture optionnelle. Position globale, recommandations principales, top 3 priorités de chaque expert.</p>
+
+  <details>
+    <summary><span class="expert-icon e1">01</span> Architecte Sécurité — "Mot de passe + OTP quotidien sans trusted device = churn assuré"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Le combo "mot de passe + OTP à chaque connexion" est <strong>techniquement correct mais opérationnellement risqué</strong>. Un chauffeur qui ouvre l'app à 5h47, doit attendre l'OTP, le saisir sous la pluie... 15-25% de pertes sur la friction quotidienne. <strong>Trusted device 30-60 jours obligatoire.</strong></p>
+      <h4>Stack technique</h4>
+      <ul>
+        <li><code>bcrypt</code> cost 12 (Argon2id pas nécessaire à ce stade)</li>
+        <li>JWT HS256, secret en env Cloudflare</li>
+        <li>Pas d'Auth0/Cognito (over-engineering)</li>
+        <li>Construis-le toi-même sur Cloudflare Workers</li>
+        <li>Resend ou Postmark pour les emails OTP (UE possible)</li>
+      </ul>
+      <h4>Sécurité photo carte pro</h4>
+      <p>Upload direct vers R2 via <strong>presigned URL</strong> (pas via le Worker). <strong>Chiffrement applicatif AES-256-GCM</strong> en plus du chiffrement R2 par défaut. Pas d'URL publique. Suppression auto J+30.</p>
+      <h4>Politique mot de passe (NIST/ANSSI 2024)</h4>
+      <ul>
+        <li><strong>Minimum 10 caractères</strong> (pas 8, trop faible)</li>
+        <li><strong>Pas d'exigence de complexité</strong> chiffres/majuscules/symboles</li>
+        <li><strong>Vérification HaveIBeenPwned</strong> à l'inscription</li>
+      </ul>
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>Trusted device 30-60 jours obligatoire</li>
+        <li>Resend/Postmark pour emails (délivrabilité critique)</li>
+        <li>Photos chiffrées applicativement avant R2 + suppression auto J+30</li>
+      </ul>
+      <h4>Avertissement</h4>
+      <p>Ne déploie pas en prod sans <strong>pen-test ciblé</strong> sur le flow auth. 2-3K€ pour 2-3 jours. Non-négociable.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="expert-icon e2">02</span> Designer UX — "Sépare inscription et vérification, c'est 2x plus de complétion"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Tu construis pour des chauffeurs <strong>professionnellement méfiants</strong> (échaudés par Uber, centrales, régul). <strong>L'enjeu n'est pas la friction technique, c'est la friction émotionnelle.</strong> Ils doivent sentir que tu es un pair, pas un inquisiteur.</p>
+      <h4>Le single biggest unlock</h4>
+      <ul>
+        <li><strong>Phase A (3 min)</strong> : email + password + OTP + accès immédiat à l'app (mode découverte)</li>
+        <li><strong>Phase B (à faire quand le chauffeur veut)</strong> : vérification carte pour débloquer toutes les features</li>
+      </ul>
+      <p><strong>+30% de complétion d'onboarding</strong> systématiquement.</p>
+      <h4>5 principes d'un onboarding chauffeur réussi</h4>
+      <ul>
+        <li>Établir la confiance AVANT de demander quoi que ce soit (photo Salim + numéro carte pro)</li>
+        <li>Justifier chaque champ demandé en 1 phrase</li>
+        <li>Progression visible + bouton retour systématique</li>
+        <li>Sauvegarder en continu (mode brouillon)</li>
+        <li>Onboarding ≠ Inscription (séparation 2 phases)</li>
+      </ul>
+      <h4>Atténuation friction OTP quotidien</h4>
+      <ul>
+        <li>Bouton "Faire confiance à cet appareil 30 jours" coché par défaut</li>
+        <li>Biométrie (Face ID) en V2 comme alternative</li>
+        <li>SMS en fallback de l'email (V2)</li>
+        <li>Auto-fill iOS/Android via API native</li>
+      </ul>
+      <h4>Erreurs critiques à éviter</h4>
+      <ul>
+        <li>"Mot de passe doit contenir 1 majuscule + 1 chiffre..." → user déteste</li>
+        <li>Demander date de naissance à l'inscription</li>
+        <li>Une seule case "j'accepte tout" (illégal et abus de design)</li>
+        <li>Bloquer l'écran tant que validation carte pas faite (-60% de complétion)</li>
+        <li>Ne pas dire "qui voit ma carte" (méfiance instantanée)</li>
+      </ul>
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>Sépare inscription rapide (3 min) et vérification carte (à faire quand le chauffeur veut)</li>
+        <li>Trusted device 30 jours coché par défaut</li>
+        <li>Justifie chaque champ demandé en 1 phrase</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="expert-icon e3">03</span> Juriste RGPD — "C'est un traitement KYC, pas une simple inscription"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Ce n'est PAS une simple inscription. C'est un <strong>traitement KYC à finalités multiples</strong> : identification, vérification de qualification professionnelle, archivage de documents. Plus complexe juridiquement qu'il n'y paraît.</p>
+      <h4>Base légale recommandée V1</h4>
+      <p><strong>Pseudonymisation forte avec consentement explicite</strong>. Régime RGPD complet : consentement granulaire, droit d'accès, droit à l'oubli, AIPD obligatoire, registre des traitements.</p>
+      <h4>4 cases consentement obligatoires</h4>
+      <ul>
+        <li>☐ J'accepte les CGU (obligatoire)</li>
+        <li>☐ J'ai pris connaissance de la Politique de Confidentialité (obligatoire)</li>
+        <li>☐ J'autorise TaxiPulse à vérifier ma carte professionnelle... (obligatoire, séparée)</li>
+        <li>☐ J'accepte de recevoir des newsletters (facultatif)</li>
+      </ul>
+      <h4>Photo carte pro : règles strictes</h4>
+      <ul>
+        <li><strong>30 jours max</strong> après validation, puis destruction automatique</li>
+        <li>90 jours en cas de rejet (recours)</li>
+        <li>24h en cas de suppression de compte</li>
+        <li>Chiffrement applicatif AES-256 obligatoire</li>
+        <li>Logging de chaque consultation par toi</li>
+      </ul>
+      <h4>Documents juridiques obligatoires</h4>
+      <ul>
+        <li><strong>AIPD complète</strong> (~30 pages, 2-4K€) — couvre inscription + heatmap unifiées</li>
+        <li>Politique privacy avec section dédiée carte pro</li>
+        <li>Registre des traitements (article 30 RGPD)</li>
+        <li>Procédure exercice des droits</li>
+        <li>DPA signés avec Cloudflare, Resend, TinEye, etc.</li>
+        <li>Charte confidentialité admin signée par toi</li>
+      </ul>
+      <h4>MFA admin obligatoire</h4>
+      <p>Ton compte admin doit avoir MFA <strong>non optionnel</strong>. Idéalement YubiKey + OTP. Logs d'audit de toutes tes actions.</p>
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>AIPD complète AVANT bêta (2-4K€ contre 15K€+ de risque évité)</li>
+        <li>Architecture "agrégation à 48h" : aucune donnée nominative ne survit plus de 2 jours</li>
+        <li>Procédure suppression compte automatisée</li>
+      </ul>
+      <h4>Avertissement final</h4>
+      <p>Le KYC professionnel chauffeur est un terrain juridique <strong>plus surveillé que la moyenne</strong>. La CNIL a des dossiers récents Uber/Heetch sur ce sujet. <strong>Une seule fuite de photo de carte pro = sanction CNIL probable + impact réputationnel massif.</strong></p>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="expert-icon e4">04</span> Ops Anti-fraude — "Sur 1000 inscriptions, 120-180 fraudes attendues"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Sur 1000 inscriptions taxi : 120-180 fraudes. Pas des fraudeurs vissés, des opportunistes. <strong>La fraude n'est pas un problème technique, c'est un problème de processus et de signaux faibles.</strong></p>
+      <h4>4 profils de fraude attendus</h4>
+      <ul>
+        <li><strong>Chauffeur Uber/VTC qui se fait passer pour taxi</strong> (50-60%) : carte VTC en faisant croire taxi, photo trouvée sur Google Image</li>
+        <li><strong>Chauffeur taxi avec multi-comptes</strong> (10-15%) : tester features payantes, contourner ban, parrainer son propre compte</li>
+        <li><strong>Faux chauffeur sans carte pro</strong> (15-20%) : Photoshop, carte volée ou journalisme/concurrent</li>
+        <li><strong>Chauffeur banni qui revient</strong> (5-10%) : nouveau compte, même carte</li>
+      </ul>
+      <h4>Vérifications automatisées (signaux faibles)</h4>
+      <ul>
+        <li><strong>OCR de la carte</strong> (Tesseract.js) : extraction n° + nom, match avec saisie</li>
+        <li><strong>Reverse image search</strong> (TinEye API) : photo déjà sur le web ?</li>
+        <li><strong>Validation format n°</strong> par préfecture (T3P pour Paris, etc.)</li>
+        <li><strong>Détection doublon n°</strong> : index unique en base</li>
+        <li><strong>IP/device shared</strong> : 2+ comptes avec même fingerprint = flag jaune</li>
+      </ul>
+      <h4>Workflow validation manuelle</h4>
+      <ul>
+        <li>Queue d'attente avec score de risque pré-calculé</li>
+        <li>Vue détail : photos + score + signaux + boutons d'action</li>
+        <li>Cible : 30-60 sec par dossier</li>
+        <li>Pas de bannissement immédiat sans preuve solide → demande de complément d'abord</li>
+      </ul>
+      <h4>À constituer en interne</h4>
+      <ul>
+        <li>Base de référence des numéros de carte par préfecture</li>
+        <li>Galerie de "vraies cartes" exemplaires (5-10 photos HD avec accord)</li>
+        <li>Liste noire interne (n°, IPs, devices)</li>
+      </ul>
+      <h4>Surveillance long terme post-validation</h4>
+      <ul>
+        <li>Changement brutal de comportement GPS</li>
+        <li>Connexion depuis pays non-UE</li>
+        <li>Pattern de contribution heatmap aberrant</li>
+        <li>Multiplication de demandes OTP (compte piraté)</li>
+      </ul>
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>Admin panel structuré dès la V1 (sans, founder solo craque)</li>
+        <li>OCR + reverse image search dès la V1 (gain de temps massif)</li>
+        <li>Index unique sur n° carte + base de blacklist</li>
+      </ul>
+      <h4>Avertissement final</h4>
+      <p><strong>Tu n'as pas besoin d'un système anti-fraude parfait.</strong> Tu as besoin d'un système qui filtre 70-80% des fraudes faciles à un coût raisonnable. Les fraudes très sophistiquées tu les laisses passer pour la V1, tu les détecteras en post-validation.</p>
+    </div>
+  </details>
+</section>
+
+<footer class="footer">
+  <div class="footer-mark">— Le council a parlé —</div>
+  Council convoqué le 04 mai 2026 · Méthodologie Karpathy LLM Council adaptée<br>
+  4 experts indépendants · Peer reviews croisées anonymes · 1 chairman synthesis<br>
+  Document de travail TaxiPulse · Vol. III · Inscription &amp; Authentification carte pro
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Council Report — Heatmap TaxiPulse · Architecture du nerf produit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,800;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f7f3ec;
+  --paper-warm: #f0e9dc;
+  --ink: #1a1815;
+  --ink-soft: #44403c;
+  --ink-faint: #78716c;
+  --rule: #d6cfc1;
+  --rule-strong: #1a1815;
+  --hot: #c1272d;
+  --warm: #d97706;
+  --cold: #1e40af;
+  --green: #15803d;
+  --gold: #a16207;
+  --paper-card: #fbf7f0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.6;
+  font-size: 16px;
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(193, 39, 45, 0.025), transparent 25%),
+    radial-gradient(circle at 85% 80%, rgba(30, 64, 175, 0.025), transparent 25%);
+}
+
+.container { max-width: 920px; margin: 0 auto; padding: 60px 28px 100px; }
+
+/* === MASTHEAD === */
+.masthead {
+  border-bottom: 3px double var(--rule-strong);
+  padding-bottom: 32px;
+  margin-bottom: 48px;
+  position: relative;
+}
+.masthead::before {
+  content: '';
+  position: absolute;
+  bottom: -3px; left: 0;
+  width: 100px; height: 3px;
+  background: var(--hot);
+}
+.masthead-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.masthead-title {
+  font-family: 'Fraunces', serif;
+  font-size: 56px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -2px;
+  margin-bottom: 18px;
+}
+.masthead-title em {
+  font-style: italic;
+  color: var(--hot);
+  font-weight: 600;
+}
+.masthead-deck {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: var(--ink-soft);
+  font-style: italic;
+  max-width: 720px;
+}
+
+/* === QUESTION FRAMED === */
+.framed-question {
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--ink);
+  padding: 28px 32px;
+  margin-bottom: 48px;
+  position: relative;
+}
+.framed-question::before {
+  content: '"';
+  position: absolute;
+  top: -18px; left: 16px;
+  font-family: 'Fraunces', serif;
+  font-size: 80px;
+  font-weight: 900;
+  color: var(--hot);
+  line-height: 1;
+  background: var(--paper);
+  padding: 0 6px;
+}
+.framed-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.framed-text {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  font-weight: 400;
+}
+
+/* === NAV === */
+.toc {
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  padding: 20px 24px;
+  margin-bottom: 48px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.toc-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+.toc ol { list-style: none; counter-reset: toc; }
+.toc li {
+  counter-increment: toc;
+  padding: 6px 0;
+  border-bottom: 1px dotted var(--rule);
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+}
+.toc li:last-child { border-bottom: none; }
+.toc li::before {
+  content: counter(toc, decimal-leading-zero);
+  font-weight: 700;
+  color: var(--hot);
+  min-width: 28px;
+}
+.toc a { color: var(--ink); text-decoration: none; flex: 1; }
+.toc a:hover { color: var(--hot); }
+.toc-page { color: var(--ink-faint); font-size: 11px; }
+
+/* === SECTION === */
+.section { margin-bottom: 64px; scroll-margin-top: 24px; }
+.section-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--hot);
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-eyebrow::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 36px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+.section-lead {
+  font-family: 'Fraunces', serif;
+  font-size: 19px;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+  padding-left: 16px;
+  border-left: 2px solid var(--hot);
+}
+
+/* === VERDICT BOX (chairman) === */
+.verdict-box {
+  background: linear-gradient(135deg, #1a1815 0%, #2c2723 100%);
+  color: var(--paper);
+  border-radius: 4px;
+  padding: 40px 44px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+.verdict-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 4px;
+  background: linear-gradient(90deg, var(--hot), var(--warm), var(--gold));
+}
+.verdict-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.verdict-headline {
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 600;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+.verdict-headline em { color: var(--gold); font-style: italic; }
+.verdict-text {
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(247, 243, 236, 0.9);
+}
+.verdict-text p { margin-bottom: 14px; }
+.verdict-text strong { color: var(--paper); }
+
+.first-action {
+  background: rgba(247, 243, 236, 0.08);
+  border: 1px solid rgba(247, 243, 236, 0.15);
+  border-radius: 4px;
+  padding: 20px 24px;
+  margin-top: 24px;
+  border-left: 3px solid var(--gold);
+}
+.first-action-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.first-action-text {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--paper);
+}
+
+/* === EXPERTS GRID === */
+.experts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.expert-pill {
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-top-width: 4px;
+  padding: 16px 20px;
+  position: relative;
+}
+.expert-pill.e1 { border-top-color: #1e40af; }
+.expert-pill.e2 { border-top-color: #15803d; }
+.expert-pill.e3 { border-top-color: #a16207; }
+.expert-pill.e4 { border-top-color: #c1272d; }
+.expert-pill.e5 { border-top-color: #1a1815; }
+.expert-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--ink-faint);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.expert-name {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.expert-tagline {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* === AGREEMENT / CLASH / BLINDSPOT === */
+.findings-grid { display: grid; gap: 14px; margin-bottom: 32px; }
+.finding {
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 18px 22px;
+  position: relative;
+  border-left: 3px solid var(--ink);
+}
+.finding.agree { border-left-color: var(--green); }
+.finding.clash { border-left-color: var(--warm); }
+.finding.blind { border-left-color: var(--hot); }
+
+.finding-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+.finding.agree .finding-tag { background: var(--green); color: var(--paper); }
+.finding.clash .finding-tag { background: var(--warm); color: var(--paper); }
+.finding.blind .finding-tag { background: var(--hot); color: var(--paper); }
+
+.finding-title {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.finding-body {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+.finding-body strong { color: var(--ink); font-weight: 600; }
+.finding-body em { font-style: italic; }
+
+.clash-sides {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.clash-side {
+  padding: 10px 14px;
+  background: var(--paper);
+  border-radius: 3px;
+  border-left: 2px solid var(--cold);
+}
+.clash-side:nth-child(2) { border-left-color: var(--hot); }
+.clash-side strong {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-faint);
+  margin-bottom: 4px;
+}
+
+/* === PHASES TIMELINE === */
+.phases {
+  border: 1px solid var(--rule);
+  background: var(--paper-card);
+  border-radius: 4px;
+  padding: 0;
+  overflow: hidden;
+}
+.phase {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.phase:last-child { border-bottom: none; }
+.phase-marker {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 22px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.phase-marker.p0 { background: var(--ink); }
+.phase-marker.p1 { background: var(--cold); }
+.phase-marker.p2 { background: var(--green); }
+.phase-marker.p3 { background: var(--warm); }
+.phase-marker.p4 { background: var(--hot); }
+.phase-num {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+.phase-week {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 6px;
+  opacity: 0.8;
+}
+.phase-content { padding: 22px 26px; }
+.phase-name {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.phase-conditional {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--hot);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.phase-list { list-style: none; padding: 0; }
+.phase-list li {
+  padding: 5px 0 5px 20px;
+  font-size: 14px;
+  line-height: 1.45;
+  position: relative;
+  color: var(--ink-soft);
+}
+.phase-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: var(--hot);
+  font-weight: 700;
+}
+.phase-gate {
+  background: var(--paper);
+  border: 1px dashed var(--ink-faint);
+  border-radius: 3px;
+  padding: 10px 14px;
+  margin-top: 12px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+.phase-gate strong {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+  font-style: normal;
+  margin-bottom: 4px;
+}
+
+/* === DETAILS / ACCORDIONS === */
+details {
+  margin-bottom: 12px;
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+}
+details summary {
+  padding: 18px 24px;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 600;
+  font-size: 16px;
+  user-select: none;
+  transition: background 0.15s;
+}
+details summary:hover { background: var(--paper-warm); }
+details summary::-webkit-details-marker { display: none; }
+details summary::after {
+  content: '+';
+  margin-left: auto;
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--ink-faint);
+  transition: transform 0.2s;
+}
+details[open] summary::after { content: '−'; }
+details[open] summary {
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper-warm);
+}
+.details-content {
+  padding: 24px 28px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+.details-content h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 18px 0 8px;
+}
+.details-content h4:first-child { margin-top: 0; }
+.details-content p { margin-bottom: 10px; }
+.details-content ul { margin: 10px 0 14px 20px; }
+.details-content li { margin-bottom: 6px; }
+.details-content strong { color: var(--ink); }
+.details-content em { font-style: italic; }
+.details-content code {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--paper);
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 12.5px;
+  border: 1px solid var(--rule);
+}
+
+.expert-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.expert-icon.e1 { background: #1e40af; }
+.expert-icon.e2 { background: #15803d; }
+.expert-icon.e3 { background: #a16207; }
+.expert-icon.e4 { background: #c1272d; }
+.expert-icon.e5 { background: #1a1815; }
+
+/* === Q TABLE === */
+.q-row {
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
+  align-items: baseline;
+}
+.q-row:last-child { border-bottom: none; }
+.q-num {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--hot);
+  line-height: 1;
+}
+.q-text { font-size: 14.5px; line-height: 1.5; }
+.q-text strong { display: block; margin-bottom: 4px; font-weight: 700; }
+
+/* === FOOTER === */
+.footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 3px double var(--rule-strong);
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--ink-faint);
+  line-height: 1.8;
+}
+.footer-mark {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink);
+  margin-bottom: 8px;
+  letter-spacing: 0;
+}
+
+/* === CALL OUT === */
+.callout {
+  background: linear-gradient(135deg, rgba(193, 39, 45, 0.05), rgba(217, 119, 6, 0.05));
+  border-left: 4px solid var(--hot);
+  padding: 20px 24px;
+  margin: 20px 0;
+  border-radius: 0 4px 4px 0;
+}
+.callout-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--hot);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.callout-text {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* RESPONSIVE */
+@media (max-width: 720px) {
+  .container { padding: 36px 18px 60px; }
+  .masthead-title { font-size: 36px; letter-spacing: -1px; }
+  .masthead-deck { font-size: 17px; }
+  .section-title { font-size: 26px; }
+  .verdict-box { padding: 28px 24px; }
+  .verdict-headline { font-size: 24px; }
+  .first-action-text { font-size: 16px; }
+  .clash-sides { grid-template-columns: 1fr; }
+  .phase { grid-template-columns: 1fr; }
+  .phase-marker { padding: 14px; }
+  .phase-num { font-size: 22px; display: inline-block; margin-right: 12px; }
+  .phase-week { display: inline-block; margin-top: 0; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-meta">
+    <span>Council Report · TaxiPulse</span>
+    <span>03 mai 2026 · Vol. II</span>
+  </div>
+  <h1 class="masthead-title">Le nerf<br>du <em>produit.</em></h1>
+  <p class="masthead-deck">Cinq experts indépendants ont disséqué l'architecture de la heatmap prédictive. Ce qui ressort n'est pas le plan attendu — mais une remise en cause profonde de l'ordre dans lequel construire.</p>
+</header>
+
+<!-- QUESTION FRAMED -->
+<div class="framed-question">
+  <div class="framed-label">La question soumise au council</div>
+  <div class="framed-text">Concevoir l'architecture complète d'une heatmap prédictive de potentiel de charge taxi à Paris, ultra-fiable, déployable par un solo founder en 12-16 semaines, basée sur la fusion multi-sources (events, transports, crowdsourcing chauffeurs anonyme, historique, météo, trafic). Priorités : <strong>fiabilité absolue → vitesse de mise en marché → coût bas → RGPD bulletproof → apprentissage continu</strong>. Détection automatique des charges sans flicage. Anonymat strict.</div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<nav class="toc">
+  <div class="toc-title">Sommaire de l'audit</div>
+  <ol>
+    <li><a href="#verdict">Verdict du Chairman</a><span class="toc-page">→ section principale</span></li>
+    <li><a href="#experts">Les cinq experts convoqués</a><span class="toc-page">→ profils</span></li>
+    <li><a href="#agree">Où le council est unanime</a><span class="toc-page">→ haute confiance</span></li>
+    <li><a href="#clash">Où le council se déchire</a><span class="toc-page">→ tensions</span></li>
+    <li><a href="#blind">Les angles morts révélés</a><span class="toc-page">→ peer review</span></li>
+    <li><a href="#plan">Plan en 4 phases (12-14 sem.)</a><span class="toc-page">→ exécution</span></li>
+    <li><a href="#first">La seule chose à faire en premier</a><span class="toc-page">→ cette semaine</span></li>
+    <li><a href="#analyses">Analyses individuelles complètes</a><span class="toc-page">→ détails</span></li>
+  </ol>
+</nav>
+
+<!-- VERDICT -->
+<section class="section" id="verdict">
+  <div class="section-eyebrow">Synthèse principale</div>
+  <h2 class="section-title">Le Verdict</h2>
+
+  <div class="verdict-box">
+    <div class="verdict-eyebrow">Chairman's call</div>
+    <div class="verdict-headline">Tu optimises une solution avant d'avoir validé le <em>problème.</em></div>
+    <div class="verdict-text">
+      <p>Le council, après débat et peer review, converge sur un constat dérangeant : <strong>l'approche "plan détaillé sur 16 semaines puis exécution"</strong> est le mauvais format pour ce projet. Pas parce que la heatmap est une mauvaise idée — mais parce qu'à ce stade, <strong>tu n'as pas encore validé que c'est la bonne forme de produit pour les chauffeurs</strong>.</p>
+      <p>Trois experts sur cinq ont indépendamment soulevé la même alerte : avant de coder une heatmap hexagonale H3 multi-sources avec détection automatique, il faut <strong>10 conversations avec des chauffeurs réels</strong>. Pas des sondages. Des entretiens. Une heure chacun. Pour comprendre s'ils veulent une carte, un Top 3 textuel, ou une notif push géolocalisée.</p>
+      <p>La fiabilité — ta priorité n°1 — ne se construit pas dans le code. Elle se construit dans l'<strong>écoute du terrain</strong>, le <strong>recalibrage hebdomadaire</strong>, et la <strong>validation incrémentale à chaque phase</strong>. C'est l'opposé de l'approche big-bang.</p>
+    </div>
+
+    <div class="first-action">
+      <div class="first-action-label">→ La seule chose à faire en premier</div>
+      <div class="first-action-text">10 interviews chauffeurs avant toute décision d'architecture. 1h × 10 = 10h. Cela peut t'épargner 200h de développement sur la mauvaise forme de produit.</div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERTS -->
+<section class="section" id="experts">
+  <div class="section-eyebrow">Composition</div>
+  <h2 class="section-title">Les cinq experts convoqués</h2>
+  <p class="section-lead">Chaque expert a analysé indépendamment 8 questions structurantes (détection charge, grille spatiale, scoring, bootstrap froid, apprentissage, anonymisation, scalabilité, validation), puis lu anonymement les 4 autres pour identifier le meilleur, les blind spots, et ce que tous ont raté.</p>
+
+  <div class="experts-grid">
+    <div class="expert-pill e1">
+      <div class="expert-num">Expert 01</div>
+      <div class="expert-name">Data Scientist Mobilité</div>
+      <div class="expert-tagline">8 ans Uber/Bolt pricing dynamique. PhD prédiction flux humains.</div>
+    </div>
+    <div class="expert-pill e2">
+      <div class="expert-num">Expert 02</div>
+      <div class="expert-name">Géomaticien / SIG</div>
+      <div class="expert-tagline">12 ans IGN puis Citymapper Paris. Architecte des couches spatiales.</div>
+    </div>
+    <div class="expert-pill e3">
+      <div class="expert-num">Expert 03</div>
+      <div class="expert-name">Juriste RGPD / DPO</div>
+      <div class="expert-tagline">Ex-CNIL, DPO 3 scale-ups mobilité. Défense classes contre tracking.</div>
+    </div>
+    <div class="expert-pill e4">
+      <div class="expert-num">Expert 04</div>
+      <div class="expert-name">Ops Taxi Terrain</div>
+      <div class="expert-tagline">22 ans chauffeur Paris. Formateur école taxi. Connaît 400 chauffeurs.</div>
+    </div>
+    <div class="expert-pill e5">
+      <div class="expert-num">Expert 05</div>
+      <div class="expert-name">The Contrarian</div>
+      <div class="expert-tagline">Anti-consensus systématique. Cherche le crash le plus probable.</div>
+    </div>
+  </div>
+
+  <details>
+    <summary><span class="expert-icon">8</span> Les 8 questions structurantes traitées par chaque expert</summary>
+    <div class="details-content">
+      <div class="q-row"><div class="q-num">01</div><div class="q-text"><strong>Détection de charge</strong>Comment détecter de manière fiable qu'un chauffeur prend un client, sans le fliquer, avec quel signal et quel seuil ?</div></div>
+      <div class="q-row"><div class="q-num">02</div><div class="q-text"><strong>Architecture grille spatiale</strong>H3, S2 ou custom ? Quelle résolution ? Comment gérer les bordures, les hubs, la topologie urbaine ?</div></div>
+      <div class="q-row"><div class="q-num">03</div><div class="q-text"><strong>Modèle de scoring multi-sources</strong>Comment combiner 7 sources hétérogènes ? Pondération fixe ou apprise ? Décroissance temporelle et spatiale ?</div></div>
+      <div class="q-row"><div class="q-num">04</div><div class="q-text"><strong>Bootstrap froid</strong>Comment avoir un score fiable AVANT 4-8 semaines de data crowdsourcée ? Sources publiques ? Shadow mode ?</div></div>
+      <div class="q-row"><div class="q-num">05</div><div class="q-text"><strong>Apprentissage continu</strong>Comment la heatmap s'améliore-t-elle avec le temps ? ML, régression, recalibrage manuel ? Quelle métrique ?</div></div>
+      <div class="q-row"><div class="q-num">06</div><div class="q-text"><strong>Anonymisation technique RGPD-conforme</strong>Hashing, k-anonymity, differential privacy, rétention. Quels seuils minimaux ? Quels documents ?</div></div>
+      <div class="q-row"><div class="q-num">07</div><div class="q-text"><strong>Scalabilité et coûts d'opération</strong>Dimensionnement Cloudflare à 100 / 500 / 2000 chauffeurs. Tile server. Stratégie cache.</div></div>
+      <div class="q-row"><div class="q-num">08</div><div class="q-text"><strong>Validation qualité go/no-go</strong>Comment PROUVER que la heatmap est fiable avant lancement ? Métriques, panels, critères chiffrés.</div></div>
+    </div>
+  </details>
+</section>
+
+<!-- AGREEMENTS -->
+<section class="section" id="agree">
+  <div class="section-eyebrow">Convergences</div>
+  <h2 class="section-title">Où le council est unanime</h2>
+  <p class="section-lead">Cinq points sur lesquels au moins 4 experts sur 5 ont convergé indépendamment. Ce sont des signaux haute confiance — moins de débat, plus de certitude.</p>
+
+  <div class="findings-grid">
+    <div class="finding agree">
+      <span class="finding-tag">Convergence forte</span>
+      <div class="finding-title">La détection de charge totalement automatique est risquée en V1</div>
+      <div class="finding-body">Quatre experts convergent : le "tout automatique" n'est ni techniquement fiable sans data de calibration, ni juridiquement safe sans consentement granulaire, ni culturellement accepté par la profession taxi. <strong>Hybride avec contrôle utilisateur OU manuel pur en V1.</strong> Détection automatique = V2 minimum.</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Consensus technique</span>
+      <div class="finding-title">H3 d'Uber est le bon choix de grille spatiale</div>
+      <div class="finding-body">Open source, prouvé en production, écosystème mature. Pas de débat. Résolution 9 (175m) en zone dense, agrégation 8 (350m) sur les hubs, masque pré-calculé des hex actifs (~2400 sur Paris) pour économiser le compute.</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Fondations</span>
+      <div class="finding-title">L'open data public doit être la fondation du bootstrap</div>
+      <div class="finding-body">Tous d'accord : <strong>RATP/STIF, INSEE mobilité, IDFM, OSM, Météo France, Aéroports de Paris, OpenAgenda, Que Faire à Paris.</strong> Gratuit, RGPD-safe, riche. C'est le socle. Le crowdsourcing chauffeur vient s'ajouter par-dessus, jamais en remplacement.</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Anonymat technique</span>
+      <div class="finding-title">K-anonymity stricte + agrégation sous 48h</div>
+      <div class="finding-body">Juriste, data scientist et géomaticien d'accord sur les seuils minimaux : <strong>k=15 chauffeurs distincts pour affichage public</strong>, agrégation rapide, suppression des données nominatives sous 48h, hashing avec sel rotatif quotidien. Non-négociable juridiquement.</div>
+    </div>
+    <div class="finding agree">
+      <span class="finding-tag">Méthodologie</span>
+      <div class="finding-title">La validation qualité doit être chiffrée AVANT le lancement</div>
+      <div class="finding-body">Critère go/no-go défini par avance, pas évalué à l'émotion. <strong>Précision top-20% &gt;70%</strong>, <strong>NPS chauffeurs &gt;+30</strong>, <strong>rétention 4 semaines &gt;70%</strong>, <strong>gain perçu déclaré ≥7/10 chauffeurs</strong>. Sans cela, lancement aveugle = perte de temps.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CLASHES -->
+<section class="section" id="clash">
+  <div class="section-eyebrow">Tensions</div>
+  <h2 class="section-title">Où le council se déchire</h2>
+  <p class="section-lead">Trois clashes majeurs entre experts. Ces désaccords sont précieux : ils marquent les vraies décisions stratégiques où plusieurs réponses sont défendables. Le chairman tranche en bas de chaque clash.</p>
+
+  <div class="findings-grid">
+    <div class="finding clash">
+      <span class="finding-tag">Clash 01</span>
+      <div class="finding-title">Sophistication technique vs simplicité radicale</div>
+      <div class="finding-body">Faut-il une architecture multi-couches sophistiquée dès la V1, ou un modèle ultra-simple à 3 features qu'on enrichit après validation ?
+        <div class="clash-sides">
+          <div class="clash-side"><strong>Camp sophistication (Data Sci + Géo)</strong>Architecture 3 couches additives, isochrones anisotropes. "Sans ça, pas la précision attendue."</div>
+          <div class="clash-side"><strong>Camp simplicité (Contrarian + Ops)</strong>Formule 3 features, recalibrage manuel hebdo. "Personne ne saura distinguer 87 de 78."</div>
+        </div>
+        <p style="margin-top: 14px;"><strong>Verdict du chairman :</strong> les deux ont raison à des phases différentes. Simplicité radicale en V0 (validation), sophistication en V2 (excellence). L'erreur serait de sauter une phase.</p>
+      </div>
+    </div>
+
+    <div class="finding clash">
+      <span class="finding-tag">Clash 02</span>
+      <div class="finding-title">Détection de charge automatique vs manuelle vs aucune</div>
+      <div class="finding-body">Trois positions distinctes sur la stratégie de collecte :
+        <div class="clash-sides">
+          <div class="clash-side"><strong>Ops Taxi</strong>Manuel d'abord pour gagner la confiance. Auto en V2.</div>
+          <div class="clash-side"><strong>Contrarian</strong>Ni l'un ni l'autre en V1. Heatmap purement prédictive d'abord.</div>
+        </div>
+        <p style="margin-top: 14px;"><strong>Verdict du chairman :</strong> Contrarian raison sur le timing (pas avant validation produit), Ops Taxi raison sur le modèle (manuel d'abord puis hybride). Le Data Scientist se trompe en supposant que crowdsourcing = nécessaire dès V1.</p>
+      </div>
+    </div>
+
+    <div class="finding clash">
+      <span class="finding-tag">Clash 03</span>
+      <div class="finding-title">Heatmap visuelle vs interface alternative (texte / vocal / push)</div>
+      <div class="finding-body">Tout le monde a tenu la heatmap visuelle pour acquise — sauf le Contrarian, qui pose la question : et si un Top 3 textuel ou une notif push géolocalisée était plus actionnable au volant ?
+        <p style="margin-top: 12px;"><strong>Verdict du chairman :</strong> le Contrarian pose la bonne question, mais sa solution sous-estime la dimension exploratoire. <strong>Synthèse : commencer par Top N textuel (2 sem), valider, PUIS construire la carte si validé.</strong> Cette séquence n'avait été proposée par aucun expert mais résout le clash.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLINDSPOTS -->
+<section class="section" id="blind">
+  <div class="section-eyebrow">Angles morts</div>
+  <h2 class="section-title">Ce que la peer review a révélé</h2>
+  <p class="section-lead">Dix points critiques qui ne sont apparus qu'après que les experts se soient relus mutuellement de manière anonyme. Ce sont les surprises — les choses que personne ne voit seul.</p>
+
+  <div class="findings-grid">
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · critique</span>
+      <div class="finding-title">L'effet "self-fulfilling prophecy" de la heatmap publique</div>
+      <div class="finding-body">Si la carte dit "Bercy chaud" et que tous les chauffeurs y vont, l'hex devient froid (saturation taxis). <strong>La heatmap se réfute elle-même.</strong> Personne n'avait modélisé cette boucle de rétroaction négative. Solution : décrémenter le score affiché en fonction du nombre de consultations dans les 5-10 dernières minutes.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · critique</span>
+      <div class="finding-title">Coût d'opportunité asymétrique des erreurs</div>
+      <div class="finding-body">Une erreur "chaud-mais-froid" coûte 30 min + essence + confiance. La confiance s'effondre <em>exponentiellement</em>. Une heatmap ressentie à 75% de précision n'est pas 25% inutile, elle est <strong>80% inutile</strong>. Conséquence : mieux vaut afficher "incertain" honnêtement que "chaud" risqué.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · juridique</span>
+      <div class="finding-title">Statut LOM "plateforme d'intermédiation" non examiné</div>
+      <div class="finding-body">La loi mobilité 2019 pourrait classer TaxiPulse comme plateforme d'intermédiation, ce qui changerait massivement les obligations. <strong>Notification possiblement obligatoire à la Préfecture de Police de Paris</strong> (carte verte chauffeur). À clarifier en semaine 1, avant tout autre travail.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · technique</span>
+      <div class="finding-title">Modèles multi-armed bandit ignorés</div>
+      <div class="finding-body">Approche éprouvée chez Uber/Lyft pour démarrer sans data : tester des recommandations exploratoires + observer le résultat + ajuster. Plus puissant qu'une régression simple pour le cold-start. À considérer pour V2 minimum.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · métier</span>
+      <div class="finding-title">Saisonnalité et exceptions annuelles</div>
+      <div class="finding-body">Vacances scolaires, Ramadan, fêtes juives, 14 juillet, Fashion Week, Roland-Garros, Tour de France, JO 2024 et 2028. <strong>Ne jamais résoudre par ML.</strong> Calendrier d'exceptions maintenu à la main, override le modèle. Sinon faux positifs massifs aux dates sensibles.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · UX</span>
+      <div class="finding-title">Routing temps-réel vers la zone chaude</div>
+      <div class="finding-body">Identifier "où c'est chaud" n'est qu'une moitié du job. <strong>"Comment y aller le plus vite, en évitant les bouchons" est l'autre moitié.</strong> Pas dans le brief mais critique côté chauffeur. Pas besoin de réinventer Google Maps mais besoin d'un signal "trajet praticable / bouché".</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · UX</span>
+      <div class="finding-title">L'effet "premier dans la file"</div>
+      <div class="finding-body">Une zone chaude peut avoir 5 places de pickup et 6 taxis présents → le 6ème attend 30 min. <strong>Affichage non seulement de la chaleur mais du nombre estimé de places restantes.</strong> Critère de décision majeur pour le chauffeur.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · business</span>
+      <div class="finding-title">Unit economics non calculées</div>
+      <div class="finding-body">LTV chauffeur ≈ 10€/mois × 12 mois × 70% rétention = 84€. <strong>Si CAC &gt; 30€, le business model est cassé.</strong> Aucun expert n'avait fait ce calcul. À chiffrer urgemment avant tout investissement marketing.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · juridique</span>
+      <div class="finding-title">Localisation des données chez Cloudflare</div>
+      <div class="finding-body">Cloudflare stocke en multi-zones globales. Pour des données sensibles de chauffeurs français post-Schrems II, peut être problématique vis-à-vis de la doctrine CNIL. À sécuriser via région UE-only ou architecture hybride avec stockage sensible en France.</div>
+    </div>
+
+    <div class="finding blind">
+      <span class="finding-tag">Blind spot · sécu</span>
+      <div class="finding-title">La menace #1 n'est pas la ré-identification, c'est la fuite de la base entière</div>
+      <div class="finding-body">Toutes les sanctions CNIL massives de la dernière décennie viennent de fuites de bases (SQL injection, secret leaké, mauvaise auth admin), pas de re-identification mathématique sophistiquée. <strong>Investir d'abord en sécu offensive (pen-test, audit code, chiffrement at-rest) avant le k-anonymity ε=0.5.</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section class="section" id="plan">
+  <div class="section-eyebrow">Recommandation actionnable</div>
+  <h2 class="section-title">Plan en 4 phases (12-14 semaines)</h2>
+  <p class="section-lead">Au lieu d'un plan béton de 16 semaines exécuté linéairement, le council recommande quatre phases avec validation explicite à chaque étape. Tu peux tuer le projet à n'importe quelle phase si les chiffres ne suivent pas — c'est ce qui te protège du gouffre.</p>
+
+  <div class="phases">
+
+    <div class="phase">
+      <div class="phase-marker p0">
+        <div class="phase-num">P0</div>
+        <div class="phase-week">Sem. 1-2</div>
+      </div>
+      <div class="phase-content">
+        <div class="phase-name">Fondations & écoute terrain</div>
+        <ul class="phase-list">
+          <li><strong>10 interviews chauffeurs</strong> 1h chacun (priorité absolue, voir liste de questions ci-dessous)</li>
+          <li>AIPD complète rédigée par juriste pro (2-4K€)</li>
+          <li>Recherche statut LOM, notification Préfecture, localisation données UE</li>
+          <li>Cyber-assurance + RC Pro tech souscrites</li>
+          <li>Veille concurrentielle data sources (Sortiraparis, Citymapper, Google Popular Times, Waze)</li>
+          <li>Calcul unit economics (LTV vs CAC, scénarios à 100/500/2000 chauffeurs)</li>
+        </ul>
+        <div class="phase-gate"><strong>Décision fin S2</strong>Forme produit V0 décidée à partir des interviews : carte ? Top N textuel ? Push notif ? Hybride ?</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-marker p1">
+        <div class="phase-num">P1</div>
+        <div class="phase-week">Sem. 3-5</div>
+      </div>
+      <div class="phase-content">
+        <div class="phase-name">V0 ultra-simple sans crowdsourcing</div>
+        <ul class="phase-list">
+          <li>Forme produit choisie en P0 (probablement Top 3 textuel ou hybride)</li>
+          <li>Modèle déterministe à 3-5 features : events + transports + heure-jour + météo + jour-semaine</li>
+          <li>Pré-calcul hex H3 actifs Paris (~2400) + voisinages stockés en D1</li>
+          <li>Open data uniquement : RATP/STIF, IDFM, ADP, OpenAgenda, QFAP, Météo France</li>
+          <li><strong>AUCUN crowdsourcing chauffeur</strong> à ce stade — RGPD allégé</li>
+          <li>Hébergement Cloudflare avec config UE-only (Workers EU jurisdiction)</li>
+          <li>Calendrier d'exceptions saisonnier maintenu manuellement</li>
+        </ul>
+        <div class="phase-gate"><strong>Sortie S5</strong>V0 fonctionnel en production, prêt pour 10 chauffeurs bêta</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-marker p2">
+        <div class="phase-num">P2</div>
+        <div class="phase-week">Sem. 6-8</div>
+      </div>
+      <div class="phase-content">
+        <div class="phase-name">Bêta privée 10 chauffeurs · validation produit</div>
+        <ul class="phase-list">
+          <li>Onboard manuel des 10 chauffeurs interviewés en P0</li>
+          <li>Daily standup WhatsApp avec eux : 5 min/jour de retours bruts</li>
+          <li>Feedback hebdomadaire structuré : "as-tu suivi ? qu'est-ce qui a marché ? gain perçu ?"</li>
+          <li>Recalibrage <strong>manuel</strong> hebdo des poids du modèle (Excel + override en code)</li>
+          <li>Mesure rigoureuse : précision top-20%, NPS, gain perçu, rétention</li>
+        </ul>
+        <div class="phase-gate"><strong>Critère go/no-go fin S8</strong>Si ≥7/10 chauffeurs disent "ça m'a fait gagner plus" et NPS &gt;+20 → Phase 3. <strong>Sinon : pivot ou kill.</strong> Pas de "il faut juste plus de temps".</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-marker p3">
+        <div class="phase-num">P3</div>
+        <div class="phase-week">Sem. 9-12</div>
+      </div>
+      <div class="phase-content">
+        <div class="phase-name">Heatmap visuelle + détection charge manuelle</div>
+        <div class="phase-conditional">⚠ Conditionnel à la réussite de Phase 2</div>
+        <ul class="phase-list">
+          <li>Construction de la carte hexagonale H3 (Leaflet ou Mapbox UE-only)</li>
+          <li>Bouton manuel 1-tap "course en cours" (recommandé par Ops Taxi)</li>
+          <li>Anti-self-fulfilling : décrément du score selon consultations 5 min</li>
+          <li>Affichage de l'incertitude : opacité = score, contour = confiance</li>
+          <li>Ajout du facteur "concurrence taxis présents" et "trajet praticable"</li>
+          <li>Boucle de feedback hebdomadaire toujours manuelle</li>
+          <li>Préparation lancement public soft : 50-100 chauffeurs payants</li>
+        </ul>
+        <div class="phase-gate"><strong>Critère go/no-go fin S12</strong>Précision top-20% &gt;70%, NPS chauffeurs &gt;+30, rétention 4 sem &gt;70%, ≥3 témoignages spontanés positifs. Sinon : itération supplémentaire.</div>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-marker p4">
+        <div class="phase-num">P4</div>
+        <div class="phase-week">Sem. 13+</div>
+      </div>
+      <div class="phase-content">
+        <div class="phase-name">Détection auto hybride + apprentissage statistique</div>
+        <div class="phase-conditional">⚠ Conditionnel à la réussite de Phase 3</div>
+        <ul class="phase-list">
+          <li>Détection auto hybride : 3 états (confirmed / probable / ignored)</li>
+          <li>Calibration sur dataset propre (50 courses solo + 5 chauffeurs early)</li>
+          <li>Map-matching OSM systématique sur tous les pickups détectés</li>
+          <li>Pondération apprise par régression linéaire sur résidus accumulés</li>
+          <li>Premiers tests multi-armed bandit pour exploration de zones</li>
+          <li>Scaling au-delà de 200 chauffeurs : Durable Objects par hex</li>
+          <li>Lancement public officiel + extension Lyon en pilote</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FIRST ACTION -->
+<section class="section" id="first">
+  <div class="section-eyebrow">Cette semaine</div>
+  <h2 class="section-title">La seule chose à faire en premier</h2>
+
+  <div class="callout">
+    <div class="callout-label">→ Action immédiate</div>
+    <div class="callout-text"><strong>Les 10 interviews chauffeurs.</strong> Pas la sécurité. Pas le code. Pas les datasets. Les interviews. 1h × 10 = 10h de ton temps. Cela peut t'épargner 200h de développement sur la mauvaise forme de produit.</div>
+  </div>
+
+  <details>
+    <summary>📋 Les 10 questions critiques à poser (à utiliser tel quel)</summary>
+    <div class="details-content">
+      <h4>Cadre des entretiens</h4>
+      <p>Format conversation, pas interrogatoire. 1h, dans leur taxi pendant une pause ou dans un café près d'une station. Carnet papier + enregistrement audio (avec leur accord). Cible : 10 chauffeurs variés (jeunes, expérimentés, indépendants, salariés, jour, nuit).</p>
+
+      <h4>Les questions</h4>
+      <ul>
+        <li><strong>1.</strong> Quand tu cherches où charger, tu fais quoi aujourd'hui ? (apps, intuition, groupes WhatsApp, radio, etc.)</li>
+        <li><strong>2.</strong> Si une app te disait "vas à X dans Y minutes", tu y irais ? À quel niveau de confiance minimum ? À 50% tu y vas ? À 70% ? À 90% ?</li>
+        <li><strong>3.</strong> Tu préfères : carte avec heatmap colorée / Top 3 zones en texte / notification push géolocalisée / commande vocale / autre chose ?</li>
+        <li><strong>4.</strong> Tu paierais combien par mois pour qu'elle soit fiable à 70% ? À 90% ? Tu paierais combien si elle te faisait gagner +10% ? +20% ?</li>
+        <li><strong>5.</strong> Tu accepterais qu'elle détecte automatiquement tes courses (anonymement) si ça améliore l'app pour tous ? Sinon pourquoi ?</li>
+        <li><strong>6.</strong> Quel est LE truc qui te ferait dire "cette app est meilleure que mon expérience perso" ?</li>
+        <li><strong>7.</strong> Quelles sont les 3 zones que tu connais comme chaudes mais qu'aucune app ne te dit ? (= tes spots tribaux)</li>
+        <li><strong>8.</strong> Tu fais combien d'heures par jour ? Combien de courses moyennes ? Tu cherches activement où charger combien de fois par garde ?</li>
+        <li><strong>9.</strong> As-tu des collègues qui essaieraient si tu leur disais "test cette app" ? Combien sur les 20 que tu connais ?</li>
+        <li><strong>10.</strong> Si je te montre un proto dans 2 semaines, tu acceptes une session de 30 min de retour ?</li>
+      </ul>
+
+      <h4>Comment décider à partir des résultats</h4>
+      <ul>
+        <li>Si <strong>7+/10</strong> préfèrent texte/push à carte : V0 = Top 3 textuel + push géolocalisée, pas de heatmap visuelle avant Phase 3.</li>
+        <li>Si <strong>7+/10</strong> préfèrent la carte : V0 = mini-carte simple avec 3-5 zones colorées, pas hexagonale.</li>
+        <li>Si <strong>réponses partagées</strong> : commencer par le moins coûteux (Top 3 textuel, 1 semaine de dev) puis ajouter la carte si Phase 2 valide.</li>
+        <li>Si <strong>5+/10</strong> refusent la détection auto, même anonyme : positionner détection 100% manuelle pour V1 et V2, automatique seulement en V3.</li>
+        <li>Si <strong>moins de 5/10</strong> sont prêts à payer 9,99€ : revoir le pricing ou le positionnement freemium.</li>
+      </ul>
+    </div>
+  </details>
+</section>
+
+<!-- ANALYSES INDIVIDUELLES -->
+<section class="section" id="analyses">
+  <div class="section-eyebrow">Détails</div>
+  <h2 class="section-title">Analyses individuelles complètes</h2>
+  <p class="section-lead">Pour chaque expert : sa position globale, ses réponses aux 8 questions, et ses 3 priorités s'il devait n'en garder que 3. Lecture optionnelle, mais utile si tu veux retourner aux arguments d'origine.</p>
+
+  <details>
+    <summary><span class="expert-icon e1">01</span> Data Scientist Mobilité — "La fiabilité vient de la honnêteté du score, pas de la sophistication"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>90% des heatmaps en production échouent parce qu'elles affichent des prédictions sans intervalle de confiance. Le chauffeur fait confiance à un "87" qui en réalité vaut "55±35". <strong>Le piège n°1 : un score précis. Vise un score honnête.</strong></p>
+
+      <h4>Détection de charge</h4>
+      <p>Hybride à 3 états avec seuils dynamiques. Signal GPS principal (arrêt ≥45 sec en bord de voie + redémarrage avec accélération douce + trajectoire orientée + durée mouvement &gt;4 min) + signaux secondaires (altimétrie, accéléromètre, heure). 3 sorties : <code>confirmed</code> (≥85, validé silencieusement), <code>probable</code> (50-85, confirmation 1-tap), <code>ignored</code> (&lt;50). <strong>Calibration impossible sans data : 50-100 courses solo + 5 chauffeurs early × 2 semaines requis.</strong></p>
+
+      <h4>Modèle de scoring</h4>
+      <p>Architecture 3 couches additives : <code>Score = Baseline (50%) + Live Boost (30%) + Event Boost (20%)</code>. Météo et trafic = modificateurs multiplicatifs, pas couches. Pondération FIXE pendant 4-8 semaines, puis régression linéaire simple sur résidus. <strong>Pas de deep learning.</strong></p>
+
+      <h4>Le truc critique</h4>
+      <p>Afficher l'incertitude. Score "87 ± 15" plus utile que "87". Visuellement : opacité du hex = score, taille du contour = inverse de la confiance.</p>
+
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>Détection de charge calibrée sur dataset perso (sans ça, rien d'autre ne tient).</li>
+        <li>Architecture H3 + scoring 3-couches avec affichage de l'incertitude.</li>
+        <li>Pipeline shadow validation AVANT ouverture bêta.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="expert-icon e2">02</span> Géomaticien / SIG — "Paris n'est pas une grille uniforme"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Les développeurs traitent l'espace comme une grille uniforme. Paris n'est PAS uniforme. Un hex de 175m sur la place de la Concorde n'a rien à voir avec un hex de 175m dans le 19e. <strong>Ne pas tenir compte de la topologie urbaine = produire une heatmap qui regarde joli mais ment.</strong></p>
+
+      <h4>Grille spatiale</h4>
+      <p>H3 résolution 9 (175m) en zone dense, résolution 8 (350m) sur les hubs (CDG, gares). <strong>Pré-calcul d'un masque hex actifs</strong> (~2400 sur 3500) pour économiser 30% du compute. Construire un graphe d'accessibilité : pour chaque hex, les 5-10 hex accessibles en &lt;3 min en voiture. Stocké dans D1, recalculé jamais.</p>
+
+      <h4>Décroissance spatiale anisotrope</h4>
+      <p>Quand le PSG joue, les sortants ne se répartissent pas en cercle autour du Parc des Princes. Ils suivent les axes (Métro 9, Métro 10, Périph). <strong>Modélisation correcte = isochrones de marche depuis le lieu de l'event</strong> (5min, 10min, 15min) pondérés par capacité du réseau de transport voisin.</p>
+
+      <h4>Map-matching obligatoire</h4>
+      <p>Ne jamais stocker une coordonnée GPS brute pour le pickup. La snap sur le segment de rue le plus proche via OSRM. Sinon pickups en pleine Seine à cause d'erreurs GPS.</p>
+
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>Hex actifs pré-filtrés + voisinages pré-calculés en D1 dès le départ.</li>
+        <li>Décroissance spatiale anisotrope sur isochrones, pas circulaire.</li>
+        <li>Map-matching OSM systématique sur tous les pickups détectés.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="expert-icon e3">03</span> Juriste RGPD — "Le crowdsourcing GPS chauffeurs est l'un des cas les plus risqués légalement"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Vous traitez en continu des données de géolocalisation de travailleurs ET de la donnée comportementale fine. C'est exactement le profil que la CNIL surveille de près. <strong>Soit anonymisation au niveau de l'art (et hors RGPD), soit pseudonymisé avec régime complet.</strong> Le flou entre les deux est intenable.</p>
+
+      <h4>Recommandation V1 : Pseudonymisation forte</h4>
+      <p>Régime RGPD complet : consentement, droit d'accès, droit à l'oubli, AIPD obligatoire, registre des traitements. Plus contraignant mais plus simple techniquement.</p>
+
+      <h4>6 mesures techniques minimales</h4>
+      <ul>
+        <li>Hashing SHA-256 + sel rotatif quotidien, anciens sels détruits J+7.</li>
+        <li>K-anonymity à 2 niveaux : k=15 affichage public, k=5 stats internes.</li>
+        <li>Differential privacy : bruit Laplacien ε=0.5 sur les comptes affichés.</li>
+        <li>Géo-floutage : pickup snappé au centroïde hex, jamais position brute stockée.</li>
+        <li>Pas de profilage individuel possible côté serveur.</li>
+        <li>Audit log exhaustif de tout accès aux données chaudes.</li>
+      </ul>
+
+      <h4>Documents obligatoires AVANT bêta</h4>
+      <p>AIPD (~30 pages, 2-4K€), politique confidentialité géoloc dédiée, registre traitements art. 30, charte chauffeur 1 page lisible, procédure exercice des droits, DPA Cloudflare et sous-traitants.</p>
+
+      <h4>Avertissement final</h4>
+      <p><strong>La CNIL a déjà sanctionné des dispositifs similaires.</strong> Une seule fuite de données = game over marque + financièrement (4% CA annuel max). Ne lancez PAS sans : AIPD validée par juriste pro, pen-test des API, procédure droits opérationnelle, cyber-assurance.</p>
+
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>AIPD complète AVANT bêta. 2-4K€ d'investissement contre 15K€+ de risque évité.</li>
+        <li>Architecture "agrégation à 48h" : aucune donnée nominative ne survit plus de 2 jours.</li>
+        <li>Consentement granulaire et révocable, jamais bundlé.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="expert-icon e4">04</span> Ops Taxi Terrain — "La heatmap parfaite n'existe pas. Une app qui écoute les chauffeurs, oui"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Une heatmap "fiable à 95%" qui dit au chauffeur d'aller où il sait déjà aller, ça ne sert à rien. Le chauffeur expérimenté connaît le trafic, les events, les sorties. Il a son carnet d'adresses depuis 15 ans. <strong>Ce qu'il veut, c'est l'info qu'il N'A PAS</strong> : la course imprévue, l'event qu'il a oublié, la pluie qui change tout. <strong>La fraîcheur &gt; la précision à 5 points près.</strong></p>
+
+      <h4>Détection : bouton manuel V1, auto V2</h4>
+      <p>80% des chauffeurs vont saboter la détection auto par habitude (stationnement 30 min devant hôtel, U-turns, courses entre eux, usage perso le soir). Bouton manuel 1-tap pour V1. <strong>La fiabilité d'un signal volontaire bat n'importe quel algo.</strong> Détection auto = V2 après confiance gagnée.</p>
+
+      <h4>Spots tribaux (le moat)</h4>
+      <p>40% du métier est invisible des datasets publics : codes promo bars-restos, soirées privées, Fashion Week, Vivatech, pèlerinages religieux, enterrements VIP. Solution : <strong>base "events tribaux" alimentée par 10-20 chauffeurs informateurs payés 50€/mois</strong>. C'est ton seul vrai moat vs G7.</p>
+
+      <h4>Affichage en quartiers</h4>
+      <p>Les chauffeurs raisonnent en quartiers ("je remonte à Pigalle"), pas en hexagones. Affichage = <strong>noms de zones</strong> lisibles, pas coordonnées. Résolution 350-400m optimale pour décision.</p>
+
+      <h4>Facteurs sous-estimés</h4>
+      <ul>
+        <li>Concurrence : score utile = potentiel / nombre de taxis présents.</li>
+        <li>Trajet : un hex à 95 à 8 km bouchonné = inactionnable.</li>
+        <li>Fin de garde : à 2h, le chauffeur veut une course qui le rapproche de chez lui.</li>
+      </ul>
+
+      <h4>Top 3 priorités</h4>
+      <ul>
+        <li>Bouton manuel 1-tap pour V1, auto pour V2. Confiance avant performance.</li>
+        <li>Base "spots tribaux" alimentée par 10-20 chauffeurs informateurs.</li>
+        <li>Mesure de qualité = "as-tu gagné plus ?" auto-déclaratif. Le reste est cosmétique.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details>
+    <summary><span class="expert-icon e5">05</span> The Contrarian — "Le risque #1 n'est pas l'imprécision, c'est l'inutilisation"</summary>
+    <div class="details-content">
+      <h4>Position</h4>
+      <p>Le pire scénario pour TaxiPulse n'est pas que la heatmap soit imprécise. C'est que <strong>vous construisiez 16 semaines un système élégant et que personne ne s'en serve</strong>.</p>
+
+      <h4>Question préalable que personne n'a posée</h4>
+      <p>Est-ce qu'une heatmap est vraiment ce dont les chauffeurs ont besoin ?
+      <ul>
+        <li>Une simple <strong>liste textuelle "Top 5 zones chaudes maintenant"</strong> battra peut-être une heatmap visuelle.</li>
+        <li>Un <strong>chatbot vocal</strong> "Hey TaxiPulse, où charger maintenant ?" est plus utile (mains au volant).</li>
+        <li>Une <strong>alerte push géolocalisée</strong> "Concert finit dans 5 min à 800m de toi, fonce" est plus actionnable.</li>
+      </ul></p>
+
+      <h4>5 vérités contre-intuitives</h4>
+      <ul>
+        <li>Vous n'avez peut-être pas besoin d'une heatmap. Une notif push contextuelle ferait peut-être 80% du job en V1.</li>
+        <li>Vous n'avez peut-être pas besoin de crowdsourcing en V1. Events + transports + historique public suffit.</li>
+        <li>Vous n'avez peut-être pas besoin d'apprentissage automatique. Tunage manuel hebdo sur Excel sera plus rapide.</li>
+        <li>La sécu offensive bat l'anonymisation mathématique pour V1. Pen-test &gt; k-anonymity ε=0.5.</li>
+        <li>Le risque #1 n'est pas l'imprécision, c'est l'inutilisation.</li>
+      </ul>
+
+      <h4>Plan alternatif radical (12 sem au lieu de 16)</h4>
+      <p>Phase 1 (3 sem) : MVP "pas-de-heatmap" — page web Top 3 zones en texte, recalculée toutes les 5 min. Phase 2 (2 sem) : test brut sur 10 chauffeurs, mesure "as-tu gagné plus ?". Phase 3 (4 sem) : SI Phase 2 positive, ajout carte simple. Phase 4 (3 sem) : SI Phase 3 valide, crowdsourcing avec consentement.</p>
+
+      <h4>La seule vraie question</h4>
+      <p><em>"Si dans 8 semaines, 7/10 chauffeurs me disent que mon outil leur a fait gagner +10%, à quoi minimum doit-il ressembler ?" Construisez ÇA, et seulement ça. Le reste c'est de la roadmap.</em></p>
+    </div>
+  </details>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-mark">— Le council a parlé —</div>
+  Council convoqué le 03 mai 2026 · Méthodologie Karpathy LLM Council adaptée<br>
+  5 experts indépendants · 8 questions structurantes · 5 peer reviews croisées anonymes · 1 chairman synthesis<br>
+  Document de travail TaxiPulse · Vol. II · Architecture Heatmap
+</footer>
+
+</div>
+</body>
+</html>
