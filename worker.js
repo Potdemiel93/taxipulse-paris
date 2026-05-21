@@ -44,6 +44,7 @@ import { handleTicketmaster } from './src/handlers/ticketmaster.js';
 import { handleEventsHealth } from './src/handlers/events-health.js';
 import { handleEventsAggregate } from './src/handlers/events-aggregate.js';
 import { handleScheduled } from './src/scheduled.js';
+import { handleHeatmapState } from './src/handlers/heatmap.js';
 
 // =============================================================================
 //  ROUTEUR PRINCIPAL
@@ -134,6 +135,11 @@ async function handleRequest(request, env) {
   // ─── EVENTS AGGREGATE V2 ───
   if (path === '/events/aggregate' || path === '/events/aggregate/') {
     return handleEventsAggregate(request, env);
+  }
+
+  // ─── HEATMAP STATE ───
+  if (path === '/heatmap/state' || path === '/heatmap/state/') {
+    return handleHeatmapState(request, env);
   }
 
   // ─── PROXY SNCF (catch-all) ───
