@@ -3472,7 +3472,12 @@ header{
 .loading-stub{text-align:center;padding:18px;color:var(--ink3);font-size:12.5px;font-style:italic}
 
 </style>
-<link id="gfont-Inter" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"></head>
+<link id="gfont-Inter" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap">
+<!-- === HEATMAP V1 START === -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- === HEATMAP V1 END === -->
+</head>
 <body data-cc-id="cc-1" style="font-family: -apple-system; background-color: rgb(255, 249, 234); cursor: crosshair;">
 <div id="tp-splash">
   <svg class="tp-sky" viewBox="0 0 430 180" preserveAspectRatio="xMidYEnd meet" aria-hidden="true">
@@ -4323,6 +4328,34 @@ header{
     <div id="ca-week"><div class="loading-stub">—</div></div>
   </section>
 
+  <!-- === HEATMAP V1 START === -->
+  <section class="tab" id="tab-map">
+    <!-- Disclaimer permanent (HEATMAP_SPEC §5) -->
+    <div id="map-disclaimer">⚠️ Les estimations ne sont pas des garanties de course ni de revenus.</div>
+
+    <!-- Container Leaflet — hauteur calculée pour exclure top-bar + disclaimer + bottom-nav -->
+    <div id="map-container">
+      <div id="map-loading">
+        <span class="map-loading-dot"></span>
+        Chargement de la carte…
+      </div>
+    </div>
+
+    <!-- FAB Recentrer — positionné en absolu dans la section -->
+    <button id="map-recenter-btn" onclick="mapRecenter()" aria-label="Recentrer ma position">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="18" height="18" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <line x1="12" y1="2" x2="12" y2="6"/>
+        <line x1="12" y1="18" x2="12" y2="22"/>
+        <line x1="2" y1="12" x2="6" y2="12"/>
+        <line x1="18" y1="12" x2="22" y2="12"/>
+      </svg>
+      Recentrer
+    </button>
+  </section>
+  <!-- === HEATMAP V1 END === -->
+
 </main>
 
 <!-- ══ BOTTOM TAB BAR ══ -->
@@ -4389,6 +4422,20 @@ header{
     </span>
     <span class="bn-lbl">Aéro</span>
   </button>
+  <!-- === HEATMAP V1 START === -->
+  <button data-tab="tab-map" aria-label="Carte heatmap" class="">
+    <span class="bn-ico">
+      <!-- Carte géographique — 3 lignes de pliage -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="fill" d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path>
+        <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path>
+        <line x1="9" y1="3" x2="9" y2="18"></line>
+        <line x1="15" y1="6" x2="15" y2="21"></line>
+      </svg>
+    </span>
+    <span class="bn-lbl">Map</span>
+  </button>
+  <!-- === HEATMAP V1 END === -->
   <button data-tab="tab-trajet" aria-label="Trajet" class="">
     <span class="bn-ico">
       <!-- Taxi vue de face + taximètre -->
@@ -8811,6 +8858,7 @@ function switchTab(id){
   }
   if(id === 'tab-aero')     renderAero();
   if(id === 'tab-ca')       renderCa();
+  if(id === 'tab-map')      requestAnimationFrame(() => requestAnimationFrame(initHeatmapTab)); /* HEATMAP V1 */
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -12103,5 +12151,167 @@ boot();
 })();
 </script>
 
+<!-- === HEATMAP V1 START === -->
+<style>
+  /* Disclaimer bandeau */
+  #map-disclaimer {
+    font-size: 11px;
+    text-align: center;
+    padding: 7px 16px;
+    background: #fff8e8;
+    color: #8a6a2e;
+    border-bottom: 1px solid rgba(232,93,26,.12);
+    position: relative;
+    z-index: 2;
+  }
+  /* hauteur = 100dvh - top-bar(56px) - disclaimer(36px) - bottom-nav(88px) - safe-area */
+  #map-container {
+    width: 100%;
+    height: calc(100dvh - 56px - 36px - 88px - env(safe-area-inset-bottom, 0px));
+    position: relative;
+    background: #e8e0d0;
+  }
+  /* État de chargement centré dans le container */
+  #map-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #8a6a2e;
+    z-index: 1;
+  }
+  .map-loading-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent, #e85d1a);
+    animation: map-pulse 1s ease-in-out infinite;
+  }
+  @keyframes map-pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.4; transform:scale(.7); }
+  }
+  /* La section est le parent positionné du FAB */
+  #tab-map { position: relative; }
+  /* FAB Recentrer — au-dessus des tiles Leaflet (z ~400), sous les modals */
+  #map-recenter-btn {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 1000;
+    background: rgba(255,252,243,.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.8);
+    border-radius: 22px;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink, #2a1f0e);
+    box-shadow: 0 4px 16px -4px rgba(50,38,24,.22);
+    cursor: pointer;
+  }
+  #map-recenter-btn:active { transform: scale(.95); }
+</style>
+<script>
+  /* === HEATMAP V1 JS === */
+  let _leafletMap = null; // instance Leaflet, null = pas encore initialisée
+  let _userMarker = null; // marker bleu position chauffeur
+  let _userLatLng = null; // dernière position GPS connue
+
+  // Appelée par switchTab au premier tap sur "Map" et à chaque retour sur l'onglet
+  function initHeatmapTab() {
+    console.log('[HEATMAP] initHeatmapTab called, _leafletMap =', _leafletMap);
+
+    if (_leafletMap) {
+      console.log('[HEATMAP] map already exists, invalidating size');
+      _leafletMap.invalidateSize();
+      return;
+    }
+
+    var container = document.getElementById('map-container');
+    if (!container) {
+      console.error('[HEATMAP] #map-container introuvable !');
+      return;
+    }
+
+    console.log('[HEATMAP] container size:', container.offsetWidth, 'x', container.offsetHeight);
+    console.log('[HEATMAP] container display:', getComputedStyle(container).display);
+    console.log('[HEATMAP] L (Leaflet) typeof:', typeof L);
+
+    if (typeof L === 'undefined') {
+      console.error('[HEATMAP] Leaflet pas chargé !');
+      return;
+    }
+
+    var loading = document.getElementById('map-loading');
+    if (loading) loading.style.display = 'none';
+
+    // Carte centrée Paris, zoom 12
+    _leafletMap = L.map('map-container', { zoomControl: true })
+      .setView([48.8566, 2.3522], 12);
+
+    // Fond OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(_leafletMap);
+
+    console.log('[HEATMAP] map created, forcing invalidateSize');
+    _leafletMap.invalidateSize();
+
+    // Filet de sécurité : invalidateSize de nouveau après 200ms
+    setTimeout(() => {
+      if (_leafletMap) {
+        console.log('[HEATMAP] late invalidateSize (200ms)');
+        _leafletMap.invalidateSize();
+      }
+    }, 200);
+
+    _requestGeolocForMap();
+  }
+
+  // Géoloc → marker bleu pulsant pour la position du chauffeur
+  function _requestGeolocForMap() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        _userLatLng = [pos.coords.latitude, pos.coords.longitude];
+        if (_userMarker) {
+          _userMarker.setLatLng(_userLatLng);
+        } else {
+          var icon = L.divIcon({
+            className: '',
+            html: '<div style="width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 4px rgba(37,99,235,.25)"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+          });
+          _userMarker = L.marker(_userLatLng, { icon: icon, zIndexOffset: 1000 })
+            .bindPopup('Votre position')
+            .addTo(_leafletMap);
+        }
+        _leafletMap.setView(_userLatLng, 13);
+      },
+      function() { /* géoloc refusée — on reste centré Paris */ },
+      { timeout: 8000, maximumAge: 30000 }
+    );
+  }
+
+  // FAB — recentre la carte sur la position du chauffeur
+  function mapRecenter() {
+    if (!_leafletMap) return;
+    if (_userLatLng) {
+      _leafletMap.setView(_userLatLng, 14, { animate: true });
+    } else {
+      _requestGeolocForMap();
+    }
+  }
+</script>
+<!-- === HEATMAP V1 END === -->
 
 </body></html>
