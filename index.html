@@ -12226,10 +12226,7 @@ boot();
 
   // Appelée par switchTab au premier tap sur "Map" et à chaque retour sur l'onglet
   function initHeatmapTab() {
-    console.log('[HEATMAP] initHeatmapTab called, _leafletMap =', _leafletMap);
-
     if (_leafletMap) {
-      console.log('[HEATMAP] map already exists, invalidating size');
       _leafletMap.invalidateSize();
       return;
     }
@@ -12239,10 +12236,6 @@ boot();
       console.error('[HEATMAP] #map-container introuvable !');
       return;
     }
-
-    console.log('[HEATMAP] container size:', container.offsetWidth, 'x', container.offsetHeight);
-    console.log('[HEATMAP] container display:', getComputedStyle(container).display);
-    console.log('[HEATMAP] L (Leaflet) typeof:', typeof L);
 
     if (typeof L === 'undefined') {
       console.error('[HEATMAP] Leaflet pas chargé !');
@@ -12262,15 +12255,11 @@ boot();
       maxZoom: 19
     }).addTo(_leafletMap);
 
-    console.log('[HEATMAP] map created, forcing invalidateSize');
     _leafletMap.invalidateSize();
 
     // Filet de sécurité : invalidateSize de nouveau après 200ms
     setTimeout(() => {
-      if (_leafletMap) {
-        console.log('[HEATMAP] late invalidateSize (200ms)');
-        _leafletMap.invalidateSize();
-      }
+      if (_leafletMap) _leafletMap.invalidateSize();
     }, 200);
 
     _requestGeolocForMap();
