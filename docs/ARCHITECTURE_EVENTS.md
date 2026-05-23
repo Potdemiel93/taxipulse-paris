@@ -125,6 +125,7 @@ Transformations dans l'ordre :
 
 1. Lowercase
 2. NFD + suppression diacritiques (`é→e`, `à→a`, `ç→c`…)
+2.5. Normalisation des liaisons : `&` → `et`, ` + ` (entouré d'espaces) → `et`
 3. Suppression marqueurs de journée : `j1`, `j2`, `j16`, `jour 1`, `journée 2`, `day 3`
 4. Suppression années 4 chiffres (`2026`, `2025`)
 5. Suppression mots-outils : `tour`, `tournée`, `the tour`, `world tour`, `live tour`, `résidence`
@@ -134,17 +135,21 @@ Transformations dans l'ordre :
 
 **Vecteurs de test garantis (entrée → slug attendu) :**
 
-| Input | Slug attendu |
-|-------|-------------|
-| `"Jul - Terre Connue"` | `"julterreconnue"` |
-| `"Étienne Daho J2"` | `"etiennedaho"` |
-| `"Etienne Daho"` | `"etiennedaho"` |
-| `"Roland-Garros 2026 - Qualifications J1"` | `"rolandgarrosqualif"` |
-| `"Roland-Garros 2026 Qualifs J1"` | `"rolandgarrosqualif"` |
-| `"Fally Ipupa J1"` | `"fallyipupa"` |
-| `"Fally Ipupa - 20 ans de carriere"` | `"fallyipupa20ansdecarriere"` |
-| `"Céline Dion - Courage World Tour"` | `"celinedion"` |
-| `"Florent Pagny – L'Adieu Tour"` | `"florentpagny"` |
+| Input | Slug attendu | Note |
+|-------|-------------|------|
+| `"Jul - Terre Connue"` | `"julterreconnue"` | |
+| `"Étienne Daho J2"` | `"etiennedaho"` | accent + Jn |
+| `"Etienne Daho"` | `"etiennedaho"` | sans accent → même slug |
+| `"Roland-Garros 2026 - Qualifications J1"` | `"rolandgarrosqualif"` | abrév. sportive |
+| `"Roland-Garros 2026 Qualifs J1"` | `"rolandgarrosqualif"` | idem → passe 1 |
+| `"Fally Ipupa J1"` | `"fallyipupa"` | Jn strippé |
+| `"Fally Ipupa - 20 ans de carriere"` | `"fallyipupa20ansdecarriere"` | fuzzy passe 2 |
+| `"Céline Dion - Courage World Tour"` | `"celinedion"` | mot-outil strippé |
+| `"Florent Pagny – L'Adieu Tour"` | `"florentpagny"` | mot-outil strippé |
+| `"Bigflo & Oli"` | `"bigfloetoli"` | step 2.5 : & → et |
+| `"Bigflo et Oli"` | `"bigfloetoli"` | idem → passe 1 |
+| `"Anyma - ÆDEN"` | `"anymaeden"` | ÆDEN → ae après NFD |
+| `"Anyma"` | `"anyma"` | slug court → exception fuzzy passe 2 |
 
 ⚠️ `"Fally Ipupa J1"` et `"Fally Ipupa - 20 ans de carriere"` produisent des slugs **différents**
 après passe 1. Leur fusion passe par la règle fuzzy (§3.3, passe 2).
@@ -162,31 +167,66 @@ Conditions cumulatives pour fusionner A et B :
 
 1. Même `venue_id` et même `date`
 2. `|heure_debut_A − heure_debut_B| ≤ 90 min`
-3. `title_slug(A)` commence par les **8 premiers caractères** de `title_slug(B)`, ou vice versa
+3. La fusion passe les deux sous-règles suivantes :
+
+   **3a — Critère anti-générique (blacklist)**
+   Le `title_slug` le plus court ne commence **pas** par l'un de ces mots :
+   `concert`, `spectacle`, `soiree`, `event`, `show`
+   → Si blacklist atteinte : fusion **interdite**, lever un `EventConflict` à la place.
+
+   **3b — Critère de similarité** (l'une OU l'autre des deux conditions) :
+   - *[cas standard]*  : `len(slug_court) ≥ 6`  ET  `ratio ≥ 0.85`
+     où `ratio = len(préfixe_commun) / len(slug_court)`
+   - *[exception slug court]* : `slug_court` est le **préfixe entier** de `slug_long`
+     ET `len(slug_court) ≥ 3`
+     → Couvre les artistes à nom très court : Anyma (5), BTS (3), Korn (4)…
 
 → Conserver l'event de score source le plus élevé, ajouter l'autre dans `merged_from`.
 
 **Vérification sur les cas de test :**
 
-- **Fally J1** (`"fallyipupa"`) + **Fally "20 ans"** (`"fallyipupa20ansdecarriere"`) →
-  "fallyipu" est préfixe des deux → **fusion passe 2** ✓
+- **Fally J1** (`"fallyipupa"`, 10) + **Fally "20 ans"** (`"fallyipupa20ansdecarriere"`, 25) →
+  ratio = 10/10 = 1.0 ≥ 0.85, pas blacklist → **fusion passe 2** ✓
+- **Anyma** (`"anyma"`, 5) + **Anyma ÆDEN** (`"anymaeden"`, 9) →
+  exception slug court : "anyma" préfixe entier de "anymaeden", len ≥ 3 → **fusion** ✓
 - **RG "Qualifs J1"** + **"Qualifications J1"** → même slug `"rolandgarrosqualif"` →
   **fusion passe 1** (pas besoin de passe 2) ✓
 - **RG session jour** (10h) + **session nuit** (19h) →
   `|10h − 19h| = 540 min > 90 min` → **PAS de fusion** ✓
+- **Concert rock** + **Concert rock alternative** → slug_court `"concertrock"` commence par
+  `"concert"` → blacklist → **PAS de fusion, EventConflict** ✓
+
+**Limitation connue — inversion de mots (EC3) :**
+`"Grand Prix de Paris CYGAMES"` vs `"CYGAMES Grand Prix de Paris"` (même venue+date) →
+aucun préfixe commun → pas de fuzzy → `EventConflict` levé → arbitrage Sofiane.
+La déduplication par inversion d'ordre est hors-scope V2.
 
 ### 3.4 Hiérarchie des sources
 
 | Level | Score | Exemples |
 |-------|-------|---------|
-| `canonical` | 100 | stadefrance.com, le-zenith.com, rolandgarros.com, **Sheet Sofiane** |
+| `canonical` | 100 | stadefrance.com, le-zenith.com, rolandgarros.com |
 | `ticketing` | 70 | ticketmaster.fr, fnacspectacles.com, openagenda_idf |
 | `aggregator` | 40 | qfap, openagenda_fr |
 | `scraper` | 20 | sortiraparis.com, offi.fr |
 
-**Règle spéciale — Sheet bat tout.**
-Si le Sheet contredit une source `canonical` (heure différente, titre différent), le Sheet gagne
-+ un objet `EventConflict` est généré + alerte email envoyée.
+**Score des lignes Sheet selon leur colonne `source` :**
+
+| Valeur de la colonne `source` dans le Sheet | Score appliqué |
+|---------------------------------------------|----------------|
+| Domaine connu (ex : `"stadefrance.com"`) | Score de la table ci-dessus |
+| Vide, `"manuel"`, `"sofiane"`, `"sheet"` | `canonical` — 100 |
+| Domaine inconnu | `aggregator` — 40 |
+
+**Règle spéciale — Sheet bat tout (inchangée) :**
+Si le Sheet et une source `canonical` divergent sur le même event (heure ou titre différents),
+le Sheet gagne + un `EventConflict` est généré + alerte email envoyée.
+Cette règle est indépendante du score : elle s'applique même si les deux côtés ont score 100.
+
+**Fake-detector sur lignes Sheet :**
+`ingest.js` applique le fake-detector aux lignes Sheet **uniquement si** leur colonne `source`
+est non-vide et non-manuelle (c'est-à-dire : pas `""`, `"manuel"`, `"sofiane"`, `"sheet"`).
+Si Sofiane a saisi intentionnellement une ligne vide ou manuelle, elle n'est pas filtrée.
 
 ### 3.5 Détection de conflits
 
@@ -217,6 +257,12 @@ Conflicts stockés dans `events:conflicts` (TTL 7 jours).
 - `events_aggregator_last_run` → remplacé par `events:sync:last`
 - `aggregator_rejects:{date}` → remplacé par `events:rejects:last`
 - `tm:events:{start}:{end}` → cache TM géré par ingest.js à partir de S6
+
+**Venue inconnue → jamais silencieuse :**
+Si un event a une venue absente de `VENUE_MAPPING`, il est rejeté et ajouté dans
+`events:rejects:last` avec le payload :
+`{ reason: "unknown_venue", venue_raw: "<valeur brute>", titre, date, source }`
+Sofiane peut auditer la liste complète via GET /events/health (disponible en S7).
 
 ---
 

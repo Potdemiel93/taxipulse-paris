@@ -12379,7 +12379,7 @@ boot();
   // ── FETCH /heatmap/state + POLLING 90s ────────────────────────
   function fetchHeatmapState() {
     if (typeof PROXY === 'undefined' || !PROXY) return;
-    var url = PROXY.replace(/\?url=$/, '') + '/heatmap/state';
+    var url = PROXY.replace(/\/?\?url=$/, '') + '/heatmap/state';
     updateLiveIndicator('loading');
     fetch(url)
       .then(function(r) {
