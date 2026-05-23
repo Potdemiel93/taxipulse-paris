@@ -101,6 +101,25 @@ Avant tout `wrangler deploy`, `git push`, ou `gh pr merge` :
 5. **Auth + validation carte pro** (gros chantier, 3-4 semaines)
 6. **AIPD RGPD** (livrable légal, pas de code)
 
+## 📐 Chantier Events V2 (session active)
+
+**Avant tout code sur les events : lire `docs/ARCHITECTURE_EVENTS.md`.**
+
+### Sessions
+S1 (cadrage docs) → S2 (normalize.js) → S3 (event-store.js) → S4 (ingest.js) →
+S5 (sync Sheet) → S6 (refacto aggregator/TM) → S7 (API /events/list) →
+S8 (bascule front) → S9 (théâtres récurrents) → S10 (alertes) → S11+ (sources canonical)
+
+### Règles spécifiques à ce chantier
+- Toute déviation d'architecture → STOP + demander à Sofiane
+- Chaque session finit par un **commit propre + test vert + livrable vérifiable**
+- Test rouge = session pas finie
+- Toujours annoncer le diff prévisualisé avant de modifier
+
+### Cas de test non-régression (9 cas — voir ARCHITECTURE_EVENTS.md §5)
+Jul SdF · Daho vs Renaud · Roland-Garros day/night · RG Qualifs dedup ·
+Fally (2 jours, pas 4) · Céline 16 dates · Pagny 16 dates · Sheet bat canonical · stale_warning
+
 ## 🎁 Backups locaux automatiques
 Pas besoin de créer des fichiers .bak ou un dossier backups/.
 **Git suffit comme archive.** Tout est récupérable via `git show <commit>:<fichier>`.
