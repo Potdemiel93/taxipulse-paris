@@ -12328,6 +12328,112 @@ boot();
   let _currentZoneForSheet = null;       // zone affichée dans le bottom sheet
   let _heatmapRetries      = 0;          // compteur retry exponentiel
 
+  // ── LANDMARKS ─────────────────────────────────────────────────
+  var _landmarkMarkers = [];
+
+  var _MONUMENTS = [
+    { id:'tour-eiffel',  nom:'Tour Eiffel',           lat:48.8584, lng:2.2945, cat:'monument' },
+    { id:'louvre',       nom:'Musée du Louvre',        lat:48.8606, lng:2.3376, cat:'monument' },
+    { id:'notre-dame',   nom:'Notre-Dame de Paris',    lat:48.8530, lng:2.3499, cat:'monument' },
+    { id:'arc-triomphe', nom:'Arc de Triomphe',        lat:48.8738, lng:2.2950, cat:'monument' },
+    { id:'sacre-coeur',  nom:'Sacré-Cœur',            lat:48.8867, lng:2.3431, cat:'monument' },
+    { id:'orsay',        nom:"Musée d'Orsay",          lat:48.8600, lng:2.3266, cat:'monument' },
+    { id:'pantheon',     nom:'Panthéon',               lat:48.8462, lng:2.3510, cat:'monument' },
+    { id:'invalides',    nom:'Les Invalides',          lat:48.8566, lng:2.3124, cat:'monument' },
+    { id:'moulin-rouge', nom:'Moulin Rouge',           lat:48.8842, lng:2.3323, cat:'monument' },
+    { id:'versailles',   nom:'Château de Versailles',  lat:48.8049, lng:2.1204, cat:'monument' },
+  ];
+
+  var _LM_SVG = {
+    monument: '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="5" width="2" height="9" fill="white"/><rect x="1" y="14" width="14" height="2" fill="white"/><path d="M2 5 Q8 1 14 5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+    gare:     '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="10" height="8" rx="2" fill="white"/><rect x="3" y="7" width="10" height="1.5" fill="rgba(0,0,0,.25)"/><circle cx="6" cy="13" r="1.5" fill="white"/><circle cx="10" cy="13" r="1.5" fill="white"/></svg>',
+    aeroport: '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 1 L10.5 8 L14 7 L13 9.5 L10.5 9 L8 15 L5.5 9 L3 9.5 L2 7 L5.5 8 Z" fill="white"/></svg>',
+    theatre:  '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="7" r="3.5" fill="none" stroke="white" stroke-width="1.5"/><path d="M3 9 Q5 11.5 7 9" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="11" cy="7" r="3.5" fill="none" stroke="white" stroke-width="1.5"/><path d="M9 5.5 Q11 3.5 13 5.5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+    concert:  '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="2" width="1.5" height="7" fill="white"/><rect x="8" y="2" width="5" height="1.5" fill="white"/><circle cx="6" cy="10" r="2.5" fill="white"/></svg>',
+    sport:    '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><ellipse cx="8" cy="8" rx="6.5" ry="4" fill="none" stroke="white" stroke-width="2"/><ellipse cx="8" cy="8" rx="2.5" ry="1.5" fill="none" stroke="white" stroke-width="1.5"/></svg>',
+    salon:    '<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><polygon points="8,1 10,6 15,6 11,9.5 12.5,15 8,12 3.5,15 5,9.5 1,6 6,6" fill="white"/></svg>',
+  };
+  _LM_SVG.arena = _LM_SVG.sport;
+
+  var _LM_COLOR = {
+    monument: '#7c3aed',
+    gare:     '#1d4ed8',
+    aeroport: '#0369a1',
+    theatre:  '#b45309',
+    concert:  '#b45309',
+    sport:    '#15803d',
+    arena:    '#15803d',
+    salon:    '#9d174d',
+  };
+
+  function _makeLandmarkIcon(cat) {
+    var svg   = _LM_SVG[cat]   || _LM_SVG.monument;
+    var color = _LM_COLOR[cat] || '#4b5563';
+    var html  = '<div style="width:28px;height:28px;border-radius:50%;background:'
+      + color + ';display:flex;align-items:center;justify-content:center;'
+      + 'box-shadow:0 2px 8px rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.7)">'
+      + svg + '</div>';
+    return L.divIcon({ className: '', html: html, iconSize: [28, 28], iconAnchor: [14, 14] });
+  }
+
+  function _lmPopupHtml(nom, lat, lng) {
+    var js = nom.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return '<div style="font-family:sans-serif;min-width:110px">'
+      + '<b style="font-size:14px">' + nom + '</b><br>'
+      + '<button style="margin-top:6px;padding:5px 12px;background:#e85d1a;color:#fff;'
+      + 'border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600" '
+      + 'onclick="openWaze(' + lat + ',' + lng + ',\'' + js + '\')">'
+      + '\u{1F9ED} Y aller</button></div>';
+  }
+
+  function renderLandmarkMarkers() {
+    if (!_leafletMap) return;
+    var zoom = _leafletMap.getZoom();
+
+    // Nettoyer les markers précédents
+    _landmarkMarkers.forEach(function(m) { _leafletMap.removeLayer(m); });
+    _landmarkMarkers = [];
+
+    if (zoom < 12) return;
+
+    // ── Gares (zoom ≥ 12) ──
+    GARES.forEach(function(g) {
+      if (!g.lat || !g.lng) return;
+      var m = L.marker([g.lat, g.lng], { icon: _makeLandmarkIcon('gare') })
+        .bindPopup(_lmPopupHtml(g.nom, g.lat, g.lng))
+        .addTo(_leafletMap);
+      _landmarkMarkers.push(m);
+    });
+
+    // ── Aéroports (zoom ≥ 12) ──
+    Object.values(AEROPORTS).forEach(function(a) {
+      if (!a.lat || !a.lng) return;
+      var m = L.marker([a.lat, a.lng], { icon: _makeLandmarkIcon('aeroport') })
+        .bindPopup(_lmPopupHtml(a.nom, a.lat, a.lng))
+        .addTo(_leafletMap);
+      _landmarkMarkers.push(m);
+    });
+
+    if (zoom < 13) return;
+
+    // ── Monuments iconiques (zoom ≥ 13) ──
+    _MONUMENTS.forEach(function(mon) {
+      var m = L.marker([mon.lat, mon.lng], { icon: _makeLandmarkIcon(mon.cat) })
+        .bindPopup(_lmPopupHtml(mon.nom, mon.lat, mon.lng))
+        .addTo(_leafletMap);
+      _landmarkMarkers.push(m);
+    });
+
+    // ── Venues : salles, stades, théâtres, salons (zoom ≥ 13) ──
+    Object.values(VENUES).forEach(function(v) {
+      if (!v.lat || !v.lng) return;
+      var m = L.marker([v.lat, v.lng], { icon: _makeLandmarkIcon(v.cat) })
+        .bindPopup(_lmPopupHtml(v.nom, v.lat, v.lng))
+        .addTo(_leafletMap);
+      _landmarkMarkers.push(m);
+    });
+  }
+
   // ── FOND DE CARTE CARTODB ──────────────────────────────────────
   function _makeCartoLayer(phase) {
     var url = phase === 'night'
@@ -12564,6 +12670,10 @@ boot();
     // Fetch initial zones + polling 90s
     fetchHeatmapState();
     _heatmapPollId = setInterval(fetchHeatmapState, 90000);
+
+    // Markers landmarks + re-render au changement de zoom
+    renderLandmarkMarkers();
+    _leafletMap.on('zoomend', renderLandmarkMarkers);
 
     // Pause polling si app en arrière-plan, reprise au retour au focus
     document.addEventListener('visibilitychange', function() {
