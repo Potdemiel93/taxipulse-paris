@@ -4330,8 +4330,11 @@ header{
 
   <!-- === HEATMAP V1 START === -->
   <section class="tab" id="tab-map">
-    <!-- Disclaimer permanent (HEATMAP_SPEC §5) -->
-    <div id="map-disclaimer">⚠️ Les estimations ne sont pas des garanties de course ni de revenus.</div>
+    <!-- Disclaimer permanent (HEATMAP_SPEC §5) + indicateur live -->
+    <div id="map-disclaimer">
+      ⚠️ Les estimations ne sont pas des garanties de course ni de revenus.
+      <span id="map-live-dot">🟡</span>
+    </div>
 
     <!-- Container Leaflet — hauteur calculée pour exclure top-bar + disclaimer + bottom-nav -->
     <div id="map-container">
@@ -4353,6 +4356,20 @@ header{
       </svg>
       Recentrer
     </button>
+
+    <!-- Backdrop semi-transparent (tap pour fermer) -->
+    <div id="heatmap-backdrop" onclick="closeZoneSheet()"></div>
+
+    <!-- Bottom sheet détail zone (HEATMAP_SPEC §5) -->
+    <div id="heatmap-zone-sheet">
+      <button id="hz-close" onclick="closeZoneSheet()" aria-label="Fermer">✕</button>
+      <div id="hz-name"></div>
+      <div id="hz-reason"></div>
+      <div id="hz-peak"></div>
+      <div id="hz-fare"></div>
+      <div id="hz-confidence"></div>
+      <button id="hz-go" onclick="heatmapGoZone()">🧭 Y ALLER</button>
+    </div>
   </section>
   <!-- === HEATMAP V1 END === -->
 
@@ -12217,14 +12234,284 @@ boot();
     cursor: pointer;
   }
   #map-recenter-btn:active { transform: scale(.95); }
+
+  /* ── Variables couleurs score heatmap ── */
+  :root {
+    --hz-green:   #4ade80;
+    --hz-yellow:  #facc15;
+    --hz-orange:  #f97316;
+    --hz-red:     #ef4444;
+    --hz-darkred: #b91c1c;
+  }
+
+  /* ── Animation pulse zones rouges (opacité seule = pas de layout repaint) ── */
+  @keyframes heatmap-pulse {
+    0%, 100% { opacity: .5; }
+    50%       { opacity: .9; }
+  }
+  path.heatmap-pulse-zone { animation: heatmap-pulse 2s ease-in-out infinite; }
+
+  /* ── Indicateur live ── */
+  #map-live-dot { margin-left: 10px; font-size: 10px; white-space: nowrap; }
+
+  /* ── Backdrop bottom sheet ── */
+  #heatmap-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 1400;
+  }
+  #heatmap-backdrop.open { display: block; }
+  /* Cacher backdrop/sheet si l'onglet Map n'est pas actif */
+  #tab-map:not(.active) #heatmap-backdrop,
+  #tab-map:not(.active) #heatmap-zone-sheet { display: none !important; }
+
+  /* ── Bottom sheet détail zone ── */
+  #heatmap-zone-sheet {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    max-height: 60vh;
+    background: #fffcf3;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 40px;
+    z-index: 1500;
+    transform: translateY(100%);
+    transition: transform .28s cubic-bezier(.32,.72,0,1);
+    overflow-y: auto;
+    box-shadow: 0 -8px 32px rgba(50,38,24,.18);
+  }
+  #heatmap-zone-sheet.open { transform: translateY(0); }
+  #hz-close {
+    position: absolute; top: 14px; right: 14px;
+    background: #f3f4f6; border: none; border-radius: 50%;
+    width: 28px; height: 28px; font-size: 14px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #6b7280;
+  }
+  #hz-name {
+    font-size: 17px; font-weight: 700;
+    margin-bottom: 6px; padding-right: 36px;
+    color: var(--ink, #2a1f0e);
+    line-height: 1.3;
+  }
+  #hz-reason {
+    font-size: 13px; font-style: italic;
+    color: #6b7280; margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  #hz-peak, #hz-fare {
+    font-size: 14px; margin-bottom: 7px;
+    color: var(--ink, #2a1f0e);
+  }
+  #hz-confidence { font-size: 14px; margin-bottom: 18px; }
+  #hz-go {
+    width: 100%; padding: 15px;
+    background: var(--accent, #e85d1a); color: #fff;
+    border: none; border-radius: 14px;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    letter-spacing: .2px;
+  }
+  #hz-go:active { opacity: .85; }
 </style>
 <script>
   /* === HEATMAP V1 JS === */
-  let _leafletMap = null; // instance Leaflet, null = pas encore initialisée
-  let _userMarker = null; // marker bleu position chauffeur
-  let _userLatLng = null; // dernière position GPS connue
 
-  // Appelée par switchTab au premier tap sur "Map" et à chaque retour sur l'onglet
+  // ── Variables globales (préfixe _ par convention) ──────────────
+  let _leafletMap          = null;       // instance Leaflet
+  let _currentBasemap      = null;       // couche CartoDB active
+  let _userMarker          = null;       // marker bleu position chauffeur
+  let _userLatLng          = null;       // dernière position GPS connue
+  let _heatmapPollId       = null;       // id setInterval polling /heatmap/state
+  let _zonePolygons        = new Map();  // zone.id → L.polygon
+  let _currentZoneForSheet = null;       // zone affichée dans le bottom sheet
+  let _heatmapRetries      = 0;          // compteur retry exponentiel
+
+  // ── FOND DE CARTE CARTODB ──────────────────────────────────────
+  function _makeCartoLayer(phase) {
+    var url = phase === 'night'
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    return L.tileLayer(url, {
+      attribution: '© <a href="https://carto.com/attributions" target="_blank">CARTO</a> | © <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+      subdomains: 'abcd',
+      maxZoom: 19
+    });
+  }
+
+  // ── CALCUL PHASE JOUR/NUIT — algo NOAA pur JS ─────────────────
+  // Source : https://en.wikipedia.org/wiki/Sunrise_equation
+  function getDayPhaseForParis(date) {
+    var LAT = 48.8566, LNG = 2.3522, rad = Math.PI / 180;
+    // Jours depuis J2000.0 (2000-01-01 12:00 UTC)
+    var n     = Math.floor(date.getTime() / 86400000 - 10957.5 + 0.0009);
+    var Jstar = n - LNG / 360;
+    var M     = (357.5291 + 0.98560028 * Jstar) % 360;
+    var Mrad  = M * rad;
+    var C     = 1.9148 * Math.sin(Mrad) + 0.0200 * Math.sin(2 * Mrad) + 0.0003 * Math.sin(3 * Mrad);
+    var lam   = (M + C + 180 + 102.9372) % 360;
+    var lRad  = lam * rad;
+    var Jtr   = 2451545 + Jstar + 0.0053 * Math.sin(Mrad) - 0.0069 * Math.sin(2 * lRad);
+    var sinD  = Math.sin(lRad) * Math.sin(23.4397 * rad);
+    var cosD  = Math.cos(Math.asin(sinD));
+    var cosH  = (Math.sin(-0.8333 * rad) - Math.sin(LAT * rad) * sinD) / (Math.cos(LAT * rad) * cosD);
+    if (cosH < -1) return 'day';
+    if (cosH >  1) return 'night';
+    var H         = Math.acos(cosH) * (180 / Math.PI);
+    var base      = 946728000000; // J2000.0 en ms Unix
+    var sunriseMs = (Jtr - H / 360 - 2451545) * 86400000 + base;
+    var sunsetMs  = (Jtr + H / 360 - 2451545) * 86400000 + base;
+    return (date.getTime() >= sunriseMs && date.getTime() <= sunsetMs) ? 'day' : 'night';
+  }
+
+  // Bascule le fond si la phase jour/nuit a changé
+  function switchBasemapIfNeeded() {
+    if (!_leafletMap || !_currentBasemap) return;
+    var phase     = getDayPhaseForParis(new Date());
+    var isDark    = phase === 'night';
+    var nowIsDark = (_currentBasemap._url || '').includes('dark_all');
+    if (isDark === nowIsDark) return;
+    _leafletMap.removeLayer(_currentBasemap);
+    _currentBasemap = _makeCartoLayer(phase);
+    _currentBasemap.addTo(_leafletMap);
+  }
+
+  // ── FETCH /heatmap/state + POLLING 90s ────────────────────────
+  function fetchHeatmapState() {
+    if (typeof PROXY === 'undefined' || !PROXY) return;
+    var url = PROXY.replace(/\?url=$/, '') + '/heatmap/state';
+    updateLiveIndicator('loading');
+    fetch(url)
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) {
+        _heatmapRetries = 0;
+        if (data.zones) renderHeatmapZones(data.zones);
+        updateLiveIndicator('live');
+      })
+      .catch(function() {
+        _heatmapRetries++;
+        var delays = [1000, 3000, 9000];
+        if (_heatmapRetries <= delays.length) {
+          // Retry exponentiel : 1s → 3s → 9s
+          setTimeout(fetchHeatmapState, delays[_heatmapRetries - 1]);
+        } else {
+          _heatmapRetries = 0;
+          updateLiveIndicator('offline');
+        }
+      });
+  }
+
+  // ── RENDU POLYGONES COLORÉS ────────────────────────────────────
+  var _SCORE_COLORS = [
+    { min: 85, fill: '#b91c1c' }, // rouge foncé
+    { min: 65, fill: '#ef4444' }, // rouge
+    { min: 40, fill: '#f97316' }, // orange
+    { min: 20, fill: '#facc15' }, // jaune
+    { min:  0, fill: '#4ade80' }  // vert
+  ];
+  function _scoreToColor(score) {
+    for (var i = 0; i < _SCORE_COLORS.length; i++) {
+      if (score >= _SCORE_COLORS[i].min) return _SCORE_COLORS[i].fill;
+    }
+    return '#4ade80';
+  }
+  var _CONF_OPACITY = [0, 0.30, 0.50, 0.65, 0.78];
+  function _confidenceToOpacity(conf) {
+    return _CONF_OPACITY[Math.min(4, Math.max(0, conf || 0))];
+  }
+  function _polygonCentroid(polygon) {
+    var lat = 0, lng = 0;
+    for (var i = 0; i < polygon.length; i++) { lat += polygon[i][0]; lng += polygon[i][1]; }
+    return { lat: lat / polygon.length, lng: lng / polygon.length };
+  }
+
+  function renderHeatmapZones(zones) {
+    if (!_leafletMap) return;
+    var seen = new Set();
+    zones.forEach(function(zone) {
+      seen.add(zone.id);
+      var color  = _scoreToColor(zone.score);
+      var fOpacity = _confidenceToOpacity(zone.confidence);
+      var style  = { color: color, weight: 2, fillColor: color, fillOpacity: fOpacity, opacity: 0.9 };
+
+      if (_zonePolygons.has(zone.id)) {
+        // Mise à jour style uniquement — pas de recréation
+        var poly = _zonePolygons.get(zone.id);
+        poly.setStyle(style);
+        poly._heatmapZone = zone;
+        var el = poly.getElement ? poly.getElement() : null;
+        if (el) el.classList.toggle('heatmap-pulse-zone', zone.score >= 85);
+      } else {
+        // Création du polygone
+        var poly = L.polygon(zone.polygon, style).addTo(_leafletMap);
+        poly._heatmapZone = zone;
+        // Click → bottom sheet (closure sur poly pour toujours lire la donnée fraîche)
+        poly.on('click', (function(p) {
+          return function() { showZoneSheet(p._heatmapZone); };
+        })(poly));
+        // Classe pulse après insertion dans le DOM
+        if (zone.score >= 85) {
+          setTimeout(function() {
+            var el = poly.getElement ? poly.getElement() : null;
+            if (el) el.classList.add('heatmap-pulse-zone');
+          }, 50);
+        }
+        _zonePolygons.set(zone.id, poly);
+      }
+    });
+    // Supprimer les polygones absents du nouveau JSON
+    _zonePolygons.forEach(function(poly, id) {
+      if (!seen.has(id)) { _leafletMap.removeLayer(poly); _zonePolygons.delete(id); }
+    });
+  }
+
+  // ── BOTTOM SHEET DÉTAIL ZONE ───────────────────────────────────
+  function showZoneSheet(zone) {
+    _currentZoneForSheet = zone;
+    document.getElementById('hz-name').textContent = zone.name;
+    document.getElementById('hz-reason').textContent = zone.reason;
+    var fmt = function(iso) {
+      try {
+        return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' });
+      } catch(e) { return iso; }
+    };
+    document.getElementById('hz-peak').textContent =
+      '⏱ Pic prévu : ' + fmt(zone.peak_start) + ' – ' + fmt(zone.peak_end);
+    document.getElementById('hz-fare').textContent =
+      '💶 Course estimée : ' + zone.estimated_fare_min + '–' + zone.estimated_fare_max + ' €';
+    var stars = '';
+    for (var i = 0; i < (zone.confidence || 0); i++) stars += '⭐';
+    document.getElementById('hz-confidence').textContent = 'Confiance : ' + (stars || '—');
+    document.getElementById('heatmap-backdrop').classList.add('open');
+    document.getElementById('heatmap-zone-sheet').classList.add('open');
+    if (navigator.vibrate) navigator.vibrate(15);
+  }
+
+  function closeZoneSheet() {
+    document.getElementById('heatmap-backdrop').classList.remove('open');
+    document.getElementById('heatmap-zone-sheet').classList.remove('open');
+    _currentZoneForSheet = null;
+  }
+
+  function heatmapGoZone() {
+    if (!_currentZoneForSheet) return;
+    var c = _polygonCentroid(_currentZoneForSheet.polygon);
+    openWaze(c.lat, c.lng, _currentZoneForSheet.name); // openWaze() existe déjà (ligne 9861)
+  }
+
+  // ── INDICATEUR LIVE ────────────────────────────────────────────
+  function updateLiveIndicator(state) {
+    var el = document.getElementById('map-live-dot');
+    if (!el) return;
+    if (state === 'live')    { el.textContent = '🟢 Live'; }
+    if (state === 'loading') { el.textContent = '🟡 Actualisation…'; }
+    if (state === 'offline') { el.textContent = '🔴 Hors ligne'; }
+  }
+
+  // ── INIT CARTE ─────────────────────────────────────────────────
   function initHeatmapTab() {
     if (_leafletMap) {
       _leafletMap.invalidateSize();
@@ -12232,15 +12519,8 @@ boot();
     }
 
     var container = document.getElementById('map-container');
-    if (!container) {
-      console.error('[HEATMAP] #map-container introuvable !');
-      return;
-    }
-
-    if (typeof L === 'undefined') {
-      console.error('[HEATMAP] Leaflet pas chargé !');
-      return;
-    }
+    if (!container) { console.error('[HEATMAP] #map-container introuvable !'); return; }
+    if (typeof L === 'undefined') { console.error('[HEATMAP] Leaflet pas chargé !'); return; }
 
     var loading = document.getElementById('map-loading');
     if (loading) loading.style.display = 'none';
@@ -12249,23 +12529,36 @@ boot();
     _leafletMap = L.map('map-container', { zoomControl: true })
       .setView([48.8566, 2.3522], 12);
 
-    // Fond OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    }).addTo(_leafletMap);
+    // Fond CartoDB selon phase jour/nuit (HEATMAP_SPEC §4)
+    _currentBasemap = _makeCartoLayer(getDayPhaseForParis(new Date()));
+    _currentBasemap.addTo(_leafletMap);
+
+    // Recalcul fond de carte toutes les 5 min
+    setInterval(switchBasemapIfNeeded, 5 * 60 * 1000);
 
     _leafletMap.invalidateSize();
+    setTimeout(function() { if (_leafletMap) _leafletMap.invalidateSize(); }, 200);
 
-    // Filet de sécurité : invalidateSize de nouveau après 200ms
-    setTimeout(() => {
-      if (_leafletMap) _leafletMap.invalidateSize();
-    }, 200);
-
+    // Géoloc chauffeur
     _requestGeolocForMap();
+
+    // Fetch initial zones + polling 90s
+    fetchHeatmapState();
+    _heatmapPollId = setInterval(fetchHeatmapState, 90000);
+
+    // Pause polling si app en arrière-plan, reprise au retour au focus
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        clearInterval(_heatmapPollId);
+        _heatmapPollId = null;
+      } else if (!_heatmapPollId) {
+        fetchHeatmapState();
+        _heatmapPollId = setInterval(fetchHeatmapState, 90000);
+      }
+    });
   }
 
-  // Géoloc → marker bleu pulsant pour la position du chauffeur
+  // ── GÉOLOC CHAUFFEUR ───────────────────────────────────────────
   function _requestGeolocForMap() {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -12291,7 +12584,7 @@ boot();
     );
   }
 
-  // FAB — recentre la carte sur la position du chauffeur
+  // ── FAB RECENTRER ──────────────────────────────────────────────
   function mapRecenter() {
     if (!_leafletMap) return;
     if (_userLatLng) {
