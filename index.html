@@ -12244,12 +12244,13 @@ boot();
     --hz-darkred: #b91c1c;
   }
 
-  /* ── Animation pulse zones rouges (opacité seule = pas de layout repaint) ── */
-  @keyframes heatmap-pulse {
+  /* ── Halos circulaires flous — look Uber/Bolt ── */
+  path.heatmap-halo { filter: blur(12px); }
+  @keyframes heatmap-halo-anim {
     0%, 100% { opacity: .5; }
-    50%       { opacity: .9; }
+    50%       { opacity: .95; }
   }
-  path.heatmap-pulse-zone { animation: heatmap-pulse 2s ease-in-out infinite; }
+  path.heatmap-halo-pulse { animation: heatmap-halo-anim 2s ease-in-out infinite; }
 
   /* ── Indicateur live ── */
   #map-live-dot { margin-left: 10px; font-size: 10px; white-space: nowrap; }
@@ -12404,23 +12405,26 @@ boot();
       });
   }
 
-  // ── RENDU POLYGONES COLORÉS ────────────────────────────────────
-  var _SCORE_COLORS = [
-    { min: 85, fill: '#b91c1c' }, // rouge foncé
-    { min: 65, fill: '#ef4444' }, // rouge
-    { min: 40, fill: '#f97316' }, // orange
-    { min: 20, fill: '#facc15' }, // jaune
-    { min:  0, fill: '#4ade80' }  // vert
+  // ── RENDU HALOS CIRCULAIRES ────────────────────────────────────
+  // Gradient 7 paliers (look Uber/Bolt — plus c'est rouge, plus c'est chaud)
+  var _HALO_COLORS = [
+    { min: 90, fill: '#7f1d1d' }, // bordeaux ultra-saturé
+    { min: 80, fill: '#b91c1c' }, // rouge foncé
+    { min: 65, fill: '#dc2626' }, // rouge vif
+    { min: 50, fill: '#ef4444' }, // rouge moyen
+    { min: 35, fill: '#f97316' }, // orange
+    { min: 20, fill: '#fbbf24' }, // jaune-orange
+    { min:  0, fill: null      }  // < 20 : zone calme, ne pas afficher
   ];
-  function _scoreToColor(score) {
-    for (var i = 0; i < _SCORE_COLORS.length; i++) {
-      if (score >= _SCORE_COLORS[i].min) return _SCORE_COLORS[i].fill;
+  function _intensityToColor(score) {
+    for (var i = 0; i < _HALO_COLORS.length; i++) {
+      if (score >= _HALO_COLORS[i].min) return _HALO_COLORS[i].fill;
     }
-    return '#4ade80';
+    return null;
   }
-  var _CONF_OPACITY = [0, 0.30, 0.50, 0.65, 0.78];
-  function _confidenceToOpacity(conf) {
-    return _CONF_OPACITY[Math.min(4, Math.max(0, conf || 0))];
+  // fillOpacity proportionnelle au score, max 0.7 pour garder la transparence
+  function _intensityToOpacity(score) {
+    return Math.min(0.7, (score / 100) * 0.7);
   }
   function _polygonCentroid(polygon) {
     var lat = 0, lng = 0;
@@ -12428,14 +12432,25 @@ boot();
     return { lat: lat / polygon.length, lng: lng / polygon.length };
   }
 
+  // Rayon du halo selon la source (aéroports = grand, gares = moyen, etc.)
+  function _radiusForSourceType(type) {
+    if (type === 'vol_international' || type === 'vol_schengen') return 600;
+    if (type === 'eurostar' || type === 'tgv')                   return 250;
+    if (type === 'concert')                                       return 200;
+    return 180; // transilien + default
+  }
+
   function renderHeatmapZones(zones) {
     if (!_leafletMap) return;
     var seen = new Set();
     zones.forEach(function(zone) {
+      var color   = _intensityToColor(zone.score);
+      if (!color) return; // score < 20 : zone calme, ne pas afficher
       seen.add(zone.id);
-      var color  = _scoreToColor(zone.score);
-      var fOpacity = _confidenceToOpacity(zone.confidence);
-      var style  = { color: color, weight: 2, fillColor: color, fillOpacity: fOpacity, opacity: 0.9 };
+      var opacity = _intensityToOpacity(zone.score);
+      var radius  = _radiusForSourceType(zone.source_type);
+      var c       = _polygonCentroid(zone.polygon);
+      var style   = { color: 'none', weight: 0, fillColor: color, fillOpacity: opacity };
 
       if (_zonePolygons.has(zone.id)) {
         // Mise à jour style uniquement — pas de recréation
@@ -12443,26 +12458,30 @@ boot();
         poly.setStyle(style);
         poly._heatmapZone = zone;
         var el = poly.getElement ? poly.getElement() : null;
-        if (el) el.classList.toggle('heatmap-pulse-zone', zone.score >= 85);
+        if (el) {
+          el.classList.add('heatmap-halo');
+          el.classList.toggle('heatmap-halo-pulse', zone.score >= 80);
+        }
       } else {
-        // Création du polygone
-        var poly = L.polygon(zone.polygon, style).addTo(_leafletMap);
+        // Création du cercle halo
+        var poly = L.circle([c.lat, c.lng], Object.assign({ radius: radius }, style)).addTo(_leafletMap);
         poly._heatmapZone = zone;
         // Click → bottom sheet (closure sur poly pour toujours lire la donnée fraîche)
         poly.on('click', (function(p) {
           return function() { showZoneSheet(p._heatmapZone); };
         })(poly));
-        // Classe pulse après insertion dans le DOM
-        if (zone.score >= 85) {
-          setTimeout(function() {
-            var el = poly.getElement ? poly.getElement() : null;
-            if (el) el.classList.add('heatmap-pulse-zone');
-          }, 50);
-        }
+        // Classes halo après insertion dans le DOM
+        setTimeout(function() {
+          var el = poly.getElement ? poly.getElement() : null;
+          if (el) {
+            el.classList.add('heatmap-halo');
+            if (zone.score >= 80) el.classList.add('heatmap-halo-pulse');
+          }
+        }, 50);
         _zonePolygons.set(zone.id, poly);
       }
     });
-    // Supprimer les polygones absents du nouveau JSON
+    // Supprimer les halos absents du nouveau JSON
     _zonePolygons.forEach(function(poly, id) {
       if (!seen.has(id)) { _leafletMap.removeLayer(poly); _zonePolygons.delete(id); }
     });
