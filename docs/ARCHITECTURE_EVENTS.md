@@ -202,8 +202,8 @@ Conditions cumulatives pour fusionner A et B :
 
 - **Fally J1** (`"fallyipupa"`, 10) + **Fally "20 ans"** (`"fallyipupa20ansdecarriere"`, 25) →
   ratio = 10/10 = 1.0 ≥ 0.85, pas blacklist → **fusion passe 2** ✓
-- **Anyma** (`"anyma"`, 5) + **Anyma ÆDEN** (`"anymaeden"`, 9) →
-  exception slug court : "anyma" préfixe entier de "anymaeden", len ≥ 3 → **fusion** ✓
+- **Anyma** (`"anyma"`, 5) + **Anyma ÆDEN** (`"anymaaeden"`, 10) →
+  exception slug court : "anyma" préfixe entier de "anymaaeden", len ≥ 3 → **fusion** ✓
 - **RG "Qualifs J1"** + **"Qualifications J1"** → même slug `"rolandgarrosqualif"` →
   **fusion passe 1** (pas besoin de passe 2) ✓
 - **RG session jour** (10h) + **session nuit** (19h) →
