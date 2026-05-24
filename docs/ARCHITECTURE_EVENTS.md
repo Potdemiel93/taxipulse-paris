@@ -124,11 +124,26 @@ event_id = "{date}|{venue_id}|{title_slug}"
 Transformations dans l'ordre :
 
 1. Lowercase
+1.5. Remplacement explicite des ligatures latines (avant NFD) :
+   Æ/æ → ae, Œ/œ → oe, ß → ss
 2. NFD + suppression diacritiques (`é→e`, `à→a`, `ç→c`…)
 2.5. Normalisation des liaisons : `&` → `et`, ` + ` (entouré d'espaces) → `et`
 3. Suppression marqueurs de journée : `j1`, `j2`, `j16`, `jour 1`, `journée 2`, `day 3`
 4. Suppression années 4 chiffres (`2026`, `2025`)
-5. Suppression mots-outils : `tour`, `tournée`, `the tour`, `world tour`, `live tour`, `résidence`
+5. Suppression mots-outils — en deux phases :
+
+   **Phase A — strip depuis le séparateur :**
+   Si la chaîne contient un séparateur (` - `, ` – `, ` — `) suivi d'un suffixe
+   contenant l'un de : `tour`, `tournée`, `world tour`, `live tour`, `the tour`, `résidence`
+   → strip depuis le séparateur jusqu'à la fin.
+   **Garde-fou :** si la partie à gauche du séparateur, après lowercase + strip non-alnum,
+   fait moins de 4 caractères — ne PAS appliquer la phase A.
+   (Exemples protégés : "Jul" → 3 chars, "U2" → 2 chars, "BTS" → 3 chars.)
+
+   **Phase B — strip standalone :**
+   Strip des mots-outils restants (sans séparateur, ou après phase A) :
+   `tour`, `tournée`, `world tour`, `live tour`, `the tour`, `résidence`
+
 6. Normalisation abréviations sportives : `qualifs` → `qualif`, `qualifications` → `qualif`
 7. Suppression de tout ce qui n'est pas `[a-z0-9]`
 8. Trim
@@ -148,7 +163,7 @@ Transformations dans l'ordre :
 | `"Florent Pagny – L'Adieu Tour"` | `"florentpagny"` | mot-outil strippé |
 | `"Bigflo & Oli"` | `"bigfloetoli"` | step 2.5 : & → et |
 | `"Bigflo et Oli"` | `"bigfloetoli"` | idem → passe 1 |
-| `"Anyma - ÆDEN"` | `"anymaeden"` | ÆDEN → ae après NFD |
+| `"Anyma - ÆDEN"` | `"anymaaeden"` | step 1.5 : Æ → ae avant NFD → "anymaaeden" (10 chars) |
 | `"Anyma"` | `"anyma"` | slug court → exception fuzzy passe 2 |
 
 ⚠️ `"Fally Ipupa J1"` et `"Fally Ipupa - 20 ans de carriere"` produisent des slugs **différents**
@@ -317,4 +332,4 @@ Tout changement du moteur de dedup DOIT satisfaire ces 9 cas avant merge.
 
 ---
 
-*Créé en S1. Dernière mise à jour : 2026-05-23.*
+*Créé en S1. Dernière mise à jour : 2026-05-24.*
