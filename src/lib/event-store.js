@@ -80,7 +80,35 @@ const VENUE_MAPPING = {
   'porte_versailles':                   'porte_versailles',
   'parc_des_expositions_de_villepinte': 'villepinte',
   'villepinte':                         'villepinte',
-  // TODO S11+ : compléter depuis events_master_2026_v3_final.csv
+  // Salles de concert (manquantes du stub S3)
+  'bataclan':                           'bataclan',
+  'le_bataclan':                        'bataclan',
+  'cigale':                             'cigale',
+  'la_cigale':                          'cigale',
+  'trianon':                            'trianon',
+  'le_trianon':                         'trianon',
+  'seine_musicale':                     'seine_musicale',
+  'la_seine_musicale':                  'seine_musicale',
+  // Espaces verts / plein air
+  'bois_vincennes':                     'bois_vincennes',
+  'bois_de_vincennes':                  'bois_vincennes',
+  'vincennes_bois':                     'bois_vincennes',
+  'saint_cloud':                        'saint_cloud',
+  'domaine_national_de_saint_cloud':    'saint_cloud',
+  'domaine_de_saint_cloud':             'saint_cloud',
+  // Musées / culture
+  'louvre':                             'louvre',
+  'musee_du_louvre':                    'louvre',
+  'mam_paris':                          'mam_paris',
+  'musee_d_art_moderne_de_paris':       'mam_paris',
+  'musee_art_moderne':                  'mam_paris',
+  'musee_orsay':                        'musee_orsay',
+  'musee_d_orsay':                      'musee_orsay',
+  'fondation_lv':                       'fondation_lv',
+  'fondation_louis_vuitton':            'fondation_lv',
+  // Paris générique (events diffus : feux, marathon, réveillon, Champs-Élysées…)
+  'paris':                              'paris',
+  // TODO S11+ : bataclan.fr, laseinemusicale.com, louvre.fr, musee-orsay.fr…
 };
 
 // =============================================================================
