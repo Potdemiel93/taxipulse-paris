@@ -78,6 +78,14 @@ type EventCategory =
   | 'course'            | 'autre'
 ```
 
+**Catégorie hors enum (ZG6, décidée en S5)** :
+Si la colonne `cat` d'une ligne Sheet contient une valeur **non vide** absente de cet enum
+(ex : `"musee"`, `"festival"`), `sheet-sync.js` la **ramène à `'autre'`** plutôt que de
+rejeter la ligne — une saisie manuelle ne doit pas être perdue pour une typo. Chaque
+normalisation incrémente le compteur `cat_normalized`, reporté dans `events:sync:last`.
+Une colonne `cat` **vide** est ramenée à `'autre'` silencieusement (pas de comptage —
+c'est le défaut attendu, pas une erreur).
+
 ---
 
 ## 3. Calcul du confidence_score
@@ -186,4 +194,4 @@ interface EventStore {
 
 ---
 
-*Créé en S1. Dernière mise à jour : 2026-05-23.*
+*Créé en S1. Dernière mise à jour : 2026-05-28 (S5 — ZG6 cat hors enum → 'autre').*

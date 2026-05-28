@@ -10,5 +10,6 @@ id = "587f2f1a5db3407ca9d3b7623abdf054"
 # Cron Triggers :
 #   - "0 5 * * *" : daily 5h UTC (= 6h Paris hiver / 7h été) -> aggregator QFAP events
 #   - "0 6 * * 1" : lundi 6h UTC (= 7h Paris été / 8h hiver) -> récap fraîcheur Sheet
+#   - "0 * * * *" : toutes les heures -> sync Sheet → store KV V2 (S5, écriture conditionnelle)
 [triggers]
-crons = ["0 5 * * *", "0 6 * * 1"]
+crons = ["0 5 * * *", "0 6 * * 1", "0 * * * *"]

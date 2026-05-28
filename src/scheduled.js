@@ -6,6 +6,7 @@
 
 import { handleAggregate } from '../events-aggregator.js';
 import { analyzeEventsFreshness, sendFreshnessRecapEmail } from './handlers/events-health.js';
+import { syncSheet } from './handlers/sheet-sync.js';
 
 export async function handleScheduled(event, env) {
   const cron = event && event.cron ? event.cron : '';
@@ -24,6 +25,19 @@ export async function handleScheduled(event, env) {
     } catch (err) {
       console.error('[CRON daily] Error:', err.message);
       return { type: 'aggregator', error: err.message };
+    }
+  }
+
+  // Cron horaire (0 * * * *) -> sync Sheet → store KV V2 (S5)
+  if (cron === '0 * * * *') {
+    console.log('[CRON hourly] Sheet sync...');
+    try {
+      const result = await syncSheet(env);
+      console.log('[CRON hourly] Sheet sync result:', JSON.stringify(result).substring(0, 400));
+      return { type: 'sheet_sync', result: result };
+    } catch (err) {
+      console.error('[CRON hourly] Error:', err.message);
+      return { type: 'sheet_sync', error: err.message };
     }
   }
 
