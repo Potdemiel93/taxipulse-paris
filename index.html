@@ -12170,21 +12170,22 @@ boot();
 
 <!-- === HEATMAP V1 START === -->
 <style>
-  /* Disclaimer bandeau */
+  /* Disclaimer bandeau — compact */
   #map-disclaimer {
-    font-size: 11px;
+    font-size: 10.5px;
     text-align: center;
-    padding: 7px 16px;
+    padding: 4px 12px;
+    line-height: 20px;
     background: #fff8e8;
     color: #8a6a2e;
     border-bottom: 1px solid rgba(232,93,26,.12);
     position: relative;
     z-index: 2;
   }
-  /* hauteur = 100dvh - top-bar(56px) - disclaimer(36px) - bottom-nav(88px) - safe-area */
+  /* hauteur = 100dvh - top-bar(56px) - disclaimer(28px) - bottom-nav(88px) - safe-area */
   #map-container {
     width: 100%;
-    height: calc(100dvh - 56px - 36px - 88px - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 56px - 28px - 88px - env(safe-area-inset-bottom, 0px));
     position: relative;
     background: #e8e0d0;
   }
@@ -12245,12 +12246,67 @@ boot();
   }
 
   /* ── Halos circulaires flous — look Uber/Bolt ── */
-  path.heatmap-halo { filter: blur(12px); }
+  path.heatmap-halo { filter: blur(18px); }
   @keyframes heatmap-halo-anim {
-    0%, 100% { opacity: .5; }
-    50%       { opacity: .95; }
+    0%, 100% { opacity: .3; transform: scale(1); }
+    50%       { opacity: .9; transform: scale(1.05); }
   }
-  path.heatmap-halo-pulse { animation: heatmap-halo-anim 2s ease-in-out infinite; }
+  path.heatmap-halo-pulse {
+    animation: heatmap-halo-anim 2.2s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+
+  /* ── Marker position chauffeur — pulsation bleue ── */
+  .user-pulse-dot {
+    width: 14px; height: 14px;
+    background: #2563eb;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 0 rgba(37,99,235,.6);
+    animation: user-pulse 2s ease-out infinite;
+  }
+  @keyframes user-pulse {
+    0%  { box-shadow: 0 0 0 0   rgba(37,99,235,.5); }
+    70% { box-shadow: 0 0 0 24px rgba(37,99,235,0); }
+    100%{ box-shadow: 0 0 0 0   rgba(37,99,235,0); }
+  }
+
+  /* ── Markers plats style Uber / Apple Maps ── */
+  .lm-flat {
+    display: flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px;
+    background: rgba(255,255,255,.95);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    transition: opacity 0.3s ease;
+    position: relative;
+  }
+  .lm-flat svg { width: 14px; height: 14px; }
+  .lm-flat-label {
+    position: absolute; top: 26px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 9.5px; font-weight: 600; color: #374151;
+    background: rgba(255,255,255,.85);
+    padding: 1px 5px; border-radius: 6px;
+    white-space: nowrap; pointer-events: none;
+    text-shadow: 0 0 2px rgba(255,255,255,1);
+  }
+
+  /* ── Numéros d'arrondissement (T3.12) ── */
+  .arr-num-label {
+    font-size: 14px; font-weight: 500;
+    color: rgba(120,120,120,.5);
+    text-shadow: 0 0 4px rgba(255,255,255,.8);
+    pointer-events: none; white-space: nowrap;
+    transition: opacity .3s ease;
+  }
+  .arr-num-label.night {
+    color: rgba(220,220,220,.4);
+    text-shadow: 0 0 4px rgba(0,0,0,.7);
+  }
+  .arr-num-label.arr-labels-hidden { opacity: 0; }
 
   /* ── Indicateur live ── */
   #map-live-dot { margin-left: 10px; font-size: 10px; white-space: nowrap; }
@@ -12327,49 +12383,112 @@ boot();
   let _zonePolygons        = new Map();  // zone.id → L.polygon
   let _currentZoneForSheet = null;       // zone affichée dans le bottom sheet
   let _heatmapRetries      = 0;          // compteur retry exponentiel
+  var _watchId             = null;       // id watchPosition géoloc
+  var _geolocFirstFix      = true;       // zoom auto uniquement sur le 1er fix
+  var _lastFetchTime       = null;       // timestamp dernier fetch /heatmap/state OK
 
-  // ── LANDMARKS — gares + aéroports uniquement ─────────────────
-  var _landmarkMarkers = [];
+  // ── LANDMARKS — gares, aéroports, monuments, venues ─────────────
+  var _landmarkMarkers   = [];
+  var _arrondLayer       = null;  // couche GeoJSON arrondissements
+  var _arrLabels         = [];    // markers L.divIcon numéros arrondissements (T3.12)
+  var _centroidDebugDone = false; // flag debug centroïdes halos (une seule fois)
+
+  // 9 monuments iconiques avec tier de priorité d'affichage
+  var _MONUMENTS = [
+    { id:'tour-eiffel',  nom:'Tour Eiffel',         lat:48.8584, lng:2.2945, cat:'monument', tier:1 },
+    { id:'louvre',       nom:'Louvre',              lat:48.8606, lng:2.3376, cat:'monument', tier:1 },
+    { id:'notre-dame',   nom:'Notre-Dame',          lat:48.8530, lng:2.3499, cat:'monument', tier:1 },
+    { id:'arc-triomphe', nom:'Arc de Triomphe',     lat:48.8738, lng:2.2950, cat:'monument', tier:1 },
+    { id:'sacre-coeur',  nom:'Sacré-Cœur',         lat:48.8867, lng:2.3431, cat:'monument', tier:2 },
+    { id:'orsay',        nom:"Musée d'Orsay",       lat:48.8600, lng:2.3266, cat:'monument', tier:2 },
+    { id:'pantheon',     nom:'Panthéon',            lat:48.8462, lng:2.3510, cat:'monument', tier:2 },
+    { id:'invalides',    nom:'Les Invalides',       lat:48.8566, lng:2.3124, cat:'monument', tier:2 },
+    { id:'moulin-rouge', nom:'Moulin Rouge',        lat:48.8842, lng:2.3323, cat:'monument', tier:2 },
+  ];
+
+  // Tier par catégorie de venue (apparition progressive au zoom)
+  var _VENUE_TIER = { arena:2, sport:2, concert:2, theatre:3, salon:3 };
+
+  // Couleurs neutres par catégorie (icônes sur fond blanc)
+  var _LM_CAT_COLOR = {
+    monument: '#8b5cf6',  // violet doux
+    gare:     '#1e40af',  // bleu marine
+    aeroport: '#0c4a6e',  // bleu profond
+    concert:  '#c2410c',  // orange brique
+    theatre:  '#c2410c',
+    sport:    '#166534',  // vert forêt
+    arena:    '#166534',
+    salon:    '#831843',  // bordeaux
+  };
+
+  // Templates SVG — FILL est remplacé par la couleur de catégorie au runtime
+  var _LM_SVG_DATA = {
+    monument: '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="5" width="2" height="9" fill="FILL"/><rect x="1" y="14" width="14" height="2" fill="FILL"/><path d="M2 5 Q8 1 14 5" stroke="FILL" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+    gare:     '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="10" height="8" rx="2" fill="FILL"/><rect x="3" y="7" width="10" height="1.5" fill="rgba(0,0,0,.15)"/><circle cx="6" cy="13" r="1.5" fill="FILL"/><circle cx="10" cy="13" r="1.5" fill="FILL"/></svg>',
+    aeroport: '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 1 L10.5 8 L14 7 L13 9.5 L10.5 9 L8 15 L5.5 9 L3 9.5 L2 7 L5.5 8 Z" fill="FILL"/></svg>',
+    concert:  '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="2" width="1.5" height="7" fill="FILL"/><rect x="8" y="2" width="5" height="1.5" fill="FILL"/><circle cx="6" cy="10" r="2.5" fill="FILL"/></svg>',
+    theatre:  '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="7" r="3.5" fill="none" stroke="FILL" stroke-width="1.5"/><path d="M3 9 Q5 11.5 7 9" stroke="FILL" stroke-width="1.5" fill="none" stroke-linecap="round"/><circle cx="11" cy="7" r="3.5" fill="none" stroke="FILL" stroke-width="1.5"/><path d="M9 5.5 Q11 3.5 13 5.5" stroke="FILL" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
+    sport:    '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><ellipse cx="8" cy="8" rx="6.5" ry="4" fill="none" stroke="FILL" stroke-width="2"/><ellipse cx="8" cy="8" rx="2.5" ry="1.5" fill="none" stroke="FILL" stroke-width="1.5"/></svg>',
+    salon:    '<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><polygon points="8,1 10,6 15,6 11,9.5 12.5,15 8,12 3.5,15 5,9.5 1,6 6,6" fill="FILL"/></svg>',
+  };
+  _LM_SVG_DATA.arena = _LM_SVG_DATA.sport;
+
+  // Opacité 0–1 selon le tier et le zoom (apparition progressive style Uber)
+  function _opacityForTier(tier, zoom) {
+    if (tier === 0) return 1;
+    if (tier === 1 && zoom >= 12) return Math.min(1, (zoom - 11) * 0.5);
+    if (tier === 2 && zoom >= 13) return Math.min(1, (zoom - 12) * 0.4);
+    if (tier === 3 && zoom >= 14) return Math.min(1, (zoom - 13) * 0.5);
+    return 0;
+  }
+
+  // Fabrique un L.divIcon flat (fond blanc + SVG coloré + label optionnel zoom ≥ 14)
+  function _makeFlatIcon(cat, nom, opacity, zoom) {
+    var color  = _LM_CAT_COLOR[cat] || '#374151';
+    var svgTpl = _LM_SVG_DATA[cat]  || _LM_SVG_DATA.monument;
+    var svg    = svgTpl.replace(/FILL/g, color);
+    var label  = (zoom >= 14)
+      ? '<span class="lm-flat-label">' + (nom.length > 20 ? nom.slice(0, 18) + '…' : nom) + '</span>'
+      : '';
+    var html = '<div class="lm-flat" style="opacity:' + opacity.toFixed(2) + '">' + svg + label + '</div>';
+    return L.divIcon({ className: '', html: html, iconSize: [24, 24], iconAnchor: [12, 12] });
+  }
 
   function renderLandmarkMarkers() {
     if (!_leafletMap) return;
     _landmarkMarkers.forEach(function(m) { _leafletMap.removeLayer(m); });
     _landmarkMarkers = [];
-    if (_leafletMap.getZoom() < 11) return;
+    var zoom = _leafletMap.getZoom();
+    if (zoom < 11) return;
 
-    var gareSvg = '<svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="10" height="8" rx="2" fill="white"/><rect x="3" y="7" width="10" height="1.5" fill="rgba(0,0,0,.25)"/><circle cx="6" cy="13" r="1.5" fill="white"/><circle cx="10" cy="13" r="1.5" fill="white"/></svg>';
-    var aeroSvg = '<svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 1 L10.5 8 L14 7 L13 9.5 L10.5 9 L8 15 L5.5 9 L3 9.5 L2 7 L5.5 8 Z" fill="white"/></svg>';
-
-    function _makeIcon(svg, color) {
-      return L.divIcon({
-        className: '',
-        html: '<div style="width:22px;height:22px;border-radius:50%;background:' + color
-            + ';display:flex;align-items:center;justify-content:center;'
-            + 'box-shadow:0 2px 8px rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.8)">'
-            + svg + '</div>',
-        iconSize: [22, 22], iconAnchor: [11, 11]
-      });
-    }
-
-    function _addMarker(lat, lng, nom, icon) {
+    function _addMarker(lat, lng, nom, cat, tier) {
       if (!lat || !lng) return;
-      var js = nom.replace(/'/g, "\\'");
+      var opacity = _opacityForTier(tier, zoom);
+      if (opacity <= 0) return;
+      var icon = _makeFlatIcon(cat, nom, opacity, zoom);
+      var js   = nom.replace(/'/g, "\\'");
       var popup = '<div style="font-family:sans-serif;min-width:110px">'
         + '<b style="font-size:14px">' + nom + '</b><br>'
         + '<button style="margin-top:6px;padding:5px 12px;background:#e85d1a;color:#fff;'
         + 'border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600" '
-        + 'onclick="openWaze(' + lat + ',' + lng + ',\'' + js + '\')">🧭 Y aller</button></div>';
+        + 'onclick="_heatmapGoNav(' + lat + ',' + lng + ',\'' + js + '\')">🧭 Y aller</button></div>';
       var m = L.marker([lat, lng], { icon: icon, zIndexOffset: 1000 })
         .bindPopup(popup)
         .addTo(_leafletMap);
       _landmarkMarkers.push(m);
     }
 
-    var gareIcon = _makeIcon(gareSvg, '#1d4ed8');
-    var aeroIcon = _makeIcon(aeroSvg, '#0369a1');
-
-    GARES.forEach(function(g) { _addMarker(g.lat, g.lng, g.nom, gareIcon); });
-    Object.values(AEROPORTS).forEach(function(a) { _addMarker(a.lat, a.lng, a.nom, aeroIcon); });
+    // Gares (tier 0 — toujours visibles dès zoom 11)
+    GARES.forEach(function(g) { _addMarker(g.lat, g.lng, g.nom, 'gare', 0); });
+    // Aéroports (tier 0 — toujours visibles)
+    Object.values(AEROPORTS).forEach(function(a) { _addMarker(a.lat, a.lng, a.nom, 'aeroport', 0); });
+    // Monuments (tier 1 = zoom ≥ 12, tier 2 = zoom ≥ 13)
+    _MONUMENTS.forEach(function(mon) { _addMarker(mon.lat, mon.lng, mon.nom, mon.cat, mon.tier); });
+    // Venues : arenas/sport/concerts tier 2, théâtres/salons tier 3
+    Object.values(VENUES).forEach(function(v) {
+      if (!v.lat || !v.lng) return;
+      _addMarker(v.lat, v.lng, v.nom, v.cat, _VENUE_TIER[v.cat] || 3);
+    });
   }
 
   // ── FOND DE CARTE CARTODB ──────────────────────────────────────
@@ -12419,6 +12538,7 @@ boot();
     _leafletMap.removeLayer(_currentBasemap);
     _currentBasemap = _makeCartoLayer(phase);
     _currentBasemap.addTo(_leafletMap);
+    _styleArrForPhase(phase); // contours arrondissements jour/nuit (T3.12)
   }
 
   // ── FETCH /heatmap/state + POLLING 90s ────────────────────────
@@ -12468,7 +12588,7 @@ boot();
   }
   // fillOpacity proportionnelle au score, max 0.7 pour garder la transparence
   function _intensityToOpacity(score) {
-    return Math.min(0.7, (score / 100) * 0.7);
+    return Math.min(0.5, (score / 100) * 0.5);
   }
   function _polygonCentroid(polygon) {
     var lat = 0, lng = 0;
@@ -12486,6 +12606,14 @@ boot();
 
   function renderHeatmapZones(zones) {
     if (!_leafletMap) return;
+    // Debug centroïdes halos — une seule fois au premier fetch (FIX 4)
+    if (!_centroidDebugDone) {
+      zones.forEach(function(z) {
+        var c = _polygonCentroid(z.polygon);
+        console.log('[HALO centroid]', z.id, c.lat.toFixed(4), c.lng.toFixed(4));
+      });
+      _centroidDebugDone = true;
+    }
     var seen = new Set();
     zones.forEach(function(zone) {
       var color   = _intensityToColor(zone.score);
@@ -12559,19 +12687,103 @@ boot();
     _currentZoneForSheet = null;
   }
 
+  // Détection mobile avant d'ouvrir Waze (FIX 5 — desktop-safe)
+  function _heatmapGoNav(lat, lng, nom) {
+    if (!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      alert('🧭 Ouvre TaxiPulse sur ton téléphone pour lancer Waze depuis cette zone.');
+      return;
+    }
+    openWaze(lat, lng, nom);
+  }
+
   function heatmapGoZone() {
     if (!_currentZoneForSheet) return;
     var c = _polygonCentroid(_currentZoneForSheet.polygon);
-    openWaze(c.lat, c.lng, _currentZoneForSheet.name); // openWaze() existe déjà (ligne 9861)
+    _heatmapGoNav(c.lat, c.lng, _currentZoneForSheet.name);
   }
 
-  // ── INDICATEUR LIVE ────────────────────────────────────────────
+  // ── INDICATEUR LIVE + TIMESTAMP ───────────────────────────────
+  function _refreshLiveTs() {
+    var el = document.getElementById('map-live-dot');
+    if (!el || !_lastFetchTime) return;
+    var s = Math.round((Date.now() - _lastFetchTime) / 1000);
+    el.textContent = '🟢 Live • Maj ' + s + 's';
+  }
+
   function updateLiveIndicator(state) {
     var el = document.getElementById('map-live-dot');
     if (!el) return;
-    if (state === 'live')    { el.textContent = '🟢 Live'; }
+    if (state === 'live')    { _lastFetchTime = Date.now(); _refreshLiveTs(); }
     if (state === 'loading') { el.textContent = '🟡 Actualisation…'; }
     if (state === 'offline') { el.textContent = '🔴 Hors ligne'; }
+  }
+
+  // ── ARRONDISSEMENTS — contours fins + numéros (T3.12) ──────────
+  function _ordinalArr(n) {
+    return n === 1 ? '1er' : n + 'e';
+  }
+
+  // Applique le style jour/nuit aux contours + bascule la classe .night des labels
+  function _styleArrForPhase(phase) {
+    var isNight = phase === 'night';
+    if (_arrondLayer) {
+      _arrondLayer.setStyle(isNight
+        ? { color: '#e5e7eb', weight: 1, opacity: 0.25, fillOpacity: 0 }
+        : { color: '#9ca3af', weight: 1, opacity: 0.40, fillOpacity: 0 });
+    }
+    _arrLabels.forEach(function(m) {
+      var el  = m.getElement && m.getElement();
+      var lbl = el && el.querySelector('.arr-num-label');
+      if (lbl) lbl.classList.toggle('night', isNight);
+    });
+  }
+
+  // Masque les numéros sous le zoom 12 (toggle CSS, pas de re-add)
+  function _updateArrLabelsVisibility() {
+    if (!_leafletMap) return;
+    var hide = _leafletMap.getZoom() < 12;
+    _arrLabels.forEach(function(m) {
+      var el  = m.getElement && m.getElement();
+      var lbl = el && el.querySelector('.arr-num-label');
+      if (lbl) lbl.classList.toggle('arr-labels-hidden', hide);
+    });
+  }
+
+  // Charge le GeoJSON statique local : contours (L.geoJSON) + numéros (L.divIcon)
+  function _loadArrondissements() {
+    if (!_leafletMap) return;
+    fetch('./data/arrondissements-paris.geojson')
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(d) {
+        _arrondLayer = L.geoJSON(d, {
+          interactive: false,
+          style: { color: '#9ca3af', weight: 1, opacity: 0.40, fillOpacity: 0 }
+        }).addTo(_leafletMap);
+
+        // Labels numéros — créés UNE fois depuis geom_x_y pré-calculé par l'API
+        d.features.forEach(function(f) {
+          var p = (f && f.properties) || {};
+          var c = p.geom_x_y;
+          if (!c || typeof c.lat !== 'number' || typeof c.lon !== 'number') {
+            console.warn('[HEATMAP] geom_x_y manquant pour arrondissement', p.c_ar);
+            return;
+          }
+          var icon = L.divIcon({
+            className: '',
+            html: '<span class="arr-num-label">' + _ordinalArr(p.c_ar) + '</span>',
+            iconSize: [30, 18], iconAnchor: [15, 9]
+          });
+          _arrLabels.push(
+            L.marker([c.lat, c.lon], { icon: icon, interactive: false, zIndexOffset: -100 }).addTo(_leafletMap)
+          );
+        });
+
+        _styleArrForPhase(getDayPhaseForParis(new Date()));
+        _updateArrLabelsVisibility();
+      })
+      .catch(function(e) {
+        console.warn('[HEATMAP] échec chargement arrondissements :', (e && e.message) || e);
+      });
   }
 
   // ── INIT CARTE ─────────────────────────────────────────────────
@@ -12592,9 +12804,20 @@ boot();
     _leafletMap = L.map('map-container', { zoomControl: true })
       .setView([48.8566, 2.3522], 12);
 
+    // Tap sur le fond de carte : ferme popups + bottom sheet (FIX 4)
+    _leafletMap.on('click', function(e) {
+      if (e.originalEvent && !e.originalEvent.defaultPrevented) {
+        closeZoneSheet();
+        _leafletMap.closePopup();
+      }
+    });
+
     // Fond CartoDB selon phase jour/nuit (HEATMAP_SPEC §4)
     _currentBasemap = _makeCartoLayer(getDayPhaseForParis(new Date()));
     _currentBasemap.addTo(_leafletMap);
+
+    // Limites arrondissements + numéros — GeoJSON statique local (FIX T3.12)
+    _loadArrondissements();
 
     // Recalcul fond de carte toutes les 5 min
     setInterval(switchBasemapIfNeeded, 5 * 60 * 1000);
@@ -12612,6 +12835,11 @@ boot();
     // Markers landmarks + re-render au changement de zoom
     renderLandmarkMarkers();
     _leafletMap.on('zoomend', renderLandmarkMarkers);
+    // Numéros d'arrondissement : masqués sous zoom 12 (T3.12)
+    _leafletMap.on('zoomend', _updateArrLabelsVisibility);
+
+    // Refresh timestamp indicateur live toutes les 5s (FIX 3)
+    setInterval(_refreshLiveTs, 5000);
 
     // Pause polling si app en arrière-plan, reprise au retour au focus
     document.addEventListener('visibilitychange', function() {
@@ -12628,27 +12856,33 @@ boot();
   // ── GÉOLOC CHAUFFEUR ───────────────────────────────────────────
   function _requestGeolocForMap() {
     if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      function(pos) {
-        _userLatLng = [pos.coords.latitude, pos.coords.longitude];
-        if (_userMarker) {
-          _userMarker.setLatLng(_userLatLng);
-        } else {
-          var icon = L.divIcon({
-            className: '',
-            html: '<div style="width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 4px rgba(37,99,235,.25)"></div>',
-            iconSize: [16, 16],
-            iconAnchor: [8, 8]
-          });
-          _userMarker = L.marker(_userLatLng, { icon: icon, zIndexOffset: 1000 })
-            .bindPopup('Votre position')
-            .addTo(_leafletMap);
-        }
-        _leafletMap.setView(_userLatLng, 13);
-      },
-      function() { /* géoloc refusée — on reste centré Paris */ },
-      { timeout: 8000, maximumAge: 30000 }
-    );
+
+    var onPos = function(pos) {
+      _userLatLng = [pos.coords.latitude, pos.coords.longitude];
+      if (_userMarker) {
+        _userMarker.setLatLng(_userLatLng);
+      } else {
+        // Marker avec pulsation bleue CSS (.user-pulse-dot)
+        var icon = L.divIcon({
+          className: '',
+          html: '<div class="user-pulse-dot"></div>',
+          iconSize: [14, 14],
+          iconAnchor: [7, 7]
+        });
+        _userMarker = L.marker(_userLatLng, { icon: icon, zIndexOffset: 1000 })
+          .bindPopup('Votre position')
+          .addTo(_leafletMap);
+      }
+      // Zoom sur la position uniquement au 1er fix
+      if (_geolocFirstFix) {
+        _leafletMap.setView(_userLatLng, 14);
+        _geolocFirstFix = false;
+      }
+    };
+
+    // 1er fix rapide puis suivi continu des déplacements
+    navigator.geolocation.getCurrentPosition(onPos, function() {}, { timeout: 8000, maximumAge: 30000 });
+    _watchId = navigator.geolocation.watchPosition(onPos, function() {}, { enableHighAccuracy: true, maximumAge: 15000 });
   }
 
   // ── FAB RECENTRER ──────────────────────────────────────────────
